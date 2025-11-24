@@ -8,7 +8,7 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - name: Auto Sync GitHub Issue
@@ -35,9 +35,9 @@ jobs:
 
           # Create simple event
           EVENT_ID=$(openssl rand -hex 16)
-          cat > /tmp/sentry_event.json <<EOF
+          cat > /tmp/sentry_event.json <<'EOF'
           {
-            "event_id": "$EVENT_ID",
+            "event_id": "'$EVENT_ID'",
             "level": "info",
             "message": "GitHub Issue ${{ github.event.action }}: #${{ github.event.issue.number }}",
             "environment": "tracking",

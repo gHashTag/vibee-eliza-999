@@ -5,10 +5,12 @@ timeout = 60000
 # Test setup files - removed preload due to path resolution conflicts in CI
 # preload = ["packages/core/src/test_resources/testSetup.ts"]
 
-# Coverage configuration
+# Coverage configuration using vitest v8
 coverage = true
+coverage_provider = "v8"
+coverage_reporter = ["text", "html", "lcov"]
 
-coverage-exclude = [
+coverage_exclude = [
   "**/dist/**",
   "**/build/**",
   "**/chunk-*.js",

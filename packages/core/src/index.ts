@@ -9,6 +9,9 @@
 // Export everything from types
 export * from './types';
 
+// Export AI Entry Patterns
+export * from './entries';
+
 // Export utils first to avoid circular dependency issues
 export * from './utils';
 

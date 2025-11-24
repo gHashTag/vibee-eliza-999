@@ -351,7 +351,3 @@ export class RAGProcessor {
     };
   }
 }
-
-// ===== ЭКСПОРТ =====
-
-export { RAGProcessor };

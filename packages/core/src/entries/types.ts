@@ -174,6 +174,7 @@ export interface HealthStatus {
   latency?: number;
   errorRate?: number;
   details?: Record<string, any>;
+  error?: string;
 }
 
 // ===== CHAIN OF THOUGHT ТИПЫ =====

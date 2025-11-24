@@ -299,7 +299,3 @@ export class ChainOfThoughtProcessor {
     };
   }
 }
-
-// ===== ЭКСПОРТ =====
-
-export { ChainOfThoughtProcessor };

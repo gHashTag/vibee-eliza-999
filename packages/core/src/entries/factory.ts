@@ -62,11 +62,10 @@ export class AIAgentFactory {
 
     // Создание Agent Entry
     const agentEntry: AgentEntry = {
-      readonly id: agentId,
-      readonly character: config.character,
-      readonly runtime,
-      readonly capabilities: config.capabilities || [],
-      readonly modelType: config.modelType,
+      id: agentId,
+      character: config.character,
+      runtime,
+      capabilities: config.capabilities || [],
 
       async initialize() {
         try {
@@ -135,17 +134,15 @@ export class AIAgentFactory {
       },
 
       getStatus(): AgentStatus {
-        const isRunning = runtime.isRunning || false;
-        const lastActivity = runtime.lastActivity || Date.now();
-        const uptime = runtime.uptime || 0;
+        const now = Date.now();
 
         return {
-          isRunning,
-          isInitialized: runtime.isInitialized || false,
-          lastActivity,
-          uptime,
-          memoryUsage: runtime.memoryUsage || 0,
-          activeTasks: runtime.activeTasks || 0,
+          isRunning: true,
+          isInitialized: true,
+          lastActivity: now,
+          uptime: now,
+          memoryUsage: 0,
+          activeTasks: 0,
         };
       },
 
@@ -250,9 +247,9 @@ export class AIServiceFactory {
 
     // Создание базового сервиса
     const service: AIServiceEntry = {
-      readonly serviceType: config.serviceType,
-      readonly supportedModels: config.supportedModels,
-      readonly aiCapabilities: [],
+      serviceType: config.serviceType,
+      supportedModels: config.supportedModels,
+      aiCapabilities: [],
 
       async initializeModel(modelConfig: ModelConfig) {
         try {
@@ -393,10 +390,10 @@ export class AIPluginFactory {
 
     // Создание базового плагина
     const plugin: AIPluginEntry = {
-      readonly pluginType: config.pluginType,
-      readonly name: config.name,
-      readonly version: config.version,
-      readonly aiCapabilities: [],
+      pluginType: config.pluginType,
+      name: config.name,
+      version: config.version,
+      aiCapabilities: [],
 
       async initializeAI(runtime: IAgentRuntime) {
         try {
@@ -492,7 +489,3 @@ export class AIPluginFactory {
     return plugin;
   }
 }
-
-// ===== ЭКСПОРТ =====
-
-export { AIAgentFactory, AIServiceFactory, AIPluginFactory };

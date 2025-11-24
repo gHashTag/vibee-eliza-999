@@ -426,18 +426,3 @@ export function validateMultiAgentEntry(entry: any): ValidationResult {
 
   return createValidationResult(errors.length === 0, errors, warnings);
 }
-
-// ===== ЭКСПОРТ =====
-
-export {
-  validateAgentConfig,
-  validateAgentEntry,
-  validateServiceConfig,
-  validateModelConfig,
-  validateAIServiceEntry,
-  validatePluginConfig,
-  validateAIPluginEntry,
-  validateChainOfThoughtEntry,
-  validateRAGEntry,
-  validateMultiAgentEntry,
-};

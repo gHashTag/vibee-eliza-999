@@ -448,7 +448,3 @@ export class AIEntryRegistry {
     console.log('[AIEntryRegistry] All components cleared');
   }
 }
-
-// ===== ЭКСПОРТ =====
-
-export { AIEntryRegistry };

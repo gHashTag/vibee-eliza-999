@@ -5,6 +5,7 @@ on:
     types: [opened, reopened]
   issue_comment:
     types: [created]
+  workflow_dispatch:
 
 env:
   SENTRY_ORG: vasilev-dmitrii

@@ -3,6 +3,7 @@ name: GitHub → Sentry Sync
 on:
   issues:
     types: [opened, reopened, closed]
+  workflow_dispatch:
 
 env:
   SENTRY_ORG: vasilev-dmitrii

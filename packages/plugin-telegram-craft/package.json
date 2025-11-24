@@ -1,0 +1,57 @@
+{
+  "name": "@elizaos/plugin-telegram-craft",
+  "version": "1.6.5-alpha.1",
+  "description": "ElizaOS plugin for Telegram userbot via MTProto (GramJS) with fallback strategies",
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "elizaOS",
+    "url": "https://twitter.com/eliza_OS"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elizaOS/eliza.git",
+    "directory": "packages/plugin-telegram-craft"
+  },
+  "files": [
+    "dist",
+    "dist/**/*"
+  ],
+  "keywords": [
+    "plugin",
+    "elizaos",
+    "telegram",
+    "mtproto",
+    "userbot"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "bun run build.ts",
+    "lint": "prettier --write ./src",
+    "format": "prettier --write ./src",
+    "format:check": "prettier --check ./src",
+    "clean": "rm -rf dist .turbo node_modules .turbo-tsconfig.json *.tsbuildinfo",
+    "test": "bun test",
+    "test:unit": "bun test --timeout 30000",
+    "test:unit:watch": "bun test --watch --timeout 30000",
+    "test:unit:coverage": "bun test --coverage --timeout 30000",
+    "test:types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.3",
+    "prettier": "3.6.2",
+    "typescript": "5.9.2"
+  },
+  "dependencies": {
+    "@elizaos/core": "workspace:*",
+    "@elizaos/plugin-sql": "workspace:*",
+    "@mtproto/core": "^6.3.0",
+    "@tgsnake/core": "^1.13.15",
+    "telegraf": "^4.16.3",
+    "telegram": "^2.26.22",
+    "zod": "4.1.11"
+  }
+}

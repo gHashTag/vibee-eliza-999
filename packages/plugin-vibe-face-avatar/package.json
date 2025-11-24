@@ -1,0 +1,64 @@
+{
+  "name": "@elizaos/plugin-vibe-face-avatar",
+  "version": "1.6.5-alpha.1",
+  "description": "ElizaOS plugin for AI image generation with Replicate/Fal.ai models",
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "elizaOS",
+    "url": "https://twitter.com/eliza_OS"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elizaOS/eliza.git",
+    "directory": "packages/plugin-vibe-face-avatar"
+  },
+  "files": [
+    "dist",
+    "dist/**/*"
+  ],
+  "keywords": [
+    "plugin",
+    "elizaos",
+    "ai",
+    "image-generation",
+    "replicate",
+    "fal"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "bun run build.ts",
+    "lint": "prettier --write ./src",
+    "format": "prettier --write ./src",
+    "format:check": "prettier --check ./src",
+    "clean": "rm -rf dist .turbo node_modules .turbo-tsconfig.json *.tsbuildinfo",
+    "test": "bun test",
+    "test:unit": "bun test --timeout 30000",
+    "test:unit:watch": "bun test --watch --timeout 30000",
+    "test:unit:coverage": "bun test --coverage --timeout 30000",
+    "test:types": "tsc --noEmit",
+    "api:dev": "DATABASE_URL=sqlite bun run src/api/server.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.3",
+    "prettier": "3.6.2",
+    "typescript": "5.9.2"
+  },
+  "dependencies": {
+    "@elizaos/core": "workspace:*",
+    "@fal-ai/client": "^1.7.2",
+    "@infisical/sdk": "^4.0.6",
+    "better-sqlite3": "^12.4.1",
+    "cors": "^2.8.5",
+    "drizzle-orm": "^0.44.7",
+    "drizzle-zod": "^0.8.3",
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "postgres": "^3.4.7",
+    "replicate": "^1.4.0",
+    "zod": "4.1.11"
+  }
+}

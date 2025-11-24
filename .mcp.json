@@ -12,7 +12,10 @@
     },
     "fal-ai-image": {
       "command": "npx",
-      "args": ["-y", "mcp-fal-ai-image"]
+      "args": ["-y", "mcp-fal-ai-image"],
+      "env": {
+        "FAL_KEY": "${FAL_KEY}"
+      }
     },
     "filesystem": {
       "command": "npx",

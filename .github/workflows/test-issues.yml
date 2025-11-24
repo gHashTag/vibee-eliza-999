@@ -1,0 +1,20 @@
+name: Test Issues Event
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Test Issues Event
+        run: |
+          echo "✅ Test worked!"
+          echo "Event: ${{ github.event_name }}"
+          echo "Action: ${{ github.event.action }}"
+          echo "Issue Number: ${{ github.event.issue.number }}"
+          echo "Issue Title: ${{ github.event.issue.title }}"

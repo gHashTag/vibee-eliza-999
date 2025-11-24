@@ -9,8 +9,7 @@
 // Export everything from types
 export * from './types';
 
-// Export AI Entry Patterns
-export * from './entries';
+// AI Entry Patterns removed - not needed for agent loading
 
 // Export utils first to avoid circular dependency issues
 export * from './utils';

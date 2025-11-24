@@ -5,8 +5,10 @@
     "buildCommand": "bun install && bun run build",
     "watchPatterns": [
       "packages/**/*",
-      "src/**/*",
+      "scripts/**/*",
+      "examples/**/*",
       "*.ts",
+      "*.js",
       "*.json"
     ]
   },

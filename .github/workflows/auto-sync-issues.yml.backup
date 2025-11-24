@@ -2,13 +2,13 @@ name: Auto Sync Issues to Sentry
 
 on:
   issues:
-    types: [opened]
+    types: [opened, reopened, closed]
   workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Auto Sync GitHub Issue
@@ -35,9 +35,9 @@ jobs:
 
           # Create simple event
           EVENT_ID=$(openssl rand -hex 16)
-          cat > /tmp/sentry_event.json <<'EOF'
+          cat > /tmp/sentry_event.json <<EOF
           {
-            "event_id": "'$EVENT_ID'",
+            "event_id": "$EVENT_ID",
             "level": "info",
             "message": "GitHub Issue ${{ github.event.action }}: #${{ github.event.issue.number }}",
             "environment": "tracking",
@@ -75,6 +75,7 @@ EOF
           fi
 
       - name: Add Confirmation Comment
+        if: github.event.action == 'opened' || github.event.action == 'reopened'
         run: |
           echo "📝 Adding confirmation comment..."
 
@@ -92,3 +93,16 @@ GitHub Issue #${{ github.event.issue.number }} has been automatically registered
 
           gh issue comment ${{ github.event.issue.number }} \
             --body "$COMMENT"
+
+      - name: Add Closure Comment
+        if: github.event.action == 'closed'
+        run: |
+          echo "📝 Adding closure comment..."
+
+          gh issue comment ${{ github.event.issue.number }} \
+            --body "## 🔒 Issue Closed
+
+GitHub Issue #${{ github.event.issue.number }} has been closed.
+
+**Status:** Closed
+**Time:** $(date -u +\"%Y-%m-%d %H:%M:%S UTC\")"

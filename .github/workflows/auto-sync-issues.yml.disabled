@@ -1,0 +1,94 @@
+name: Issues to Sentry Sync
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Auto Sync GitHub Issue
+        run: |
+          echo "✅ Auto Sync Started!"
+          echo "Event: ${{ github.event_name }}"
+          echo "Action: ${{ github.event.action }}"
+          echo "Issue: #${{ github.event.issue.number }}"
+          echo "Title: ${{ github.event.issue.title }}"
+          echo ""
+
+      - name: Send to Sentry
+        env:
+          SENTRY_API_KEY: ${{ secrets.SENTRY_API_KEY }}
+          SENTRY_ORG: vasilev-dmitrii
+          SENTRY_PROJECT: vibee-eliza-999-prod
+        run: |
+          echo "🚀 Sending to Sentry..."
+
+          if [ -z "$SENTRY_API_KEY" ]; then
+            echo "❌ SENTRY_API_KEY not set"
+            exit 1
+          fi
+
+          # Create simple event
+          EVENT_ID=$(openssl rand -hex 16)
+          cat > /tmp/sentry_event.json <<'EOF'
+          {
+            "event_id": "'$EVENT_ID'",
+            "level": "info",
+            "message": "GitHub Issue ${{ github.event.action }}: #${{ github.event.issue.number }}",
+            "environment": "tracking",
+            "logger": "github-auto-sync",
+            "tags": {
+              "github_issue_number": "${{ github.event.issue.number }}",
+              "github_action": "${{ github.event.action }}",
+              "github_repository": "${{ github.repository }}"
+            },
+            "extra": {
+              "issue_title": "${{ github.event.issue.title }}",
+              "issue_url": "${{ github.event.issue.html_url }}",
+              "issue_author": "${{ github.event.issue.user.login }}"
+            },
+            "fingerprint": ["github-issue", "${{ github.event.issue.number }}"]
+          }
+EOF
+
+          # Send to Sentry
+          RESPONSE=$(curl -s -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $SENTRY_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @/tmp/sentry_event.json \
+            "https://sentry.io/api/0/projects/$SENTRY_ORG/$SENTRY_PROJECT/events/")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -c4)
+          echo "📡 HTTP Status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" = "201" ]; then
+            echo "✅ SUCCESS! Event sent to Sentry"
+            echo "Check: https://$SENTRY_ORG.sentry.io/projects/$SENTRY_PROJECT/"
+          else
+            echo "❌ FAILED! Status: $HTTP_CODE"
+            echo "$RESPONSE"
+          fi
+
+      - name: Add Confirmation Comment
+        run: |
+          echo "📝 Adding confirmation comment..."
+
+          COMMENT="## ✅ Issue Auto-Registered
+
+GitHub Issue #${{ github.event.issue.number }} has been automatically registered in Sentry.
+
+**Details:**
+- **Action:** ${{ github.event.action }}
+- **Repository:** ${{ github.repository }}
+- **Author:** ${{ github.event.issue.user.login }}
+- **Time:** $(date -u +\"%Y-%m-%d %H:%M:%S UTC\")
+
+🔍 [View in Sentry](https://vasilev-dmitrii.sentry.io/projects/vibee-eliza-999-prod/)"
+
+          gh issue comment ${{ github.event.issue.number }} \
+            --body "$COMMENT"

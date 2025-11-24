@@ -44,6 +44,14 @@ jobs:
           NODE_OPTIONS: '--max-old-space-size=2048'
         run: cd packages/core && bun test:coverage --timeout 60000
 
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: true
+          verbose: true
+
   # Lint and format job
   lint-and-format:
     # Skip duplicate runs: run on push to main, or on pull_request events only

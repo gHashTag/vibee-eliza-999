@@ -5,6 +5,7 @@ on:
     types: [opened, reopened]
   issue_comment:
     types: [created]
+  workflow_dispatch:
 
 env:
   SENTRY_ORG: vibee
@@ -12,7 +13,8 @@ env:
 
 jobs:
   create-issue-in-sentry:
-    if: github.event.action == 'opened' || (github.event.action == 'reopened')
+    if: >
+      (github.event_name == 'issues' && (github.event.action == 'opened' || github.event.action == 'reopened'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -138,7 +140,8 @@ _🤖 Auto-registered by GitHub-to-Center Sync Action_"
           echo "Check the logs above for details"
 
   update-issue-in-sentry:
-    if: github.event.action == 'created' && contains(github.event.comment.body, 'github_issue')
+    if: >
+      (github.event_name == 'issue_comment' && github.event.action == 'created')
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -198,7 +201,8 @@ _🤖 Auto-registered by GitHub-to-Center Sync Action_"
           fi
 
   close-issue-in-sentry:
-    if: github.event.action == 'closed'
+    if: >
+      (github.event_name == 'issues' && github.event.action == 'closed')
     runs-on: ubuntu-latest
     timeout-minutes: 5
 

@@ -14,6 +14,14 @@ This file contains project-specific configuration and preferences for Claude Cod
 - **Node Version:** 23.3.0
 - **Monorepo Tools:** Turbo, Lerna
 
+## 🚀 DEPLOYMENT
+
+- **Hosting Platform:** Fly.io ONLY
+- **Railway:** NOT USED (ignore railway.json files)
+- **Fly App:** vibee-eliza-999-prod
+- **Auto-deploy:** Enabled from develop branch
+- **Region:** ams (Amsterdam)
+
 ---
 
 ## MONOREPO ARCHITECTURE
@@ -849,6 +857,31 @@ _This configuration file should be referenced at the start of any ElizaOS develo
 #
 # ALL other secrets (50+ variables) are loaded from Infisical cloud at runtime.
 # See AI_AGENT_RULES.md for detailed explanation.
+#
+# ==========================================================================================================
+
+# ==========================================================================================================
+# 🚀 HOSTING PLATFORM - FLY.IO ONLY!
+# ==========================================================================================================
+#
+# ⚠️ ⚠️ ⚠️  CRITICAL FOR AI AGENTS  ⚠️ ⚠️ ⚠️
+#
+# FORGET ABOUT RAILWAY! WE USE FLY.IO ONLY!
+#
+# ✅ DO USE:
+#   - fly.toml - Main Fly.io configuration
+#   - Dockerfile - For Fly.io deployment
+#   - GitHub develop branch - triggers auto-deploy to Fly.io
+#
+# ❌ DO NOT USE:
+#   - railway.json - This is IGNORED!
+#   - Any Railway deployment references
+#   - Docker Compose configs for Railway
+#
+# DEPLOYMENT WORKFLOW:
+#   1. Push to origin/develop branch
+#   2. Fly.io auto-deploys vibee-eliza-999-prod app
+#   3. Access at: https://vibee-eliza-999-prod.fly.dev
 #
 # ==========================================================================================================
 

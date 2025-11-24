@@ -28,6 +28,7 @@ import {
   setGlobalElizaOS,
   setGlobalAgentServer,
 } from './services/message.js';
+import internalMessageBus from './bus.js';
 import { loadCharacterTryPath, jsonToCharacter } from './loader.js';
 import sqlPlugin, {
   createDatabaseAdapter,
@@ -1662,8 +1663,9 @@ export class AgentServer {
   ): Promise<CentralRootMessage> {
     const createdMessage = await (this.database as any).createMessage(data);
 
-    // Note: Internal message bus functionality temporarily disabled
-    logger.info(`[AgentServer] Message created: ${createdMessage.id}`);
+    // Emit to internal message bus so MessageBusService instances can process the message
+    logger.info(`[AgentServer] Message created: ${createdMessage.id}, emitting to internal message bus`);
+    internalMessageBus.emit('new_message', createdMessage);
 
     return createdMessage;
   }

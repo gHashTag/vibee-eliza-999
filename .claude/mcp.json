@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "cclsp": {
+      "command": "cclsp",
+      "env": {
+        "CCLSP_CONFIG_PATH": "./cclsp.json"
+      }
+    },
+    "filesystem": {
+      "command": "mcp",
+      "args": ["run", "@modelcontextprotocol/server-filesystem", "./"]
+    },
+    "sequential-thinking": {
+      "command": "mcp",
+      "args": ["run", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "telegram": {
+      "command": "mcp",
+      "args": ["run", "besir-mcp-telegram-bot"]
+    },
+    "sentry-mcp": {
+      "command": "node",
+      "args": ["./sentry-mcp-server.js"],
+      "env": {
+        "INFISICAL_CLIENT_ID": "${INFISICAL_CLIENT_ID}",
+        "INFISICAL_CLIENT_SECRET": "${INFISICAL_CLIENT_SECRET}",
+        "INFISICAL_PROJECT_ID": "${INFISICAL_PROJECT_ID}",
+        "INFISICAL_ENVIRONMENT": "${INFISICAL_ENVIRONMENT}"
+      }
+    }
+  }
+}

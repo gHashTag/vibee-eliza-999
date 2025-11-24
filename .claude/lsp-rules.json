@@ -1,0 +1,181 @@
+{
+  "description": "Правила автоматического использования LSP инструментов в проекте VIBEE",
+  "version": "1.0.0",
+  "rules": {
+    "always_use_lsp_for": {
+      "navigation": {
+        "description": "ВСЕГДА используй LSP для навигации по TypeScript/JavaScript коду",
+        "actions": [
+          "mcp__cclsp__find_definition - для поиска определений функций, классов, переменных",
+          "mcp__cclsp__find_references - для поиска всех мест использования символа",
+          "mcp__cclsp__get_diagnostics - для проверки ошибок в файле перед редактированием"
+        ],
+        "examples": [
+          "Пользователь спрашивает 'где определена функция X?' → используй find_definition",
+          "Нужно найти все места использования переменной → используй find_references",
+          "Перед редактированием файла → используй get_diagnostics"
+        ]
+      },
+      "code_analysis": {
+        "description": "ВСЕГДА анализируй код через LSP при рефакторинге",
+        "actions": [
+          "mcp__cclsp__rename_symbol - для безопасного переименования",
+          "mcp__cclsp__get_diagnostics - для выявления проблем до изменений",
+          "mcp__cclsp__find_references - для понимания области влияния изменений"
+        ],
+        "examples": [
+          "Нужно переименовать функцию → сначала find_references, потом rename_symbol",
+          "Планируешь изменить интерфейс → проверь все референсы через LSP"
+        ]
+      },
+      "error_detection": {
+        "description": "ВСЕГДА проверяй ошибки TypeScript через LSP",
+        "actions": [
+          "mcp__cclsp__get_diagnostics - для проверки ошибок, предупреждений и подсказок",
+          "Автоматически запускай диагностику после редактирования .ts/.tsx файлов"
+        ],
+        "examples": [
+          "После редактирования TypeScript файла → автоматически вызови get_diagnostics",
+          "Перед коммитом → проверь весь проект через get_diagnostics"
+        ]
+      }
+    },
+    "workflow_patterns": {
+      "before_editing": [
+        "1. Прочитай файл через Read",
+        "2. Запусти mcp__cclsp__get_diagnostics для проверки",
+        "3. Если нужно понять структуру → используй find_definition/find_references",
+        "4. Только потом редактируй"
+      ],
+      "refactoring": [
+        "1. Используй find_references для понимания области изменений",
+        "2. Сначала dry_run для rename_symbol (preview изменений)",
+        "3. Примени изменения только после подтверждения",
+        "4. Запусти диагностику для проверки результата"
+      ],
+      "debugging": [
+        "1. При ошибке в коде → сразу get_diagnostics",
+        "2. Найди определение проблемного символа через find_definition",
+        "3. Проверь все референсы для понимания контекста",
+        "4. Исправь и снова проверь диагностику"
+      ]
+    },
+    "lsp_tool_mapping": {
+      "find_definition": {
+        "trigger": "где|where|определение|definition|объявление|declaration",
+        "use_for": [
+          "Поиск места определения функции/класса/переменной",
+          "Понимание структуры кода",
+          "Переход к реализации из интерфейса"
+        ]
+      },
+      "find_references": {
+        "trigger": "используется|использование|references|референсы|ссылки",
+        "use_for": [
+          "Поиск всех мест использования символа",
+          "Анализ области влияния изменений",
+          "Понимание зависимостей в коде"
+        ]
+      },
+      "rename_symbol": {
+        "trigger": "переименовать|rename|переименовывать|rename_symbol",
+        "use_for": [
+          "Безопасное переименование с обновлением всех ссылок",
+          "Рефакторинг именований",
+          "Исправление нейминга"
+        ],
+        "always_use_dry_run": true
+      },
+      "get_diagnostics": {
+        "trigger": "ошибка|error|предупреждение|warning|проверить|check|диагностика|diagnostics",
+        "use_for": [
+          "Проверка ошибок TypeScript",
+          "Поиск предупреждений",
+          "Валидация кода перед коммитом"
+        ],
+        "auto_run_after_edits": true
+      }
+    },
+    "agent_instructions": {
+      "vibe_coder": {
+        "mandatory_lsp_usage": [
+          "Перед редактированием любого .ts/.tsx файла → ОБЯЗАТЕЛЬНО запусти get_diagnostics",
+          "При рефакторинге → сначала find_references, потом rename_symbol с dry_run",
+          "При отладке → используй find_definition для понимания кода"
+        ]
+      },
+      "vibe_critic": {
+        "mandatory_lsp_usage": [
+          "При ревью кода → всегда проверяй диагностику LSP",
+          "Найден баг → используй find_references для полного анализа",
+          "Предложения по улучшению → опирайся на данные LSP"
+        ]
+      },
+      "vibe_tester": {
+        "mandatory_lsp_usage": [
+          "Перед написанием тестов → понимай структуру через find_definition",
+          "При тестировании → используй find_references для понимания использования",
+          "После изменений → проверяй диагностику перед тестами"
+        ]
+      },
+      "vibe_spec": {
+        "mandatory_lsp_usage": [
+          "При создании спецификаций → анализируй существующий код через LSP",
+          "Проверяй соответствие API через find_references",
+          "Документируй с учётом реальной структуры кода"
+        ]
+      }
+    },
+    "automatic_triggers": {
+      "file_extensions": [
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx"
+      ],
+      "auto_diagnostics_after": [
+        "Read файла .ts/.tsx",
+        "Edit файла .ts/.tsx",
+        "В конце каждого ответа агента при работе с TypeScript"
+      ],
+      "auto_references_before": [
+        "Переименование символа",
+        "Удаление функции/класса/переменной",
+        "Изменение сигнатуры функции",
+        "Рефакторинг"
+      ]
+    },
+    "examples": {
+      "correct_usage": [
+        {
+          "action": "Пользователь: 'Найди где определена функция getUserData'",
+          "agent_response": "Ищу определение функции getUserData...",
+          "lsp_call": "mcp__cclsp__find_definition с symbol_name: 'getUserData'"
+        },
+        {
+          "action": "Нужно переименовать переменную userName в user_id",
+          "agent_response": "Сначала найду все места использования...",
+          "lsp_calls": [
+            "mcp__cclsp__find_references для анализа области",
+            "mcp__cclsp__rename_symbol с dry_run: true для preview",
+            "mcp__cclsp__rename_symbol для применения изменений"
+          ]
+        },
+        {
+          "action": "Редактирую src/character.ts",
+          "agent_workflow": [
+            "1. Read файл",
+            "2. mcp__cclsp__get_diagnostics для проверки текущего состояния",
+            "3. Edit файл",
+            "4. Снова mcp__cclsp__get_diagnostics для проверки результата"
+          ]
+        }
+      ]
+    }
+  },
+  "integration_with_existing_agents": {
+    "description": "Эти правила автоматически применяются ко всем агентам в проекте",
+    "enforcement": "Агенты ДОЛЖНЫ следовать этим правилам при работе с TypeScript/JavaScript кодом",
+    "exceptions": "Можно игнорировать только при работе с файлами других типов (.md, .json, .py и т.д.)"
+  }
+}

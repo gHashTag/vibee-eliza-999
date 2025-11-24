@@ -3,6 +3,23 @@ import { LocalEnvironmentUpdateParams } from '../types/system';
 
 export class SystemService extends BaseApiClient {
   /**
+   * Get server version information
+   *
+   * Server route (packages/server/src/api/system/version.ts):
+   *   GET /api/system/version  ->  { version, source, timestamp, environment, uptime }
+   */
+  async getVersion(): Promise<{
+    version: string;
+    source: string;
+    timestamp: string;
+    environment: string;
+    uptime: number;
+    error?: string;
+  }> {
+    return this.get('/api/system/version');
+  }
+
+  /**
    * Retrieve the local environment variables from the ElizaOS server.
    *
    * Server route (packages/server/src/api/system):

@@ -506,6 +506,28 @@ bun run build
 
 ## ENVIRONMENT CONFIGURATION
 
+### ⚠️ КРИТИЧЕСКИ ВАЖНО: INFISICAL CLOUD-FIRST
+
+**ВСЕ API КЛЮЧИ И СЕКРЕТЫ ЗАГРУЖАЮТСЯ ИЗ INFISICAL CLOUD, А НЕ ИЗ .env ФАЙЛА!**
+
+В `.env` файле находятся ТОЛЬКО 5 переменных для подключения к Infisical:
+- `INFISICAL_CLIENT_ID`
+- `INFISICAL_CLIENT_SECRET`
+- `INFISICAL_PROJECT_ID`
+- `INFISICAL_ENVIRONMENT`
+- `NODE_ENV`
+
+**ВСЕ остальные секреты (50+ переменных) загружаются из Infisical Cloud в рантайме:**
+- `OPENROUTER_API_KEY` - для LLM и эмбеддингов
+- `FAL_KEY` - для генерации изображений
+- `TELEGRAM_BOT_TOKEN` - для Telegram бота
+- `POSTGRES_URL` - для базы данных
+- `SENTRY_DSN` и `SENTRY_API_TOKEN` - для мониторинга
+- И все остальные API ключи и токены
+
+**❌ НИКОГДА не добавляйте API ключи в .env файл!**
+**✅ ВСЕГДА используйте Infisical Cloud для секретов!**
+
 ### Required Environment Variables
 
 ```bash

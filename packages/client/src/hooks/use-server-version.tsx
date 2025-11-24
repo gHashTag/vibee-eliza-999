@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import clientLogger from '../lib/logger';
+import { getElizaClient } from '@/lib/api-client-config';
 
 export interface ServerVersionInfo {
   version: string;
@@ -17,15 +18,8 @@ export function useServerVersion() {
     queryKey: ['server-version'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/system/version');
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch server version: ${response.status} ${response.statusText}`
-          );
-        }
-
-        const data = await response.json();
+        const client = getElizaClient();
+        const data = await client.system.getVersion();
         return data;
       } catch (error) {
         clientLogger.error('Error fetching server version:', error);

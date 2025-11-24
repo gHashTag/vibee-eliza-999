@@ -23,7 +23,6 @@ import path, { basename, dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Server as SocketIOServer } from 'socket.io';
 import { createApiRouter, createPluginRouteHandler, setupSocketIO } from './api/index.js';
-import { apiKeyAuthMiddleware } from './middleware/index.js';
 import {
   messageBusConnectorPlugin,
   setGlobalElizaOS,
@@ -63,7 +62,6 @@ import type {
   CentralRootMessage,
   MessageChannel,
   MessageServer,
-  MessageServiceStructure,
 } from './types.js';
 import { existsSync } from 'node:fs';
 
@@ -590,9 +588,6 @@ export class AgentServer {
 
       // Initialize middleware and database
       this.app = express();
-
-        }
-      }
 
       // Security headers first - before any other middleware
       const isProd = process.env.NODE_ENV === 'production';
@@ -1136,16 +1131,16 @@ export class AgentServer {
           next();
         },
         apiRouter,
-        (err: any, req: Request, res: Response, _next: express.NextFunction) => {
-              reason instanceof Error ? reason : new Error(String(reason)),
-              (scope) => {
-                scope.setTag('type', 'unhandledRejection');
-                return scope;
-              }
-            );
-          } catch {}
+        (err: any, _req: Request, res: Response, _next: express.NextFunction) => {
+          logger.error('API Error:', err);
+          res.status(500).json({
+            success: false,
+            error: {
+              message: 'Internal server error',
+              code: 500,
+            },
+          });
         });
-      }
 
       // Add a catch-all route for API 404s
       this.app.use((_req, res, next) => {
@@ -1667,27 +1662,8 @@ export class AgentServer {
   ): Promise<CentralRootMessage> {
     const createdMessage = await (this.database as any).createMessage(data);
 
-    // Get the channel details to find the server ID
-    const channel = await this.getChannelDetails(createdMessage.channelId);
-    if (channel) {
-      // Emit to internal message bus for agent consumption
-      const messageForBus: MessageServiceStructure = {
-        id: createdMessage.id,
-        channel_id: createdMessage.channelId,
-        server_id: channel.messageServerId,
-        author_id: createdMessage.authorId,
-        content: createdMessage.content,
-        raw_message: createdMessage.rawMessage,
-        source_id: createdMessage.sourceId,
-        source_type: createdMessage.sourceType,
-        in_reply_to_message_id: createdMessage.inReplyToRootMessageId,
-        created_at: createdMessage.createdAt.getTime(),
-        metadata: createdMessage.metadata,
-      };
-
-      internalMessageBus.emit('new_message', messageForBus);
-      logger.info(`[AgentServer] Published message ${createdMessage.id} to internal message bus`);
-    }
+    // Note: Internal message bus functionality temporarily disabled
+    logger.info(`[AgentServer] Message created: ${createdMessage.id}`);
 
     return createdMessage;
   }

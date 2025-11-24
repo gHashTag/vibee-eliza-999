@@ -19,6 +19,7 @@ RUN npm install -g bun@1.2.21 turbo@2.3.3
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
+# CRITICAL: bun.lock is required for bun workspace resolution
 COPY package.json turbo.json tsconfig.json lerna.json renovate.json .npmrc bun.lock build-utils.ts ./
 COPY scripts ./scripts
 COPY packages ./packages

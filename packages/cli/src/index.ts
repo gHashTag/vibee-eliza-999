@@ -1,24 +1,5 @@
 #!/usr/bin/env bun
 
-/// <reference path="./instrument.d.ts" />
-
-// IMPORTANT: Make sure to import `instrument.js` at the top of your file.
-// This initializes Sentry for error monitoring and performance tracking.
-import Sentry from "../../../instrument.js";
-
-// Global error handlers for Sentry
-process.on('uncaughtException', (error) => {
-  Sentry.captureException(error);
-  console.error('Uncaught Exception:', error);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  Sentry.captureException(reason);
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
-
 process.env.NODE_OPTIONS = '--no-deprecation';
 process.env.NODE_NO_WARNINGS = '1';
 process.env.QUIET_MODE = process.env.QUIET_MODE || 'true';
@@ -178,9 +159,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  // Capture exception in Sentry before logging
-  Sentry.captureException(error);
-
   logger.error({ error }, 'An error occurred:');
   process.exit(1);
 });

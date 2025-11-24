@@ -45,6 +45,145 @@ import { encryptedCharacter, stringToUuid, type Plugin } from '@elizaos/core';
 import { sql } from 'drizzle-orm';
 
 import internalMessageBus from './bus.js';
+
+/**
+ * Sanitize event data before sending to Sentry
+ */
+function sanitizeEvent(event: any): any {
+  // Remove sensitive data from user context
+  if (event.user) {
+    delete event.user.ip_address;
+    delete event.user.geo;
+    delete event.user.geo;
+  }
+
+  // Sanitize headers
+  if (event.request?.headers) {
+    const headers = { ...event.request.headers };
+    delete headers.authorization;
+    delete headers.cookie;
+    delete headers['x-api-key'];
+    event.request.headers = headers;
+  }
+
+  // Sanitize extra data
+  if (event.extra) {
+    const extra = { ...event.extra };
+    delete extra.password;
+    delete extra.token;
+    delete extra.apiKey;
+    event.extra = extra;
+  }
+
+  return event;
+}
+
+/**
+ * Track agent execution
+ * Note: Requires @sentry/tracing package for full functionality
+ */
+export function trackAgentExecution(agentId: string, operation: string): any {
+  // In Sentry v10, transaction tracking requires @sentry/tracing
+  // Fallback to breadcrumb if transaction is not available
+  if (typeof Sentry.addBreadcrumb === 'function') {
+    Sentry.addBreadcrumb({
+      message: `Agent ${agentId}: ${operation}`,
+      category: 'agent',
+      level: 'info',
+      data: {
+        agent_id: agentId,
+        operation: operation,
+      },
+    });
+  }
+  return null;
+}
+
+/**
+ * Track AI model inference
+ */
+export function trackAIInference(agentId: string, model: string, prompt: string): {
+  finish: (result: any) => void;
+} {
+  const startTime = Date.now();
+
+  return {
+    finish: (result: any) => {
+      const duration = Date.now() - startTime;
+
+      // Add breadcrumb for AI inference
+      if (typeof Sentry.addBreadcrumb === 'function') {
+        Sentry.addBreadcrumb({
+          message: `${model} inference completed`,
+          category: 'ai',
+          level: result?.success ? 'info' : 'error',
+          data: {
+            agent_id: agentId,
+            model: model,
+            prompt_length: prompt?.length || 0,
+            duration,
+            success: result?.success || false,
+            tokens: result?.tokens || 0,
+          },
+        });
+      }
+    },
+  };
+}
+
+/**
+ * Track database operations
+ */
+export function trackDatabaseOperation(operation: string, table: string): any {
+  if (typeof Sentry.addBreadcrumb === 'function') {
+    Sentry.addBreadcrumb({
+      message: `Database ${operation} on ${table}`,
+      category: 'database',
+      level: 'info',
+      data: {
+        operation,
+        table,
+      },
+    });
+  }
+  return null;
+}
+
+/**
+ * Add custom metrics
+ * Note: Metrics API may require @sentry/metrics package
+ */
+export function addMetric(name: string, value: number, type: string = 'counter', tags: Record<string, string> = {}): void {
+  // In Sentry v10, custom metrics might require additional package
+  // Fallback to adding as breadcrumb
+  if (typeof Sentry.addBreadcrumb === 'function') {
+    Sentry.addBreadcrumb({
+      message: `Metric: ${name} = ${value}`,
+      category: 'metric',
+      level: 'info',
+      data: {
+        metric_name: name,
+        metric_value: value,
+        metric_type: type,
+        tags,
+      },
+    });
+  }
+}
+
+/**
+ * Set user context
+ */
+export function setUserContext(user: { id: string; email?: string; username?: string }): void {
+  if (user && typeof Sentry.setUser === 'function') {
+    Sentry.setUser({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    });
+  }
+}
+
 import type {
   CentralRootMessage,
   MessageChannel,
@@ -582,15 +721,65 @@ export class AgentServer {
         'https://c20e2d51b66c14a783b0689d536f7e5c@o4509349865259008.ingest.us.sentry.io/4509352524120064';
       const sentryDsn = process.env.SENTRY_DSN?.trim() || DEFAULT_SENTRY_DSN;
       const sentryEnabled = Boolean(sentryDsn);
+
       if (sentryEnabled) {
         try {
+          const ENV = process.env.NODE_ENV || 'production';
+
+          // Dynamic sampling based on environment
+          const TRACES_SAMPLE_RATE = ENV === 'production' ? 0.1 : 1.0;
+          const PROFILES_SAMPLE_RATE = ENV === 'production' ? 0.1 : 0;
+
           Sentry.init({
             dsn: sentryDsn,
-            environment: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || 'development',
-            integrations: [Sentry.vercelAIIntegration({ force: sentryEnabled })],
-            tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE || 0),
+
+            // Enhanced performance monitoring
+            tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE || TRACES_SAMPLE_RATE),
+            profilesSampleRate: Number(process.env.SENTRY_PROFILES_SAMPLE_RATE || PROFILES_SAMPLE_RATE),
+
+            // Environment
+            environment: process.env.SENTRY_ENVIRONMENT || ENV,
+
+            // PII handling - only in non-production
+            sendDefaultPii: ENV !== 'production',
+
+            // Enhanced integrations
+            integrations: [
+              Sentry.captureConsoleIntegration({ levels: ['error'] }),
+              Sentry.httpIntegration(),
+              Sentry.onUnhandledRejectionIntegration(),
+              Sentry.vercelAIIntegration({ force: sentryEnabled }),
+            ],
+
+            // Before send hooks for data sanitization
+            beforeSend(event) {
+              return sanitizeEvent(event);
+            },
+
+            beforeSendTransaction(event) {
+              return sanitizeEvent(event);
+            },
+
+            // Debug mode in development
+            debug: ENV === 'development',
+
+            // Custom error sampling
+            sampleRate: ENV === 'production' ? 0.95 : 1.0,
           });
-          logger.info('[Sentry] Initialized Sentry for @elizaos/server');
+
+          // Set global tags
+          Sentry.setTags({
+            service: 'elizaos-server',
+            version: process.env.APP_VERSION || 'unknown',
+            environment: ENV,
+          });
+
+          // Set global extra data
+          Sentry.setExtra('node_version', process.version);
+          Sentry.setExtra('platform', process.platform);
+          Sentry.setExtra('arch', process.arch);
+
+          logger.info('[Sentry] Initialized enhanced Sentry for @elizaos/server');
         } catch (sentryInitError) {
           logger.error({ error: sentryInitError }, '[Sentry] Failed to initialize Sentry');
         }

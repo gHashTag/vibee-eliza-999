@@ -21,22 +21,13 @@ primary_region = "ams"
     handlers = ["tls", "http"]
     port = 443
 
-  [[services.tcp_checks]]
+  [services.tcp_checks]
     grace_period = "10s"
     interval = "15s"
-    restart_limit = 0
+    restart_limit = 3
     timeout = "2s"
-
-[[services.udp_services]]
-  internal_port = 50000
-  protocol = "udp"
-
-  [[services.udp_services.ports]]
-    handlers = ["udp"]
-    port = 50000
 
 [vm]
   cpu_kind = "shared"
   cpus = 2
   memory_mb = 2048
-

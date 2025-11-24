@@ -33,3 +33,8 @@ primary_region = "ams"
   [[services.udp_services.ports]]
     handlers = ["udp"]
     port = 50000
+
+[vm]
+  cpu_kind = "shared"
+  cpus = 2
+  memory_mb = 2048

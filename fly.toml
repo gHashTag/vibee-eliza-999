@@ -1,3 +1,4 @@
+
 app = "vibee-eliza-999-prod"
 primary_region = "ams"
 
@@ -38,3 +39,4 @@ primary_region = "ams"
   cpu_kind = "shared"
   cpus = 2
   memory_mb = 2048
+

@@ -741,7 +741,12 @@ export class AgentServer {
         'Public health check endpoints enabled: /healthz and /health (rate limited: 100 req/min)'
       );
 
-      // Optional Authentication Middleware
+      // Authentication disabled for public demo
+      logger.info('Server authentication is DISABLED for public access (demo mode).');
+      // Note: To enable auth, set ELIZA_SERVER_AUTH_TOKEN environment variable
+      // and uncomment the middleware below:
+
+      /*
       const serverAuthToken = process.env.ELIZA_SERVER_AUTH_TOKEN;
       if (serverAuthToken) {
         logger.info('Server authentication enabled. Requires X-API-KEY header for /api routes.');
@@ -754,6 +759,7 @@ export class AgentServer {
           'Server authentication is disabled. Set ELIZA_SERVER_AUTH_TOKEN environment variable to enable.'
         );
       }
+      */
 
       // Determine if web UI should be enabled
       this.isWebUIEnabled = isWebUIEnabled();

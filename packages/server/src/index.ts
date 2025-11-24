@@ -43,6 +43,23 @@ import sqlPlugin, {
 import { encryptedCharacter, stringToUuid, type Plugin } from '@elizaos/core';
 import { sql } from 'drizzle-orm';
 
+// Sentry setup with error handling - DO NOT BLOCK on errors
+import * as Sentry from '@sentry/node';
+try {
+  const SENTRY_DSN = process.env.SENTRY_DSN || "https://6775f4493fca5a1dff7fe154e30ecdf2@o4510419597656064.ingest.us.sentry.io/4510419598049280";
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    tracesSampleRate: 0.1,
+    environment: process.env.NODE_ENV || 'production',
+  });
+  logger.info('[Sentry] Initialized successfully for monitoring');
+} catch (sentryError) {
+  // Log but don't crash - Sentry is optional
+  console.error('[Sentry] Failed to initialize (non-fatal):', sentryError);
+  console.error('[Sentry] App will continue without error monitoring');
+}
+
+import type {
   CentralRootMessage,
   MessageChannel,
   MessageServer,

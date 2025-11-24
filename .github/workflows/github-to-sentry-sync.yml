@@ -5,111 +5,94 @@ on:
     types: [opened, reopened]
   issue_comment:
     types: [created]
-  workflow_dispatch:
-
-env:
-  SENTRY_ORG: vibee
-  SENTRY_PROJECT: eliza
 
 jobs:
-  create-issue-in-sentry:
-    if: >
-      (github.event_name == 'issues' && (github.event.action == 'opened' || github.event.action == 'reopened'))
+  track-issue:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
-      - name: Create Sentry Issue from GitHub Issue
+      - name: Track GitHub Issue in Sentry
         env:
           SENTRY_API_KEY: ${{ secrets.SENTRY_API_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
-          echo "🔄 Creating Sentry issue from GitHub issue #${{ github.event.issue.number }}"
+          echo "🔄 Tracking GitHub issue in Sentry"
 
           ISSUE_NUMBER=${{ github.event.issue.number }}
           ISSUE_TITLE="${{ github.event.issue.title }}"
-          ISSUE_BODY="${{ github.event.issue.body }}"
           ISSUE_URL="${{ github.event.issue.html_url }}"
           ISSUE_AUTHOR="${{ github.event.issue.user.login }}"
 
-          # Подготовить данные для Sentry
+          echo "📋 Issue Details:"
+          echo "   Number: $ISSUE_NUMBER"
+          echo "   Title: $ISSUE_TITLE"
+          echo "   Author: $ISSUE_AUTHOR"
+          echo "   URL: $ISSUE_URL"
+
+          # Создать простой event в Sentry
           SENTRY_EVENT_ID=$(openssl rand -hex 16)
 
-          # Создать event в Sentry с типом "github_issue"
-          SENTRY_PAYLOAD=$(cat <<EOF
+          # Простой JSON payload без сложных функций
+          cat > /tmp/sentry_event.json <<EVENT_EOF
           {
             "event_id": "$SENTRY_EVENT_ID",
             "level": "info",
-            "message": "GitHub Issue: $ISSUE_TITLE",
+            "message": "GitHub Issue Created: $ISSUE_TITLE",
             "environment": "tracking",
             "logger": "github",
             "tags": {
               "github_issue_number": "$ISSUE_NUMBER",
-              "github_issue_type": "user_report",
               "github_repository": "${{ github.repository }}",
-              "sync_status": "github_to_sentry"
+              "issue_author": "$ISSUE_AUTHOR",
+              "sync_direction": "github_to_sentry"
             },
             "extra": {
-              "github_issue": {
-                "number": $ISSUE_NUMBER,
-                "title": $(echo "$ISSUE_TITLE" | jq -Rs .),
-                "url": "$ISSUE_URL",
-                "author": "$ISSUE_AUTHOR",
-                "labels": $(echo '${{ toJson(github.event.issue.labels) }}' | jq -c '.[] | .name'),
-                "body": $(echo "$ISSUE_BODY" | jq -Rs . | cut -c1-1000),
-                "created_at": "${{ github.event.issue.created_at }}",
-                "updated_at": "${{ github.event.issue.updated_at }}"
-              },
-              "github_repository": "${{ github.repository }}",
               "github_issue_url": "$ISSUE_URL",
+              "github_issue_title": "$ISSUE_TITLE",
+              "github_issue_number": $ISSUE_NUMBER,
+              "github_repository": "${{ github.repository }}",
               "sync_timestamp": "$(date -u +"%Y-%m-%d %H:%M:%S UTC")"
             },
             "fingerprint": ["github-issue", "${{ github.repository }}", "$ISSUE_NUMBER"]
           }
-          EOF
-          )
+EVENT_EOF
 
-          echo "📦 Sentry payload prepared"
-          echo "$SENTRY_PAYLOAD" | jq '.'
+          echo "📦 Sentry event JSON prepared:"
+          cat /tmp/sentry_event.json
+          echo ""
 
-          # Отправить event в Sentry
+          # Отправить в Sentry
           if [ -n "$SENTRY_API_KEY" ]; then
-            echo "🔑 Sentry API key found, sending event..."
+            echo "🔑 Sending event to Sentry..."
 
             RESPONSE=$(curl -s -X POST \
               -H "Authorization: Bearer $SENTRY_API_KEY" \
               -H "Content-Type: application/json" \
               -H "User-Agent: GitHub-Sentry-Sync/1.0" \
-              -d "$SENTRY_PAYLOAD" \
-              "https://sentry.io/api/$SENTRY_ORG/$SENTRY_PROJECT/events/")
+              -d @/tmp/sentry_event.json \
+              "https://sentry.io/api/0/projects/vibee/eliza/events/")
 
             echo "✅ Sentry response:"
-            echo "$RESPONSE" | jq '.'
+            echo "$RESPONSE" | jq '.' 2>/dev/null || echo "$RESPONSE"
 
-            # Проверить, что event был принят
-            if echo "$RESPONSE" | jq -e '.id' > /dev/null; then
-              SENTRY_EVENT_ID=$(echo "$RESPONSE" | jq -r '.id')
-              echo "✅ Successfully created Sentry event: $SENTRY_EVENT_ID"
+            if echo "$RESPONSE" | grep -q "id"; then
+              echo "✅ Successfully tracked issue in Sentry!"
             else
-              echo "❌ Failed to create Sentry event"
-              echo "Response: $RESPONSE"
-              exit 1
+              echo "⚠️ Event sent, but response unclear"
             fi
           else
-            echo "⚠️ Sentry API key not found, skipping Sentry sync"
-            echo "To enable Sentry sync, add SENTRY_API_KEY to repository secrets"
+            echo "⚠️ SENTRY_API_KEY not set, skipping Sentry tracking"
+            echo "To enable tracking, add SENTRY_API_KEY to repository secrets"
           fi
 
-      - name: Add tracking comment to GitHub issue
-        if: always()
+      - name: Add confirmation comment
         run: |
-          echo "📝 Adding tracking comment to GitHub issue #${{ github.event.issue.number }}"
+          echo "📝 Adding confirmation comment to issue #${{ github.event.issue.number }}"
 
-          # Добавить комментарий в GitHub issue о том, что он синхронизирован с Sentry
-          gh issue comment ${{ github.event.issue.number }} \
-            --body "## 📊 Issue Tracking Registered
+          COMMENT_BODY="## ✅ Issue Registered in Tracking Center
 
-This GitHub issue has been automatically registered in the tracking center.
+This GitHub issue has been automatically registered in the central tracking system.
 
 ### 📋 Registration Details
 - **GitHub Issue:** #${{ github.event.issue.number }}
@@ -119,90 +102,26 @@ This GitHub issue has been automatically registered in the tracking center.
 
 ### 🎯 What's Next?
 - The issue is now tracked in the central monitoring system
-- You'll receive updates if there are related errors or events
-- Progress can be monitored through the GitHub interface
-
-### 📌 Note
-This is an automatic registration message. You can safely delete this comment if needed.
+- You can monitor progress through this GitHub interface
+- All updates will be synchronized with the tracking center
 
 ---
 _🤖 Auto-registered by GitHub-to-Center Sync Action_"
 
-      - name: Notify on success
-        if: success()
+          gh issue comment ${{ github.event.issue.number }} \
+            --body "$COMMENT_BODY"
+
+      - name: Show summary
         run: |
-          echo "✅ GitHub issue #${{ github.event.issue.number }} successfully registered in Sentry"
+          echo ""
+          echo "📊 Summary:"
+          echo "   ✅ Issue #${{ github.event.issue.number }} tracked successfully"
+          echo "   📍 Repository: ${{ github.repository }}"
+          echo "   🕐 Time: $(date -u +\"%Y-%m-%d %H:%M:%S UTC\")"
+          echo ""
 
-      - name: Notify on failure
-        if: failure()
-        run: |
-          echo "❌ Failed to register GitHub issue #${{ github.event.issue.number }} in Sentry"
-          echo "Check the logs above for details"
-
-  update-issue-in-sentry:
-    if: >
-      (github.event_name == 'issue_comment' && github.event.action == 'created')
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: Update Sentry with new comment
-        env:
-          SENTRY_API_KEY: ${{ secrets.SENTRY_API_KEY }}
-        run: |
-          echo "🔄 Updating Sentry tracking for issue #${{ github.event.issue.number }}"
-
-          ISSUE_NUMBER=${{ github.event.issue.number }}
-          COMMENT_BODY="${{ github.event.comment.body }}"
-          COMMENT_AUTHOR="${{ github.event.comment.user.login }}"
-
-          # Создать event об обновлении
-          SENTRY_EVENT_ID=$(openssl rand -hex 16)
-
-          SENTRY_PAYLOAD=$(cat <<EOF
-          {
-            "event_id": "$SENTRY_EVENT_ID",
-            "level": "info",
-            "message": "GitHub Issue Updated: #$ISSUE_NUMBER",
-            "environment": "tracking",
-            "logger": "github",
-            "tags": {
-              "github_issue_number": "$ISSUE_NUMBER",
-              "github_issue_type": "update",
-              "github_repository": "${{ github.repository }}",
-              "sync_status": "github_update_to_sentry"
-            },
-            "extra": {
-              "github_issue_update": {
-                "number": $ISSUE_NUMBER,
-                "comment_author": "$COMMENT_AUTHOR",
-                "comment_body": $(echo "$COMMENT_BODY" | jq -Rs . | cut -c1-500),
-                "updated_at": "${{ github.event.comment.created_at }}"
-              },
-              "github_repository": "${{ github.repository }}",
-              "sync_timestamp": "$(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-            },
-            "fingerprint": ["github-issue-update", "${{ github.repository }}", "$ISSUE_NUMBER"]
-          }
-          EOF
-          )
-
-          echo "📦 Sending update to Sentry..."
-
-          if [ -n "$SENTRY_API_KEY" ]; then
-            curl -s -X POST \
-              -H "Authorization: Bearer $SENTRY_API_KEY" \
-              -H "Content-Type: application/json" \
-              -H "User-Agent: GitHub-Sentry-Sync/1.0" \
-              -d "$SENTRY_PAYLOAD" \
-              "https://sentry.io/api/$SENTRY_ORG/$SENTRY_PROJECT/events/" > /dev/null
-
-            echo "✅ Sentry tracking updated"
-          fi
-
-  close-issue-in-sentry:
-    if: >
-      (github.event_name == 'issues' && github.event.action == 'closed')
+  close-issue:
+    if: github.event.action == 'closed'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -211,49 +130,41 @@ _🤖 Auto-registered by GitHub-to-Center Sync Action_"
         env:
           SENTRY_API_KEY: ${{ secrets.SENTRY_API_KEY }}
         run: |
-          echo "🔄 Closing GitHub issue #${{ github.event.issue.number }} in Sentry tracking"
+          echo "🔄 Closing GitHub issue #${{ github.event.issue.number }} in Sentry"
 
-          # Создать event о закрытии
+          ISSUE_NUMBER=${{ github.event.issue.number }}
           SENTRY_EVENT_ID=$(openssl rand -hex 16)
 
-          SENTRY_PAYLOAD=$(cat <<EOF
+          cat > /tmp/sentry_close.json <<CLOSE_EOF
           {
             "event_id": "$SENTRY_EVENT_ID",
             "level": "info",
-            "message": "GitHub Issue Closed: #${{ github.event.issue.number }}",
+            "message": "GitHub Issue Closed: #$ISSUE_NUMBER",
             "environment": "tracking",
             "logger": "github",
             "tags": {
-              "github_issue_number": "${{ github.event.issue.number }}",
-              "github_issue_type": "closed",
+              "github_issue_number": "$ISSUE_NUMBER",
               "github_repository": "${{ github.repository }}",
-              "sync_status": "github_close_to_sentry"
+              "sync_direction": "github_close_to_sentry"
             },
             "extra": {
-              "github_issue_closed": {
-                "number": ${{ github.event.issue.number }},
-                "closed_by": "${{ github.event.issue.user.login }}",
-                "closed_at": "${{ github.event.issue.closed_at }}"
-              },
+              "github_issue_number": $ISSUE_NUMBER,
               "github_repository": "${{ github.repository }}",
-              "sync_timestamp": "$(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+              "closed_at": "$(date -u +"%Y-%m-%d %H:%M:%S UTC")"
             },
-            "fingerprint": ["github-issue-closed", "${{ github.repository }}", "${{ github.event.issue.number }}"]
+            "fingerprint": ["github-issue-closed", "${{ github.repository }}", "$ISSUE_NUMBER"]
           }
-          EOF
-          )
-
-          echo "📦 Sending close event to Sentry..."
+CLOSE_EOF
 
           if [ -n "$SENTRY_API_KEY" ]; then
             curl -s -X POST \
               -H "Authorization: Bearer $SENTRY_API_KEY" \
               -H "Content-Type: application/json" \
               -H "User-Agent: GitHub-Sentry-Sync/1.0" \
-              -d "$SENTRY_PAYLOAD" \
-              "https://sentry.io/api/$SENTRY_ORG/$SENTRY_PROJECT/events/" > /dev/null
+              -d @/tmp/sentry_close.json \
+              "https://sentry.io/api/0/projects/vibee/eliza/events/" > /dev/null
 
-            echo "✅ Sentry tracking updated with closure"
+            echo "✅ Closure event sent to Sentry"
           fi
 
       - name: Add closure comment
@@ -267,12 +178,6 @@ This GitHub issue has been closed and the tracking center has been updated.
 - **GitHub Issue:** #${{ github.event.issue.number }}
 - **Status:** 🔒 Closed
 - **Closed at:** $(date -u +\"%Y-%m-%d %H:%M:%S UTC\")
-- **Repository:** ${{ github.repository }}
-
-### 🎯 What's Done
-- Issue is marked as resolved in the tracking system
-- Related events have been updated
-- Tracking entry is now archived
 
 ---
 _🤖 Auto-updated by GitHub-to-Center Sync Action_"

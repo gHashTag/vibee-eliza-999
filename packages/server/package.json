@@ -1,6 +1,6 @@
 {
   "name": "@elizaos/server",
-  "version": "1.6.5-alpha.38",
+  "version": "1.6.5-alpha.39",
   "description": "ElizaOS Server - Core server infrastructure for ElizaOS agents",
   "publishConfig": {
     "access": "public",

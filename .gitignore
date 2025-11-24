@@ -1,5 +1,4 @@
 node_modules
-bun.lock
 /out
 
 .env
@@ -176,7 +175,6 @@ tasks/
 **/.taskmaster/
 **/.windsurfrules/
 .roomodes
-bun.lock
 /.kiro
 # TypeScript incremental compilation cache
 *.tsbuildinfo

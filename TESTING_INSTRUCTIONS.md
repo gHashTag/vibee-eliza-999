@@ -8,7 +8,7 @@
 
 2. **Workflow:** `.github/workflows/github-to-sentry-sync.yml`
    - Organization: `vasilev-dmitrii`
-   - Project: `vibee-eliza-999-prod-2`
+   - Project: `vibee-eliza-999-prod`
 
 3. **Test Issues Created:**
    - #3, #4, #5, #6, #7, #8, #9
@@ -25,7 +25,7 @@
 
 ### Шаг 2: Sentry Dashboard
 ```bash
-# Зайти: https://vasilev-dmitrii.sentry.io/projects/vibee-eliza-999-prod-2/
+# Зайти: https://vasilev-dmitrii.sentry.io/projects/vibee-eliza-999-prod/
 # Проверить Events с тегом: logger: github
 # Должны появиться события при создании issues
 ```
@@ -48,7 +48,7 @@ gh issue view N --json comments
 
 **Правильные значения:**
 - Organization: `vasilev-dmitrii`
-- Project: `vibee-eliza-999-prod-2`
+- Project: `vibee-eliza-999-prod`
 - API Key: Должен иметь права `project:write`, `event:write`
 
 ## 🎯 Ожидаемый результат:

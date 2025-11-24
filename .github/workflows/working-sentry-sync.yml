@@ -25,7 +25,7 @@ jobs:
         env:
           SENTRY_API_KEY: ${{ secrets.SENTRY_API_KEY }}
           SENTRY_ORG: vasilev-dmitrii
-          SENTRY_PROJECT: vibee-eliza-999-prod-2
+          SENTRY_PROJECT: vibee-eliza-999-prod
         run: |
           if [ -z "$SENTRY_API_KEY" ]; then
             echo "❌ SENTRY_API_KEY not set"

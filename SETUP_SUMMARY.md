@@ -6,8 +6,8 @@
 
 #### 1. **Sentry Конфигурация:**
 - Организация: `vasilev-dmitrii`
-- Проект: `vibee-eliza-999-prod-2`
-- API: `https://sentry.io/api/0/projects/vasilev-dmitrii/vibee-eliza-999-prod-2/events/`
+- Проект: `vibee-eliza-999-prod`
+- API: `https://sentry.io/api/0/projects/vasilev-dmitrii/vibee-eliza-999-prod/events/`
 
 #### 2. **GitHub Secrets:**
 - `SENTRY_API_KEY` ✅ (добавлен)

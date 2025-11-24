@@ -22,8 +22,8 @@
 
 ### 2. **Настройки Sentry:**
 - **Организация:** `vasilev-dmitrii`
-- **Проект:** `vibee-eliza-999-prod-2`
-- **API Endpoint:** `https://sentry.io/api/0/projects/vasilev-dmitrii/vibee-eliza-999-prod-2/events/`
+- **Проект:** `vibee-eliza-999-prod`
+- **API Endpoint:** `https://sentry.io/api/0/projects/vasilev-dmitrii/vibee-eliza-999-prod/events/`
 
 ### 3. **Secrets в GitHub:**
 - ✅ `SENTRY_API_KEY` - для создания событий
@@ -68,7 +68,7 @@ gh issue view N --json comments
 
 ### В Sentry Dashboard:
 ```
-URL: https://vasilev-dmitrii.sentry.io/projects/vibee-eliza-999-prod-2/
+URL: https://vasilev-dmitrii.sentry.io/projects/vibee-eliza-999-prod/
 
 Look for:
 - Events with logger: github
@@ -123,7 +123,7 @@ gh issue create --title "Test Issue" --body "Testing auto-registration"
 ## 💡 Важные ссылки:
 
 - **GitHub Repository:** https://github.com/gHashTag/vibee-eliza-999
-- **Sentry Dashboard:** https://vasilev-dmitrii.sentry.io/projects/vibee-eliza-999-prod-2/
+- **Sentry Dashboard:** https://vasilev-dmitrii.sentry.io/projects/vibee-eliza-999-prod/
 - **Workflow:** Repository → Actions → GitHub Issues → Sentry Tracker
 - **Documentation:** `GITHUB_ISSUES_AUTO_REGISTRATION.md`
 

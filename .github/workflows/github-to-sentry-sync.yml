@@ -9,7 +9,7 @@ on:
 
 env:
   SENTRY_ORG: vasilev-dmitrii
-  SENTRY_PROJECT: vibee-eliza-999-prod-2
+  SENTRY_PROJECT: vibee-eliza-999-prod
 
 jobs:
   track-issue:

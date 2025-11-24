@@ -1,6 +1,6 @@
 {
   "name": "@elizaos/plugin-vibe-face-avatar",
-  "version": "1.6.5-alpha.27",
+  "version": "1.6.5-alpha.28",
   "description": "ElizaOS plugin for AI image generation with Replicate/Fal.ai models",
   "type": "module",
   "license": "MIT",

@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "cclsp": {
+      "command": "cclsp",
+      "env": {
+        "CCLSP_CONFIG_PATH": "/Users/playra/vibee-eliza-999/.claude/cclsp.json"
+      }
+    },
+    "fal-ai-image": {
+      "command": "npx",
+      "args": ["-y", "mcp-fal-ai-image"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/playra/vibee-eliza-999"]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "telegram": {
+      "command": "npx",
+      "args": ["-y", "besir-mcp-telegram-bot"]
+    }
+  }
+}

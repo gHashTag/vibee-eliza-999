@@ -559,6 +559,195 @@ SOLANA_PRIVATE_KEY=
 
 ---
 
+## 📍 РАСПОЛОЖЕНИЕ КОНФИГУРАЦИЙ MCP
+
+### ⚠️ ВАЖНОЕ ПРАВИЛО
+**ВСЕ конфигурации MCP должны храниться в папке репозитория `/Users/playra/vibee-eliza-999/.claude/`, а НЕ на уровне пользователя `~/.claude/`!**
+
+Это обеспечивает:
+- Совместную работу команды в репозитории
+- Версионирование конфигураций
+- Централизованное управление всеми MCP настройками
+
+**Файлы в репозитории:**
+- `/Users/playra/vibee-eliza-999/.claude/mcp.json` - конфигурация всех MCP серверов
+- `/Users/playra/vibee-eliza-999/.claude/cclsp.json` - конфигурация LSP серверов для cclsp
+
+---
+
+## MCP (Model Context Protocol) - ОБЯЗАТЕЛЬНО К ИСПОЛЬЗОВАНИЮ!
+
+### Что это
+**MCP** (Model Context Protocol) - это система интеграции инструментов для Claude Code. Обязательно использовать для всех проектов!
+
+### Установленные MCP серверы:
+
+#### 🔌 **Context7** (ОСНОВНОЙ - ДОКУМЕНТАЦИЯ!)
+- **Пакет:** `@upstash/context7-mcp` (установлен через npm)
+- **Назначение:** Получение актуальной документации и примеров кода любых библиотек
+- **Без контекста:** "Code examples are outdated and based on year-old training data"
+- **С Context7:** "Context7 MCP pulls up-to-date, version-specific documentation and code examples straight from the source"
+- **Использование:**
+  ```typescript
+  // Шаг 1: Получить ID библиотеки
+  await mcp__context7__resolve-library-id({ libraryName: "react" })
+
+  // Шаг 2: Получить документацию
+  await mcp__context7__get-library-docs({
+    context7CompatibleLibraryID: "/facebook/react",
+    topic: "hooks"
+  })
+  ```
+- **Лучшие практики:**
+  - Всегда добавляйте "use context7" в промпты для документации
+  - Сначала получайте library_id, потом используйте его
+  - Настройте правило автоинвокации в настройках клиента
+
+#### 🔍 **cclsp** (КОД-НАВИГАЦИЯ!)
+- **Пакет:** `cclsp@0.6.2` (установлен глобально)
+- **Назначение:** Интеграция LLM с Language Server Protocol (LSP) для навигации по коду
+- **Проблема:** "LLM-based coding agents often struggle with providing accurate line/column numbers"
+- **Решение:** "cclsp solves this by intelligently trying multiple position combinations"
+- **Инструменты cclsp:**
+  - `cclsp.find_definition` - Поиск определений символов
+  - `cclsp.find_references` - Поиск всех ссылок на символ
+  - `cclsp.rename_symbol` - Переименование символов (создает .bak файлы)
+  - `cclsp.get_diagnostics` - Получение диагностик кода
+  - `cclsp.restart_server` - Перезапуск LSP серверов
+
+**Примеры использования cclsp:**
+```typescript
+// Найти определение функции
+await cclsp.find_definition({
+  file_path: "/path/to/file.ts",
+  symbol_name: "processRequest",
+  symbol_kind: "function"
+})
+
+// Найти все ссылки на переменную
+await cclsp.find_references({
+  file_path: "/path/to/file.ts",
+  symbol_name: "CONFIG_PATH",
+  include_declaration: true
+})
+
+// Переименовать символ (с бэкапом!)
+await cclsp.rename_symbol({
+  file_path: "/path/to/file.ts",
+  symbol_name: "getUserData",
+  new_name: "fetchUserProfile",
+  dry_run: true  // Сначала предварительный просмотр
+})
+```
+
+#### 📚 **Context7 + cclsp - МОЩНАЯ КОМБИНАЦИЯ!
+- **Context7** - документация и примеры кода (актуальная информация)
+- **cclsp** - навигация по собственному коду (определения, рефакторинг)
+- **Вместе** - полный контроль над кодом и документацией!
+
+#### 🎨 **fal-ai-image** (ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЙ!)
+- **Пакет:** `mcp-fal-ai-image` (установлен через npx)
+- **Назначение:** Генерация изображений из текстовых описаний через FAL AI
+- **Возможности:**
+  - 600+ моделей для генерации изображений
+  - Стабильная диффузия (SDXL, SD 1.5, и др.)
+  - Быстрый Sprint режим (2-4 шага)
+  - Качественный Base режим (18+ шагов)
+  - Поддержка различных размеров: 512x512 до 3840x2160
+  - Генерация до 4 изображений за раз
+  - Seed для воспроизводимости результатов
+- **API:** https://fal.ai/ (нужен API ключ)
+- **Конфигурация:** Ключ `FAL_KEY` в `.env` файле
+- **Пример использования:**
+  ```json
+  {
+    "tool": "generate-image",
+    "args": {
+      "prompt": "Футуристический город на закате с летающими машинами",
+      "model": "fal-ai/kolors"
+    }
+  }
+  ```
+
+### Другие MCP серверы:
+
+#### 🔍 **sequential-thinking**
+- Для пошагового анализа и планирования сложных задач
+- Помогает разбивать сложные проблемы на подзадачи
+
+#### 📁 **filesystem**
+- Для работы с файловой системой через MCP
+- Доступ к файлам проекта
+
+#### 📱 **telegram** (besir-mcp-telegram-bot)
+- Для интеграции с Telegram API через MCP
+
+### Конфигурация MCP:
+
+**Файлы конфигурации (В РЕПОЗИТОРИИ):**
+- `/Users/playra/vibee-eliza-999/.claude/mcp.json` - главная конфигурация всех MCP серверов
+- `/Users/playra/vibee-eliza-999/.claude/cclsp.json` - конфигурация cclsp LSP серверов
+
+**Установленные серверы:**
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "cclsp": {
+      "command": "cclsp",
+      "env": {
+        "CCLSP_CONFIG_PATH": "/Users/playra/vibee-eliza-999/.claude/cclsp.json"
+      }
+    },
+    "fal-ai-image": {
+      "command": "npx",
+      "args": ["-y", "mcp-fal-ai-image"]
+    },
+    "filesystem": { /* ... */ },
+    "sequential-thinking": { /* ... */ },
+    "telegram": { /* ... */ }
+  }
+}
+```
+
+**Установка дополнительных MCP серверов:**
+```bash
+npm install -g @modelcontextprotocol/server-sequential-thinking
+npm install -g @modelcontextprotocol/server-filesystem
+npm install -g @modelcontextprotocol/server-everything
+```
+
+### Обязательные правила использования MCP:
+
+#### Для Context7:
+1. **ПЕРЕД работой с любой библиотекой** - всегда используйте context7
+2. **Добавляйте "use context7"** в промпты для документации
+3. **Сначала** получайте library_id через `resolve-library-id`, потом используйте его
+
+#### Для cclsp:
+1. **ПЕРЕД рефакторингом** - используйте `find_references` для анализа влияния
+2. **ПЕРЕД переименованием** - всегда делайте `dry_run: true`
+3. **ДЛЯ навигации** - используйте `find_definition` вместо ручного поиска
+4. **ПРИ ошибках** - используйте `get_diagnostics` для проверки кода
+5. **ПРИ зависании LSP** - используйте `restart_server`
+
+### Правило автоинвокации:
+
+**Настройте в клиенте:**
+> "Always use context7 when I need code generation, setup or configuration steps, or library/API documentation"
+
+**В промпте просто добавьте:**
+> "use context7"
+
+**Примеры:**
+- "Create a Next.js middleware that checks for a valid JWT. use context7"
+- "Configure a Cloudflare Worker script to cache JSON API responses. use context7"
+
+---
+
 ## DEVELOPMENT PRINCIPLES
 
 ### Flow - Always Plan First
@@ -634,3 +823,35 @@ SOLANA_PRIVATE_KEY=
 ---
 
 _This configuration file should be referenced at the start of any ElizaOS development session to ensure proper setup and adherence to project standards._
+- # ==========================================================================================================
+# 🔐 INFISICAL CLOUD-FIRST CONFIGURATION - CRITICAL FOR AI AGENTS
+# ==========================================================================================================
+#
+# ⚠️ ⚠️ ⚠️  WARNING FOR AI AGENTS AND AUTOMATION  ⚠️ ⚠️ ⚠️
+#
+# DO NOT ADD ANY OTHER VARIABLES TO THIS FILE!
+# DO NOT "FIX" OR "COMPLETE" THIS FILE!
+#
+# This file should ONLY contain 5 variables:
+# 1. INFISICAL_CLIENT_ID
+# 2. INFISICAL_CLIENT_SECRET
+# 3. INFISICAL_PROJECT_ID
+# 4. INFISICAL_ENVIRONMENT
+# 5. NODE_ENV
+#
+# ALL other secrets (50+ variables) are loaded from Infisical cloud at runtime.
+# See AI_AGENT_RULES.md for detailed explanation.
+#
+# ==========================================================================================================
+
+# 🔐 Infisical Cloud-First Configuration - DEVELOPMENT
+INFISICAL_CLIENT_ID=88fcf0cd-cce9-4844-bad2-8e19b4bad3ed
+INFISICAL_CLIENT_SECRET=b377e7a60b669ea2317f339dc6cb79ce49d588a7bbed92433bb2a73dedff3314
+INFISICAL_PROJECT_ID=fd763fa3-35d5-4045-93bd-1795c5f00fc3
+
+# 🧪 DEVELOPMENT ENVIRONMENT
+# Automatically loads BOT_TOKEN_TEST_1, BOT_TOKEN_TEST_2 and all API keys from Infisical
+INFISICAL_ENVIRONMENT=dev
+
+# NODE_ENV для development режима
+NODE_ENV=development Слушай, запомни: все ключи здесь лежат .env

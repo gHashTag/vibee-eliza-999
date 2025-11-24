@@ -591,9 +591,9 @@ export function AppSidebar({
                 >
                   <div className="flex flex-col pt-2 gap-1 items-start justify-center">
                     <img
-                      alt="elizaos-logo"
-                      src="/elizaos-logo-light.png"
-                      className="w-32 max-w-full"
+                      alt="vibee-logo"
+                      src="/vibee-logo-light.svg"
+                      className="w-48 max-full"
                     />
                     <span className="text-xs font-mono text-muted-foreground">v{version}</span>
                   </div>

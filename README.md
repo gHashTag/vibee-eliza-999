@@ -1,8 +1,19 @@
 <div align="center">
-  <h1>ElizaOS</h1>
+  <h1>🐝 Vibee</h1>
   <p><strong>The Open-Source Framework for Multi-Agent AI Development</strong></p>
   <p>Build, deploy, and manage autonomous AI agents with a modern, extensible, and full-featured platform.</p>
 </div>
+
+<pre>
+       _.-.
+     .'  ,_\
+    /   /  o) 🐝
+   |    `--'  <strong>Welcome to the Hive!</strong>
+   |    |
+   |    |    Buzzing with AI Agents...
+   |    |    Built by bees, for bees! 🐝
+   '._/'
+</pre>
 
 <div align="center">
   <!-- Badges will go here -->
@@ -13,9 +24,9 @@
   <a href="https://discord.gg/ai16z"><img src="https://img.shields.io/discord/1253563208833433701?style=for-the-badge&logo=discord" alt="Discord"></a>
 </div>
 
-## ✨ What is Eliza?
+## ✨ What is Vibee? 🐝
 
-ElizaOS is an all-in-one, extensible platform for building and deploying AI-powered applications. Whether you're creating sophisticated chatbots, autonomous agents for business process automation, or intelligent game NPCs, Eliza provides the tools you need to get started quickly and scale effectively.
+Vibee is an all-in-one, extensible platform for building and deploying AI-powered applications. Whether you're creating sophisticated chatbots, autonomous agents for business process automation, or intelligent game NPCs, **our buzzing hive of AI agents** provides the tools you need to get started quickly and scale effectively.
 
 It combines a modular architecture, a powerful CLI, and a rich web interface to give you full control over your agents' development, deployment, and management lifecycle.
 
@@ -183,6 +194,50 @@ Eliza is a monorepo that contains all the packages needed to run the entire plat
 - **`@elizaos/client`**: The React-based web UI for managing and interacting with your agents.
 - **`@elizaos/cli`**: The central tool for scaffolding, running, and managing your projects.
 - **`@elizaos/plugin-bootstrap`**: The mandatory core plugin that handles message processing and basic agent actions.
+
+## 🐝 VIBEE DEVELOPMENT RULES (IMPORTANT!)
+
+### Port Configuration
+- **✅ PORT 3000** - Main server (backend + static files)
+  - **USE THIS PORT** for everything!
+  - Backend API: `http://localhost:3000/api`
+  - Web Interface: `http://localhost:3000`
+
+- **❌ PORT 5173** - Vite dev server (HMR only)
+  - **AVOID THIS PORT** unless specifically needed
+  - Used only for Hot Module Replacement during development
+  - Can be disabled if you prefer manual browser refresh
+
+### Development Workflow
+```bash
+# ✅ RECOMMENDED - Start development mode with auto-clean
+cd /Users/playra/vibee-eliza-999
+bun dev
+
+# The dev command automatically:
+# 1. Kills all conflicting processes
+# 2. Clears ports 3000 and 5173
+# 3. Checks TypeScript build
+# 4. Verifies environment and assets
+# 5. Starts a clean development server with scripts/dev-watch.js
+
+# ❌ WRONG - Don't start multiple processes manually
+# Each process tries to use port 5173 → but dev cleans them first!
+```
+
+### Process Management
+- **Use `bun dev` - it automatically handles conflicts!**
+- The dev command automatically kills conflicting processes
+- Each process tries to use port 5173 → but dev cleans them first!
+- If you manually run multiple processes:
+  1. Kill all bun processes: `ps aux | grep bun | awk '{print $2}' | xargs kill -9`
+  2. Or simply use `bun dev` (it cleans automatically)
+
+### Common Issues & Solutions
+- **"Port 5173 is already in use"** → Just run `bun dev` (it auto-cleans conflicts!)
+- **HMR not working** → Use `bun dev` (handles both ports automatically)
+- **Only want port 3000** → Use `bun run start` (production mode, no HMR)
+- **Development issues** → `bun dev` handles everything automatically
 
 ## 🤝 How to Contribute
 

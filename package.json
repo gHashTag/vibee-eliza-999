@@ -1,5 +1,5 @@
 {
-  "name": "eliza",
+  "name": "vibee",
   "version": "1.4.4",
   "module": "index.ts",
   "type": "module",
@@ -11,7 +11,7 @@
     "start": "turbo run start --filter=./packages/cli --log-prefix=none --no-cache",
     "start:debug": "cross-env NODE_NO_WARNINGS=1 LOG_LEVEL=debug elizaos start",
     "start:app": "turbo run start --filter=./packages/app",
-    "dev": "bun run scripts/dev-watch.js",
+    "dev": "bash scripts/vibee-start-clean.sh",
     "build": "turbo run build --filter=!./packages/app --filter=!@elizaos/config",
     "build:client": "turbo run build --filter=@elizaos/client",
     "format": "turbo run format --filter=./packages/*",
@@ -90,6 +90,7 @@
     "utf-8-validate"
   ],
   "dependencies": {
+    "@infisical/sdk": "^4.0.6",
     "helmet": "^8.1.0",
     "js-yaml": "^4.1.0",
     "zod": "4.1.11"

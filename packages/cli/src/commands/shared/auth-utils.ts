@@ -9,7 +9,7 @@ import { getAgentRuntimeUrl } from './url-utils';
  */
 export function getAuthHeaders(opts: OptionValues): Record<string, string> {
   // Check for auth token in command options first, then environment variables
-  const authToken = opts.authToken || process.env.ELIZA_SERVER_AUTH_TOKEN;
+  const authToken = opts.authToken || process.env.VIBEE_SERVER_AUTH_TOKEN || process.env.ELIZA_SERVER_AUTH_TOKEN;
 
   // If we have an auth token, include it in the headers
   if (authToken) {
@@ -28,7 +28,7 @@ export function getAuthHeaders(opts: OptionValues): Record<string, string> {
  * @returns ApiClientConfig for use with @elizaos/api-client
  */
 export function createApiClientConfig(opts: OptionValues): ApiClientConfig {
-  const authToken = opts.authToken || process.env.ELIZA_SERVER_AUTH_TOKEN;
+  const authToken = opts.authToken || process.env.VIBEE_SERVER_AUTH_TOKEN || process.env.ELIZA_SERVER_AUTH_TOKEN;
 
   return {
     baseUrl: getAgentRuntimeUrl(opts),

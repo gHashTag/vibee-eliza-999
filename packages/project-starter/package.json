@@ -1,6 +1,6 @@
 {
   "name": "@elizaos/project-starter",
-  "description": "Project starter for elizaOS",
+  "description": "Project starter for Vibee 🐝 - Open-Source Framework for Multi-Agent AI Development",
   "version": "1.6.5-alpha.10",
   "type": "module",
   "main": "dist/src/index.js",

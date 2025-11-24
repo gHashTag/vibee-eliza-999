@@ -1,6 +1,6 @@
-# ElizaOS Agent Project Development Guide for Claude
+# 🐝 Vibee Agent Project Development Guide for Claude
 
-> **Optimized for Claude LLM** - Complete reference for building ElizaOS agent projects
+> **Optimized for Claude LLM** - Complete reference for building Vibee agent projects (powered by our buzzing hive of AI agents)
 
 ## 📋 Project Overview
 

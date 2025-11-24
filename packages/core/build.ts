@@ -3,7 +3,7 @@
  * Dual build script for @elizaos/core - generates both Node.js and browser builds
  */
 
-import { createBuildRunner } from '../../build-utils';
+import { createBuildRunner } from './build-utils';
 import { existsSync, mkdirSync } from 'node:fs';
 
 // Ensure dist directories exist

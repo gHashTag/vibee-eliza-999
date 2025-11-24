@@ -6,6 +6,10 @@ on:
   issue_comment:
     types: [created]
 
+env:
+  SENTRY_ORG: vasilev-dmitrii
+  SENTRY_PROJECT: vibee-eliza-999-prod-2
+
 jobs:
   track-issue:
     runs-on: ubuntu-latest
@@ -71,7 +75,7 @@ EVENT_EOF
               -H "Content-Type: application/json" \
               -H "User-Agent: GitHub-Sentry-Sync/1.0" \
               -d @/tmp/sentry_event.json \
-              "https://sentry.io/api/0/projects/vibee/eliza/events/")
+              "https://sentry.io/api/0/projects/$SENTRY_ORG/$SENTRY_PROJECT/events/")
 
             echo "✅ Sentry response:"
             echo "$RESPONSE" | jq '.' 2>/dev/null || echo "$RESPONSE"
@@ -162,7 +166,7 @@ CLOSE_EOF
               -H "Content-Type: application/json" \
               -H "User-Agent: GitHub-Sentry-Sync/1.0" \
               -d @/tmp/sentry_close.json \
-              "https://sentry.io/api/0/projects/vibee/eliza/events/" > /dev/null
+              "https://sentry.io/api/0/projects/$SENTRY_ORG/$SENTRY_PROJECT/events/" > /dev/null
 
             echo "✅ Closure event sent to Sentry"
           fi

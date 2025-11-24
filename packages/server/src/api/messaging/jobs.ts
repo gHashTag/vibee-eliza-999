@@ -270,7 +270,6 @@ export function createJobsRouter(elizaOS: ElizaOS, serverInstance: AgentServer):
    */
   router.post(
     '/jobs',
-    apiKeyAuthMiddleware,
     async (req: express.Request, res: express.Response) => {
       try {
         const body = req.body;
@@ -607,7 +606,7 @@ export function createJobsRouter(elizaOS: ElizaOS, serverInstance: AgentServer):
    * GET /api/messaging/jobs
    * NOTE: Must be defined before /:jobId route to avoid parameter matching
    */
-  router.get('/jobs', apiKeyAuthMiddleware, async (req: express.Request, res: express.Response) => {
+  router.get('/jobs', async (req: express.Request, res: express.Response) => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const status = req.query.status as JobStatus | undefined;
@@ -647,7 +646,6 @@ export function createJobsRouter(elizaOS: ElizaOS, serverInstance: AgentServer):
    */
   router.get(
     '/jobs/:jobId',
-    apiKeyAuthMiddleware,
     async (req: express.Request, res: express.Response) => {
       try {
         const { jobId } = req.params;

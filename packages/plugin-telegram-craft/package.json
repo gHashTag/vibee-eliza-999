@@ -1,6 +1,6 @@
 {
   "name": "@elizaos/plugin-telegram-craft",
-  "version": "1.6.5-alpha.43",
+  "version": "1.6.5-alpha.44",
   "description": "ElizaOS plugin for Telegram userbot via MTProto (GramJS) with fallback strategies",
   "type": "module",
   "license": "MIT",

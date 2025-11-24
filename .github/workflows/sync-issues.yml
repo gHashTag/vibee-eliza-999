@@ -1,0 +1,30 @@
+name: Sync Issues to Sentry
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Echo Issue
+        run: |
+          echo "✅ Issue triggered: #${{ github.event.issue.number }}"
+          echo "Title: ${{ github.event.issue.title }}"
+
+      - name: Add Comment
+        run: |
+          echo "Adding comment..."
+
+          gh issue comment ${{ github.event.issue.number }} \
+            --body "## ✅ Auto-Comment Test
+
+Issue #${{ github.event.issue.number }} triggered the workflow!
+
+- Action: ${{ github.event.action }}
+- Author: ${{ github.event.issue.user.login }}
+- Time: $(date -u +\"%Y-%m-%d %H:%M:%S UTC\")"

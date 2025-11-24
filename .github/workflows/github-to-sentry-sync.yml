@@ -12,7 +12,7 @@ env:
 
 jobs:
   track-issue:
-    if: github.event_name == 'issues' && (github.event.action == 'opened' || github.event.action == 'reopened')
+    if: github.event_name == 'issues'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -24,8 +24,15 @@ jobs:
           echo "   Event Action: ${{ github.event.action }}"
           echo "   Issue Number: ${{ github.event.issue.number }}"
           echo "   Issue Title: ${{ github.event.issue.title }}"
-          echo "   Repository: ${{ github.repository }}"
           echo ""
+
+          # Проверить action и пропустить если не подходит
+          if [ "${{ github.event.action }}" != "opened" ] && [ "${{ github.event.action }}" != "reopened" ]; then
+            echo "⚠️ Skipping: action is ${{ github.event.action }} (expected: opened or reopened)"
+            exit 0
+          fi
+
+          echo "✅ Action is valid: ${{ github.event.action }}"
 
       - name: Track GitHub Issue in Sentry
         env:

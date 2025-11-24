@@ -62,6 +62,11 @@ COPY --from=builder /app/build-utils.ts ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/scripts ./scripts
+# Copy built dist files from builder stage
+COPY --from=builder /app/packages/cli/dist ./packages/cli/dist
+COPY --from=builder /app/packages/core/dist ./packages/core/dist
+COPY --from=builder /app/packages/server/dist ./packages/server/dist
+COPY --from=builder /app/packages/client/dist ./packages/client/dist
 
 ENV NODE_ENV=production
 

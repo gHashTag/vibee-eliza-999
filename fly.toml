@@ -1,0 +1,35 @@
+app = "vibee-eliza-999-prod"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+
+[[services]]
+  internal_port = 3000
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.tcp_checks]]
+    grace_period = "10s"
+    interval = "15s"
+    restart_limit = 0
+    timeout = "2s"
+
+[[services.udp_services]]
+  internal_port = 50000
+  protocol = "udp"
+
+  [[services.udp_services.ports]]
+    handlers = ["udp"]
+    port = 50000

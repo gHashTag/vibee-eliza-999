@@ -62,7 +62,6 @@ COPY --from=builder /app/build-utils.ts ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/scripts ./scripts
-COPY --from=builder /app/dist ./dist
 
 ENV NODE_ENV=production
 

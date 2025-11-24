@@ -1,23 +1,42 @@
-# fly.toml app configuration file generated for vibee-eliza-999 on 2025-11-24T09:54:04Z
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
 
-app = 'vibee-eliza-999'
-primary_region = 'iad'
+app = "vibee-eliza-999-prod"
+primary_region = "ams"
 
 [build]
+  dockerfile = "Dockerfile"
 
-[http_service]
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+
+[[services]]
   internal_port = 3000
-  force_https = true
-  auto_stop_machines = 'stop'
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ['app']
+  protocol = "tcp"
 
-[[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
-  memory_mb = 1024
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.tcp_checks]]
+    grace_period = "10s"
+    interval = "15s"
+    restart_limit = 0
+    timeout = "2s"
+
+[[services.udp_services]]
+  internal_port = 50000
+  protocol = "udp"
+
+  [[services.udp_services.ports]]
+    handlers = ["udp"]
+    port = 50000
+
+[vm]
+  cpu_kind = "shared"
+  cpus = 2
+  memory_mb = 2048
+

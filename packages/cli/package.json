@@ -41,7 +41,7 @@
     "elizaos": "./dist/index.js"
   },
   "scripts": {
-    "start": "bun run build && bun dist/index.js start",
+    "start": "bun dist/index.js start",
     "build": "bun run build.ts",
     "lint": "prettier --write ./src",
     "format": "prettier --write ./src",

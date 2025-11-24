@@ -17,7 +17,7 @@
     "sleepApplication": false,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10,
-    "startCommand": "bun run start",
+    "startCommand": "bun packages/cli/dist/index.js start",
     "healthcheckPath": "/healthz",
     "healthcheckTimeout": 300,
     "stopCommand": "bun run stop"

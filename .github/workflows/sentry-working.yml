@@ -1,0 +1,82 @@
+name: Sentry Working
+
+on:
+  issues:
+    types: [opened, reopened, closed]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Test Issues Event (Modified)
+        run: |
+          echo "✅ Modified test working!"
+          echo "Event: ${{ github.event_name }}"
+          echo "Action: ${{ github.event.action }}"
+          echo "Issue Number: ${{ github.event.issue.number }}"
+          echo "Issue Title: ${{ github.event.issue.title }}"
+          echo ""
+
+      - name: Send to Sentry
+        env:
+          SENTRY_API_KEY: ${{ secrets.SENTRY_API_KEY }}
+          SENTRY_ORG: vasilev-dmitrii
+          SENTRY_PROJECT: vibee-eliza-999-prod-2
+        run: |
+          echo "🚀 Sending to Sentry..."
+
+          if [ -z "$SENTRY_API_KEY" ]; then
+            echo "❌ SENTRY_API_KEY not set"
+            exit 1
+          fi
+
+          EVENT_ID=$(openssl rand -hex 16)
+          cat > /tmp/sentry.json <<EOF
+          {
+            "event_id": "$EVENT_ID",
+            "level": "info",
+            "message": "GitHub Issue: ${{ github.event.issue.title }}",
+            "environment": "tracking",
+            "logger": "github-working",
+            "tags": {
+              "issue_number": "${{ github.event.issue.number }}",
+              "action": "${{ github.event.action }}"
+            }
+          }
+EOF
+
+          echo "Sending event..."
+          curl -s -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $SENTRY_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @/tmp/sentry.json \
+            "https://sentry.io/api/0/projects/$SENTRY_ORG/$SENTRY_PROJECT/events/" \
+            > /tmp/response.txt
+
+          HTTP=$(tail -c4 /tmp/response.txt)
+          echo "HTTP Status: $HTTP"
+
+          if [ "$HTTP" = "201" ]; then
+            echo "✅ SUCCESS!"
+          else
+            echo "❌ FAILED"
+          fi
+
+      - name: Add Comment
+        run: |
+          echo "Adding comment..."
+
+          COMMENT="## ✅ GitHub Issue Auto-Registered
+
+Issue #${{ github.event.issue.number }} has been tracked.
+
+**Action:** ${{ github.event.action }}
+**Time:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+[Check Sentry](https://vasilev-dmitrii.sentry.io/projects/vibee-eliza-999-prod-2/)"
+
+          gh issue comment ${{ github.event.issue.number }} \
+            --body "$COMMENT"

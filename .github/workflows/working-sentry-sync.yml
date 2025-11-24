@@ -1,0 +1,103 @@
+name: Working Sentry Sync
+
+on:
+  issues:
+    types: [opened, reopened, closed]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Echo Info
+        run: |
+          echo "=== WORKING SENTRY SYNC ==="
+          echo "Event: ${{ github.event_name }}"
+          echo "Action: ${{ github.event.action }}"
+          echo "Issue: #${{ github.event.issue.number }}"
+          echo "Title: ${{ github.event.issue.title }}"
+          echo "URL: ${{ github.event.issue.html_url }}"
+          echo ""
+
+      - name: Send to Sentry
+        env:
+          SENTRY_API_KEY: ${{ secrets.SENTRY_API_KEY }}
+          SENTRY_ORG: vasilev-dmitrii
+          SENTRY_PROJECT: vibee-eliza-999-prod-2
+        run: |
+          if [ -z "$SENTRY_API_KEY" ]; then
+            echo "❌ SENTRY_API_KEY not set"
+            exit 1
+          fi
+
+          echo "✅ API Key found"
+          echo "Sending to: $SENTRY_ORG/$SENTRY_PROJECT"
+          echo ""
+
+          # Create simple event
+          EVENT_ID=$(openssl rand -hex 16)
+          cat > /tmp/event.json <<EOF
+          {
+            "event_id": "$EVENT_ID",
+            "level": "info",
+            "message": "GitHub Issue ${{ github.event.action }}: #${{ github.event.issue.number }}",
+            "environment": "tracking",
+            "logger": "github",
+            "tags": {
+              "github_issue_number": "${{ github.event.issue.number }}",
+              "github_action": "${{ github.event.action }}",
+              "repository": "${{ github.repository }}"
+            }
+          }
+EOF
+
+          echo "📦 Event JSON:"
+          cat /tmp/event.json
+          echo ""
+
+          # Send to Sentry
+          RESPONSE=$(curl -s -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $SENTRY_API_KEY" \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: GitHub-Sync/1.0" \
+            -d @/tmp/event.json \
+            "https://sentry.io/api/0/projects/$SENTRY_ORG/$SENTRY_PROJECT/events/")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -c4)
+          echo "📡 HTTP Status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" = "201" ]; then
+            echo "✅ SUCCESS! Event sent to Sentry"
+            echo "Check: https://$SENTRY_ORG.sentry.io/projects/$SENTRY_PROJECT/"
+          else
+            echo "❌ FAILED! Status: $HTTP_CODE"
+          fi
+
+      - name: Add Comment
+        run: |
+          echo "Adding comment to issue #${{ github.event.issue.number }}..."
+
+          if [ "${{ github.event.action }}" = "opened" ] || [ "${{ github.event.action }}" = "reopened" ]; then
+            gh issue comment ${{ github.event.issue.number }} \
+              --body "## ✅ Registered in Sentry
+
+Issue #${{ github.event.issue.number }} has been registered in the tracking system.
+
+**Action:** ${{ github.event.action }}
+**Repository:** ${{ github.repository }}
+**Time:** $(date -u +\"%Y-%m-%d %H:%M:%S UTC\")
+
+[Check Sentry](https://vasilev-dmitrii.sentry.io/projects/vibee-eliza-999-prod-2/)"
+          fi
+
+          if [ "${{ github.event.action }}" = "closed" ]; then
+            gh issue comment ${{ github.event.issue.number }} \
+              --body "## 🔒 Closed
+
+Issue #${{ github.event.issue.number }} has been closed.
+
+**Status:** Closed
+**Time:** $(date -u +\"%Y-%m-%d %H:%M:%S UTC\")"
+          fi

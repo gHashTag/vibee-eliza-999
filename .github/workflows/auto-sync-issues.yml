@@ -2,7 +2,7 @@ name: Auto Sync Issues to Sentry
 
 on:
   issues:
-    types: [opened, reopened, closed]
+    types: [opened]
   workflow_dispatch:
 
 jobs:
@@ -75,7 +75,6 @@ EOF
           fi
 
       - name: Add Confirmation Comment
-        if: github.event.action == 'opened' || github.event.action == 'reopened'
         run: |
           echo "📝 Adding confirmation comment..."
 
@@ -93,16 +92,3 @@ GitHub Issue #${{ github.event.issue.number }} has been automatically registered
 
           gh issue comment ${{ github.event.issue.number }} \
             --body "$COMMENT"
-
-      - name: Add Closure Comment
-        if: github.event.action == 'closed'
-        run: |
-          echo "📝 Adding closure comment..."
-
-          gh issue comment ${{ github.event.issue.number }} \
-            --body "## 🔒 Issue Closed
-
-GitHub Issue #${{ github.event.issue.number }} has been closed.
-
-**Status:** Closed
-**Time:** $(date -u +\"%Y-%m-%d %H:%M:%S UTC\")"

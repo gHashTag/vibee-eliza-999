@@ -3,7 +3,7 @@
  * Build script for @elizaos/cli using standardized build utilities
  */
 
-import { createBuildRunner, copyAssets } from '../../build-utils';
+import { createBuildRunner, copyAssets } from './build-utils';
 import { $ } from 'bun';
 import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';

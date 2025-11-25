@@ -1,0 +1,15 @@
+# Database files (SQLite)
+/data/
+*.db
+*.db-shm
+*.db-wal
+
+# Drizzle migrations (optional - commit if needed)
+# /drizzle/migrations/
+
+# Environment variables
+.env.local
+.env.*.local
+
+# Docker volumes
+/postgres-data/

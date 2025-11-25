@@ -1,0 +1,17 @@
+# OpenTofu Configuration for VIBEE Agent Infrastructure
+# Copy this file to terraform.tfvars and fill in your values
+
+# Server Configuration
+server_ip = "188.137.250.63"
+environment = "stage"
+
+# Infisical Configuration (Cloud-First Secret Management)
+# These values should match your .env.dev file
+infisical_client_id = "YOUR_INFISICAL_CLIENT_ID_HERE"
+infisical_client_secret = "YOUR_INFISICAL_CLIENT_SECRET_HERE"
+infisical_project_id = "YOUR_INFISICAL_PROJECT_ID_HERE"
+infisical_environment = "stage"
+
+# Database Configuration (optional - if not provided, uses internal PostgreSQL container)
+# postgres_url = "postgresql://user:password@host:5432/database"
+

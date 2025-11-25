@@ -1,0 +1,52 @@
+node_modules
+
+# ElizaOS Database (all directories)
+.eliza/.elizadb/
+**/.eliza/.elizadb/
+**/.eliza/data/
+data/
+
+# Environment files (ONLY .env.example allowed in git!)
+.env
+.env.local
+.env.dev
+.env.*.local
+.env.ollama
+*.env.bak*
+.infisical.env
+.infisical.env.bak*
+**/.env
+**/.env.dev
+**/.env.local
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OpenTofu / Terraform
+terraform.tfvars
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

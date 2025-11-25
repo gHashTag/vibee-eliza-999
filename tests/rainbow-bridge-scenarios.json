@@ -1,0 +1,134 @@
+{
+  "scenarios": [
+    {
+      "name": "instagram_post_publication",
+      "description": "Публикация поста в Instagram",
+      "critical": true,
+      "steps": [
+        {
+          "action": "send_message",
+          "command": "Опубликуй пост в Instagram с изображением https://picsum.photos/800/600 и подписью Тестовый пост от VIBEE 🤖"
+        },
+        {
+          "action": "wait_response",
+          "expected_text_contains": "Instagram",
+          "timeout": 30
+        },
+        {
+          "action": "check_logs",
+          "expected_contains": "Пост опубликован в Instagram",
+          "timeout": 15
+        },
+        {
+          "action": "verify_action",
+          "action_name": "INSTAGRAM_POST",
+          "expected_success": true
+        }
+      ]
+    },
+    {
+      "name": "instagram_account_info",
+      "description": "Получение информации об Instagram аккаунте",
+      "critical": false,
+      "steps": [
+        {
+          "action": "send_message",
+          "command": "Покажи информацию об Instagram аккаунте"
+        },
+        {
+          "action": "wait_response",
+          "expected_text_contains": "аккаунт",
+          "timeout": 15
+        }
+      ]
+    },
+    {
+      "name": "neurophoto_face_train",
+      "description": "Создание новой модели через /face train",
+      "critical": true,
+      "steps": [
+        {
+          "action": "send_message",
+          "command": "/face train ТестМодель"
+        },
+        {
+          "action": "wait_response",
+          "expected_text_contains": "Создаю модель",
+          "timeout": 15
+        },
+        {
+          "action": "verify_action",
+          "action_name": "FACE_TRAIN",
+          "expected_success": true
+        },
+        {
+          "action": "check_logs",
+          "expected_contains": "model_name",
+          "timeout": 10
+        }
+      ]
+    },
+    {
+      "name": "neurophoto_no_models_error",
+      "description": "Ошибка при генерации без обученных моделей",
+      "critical": true,
+      "steps": [
+        {
+          "action": "send_message",
+          "command": "/neurophoto красивый закат"
+        },
+        {
+          "action": "wait_response",
+          "expected_text_contains": "нет обученных моделей",
+          "timeout": 15
+        },
+        {
+          "action": "wait_response",
+          "expected_text_contains": "/face train",
+          "timeout": 15
+        }
+      ]
+    },
+    {
+      "name": "neurophoto_models_list",
+      "description": "Просмотр списка моделей через /models",
+      "critical": false,
+      "steps": [
+        {
+          "action": "send_message",
+          "command": "/models"
+        },
+        {
+          "action": "wait_response",
+          "expected_text_contains": "модели",
+          "timeout": 15
+        }
+      ]
+    },
+    {
+      "name": "neurophoto_alternative_commands",
+      "description": "Тест альтернативных команд генерации",
+      "critical": false,
+      "steps": [
+        {
+          "action": "send_message",
+          "command": "нарисуй футуристический город"
+        },
+        {
+          "action": "wait_response",
+          "expected_text_contains": "моделей",
+          "timeout": 15
+        },
+        {
+          "action": "send_message",
+          "command": "создай изображение кота в космосе"
+        },
+        {
+          "action": "wait_response",
+          "expected_text_contains": "моделей",
+          "timeout": 15
+        }
+      ]
+    }
+  ]
+}

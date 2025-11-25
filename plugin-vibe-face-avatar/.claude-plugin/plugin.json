@@ -1,0 +1,37 @@
+{
+  "name": "plugin-vibe-face-avatar",
+  "version": "0.1.0",
+  "description": "Digital Avatar Body & NeuroPhoto - Плагин для обучения LoRA моделей и генерации изображений через Telegram. Включает /face add, /face train, /neurophoto команды с полной интеграцией Fal.ai и Replicate.",
+  "author": {
+    "name": "Vibee Team",
+    "email": "team@vibee.dev"
+  },
+  "keywords": [
+    "elizaos",
+    "plugin",
+    "telegram",
+    "lora",
+    "image-generation",
+    "fal-ai",
+    "replicate",
+    "neural-networks",
+    "avatar",
+    "neurophoto",
+    "face-recognition",
+    "ai-art"
+  ],
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/playra/vibee-agent"
+  },
+  "bugs": {
+    "url": "https://github.com/playra/vibee-agent/issues"
+  },
+  "homepage": "https://vibee.dev",
+  "elizaos": {
+    "pluginType": "elizaos:plugin:1.0.0",
+    "platform": "node",
+    "type": "module"
+  }
+}

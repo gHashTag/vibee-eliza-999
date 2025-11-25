@@ -1,0 +1,493 @@
+bun test v1.3.2 (b131639c)
+
+__tests__/index.test.ts:
+✅ Все тесты Instagram плагина загружены
+10 |   it('должно извлекать URL изображения из текста', () => {
+11 |     const text = 'Опубликуй пост в Instagram с изображением https://example.com/image.jpg и подписью красивый закат';
+12 |     const result = parseInstagramPost(text);
+13 | 
+14 |     expect(result.imageUrl).toBe('https://example.com/image.jpg');
+15 |     expect(result.caption).toBe('красивый закат');
+                                ^
+error: expect(received).toBe(expected)
+
+Expected: "красивый закат"
+Received: "Опубликуй пост в Instagram с изображением и подписью красивый закат"
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/unit/parseInstagramPost.test.ts:15:28)
+(fail) parseInstagramPost - Парсинг сообщений Instagram > должно извлекать URL изображения из текста [0.43ms]
+34 | 
+35 |   it('должно извлекать хэштеги из текста', () => {
+36 |     const text = 'Пост с #тегом и #другим #хэштегом';
+37 |     const result = parseInstagramPost(text);
+38 | 
+39 |     expect(result.hashtags).toContain('тег');
+                                 ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "тег"
+Received: []
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/unit/parseInstagramPost.test.ts:39:29)
+(fail) parseInstagramPost - Парсинг сообщений Instagram > должно извлекать хэштеги из текста [0.19ms]
+51 |   it('должно правильно парсить команду "опубликуй"', () => {
+52 |     const text = 'Опубликуй пост в Instagram с изображением https://example.com/image.jpg и подписью тестовая подпись';
+53 |     const result = parseInstagramPost(text);
+54 | 
+55 |     expect(result.imageUrl).toBe('https://example.com/image.jpg');
+56 |     expect(result.caption).toBe('тестовая подпись');
+                                ^
+error: expect(received).toBe(expected)
+
+Expected: "тестовая подпись"
+Received: "Опубликуй пост в Instagram с изображением и подписью тестовая подпись"
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/unit/parseInstagramPost.test.ts:56:28)
+(fail) parseInstagramPost - Парсинг сообщений Instagram > должно правильно парсить команду "опубликуй" [0.06ms]
+61 |   it('должно работать с командой "/instagram"', () => {
+62 |     const text = '/instagram пост с картинкой https://example.com/image.jpg и текстом привет мир';
+63 |     const result = parseInstagramPost(text);
+64 | 
+65 |     expect(result.imageUrl).toBe('https://example.com/image.jpg');
+66 |     expect(result.caption).toBe('привет мир');
+                                ^
+error: expect(received).toBe(expected)
+
+Expected: "привет мир"
+Received: "/instagram пост с картинкой и текстом привет мир"
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/unit/parseInstagramPost.test.ts:66:28)
+(fail) parseInstagramPost - Парсинг сообщений Instagram > должно работать с командой "/instagram" [0.06ms]
+78 |   });
+79 | 
+80 |   it('должно бросать ошибку если нет изображения', () => {
+81 |     const text = 'Опубликуй пост в Instagram';
+82 | 
+83 |     expect(() => parseInstagramPost(text)).toThrow('Прикрепите изображение как файл или укажите URL изображения в тексте сообщения');
+                                                ^
+error: expect(received).toThrow(expected)
+
+Expected substring: "Прикрепите изображение как файл или укажите URL изображения в тексте сообщения"
+
+Received function did not throw
+Received value: {
+  caption: "Опубликуй пост в Instagram",
+  imageUrl: "",
+  mediaType: "IMAGE",
+  hashtags: [],
+}
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/unit/parseInstagramPost.test.ts:83:44)
+(fail) parseInstagramPost - Парсинг сообщений Instagram > должно бросать ошибку если нет изображения [0.08ms]
+114 |   it('должно обрабатывать длинные подписи', () => {
+115 |     const longCaption = 'Это очень длинная подпись для поста в Instagram'.repeat(10);
+116 |     const text = `Опубликуй пост https://example.com/image.jpg и подписью ${longCaption}`;
+117 |     const result = parseInstagramPost(text);
+118 | 
+119 |     expect(result.caption).toBe(longCaption);
+                                 ^
+error: expect(received).toBe(expected)
+
+Expected: "Это очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в Instagram"
+Received: "Опубликуй пост и подписью Это очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в InstagramЭто очень длинная подпись для поста в Instagram"
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/unit/parseInstagramPost.test.ts:119:28)
+(fail) parseInstagramPost - Парсинг сообщений Instagram > должно обрабатывать длинные подписи [0.16ms]
+122 | 
+123 |   it('должно очищать подпись от лишних пробелов', () => {
+124 |     const text = '  Опубликуй    пост   с подписью   тест   ';
+125 |     const result = parseInstagramPost(text, [createImageAttachment('https://example.com/img.jpg')]);
+126 | 
+127 |     expect(result.caption).toBe('тест');
+                                 ^
+error: expect(received).toBe(expected)
+
+Expected: "тест"
+Received: "Опубликуй пост с подписью тест"
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/unit/parseInstagramPost.test.ts:127:28)
+(fail) parseInstagramPost - Парсинг сообщений Instagram > должно очищать подпись от лишних пробелов [0.12ms]
+23 |         json: async () => ({ data: { id: '17841401201538156' } }),
+24 |       };
+25 | 
+26 |       mockFetch.mockResolvedValue(mockResponse as any);
+27 | 
+28 |       const result = await service.validateToken('valid_token');
+                                        ^
+TypeError: service.validateToken is not a function. (In 'service.validateToken("valid_token")', 'service.validateToken' is undefined)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:28:36)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:20:55)
+(fail) InstagramAPIService - Интеграционные тесты > validateToken > должно успешно валидировать корректный токен [0.23ms]
+41 |         json: async () => ({ error: { message: 'Invalid token' } }),
+42 |       };
+43 | 
+44 |       mockFetch.mockResolvedValue(mockResponse as any);
+45 | 
+46 |       const result = await service.validateToken('invalid_token');
+                                        ^
+TypeError: service.validateToken is not a function. (In 'service.validateToken("invalid_token")', 'service.validateToken' is undefined)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:46:36)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:37:57)
+(fail) InstagramAPIService - Интеграционные тесты > validateToken > должно возвращать false для невалидного токена [0.08ms]
+49 |     });
+50 | 
+51 |     it('должно обрабатывать сетевые ошибки', async () => {
+52 |       mockFetch.mockRejectedValue(new Error('Network error'));
+53 | 
+54 |       const result = await service.validateToken('test_token');
+                                        ^
+TypeError: service.validateToken is not a function. (In 'service.validateToken("test_token")', 'service.validateToken' is undefined)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:54:36)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:51:45)
+(fail) InstagramAPIService - Интеграционные тесты > validateToken > должно обрабатывать сетевые ошибки [0.07ms]
+❌ Ошибка публикации в Instagram: 47 |    * Публикация поста в Instagram
+48 |    */
+49 |   async publishPost(post: InstagramPost): Promise<any> {
+50 |     try {
+51 |         if (!this.accessToken || !this.instagramAccountId) {
+52 |           throw new Error('Instagram API токены не настроены');
+                     ^
+error: Instagram API токены не настроены
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:52:17)
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:49:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:75:36)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:61:60)
+
+47 |    * Публикация поста в Instagram
+48 |    */
+49 |   async publishPost(post: InstagramPost): Promise<any> {
+50 |     try {
+51 |         if (!this.accessToken || !this.instagramAccountId) {
+52 |           throw new Error('Instagram API токены не настроены');
+                     ^
+error: Instagram API токены не настроены
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:52:17)
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:49:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:75:36)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:61:60)
+(fail) InstagramAPIService - Интеграционные тесты > publishPost > должно успешно публиковать пост с URL изображения [0.43ms]
+❌ Ошибка публикации в Instagram: 47 |    * Публикация поста в Instagram
+48 |    */
+49 |   async publishPost(post: InstagramPost): Promise<any> {
+50 |     try {
+51 |         if (!this.accessToken || !this.instagramAccountId) {
+52 |           throw new Error('Instagram API токены не настроены');
+                     ^
+error: Instagram API токены не настроены
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:52:17)
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:49:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:100:28)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:87:41)
+
+ 95 |         ok: false,
+ 96 |         status: 400,
+ 97 |         json: async () => ({ error: { message: 'Invalid image URL' } }),
+ 98 |       });
+ 99 | 
+100 |       await expect(service.publishPost(postData)).rejects.toThrow('Invalid image URL');
+                                                                ^
+error: expect(received).toThrow(expected)
+
+Expected substring: "Invalid image URL"
+Received message: "Instagram API токены не настроены"
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:100:59)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:87:41)
+(fail) InstagramAPIService - Интеграционные тесты > publishPost > должно обрабатывать ошибки API [0.11ms]
+❌ Ошибка публикации в Instagram: 47 |    * Публикация поста в Instagram
+48 |    */
+49 |   async publishPost(post: InstagramPost): Promise<any> {
+50 |     try {
+51 |         if (!this.accessToken || !this.instagramAccountId) {
+52 |           throw new Error('Instagram API токены не настроены');
+                     ^
+error: Instagram API токены не настроены
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:52:17)
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:49:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:117:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:103:45)
+
+47 |    * Публикация поста в Instagram
+48 |    */
+49 |   async publishPost(post: InstagramPost): Promise<any> {
+50 |     try {
+51 |         if (!this.accessToken || !this.instagramAccountId) {
+52 |           throw new Error('Instagram API токены не настроены');
+                     ^
+error: Instagram API токены не настроены
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:52:17)
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:49:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:117:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:103:45)
+(fail) InstagramAPIService - Интеграционные тесты > publishPost > должно добавлять хэштеги к подписи [0.09ms]
+❌ Ошибка публикации в Instagram: 47 |    * Публикация поста в Instagram
+48 |    */
+49 |   async publishPost(post: InstagramPost): Promise<any> {
+50 |     try {
+51 |         if (!this.accessToken || !this.instagramAccountId) {
+52 |           throw new Error('Instagram API токены не настроены');
+                     ^
+error: Instagram API токены не настроены
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:52:17)
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:49:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:133:28)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:126:48)
+
+❌ Ошибка получения метрик: 143 |    * Получение метрик поста
+144 |    */
+145 |   async getMetrics(metrics: InstagramMetrics): Promise<any> {
+146 |     try {
+147 |       if (!this.accessToken) {
+148 |         throw new Error('Instagram API токен не настроен');
+                    ^
+error: Instagram API токен не настроен
+      at getMetrics (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:148:15)
+      at getMetrics (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:145:20)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:153:36)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:138:40)
+
+143 |    * Получение метрик поста
+144 |    */
+145 |   async getMetrics(metrics: InstagramMetrics): Promise<any> {
+146 |     try {
+147 |       if (!this.accessToken) {
+148 |         throw new Error('Instagram API токен не настроен');
+                    ^
+error: Instagram API токен не настроен
+      at getMetrics (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:148:15)
+      at getMetrics (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:145:20)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:153:36)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:138:40)
+(fail) InstagramAPIService - Интеграционные тесты > getMetrics > должно получать метрики поста [0.26ms]
+❌ Ошибка получения метрик: 143 |    * Получение метрик поста
+144 |    */
+145 |   async getMetrics(metrics: InstagramMetrics): Promise<any> {
+146 |     try {
+147 |       if (!this.accessToken) {
+148 |         throw new Error('Instagram API токен не настроен');
+                    ^
+error: Instagram API токен не настроен
+      at getMetrics (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:148:15)
+      at getMetrics (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:145:20)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:167:28)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:160:58)
+
+162 |         ok: false,
+163 |         status: 404,
+164 |         json: async () => ({ error: { message: 'Post not found' } }),
+165 |       });
+166 | 
+167 |       await expect(service.getMetrics('invalid_post_id')).rejects.toThrow('Post not found');
+                                                                        ^
+error: expect(received).toThrow(expected)
+
+Expected substring: "Post not found"
+Received message: "Instagram API токен не настроен"
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:167:67)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:160:58)
+(fail) InstagramAPIService - Интеграционные тесты > getMetrics > должно обрабатывать ошибки при получении метрик [0.09ms]
+❌ Ошибка публикации истории: 108 |    * Публикация истории
+109 |    */
+110 |   async publishStory(story: InstagramStory): Promise<any> {
+111 |     try {
+112 |       if (!this.accessToken || !this.instagramAccountId) {
+113 |         throw new Error('Instagram API токены не настроены');
+                    ^
+error: Instagram API токены не настроены
+      at publishStory (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:113:15)
+      at publishStory (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:110:22)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:184:36)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:172:37)
+
+108 |    * Публикация истории
+109 |    */
+110 |   async publishStory(story: InstagramStory): Promise<any> {
+111 |     try {
+112 |       if (!this.accessToken || !this.instagramAccountId) {
+113 |         throw new Error('Instagram API токены не настроены');
+                    ^
+error: Instagram API токены не настроены
+      at publishStory (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:113:15)
+      at publishStory (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:110:22)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:184:36)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:172:37)
+(fail) InstagramAPIService - Интеграционные тесты > publishStory > должно публиковать истории [0.20ms]
+❌ Ошибка публикации истории: 108 |    * Публикация истории
+109 |    */
+110 |   async publishStory(story: InstagramStory): Promise<any> {
+111 |     try {
+112 |       if (!this.accessToken || !this.instagramAccountId) {
+113 |         throw new Error('Instagram API токены не настроены');
+                    ^
+error: Instagram API токены не настроены
+      at publishStory (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:113:15)
+      at publishStory (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:110:22)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:195:28)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:190:51)
+
+218 |         ok: false,
+219 |         status: 401,
+220 |         json: async () => ({ error: { message: 'Missing access token' } }),
+221 |       });
+222 | 
+223 |       const result = await service.validateToken('');
+                                         ^
+TypeError: service.validateToken is not a function. (In 'service.validateToken("")', 'service.validateToken' is undefined)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:223:36)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:210:59)
+(fail) InstagramAPIService - Интеграционные тесты > Обработка токенов > должно корректно обрабатывать отсутствие токенов [0.04ms]
+❌ Ошибка публикации в Instagram: 47 |    * Публикация поста в Instagram
+48 |    */
+49 |   async publishPost(post: InstagramPost): Promise<any> {
+50 |     try {
+51 |         if (!this.accessToken || !this.instagramAccountId) {
+52 |           throw new Error('Instagram API токены не настроены');
+                     ^
+error: Instagram API токены не настроены
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:52:17)
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:49:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:245:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:230:43)
+
+47 |    * Публикация поста в Instagram
+48 |    */
+49 |   async publishPost(post: InstagramPost): Promise<any> {
+50 |     try {
+51 |         if (!this.accessToken || !this.instagramAccountId) {
+52 |           throw new Error('Instagram API токены не настроены');
+                     ^
+error: Instagram API токены не настроены
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:52:17)
+      at publishPost (/Users/playra/vibee-agent/src/instagram-plugin/services/instagramService.ts:49:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:245:21)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/integration/instagramService.test.ts:230:43)
+(fail) InstagramAPIService - Интеграционные тесты > Rate Limiting > должно соблюдать ограничения API [0.12ms]
+❌ Ошибка INSTAGRAM_POST: 29 |       const postData = parseInstagramPost(message.content.text, message.content.attachments);
+30 | 
+31 |       // Валидируем данные
+32 |       const validation = InstagramPostSchema.safeParse(postData);
+33 |       if (!validation.success) {
+34 |         throw new Error(`Ошибка валидации: ${validation.error.message}`);
+                   ^
+error: Ошибка валидации: [
+  {
+    "code": "invalid_format",
+    "format": "url",
+    "path": [
+      "imageUrl"
+    ],
+    "message": "Invalid URL"
+  }
+]
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/actions/instagramPostAction.ts:34:15)
+      at handler (/Users/playra/vibee-agent/src/instagram-plugin/actions/instagramPostAction.ts:20:19)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts:145:48)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts:139:50)
+
+153 |         }
+154 |       );
+155 | 
+156 |       expect(callbackCalled).toBe(true);
+157 |       expect(errorMessage).toContain('❌ Не удалось опубликовать пост');
+158 |       expect(errorMessage).toContain('Прикрепите изображение');
+                                 ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "Прикрепите изображение"
+Received: "❌ Не удалось опубликовать пост в Instagram.\n\nОшибка: Ошибка валидации: [\n  {\n    \"code\": \"invalid_format\",\n    \"format\": \"url\",\n    \"path\": [\n      \"imageUrl\"\n    ],\n    \"message\": \"Invalid URL\"\n  }\n]\n\nПроверьте:\n- Токены Instagram API в Infisical\n- Правильность URL изображения\n- Наличие разрешений для публикации"
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts:158:28)
+(fail) Instagram Plugin - E2E Тесты > Полный поток публикации поста > должно отклонять запрос без изображения [0.65ms]
+177 |           callbackMessage = response.text || '';
+178 |         }
+179 |       );
+180 | 
+181 |       expect(callbackCalled).toBe(true);
+182 |       expect(callbackMessage).toContain('Пост от VIBEE');
+                                    ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "Пост от VIBEE"
+Received: "✅ Пост опубликован в Instagram!\n\n📝 Подпись: Опубликуй\n🖼️ Изображение: https://picsum.photos/500/500\n\n🔗 Ссылка: https://instagram.com"
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts:182:31)
+(fail) Instagram Plugin - E2E Тесты > Полный поток публикации поста > должно использовать default caption если подпись не указана [0.06ms]
+212 |     it('должно активироваться на слово "опубликовать"', async () => {
+213 |       const message = createTelegramMessage('Опубликуй это');
+214 | 
+215 |       const isValid = await instagramPostAction.validate(runtime, message);
+216 | 
+217 |       expect(isValid).toBe(true);
+                            ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts:217:23)
+(fail) Instagram Plugin - E2E Тесты > Валидация действий > должно активироваться на слово "опубликовать"
+❌ Ошибка INSTAGRAM_POST: 29 |       const postData = parseInstagramPost(message.content.text, message.content.attachments);
+30 | 
+31 |       // Валидируем данные
+32 |       const validation = InstagramPostSchema.safeParse(postData);
+33 |       if (!validation.success) {
+34 |         throw new Error(`Ошибка валидации: ${validation.error.message}`);
+                   ^
+error: Ошибка валидации: [
+  {
+    "code": "invalid_format",
+    "format": "url",
+    "path": [
+      "imageUrl"
+    ],
+    "message": "Invalid URL"
+  }
+]
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/actions/instagramPostAction.ts:34:15)
+      at handler (/Users/playra/vibee-agent/src/instagram-plugin/actions/instagramPostAction.ts:20:19)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts:235:48)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts:230:68)
+
+248 | 
+249 |     it('должно логировать ошибки в runtime', async () => {
+250 |       const message = createTelegramMessage('Опубликуй без изображения');
+251 | 
+252 |       const mockLogger = {
+253 |         info: jest.fn(),
+                    ^
+ReferenceError: jest is not defined
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts:253:15)
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts:249:45)
+(fail) Instagram Plugin - E2E Тесты > Обработка ошибок > должно логировать ошибки в runtime [0.05ms]
+335 |         {},
+336 |         async () => {}
+337 |       );
+338 | 
+339 |       // Проверяем, что память была добавлена
+340 |       expect(runtime.addMemory).toHaveBeenCalled();
+                                      ^
+error: expect(received).toHaveBeenCalled()
+
+Expected number of calls: >= 1
+Received number of calls: 0
+
+      at <anonymous> (/Users/playra/vibee-agent/src/instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts:340:33)
+(fail) Instagram Plugin - E2E Тесты > Интеграция с базой данных > должно сохранять результат операции в память [0.26ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |   64.40 |   75.87 |
+ __tests__/e2e/instagramPlugin.e2e.ts |   98.44 |   99.63 | 
+ __tests__/mocks/runtime.ts           |   66.67 |   92.50 | 22-24
+ __tests__/test-utils.ts              |   50.00 |   53.57 | 32-37,44-50
+ actions/instagramPostAction.ts       |   85.71 |   97.50 | 25,139
+ index.ts                             |    0.00 |   38.71 | 15-33
+ services/instagramService.ts         |   50.00 |   49.20 | 16-42,163-230
+ types/index.ts                       |  100.00 |  100.00 | 
+--------------------------------------|---------|---------|-------------------
+
+ 22 pass
+ 23 fail
+ 61 expect() calls
+Ran 45 tests across 3 files. [104.00ms]

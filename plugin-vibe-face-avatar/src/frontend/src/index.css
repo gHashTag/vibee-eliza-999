@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-quantum-black text-white overflow-x-hidden;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-quantum-gray/30 backdrop-blur-md border border-quantum-yellow/20 rounded-xl;
+  }
+  
+  .neon-text {
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+  
+  .neon-border {
+    box-shadow: 0 0 15px -5px rgba(255, 215, 0, 0.3);
+  }
+}

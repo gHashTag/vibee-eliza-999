@@ -5,6 +5,7 @@ import {
   getSalt,
   encryptObjectValues,
   encryptStringValue,
+  decryptStringValue,
 } from '@elizaos/core';
 import express from 'express';
 import type { AgentServer } from '../../index';
@@ -215,6 +216,66 @@ export function createAgentCrudRouter(
 
       if (Object.keys(updates).length > 0) {
         await db.updateAgent(agentId, updates);
+      }
+
+      // Also save settings to world metadata for bootstrap plugin compatibility
+      if (updates.settings && Object.keys(updates.settings).length > 0) {
+        try {
+          // Get the world for this agent (agent creates its own world with agentId as worldId)
+          const world = await db.getWorld(agentId);
+          if (world) {
+            // Initialize metadata if it doesn't exist
+            if (!world.metadata) {
+              world.metadata = {};
+            }
+
+            // Initialize settings in metadata if it doesn't exist
+            if (!world.metadata.settings) {
+              world.metadata.settings = {};
+            }
+
+            // Update settings in world metadata
+            // First decrypt any encrypted secrets for storage in world metadata
+            const settingsToSave = { ...updates.settings };
+            if (settingsToSave.secrets && typeof settingsToSave.secrets === 'object') {
+              // Decrypt secrets for storage in world metadata
+              const decryptedSecrets: Record<string, any> = {};
+              const salt = getSalt();
+              for (const [key, value] of Object.entries(settingsToSave.secrets)) {
+                if (value === null) {
+                  decryptedSecrets[key] = null;
+                } else if (typeof value === 'string') {
+                  // Decrypt the encrypted secret for world metadata
+                  try {
+                    decryptedSecrets[key] = decryptStringValue(value, salt);
+                  } catch (e) {
+                    // If decryption fails, try to use the value as-is
+                    decryptedSecrets[key] = value;
+                  }
+                } else {
+                  decryptedSecrets[key] = value;
+                }
+              }
+              settingsToSave.secrets = decryptedSecrets;
+            }
+
+            // Merge settings into world metadata
+            world.metadata.settings = {
+              ...(world.metadata.settings as Record<string, any>),
+              ...settingsToSave,
+            };
+
+            // Save updated world
+            await db.updateWorld(world);
+            logger.debug(`[AGENT UPDATE] Saved settings to world metadata for agent ${agentId}`);
+          }
+        } catch (worldError) {
+          logger.warn(
+            `[AGENT UPDATE] Failed to save settings to world metadata for agent ${agentId}:`,
+            worldError instanceof Error ? worldError.message : String(worldError)
+          );
+          // Don't fail the entire update if world metadata update fails
+        }
       }
 
       const updatedAgent = await db.getAgent(agentId);

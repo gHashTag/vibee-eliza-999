@@ -11,7 +11,7 @@ import { join } from 'node:path';
 const run = createBuildRunner({
   packageName: '@elizaos/server',
   buildOptions: {
-    entrypoints: ['src/index.ts'],
+    entrypoints: ['src/index.ts', 'src/entrypoint.ts'],
     outdir: 'dist',
     target: 'node',
     format: 'esm',

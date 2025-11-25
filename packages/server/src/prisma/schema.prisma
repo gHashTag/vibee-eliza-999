@@ -1,0 +1,63 @@
+// Prisma schema для пользователей и сессий VIBEE
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+model users {
+  id              String   @id @default(cuid())
+  telegram_id     BigInt   @unique
+  username        String?
+  first_name      String?
+  last_name       String?
+  photo_url       String?
+  is_premium      Boolean  @default(false)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updated_at
+  last_login_at   DateTime @default(now())
+  settings        Json     @default("{}")
+  usage_stats     Json     @default("{}")
+
+  sessions        user_sessions[]
+  secret_logs     secret_access_logs[]
+
+  @@index([telegram_id])
+  @@index([created_at])
+}
+
+model user_sessions {
+  id          String   @id @default(cuid())
+  user_id     String
+  jwt_token   String   @unique
+  expires_at  DateTime
+  created_at  DateTime @default(now())
+  last_used_at DateTime @default(now())
+  ip_address  String?
+  user_agent  String?
+  device_type String?
+
+  user        users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([jwt_token])
+  @@index([expires_at])
+}
+
+model secret_access_logs {
+  id          String   @id @default(cuid())
+  user_id     String
+  secret_path String
+  action      String   // read, write, delete
+  ip_address  String?
+  user_agent  String?
+  created_at  DateTime @default(now())
+
+  user        users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([created_at])
+}

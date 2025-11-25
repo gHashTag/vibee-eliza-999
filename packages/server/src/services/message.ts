@@ -479,16 +479,20 @@ export class MessageBusService extends Service {
 
       // Get ElizaOS instance
       const elizaOS = getGlobalElizaOS();
+      logger.info(`[${this.runtime.character.name}] MessageBusService: Got ElizaOS instance`);
 
       // Prepare world and room IDs
       const { agentWorldId, agentRoomId } = await this.ensureWorldAndRoomExist(message);
+      logger.info(`[${this.runtime.character.name}] MessageBusService: Ensured world and room exist`);
       const agentAuthorEntityId = await this.ensureAuthorEntityExists(message);
+      logger.info(`[${this.runtime.character.name}] MessageBusService: Ensured author entity exists`);
 
       // Generate deterministic memory ID
       const uniqueMemoryId = createUniqueUuid(
         this.runtime,
         `${message.id}-${this.runtime.agentId}`
       );
+      logger.info(`[${this.runtime.character.name}] MessageBusService: Generated unique memory ID: ${uniqueMemoryId}`);
 
       // Check if this memory already exists (in case of duplicate processing)
       const existingMemory = await this.runtime.getMemoryById(uniqueMemoryId);
@@ -498,6 +502,7 @@ export class MessageBusService extends Service {
         );
         return;
       }
+      logger.info(`[${this.runtime.character.name}] MessageBusService: Memory does not exist, proceeding`);
 
       // Prepare message content
       const messageContent: Content = {
@@ -513,57 +518,71 @@ export class MessageBusService extends Service {
           ? createUniqueUuid(this.runtime, message.in_reply_to_message_id)
           : undefined,
       };
+      logger.info(`[${this.runtime.character.name}] MessageBusService: Prepared message content`);
 
-      // Use elizaOS.sendMessage() with async callback
-      await elizaOS.sendMessage(
-        this.runtime.agentId,
-        {
-          id: uniqueMemoryId,
-          entityId: agentAuthorEntityId,
-          roomId: agentRoomId,
-          worldId: agentWorldId,
-          content: messageContent,
-          createdAt: message.created_at,
-          metadata: {
-            ...(message.metadata || {}),
-            type: 'message',
-            source: message.source_type || 'central-bus',
-            sourceId: message.id,
-            raw: {
-              ...(typeof message.raw_message === 'object' && message.raw_message !== null
-                ? message.raw_message
-                : {}),
-              senderName:
-                message.author_display_name || `User-${message.author_id.substring(0, 8)}`,
-              senderId: message.author_id,
+      logger.info(
+        `[${this.runtime.character.name}] MessageBusService: Calling elizaOS.sendMessage() with roomId=${agentRoomId}, entityId=${agentAuthorEntityId}`
+      );
+
+      try {
+        // Use elizaOS.sendMessage() with async callback
+        await elizaOS.sendMessage(
+          this.runtime.agentId,
+          {
+            id: uniqueMemoryId,
+            entityId: agentAuthorEntityId,
+            roomId: agentRoomId,
+            worldId: agentWorldId,
+            content: messageContent,
+            createdAt: message.created_at,
+            metadata: {
+              ...(message.metadata || {}),
+              type: 'message',
+              source: message.source_type || 'central-bus',
+              sourceId: message.id,
+              raw: {
+                ...(typeof message.raw_message === 'object' && message.raw_message !== null
+                  ? message.raw_message
+                  : {}),
+                senderName:
+                  message.author_display_name || `User-${message.author_id.substring(0, 8)}`,
+                senderId: message.author_id,
+              },
             },
           },
-        },
-        {
-          onResponse: async (responseContent: Content) => {
-            logger.info(
-              `[${this.runtime.character.name}] Agent generated response for message. Preparing to send back to bus.`
-            );
+          {
+            onResponse: async (responseContent: Content) => {
+              logger.info(
+                `[${this.runtime.character.name}] MessageBusService: Agent generated response for message. Preparing to send back to bus.`
+              );
 
-            await this.runtime.createMemory(
-              {
-                entityId: this.runtime.agentId,
-                content: responseContent,
-                roomId: agentRoomId,
-                worldId: agentWorldId,
-                agentId: this.runtime.agentId,
-              },
-              'messages'
-            );
+              await this.runtime.createMemory(
+                {
+                  entityId: this.runtime.agentId,
+                  content: responseContent,
+                  roomId: agentRoomId,
+                  worldId: agentWorldId,
+                  agentId: this.runtime.agentId,
+                },
+                'messages'
+              );
 
-            // Send response to central bus
-            await this.sendAgentResponseToBus(
-              agentRoomId,
-              agentWorldId,
-              responseContent,
-              uniqueMemoryId,
-              message
-            );
+              logger.info(
+                `[${this.runtime.character.name}] MessageBusService: Created memory for agent response, sending to bus`
+              );
+
+              // Send response to central bus
+              await this.sendAgentResponseToBus(
+                agentRoomId,
+                agentWorldId,
+                responseContent,
+                uniqueMemoryId,
+                message
+              );
+
+              logger.info(
+                `[${this.runtime.character.name}] MessageBusService: Successfully sent agent response to bus`
+              );
           },
           onError: async (error: Error) => {
             logger.error(
@@ -574,15 +593,35 @@ export class MessageBusService extends Service {
         }
       );
 
-      // Notify completion after handling
+      logger.info(
+        `[${this.runtime.character.name}] MessageBusService: elizaOS.sendMessage() completed successfully`
+      );
+    } catch (error) {
+      logger.error(
+        `[${this.runtime.character.name}] MessageBusService: Error processing message via elizaOS.sendMessage():`
+      );
+      logger.error(error instanceof Error ? error.message : String(error));
+    }
+
+    // Notify completion after handling (outside the try-catch for sendMessage)
+    try {
       const room = await this.runtime.getRoom(agentRoomId);
       const world = await this.runtime.getWorld(agentWorldId);
       const channelId = room?.channelId as UUID;
       const serverId = world?.serverId as UUID;
       await this.notifyMessageComplete(channelId, serverId);
+      logger.info(
+        `[${this.runtime.character.name}] MessageBusService: Notified message completion`
+      );
+    } catch (completionError) {
+      logger.error(
+        `[${this.runtime.character.name}] MessageBusService: Error notifying completion:`,
+        completionError instanceof Error ? completionError.message : String(completionError)
+      );
+    }
     } catch (error) {
       logger.error(
-        `[${this.runtime.character.name}] MessageBusService: Error processing incoming message:`,
+        `[${this.runtime.character.name}] MessageBusService: Error in main message processing loop:`,
         error instanceof Error ? error.message : String(error)
       );
     }

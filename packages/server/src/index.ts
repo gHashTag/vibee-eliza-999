@@ -590,6 +590,9 @@ export class AgentServer {
       // Initialize middleware and database
       this.app = express();
 
+      // Trust proxy for proper rate limiting behind load balancers
+      this.app.set('trust proxy', true);
+
       // Security headers first - before any other middleware
       const isProd = process.env.NODE_ENV === 'production';
       logger.debug('Setting up security headers...');
@@ -1364,18 +1367,32 @@ export class AgentServer {
    * @throws {Error} If there is an error during initialization or startup.
    */
   public async start(config?: ServerConfig): Promise<void> {
+    logger.info('[START] Entering AgentServer.start()...');
+    logger.info(`[START] isInitialized: ${this.isInitialized}`);
+
     // Step 1: Auto-initialize if not already done
     if (!this.isInitialized) {
+      logger.info('[START] Initializing AgentServer...');
       await this.initialize(config);
+      logger.info('[START] AgentServer initialized successfully');
+    } else {
+      logger.info('[START] AgentServer already initialized, skipping');
     }
 
     // Step 2: Start HTTP server (skip in test mode)
     let boundPort: number | undefined;
     if (!config?.isTestMode) {
+      logger.info(`[START] Resolving port... (config: ${config?.port || 'undefined'})`);
       boundPort = await this.resolveAndFindPort(config?.port);
+      logger.info(`[START] Resolved port: ${boundPort}`);
+      logger.info(`[START] Server instance exists: ${!!this.server}`);
+
       try {
+        logger.info(`[START] Calling startHttpServer(${boundPort})...`);
         await this.startHttpServer(boundPort);
+        logger.info(`[START] startHttpServer completed successfully`);
       } catch (error: any) {
+        logger.error({ error }, '[START] Error in startHttpServer:');
         // If binding fails due to EADDRINUSE, attempt fallback to next available port
         if (error && error.code === 'EADDRINUSE') {
           const startFrom = (boundPort ?? 3000) + 1;
@@ -1391,7 +1408,10 @@ export class AgentServer {
       // Ensure dependent services discover the final port
       if (boundPort) {
         process.env.SERVER_PORT = String(boundPort);
+        logger.info(`[START] Set SERVER_PORT=${boundPort}`);
       }
+    } else {
+      logger.info('[START] Test mode, skipping HTTP server start');
     }
 
     // Step 3: Start agents if provided
@@ -1399,6 +1419,8 @@ export class AgentServer {
       await this.startAgents(config.agents, { isTestMode: config.isTestMode });
       logger.info(`Started ${config.agents.length} agents`);
     }
+
+    logger.info('[START] AgentServer.start() completed successfully');
   }
 
   /**
@@ -1493,18 +1515,32 @@ export class AgentServer {
    * Starts the HTTP server on the specified port.
    */
   private startHttpServer(port: number): Promise<void> {
+    logger.info('[HTTPSERVER] Entering startHttpServer()...');
+    logger.info(`[HTTPSERVER] Port: ${port}`);
+
     return new Promise((resolve, reject) => {
       try {
-        logger.debug(`Starting server on port ${port}...`);
-        logger.debug(`Current agents count: ${this.elizaOS?.getAgents().length || 0}`);
-        logger.debug(`Environment: ${process.env.NODE_ENV}`);
+        logger.info(`[HTTPSERVER] Creating HTTP server...`);
+        logger.info(`[HTTPSERVER] this.app exists: ${!!this.app}`);
+        logger.info(`[HTTPSERVER] Current agents count: ${this.elizaOS?.getAgents().length || 0}`);
+        logger.info(`[HTTPSERVER] Environment: ${process.env.NODE_ENV}`);
 
         // Use http server instead of app.listen with explicit host binding and error handling
         // For tests and macOS compatibility, prefer 127.0.0.1 when specified
         const host = process.env.SERVER_HOST || '0.0.0.0';
+        logger.info(`[HTTPSERVER] Host: ${host}`);
 
+        if (!this.server) {
+          logger.error('[HTTPSERVER] CRITICAL: this.server is undefined!');
+          reject(new Error('HTTP server instance not created'));
+          return;
+        }
+
+        logger.info(`[HTTPSERVER] Calling this.server.listen(${port}, ${host})...`);
         this.server
           .listen(port, host, () => {
+            logger.info(`[HTTPSERVER] Server is now listening!`);
+
             // Only show the dashboard URL if UI is enabled
             if (this.isWebUIEnabled && process.env.NODE_ENV !== 'development') {
               // Display the dashboard URL with the correct port after the server is actually listening
@@ -1538,10 +1574,11 @@ export class AgentServer {
             });
 
             // Resolve the promise now that the server is actually listening
+            logger.info('[HTTPSERVER] Resolving promise - server is listening!');
             resolve();
           })
           .on('error', (error: any) => {
-            logger.error({ error, host, port }, `Failed to bind server to ${host}:${port}:`);
+            logger.error({ error, host, port }, `[HTTPSERVER] Failed to bind server to ${host}:${port}:`);
 
             // Provide helpful error messages for common issues
             if (error.code === 'EADDRINUSE') {
@@ -1559,12 +1596,14 @@ export class AgentServer {
             }
 
             // Reject the promise on error
+            logger.error('[HTTPSERVER] Rejecting promise due to error');
             reject(error);
           });
 
         // Server is now listening successfully
+        logger.info('[HTTPSERVER] HTTP server setup completed without errors');
       } catch (error) {
-        logger.error({ error }, 'Failed to start server:');
+        logger.error({ error }, '[HTTPSERVER] Failed to start server:');
         reject(error);
       }
     });
@@ -1663,9 +1702,33 @@ export class AgentServer {
   ): Promise<CentralRootMessage> {
     const createdMessage = await (this.database as any).createMessage(data);
 
+    logger.info(`[AgentServer] createMessage returned: ${JSON.stringify({
+      id: createdMessage.id,
+      channelId: createdMessage.channelId,
+      authorId: createdMessage.authorId,
+      hasChannelId: 'channelId' in createdMessage,
+      hasAuthorId: 'authorId' in createdMessage,
+      content: createdMessage.content?.substring(0, 50)
+    })}`);
+
+    // Transform message to MessageBusService format (snake_case field names)
+    const messageForBus = {
+      id: createdMessage.id,
+      channel_id: createdMessage.channelId,
+      server_id: createdMessage.serverId,
+      author_id: createdMessage.authorId,
+      content: createdMessage.content,
+      raw_message: createdMessage.rawMessage,
+      source_id: createdMessage.sourceId,
+      source_type: createdMessage.sourceType,
+      in_reply_to_message_id: createdMessage.inReplyToRootMessageId,
+      created_at: new Date(createdMessage.createdAt).getTime(),
+      metadata: createdMessage.metadata,
+    };
+
     // Emit to internal message bus so MessageBusService instances can process the message
     logger.info(`[AgentServer] Message created: ${createdMessage.id}, emitting to internal message bus`);
-    internalMessageBus.emit('new_message', createdMessage);
+    internalMessageBus.emit('new_message', messageForBus);
 
     return createdMessage;
   }

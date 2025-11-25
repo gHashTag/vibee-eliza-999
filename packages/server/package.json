@@ -47,7 +47,9 @@
   },
   "devDependencies": {
     "@elizaos/client": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^24.0.1",
+    "@types/pg": "^8.11.10",
     "prettier": "3.6.2",
     "tsx": "4.20.6",
     "typescript": "^5.5.4",
@@ -58,16 +60,20 @@
   "dependencies": {
     "@elizaos/core": "workspace:*",
     "@elizaos/plugin-sql": "workspace:*",
+    "@infisical/sdk": "^4.0.6",
     "@sentry/node": "^10.16.0",
     "@types/express": "^5.0.2",
     "@types/helmet": "^4.0.0",
     "@types/multer": "^2.0.0",
     "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.36.4",
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.1",
     "path-to-regexp": "^8.2.0",
+    "pg": "^8.14.0",
     "socket.io": "^4.8.1"
   }
 }

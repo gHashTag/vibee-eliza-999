@@ -16,6 +16,8 @@ import { audioRouter } from './audio';
 import { runtimeRouter } from './runtime';
 import { teeRouter } from './tee';
 import { systemRouter } from './system';
+import { authRouter } from './auth';
+import { secretsRouter } from './secrets';
 // NOTE: world router has been removed - functionality moved to messaging/spaces
 import { SocketIORouter } from '../socketio';
 import {
@@ -394,10 +396,16 @@ export function createApiRouter(
   // Mount system router at /system - handles system configuration, health checks, and environment
   router.use('/system', systemRouter());
 
+  // Mount auth router at /auth - handles Telegram authentication
+  router.use('/auth', authRouter);
+
+  // Mount secrets router at /secrets - handles user-specific secret management
+  router.use('/secrets', secretsRouter);
+
   // NOTE: /world routes have been removed - functionality moved to messaging/spaces
 
   // NOTE: Legacy route aliases removed to prevent duplicates
-  // Use proper domain routes: /messaging, /system, /tee
+  // Use proper domain routes: /messaging, /system, /tee, /auth, /secrets
 
   // Add the plugin routes middleware AFTER specific routers
   router.use(createPluginRouteHandler(elizaOS));

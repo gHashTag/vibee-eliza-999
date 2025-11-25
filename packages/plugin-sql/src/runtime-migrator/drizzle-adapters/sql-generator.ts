@@ -722,6 +722,10 @@ function formatDefaultValue(value: any, type: string): string {
 
     // SQL functions like now(), gen_random_uuid(), etc.
     if (value.match(/^\w+\(\)/i) || (value.includes('(') && value.includes(')'))) {
+      // PGLite compatibility: replace gen_random_uuid() with compatible alternative
+      if (value.includes('gen_random_uuid()')) {
+        return "lower(hex(random()::text || hex(random()::text))::uuid)";
+      }
       return value;
     }
 

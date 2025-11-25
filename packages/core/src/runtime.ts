@@ -54,6 +54,7 @@ import {
   type ModelHandler,
   type RuntimeSettings,
   type Component,
+  type WorldSettings,
   IAgentRuntime,
   type IElizaOS,
   type ActionResult,
@@ -482,6 +483,31 @@ export class AgentRuntime implements IAgentRuntime {
         }
       }
 
+      // Load settings from world metadata (for bootstrap plugin compatibility)
+      try {
+        const defaultWorld = await this.getWorld(this.agentId);
+        if (defaultWorld?.metadata?.settings) {
+          const worldSettings = defaultWorld.metadata.settings as WorldSettings;
+
+          // Extract setting values from world metadata and merge into character.settings
+          for (const [key, setting] of Object.entries(worldSettings)) {
+            if (typeof setting === 'object' && setting.value !== null && setting.value !== undefined) {
+              // Only update if not already set in character.settings (character file has priority)
+              if (!this.character.settings?.[key]) {
+                this.character.settings = {
+                  ...this.character.settings,
+                  [key]: setting.value,
+                };
+              }
+            }
+          }
+
+          this.logger.debug(`Loaded ${Object.keys(worldSettings).length} settings from world metadata`);
+        }
+      } catch (error) {
+        this.logger.warn('Failed to load settings from world metadata:', error instanceof Error ? error.message : String(error));
+      }
+
       // No need to transform agent's own ID
       let agentEntity = await this.getEntityById(this.agentId);
 
@@ -639,6 +665,28 @@ export class AgentRuntime implements IAgentRuntime {
         this.character.settings = {};
       }
       this.character.settings[key] = value;
+    }
+
+    // Auto-save settings to database
+    this.saveSettingsToDatabase().catch((error) => {
+      this.logger.error(`Failed to save settings to database: ${error}`);
+    });
+  }
+
+  private async saveSettingsToDatabase() {
+    try {
+      if (!this.adapter) {
+        this.logger.warn('No database adapter available, settings will not be persisted');
+        return;
+      }
+
+      await this.adapter.updateAgent(this.agentId, {
+        settings: this.character.settings,
+      } as any);
+
+      this.logger.debug(`Settings saved to database for agent ${this.agentId}`);
+    } catch (error) {
+      this.logger.error(`Error saving settings to database: ${error}`);
     }
   }
 

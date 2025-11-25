@@ -30,7 +30,7 @@ const run = createBuildRunner({
     ],
     sourcemap: true,
     minify: false,
-    generateDts: true,
+    generateDts: false, // Временно отключено для деплоя
   },
 });
 

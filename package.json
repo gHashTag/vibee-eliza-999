@@ -32,6 +32,7 @@
     "version:major": "bunx lerna version major --force-publish --yes --no-push --no-git-tag-version",
     "migrate": "turbo run migrate --filter=./packages/plugin-sql --force",
     "migrate:generate": "turbo run migrate:generate --filter=./packages/plugin-sql",
+    "migrate:auth": "cd packages/server && psql $POSTGRES_URL -f drizzle/migrations/20241125_create_vibee_users.sql",
     "docker:build": "bash ./scripts/docker.sh build",
     "docker:run": "bash ./scripts/docker.sh run",
     "docker:bash": "bash ./scripts/docker.sh bash",
@@ -42,6 +43,7 @@
     "test:core": "turbo run test --filter=./packages/core",
     "test:app": "turbo run test --concurrency 5 --filter=./packages/app",
     "test:server": "turbo run test --filter=./packages/server",
+    "test:auth": "bun run test-auth.ts",
     "prepare": "husky"
   },
   "packageManager": "bun@1.2.21",

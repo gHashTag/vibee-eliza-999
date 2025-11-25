@@ -421,6 +421,10 @@ export class MessageBusService extends Service {
   }
 
   public async handleIncomingMessage(data: unknown) {
+    // Variables to track response from agent
+    let responseReceived = false;
+    let responseTimeoutId: NodeJS.Timeout | null = null;
+
     // Validate the incoming data structure
     if (!data || typeof data !== 'object') {
       logger.error(
@@ -552,8 +556,16 @@ export class MessageBusService extends Service {
           },
           {
             onResponse: async (responseContent: Content) => {
+              responseReceived = true;
+              if (responseTimeoutId) {
+                clearTimeout(responseTimeoutId);
+              }
               logger.info(
-                `[${this.runtime.character.name}] MessageBusService: Agent generated response for message. Preparing to send back to bus.`
+                `[${this.runtime.character.name}] MessageBusService: ✅ onResponse called! Agent generated response for message. Preparing to send back to bus.`
+              );
+
+              logger.info(
+                `[${this.runtime.character.name}] MessageBusService: Response content: ${JSON.stringify(responseContent)}`
               );
 
               await this.runtime.createMemory(
@@ -585,53 +597,76 @@ export class MessageBusService extends Service {
               );
           },
           onError: async (error: Error) => {
+            responseReceived = true;
+            if (responseTimeoutId) {
+              clearTimeout(responseTimeoutId);
+            }
             logger.error(
-              `[${this.runtime.character.name}] MessageBusService: Error processing message via elizaOS.sendMessage()`,
+              `[${this.runtime.character.name}] MessageBusService: ❌ onError called! Error processing message via elizaOS.sendMessage()`,
               error.message
+            );
+            logger.error(
+              `[${this.runtime.character.name}] MessageBusService: Error stack:`,
+              error.stack
             );
           },
         }
       );
 
       logger.info(
-        `[${this.runtime.character.name}] MessageBusService: elizaOS.sendMessage() completed successfully`
+        `[${this.runtime.character.name}] MessageBusService: elizaOS.sendMessage() call completed, waiting for response...`
       );
-    } catch (error) {
-      logger.error(
-        `[${this.runtime.character.name}] MessageBusService: Error processing message via elizaOS.sendMessage():`
-      );
-      logger.error(error instanceof Error ? error.message : String(error));
-    }
 
-    // Notify completion after handling (outside the try-catch for sendMessage)
-    try {
-      const room = await this.runtime.getRoom(agentRoomId);
-      const world = await this.runtime.getWorld(agentWorldId);
-      const channelId = room?.channelId as UUID;
-      const serverId = world?.serverId as UUID;
-      await this.notifyMessageComplete(channelId, serverId);
-      logger.info(
-        `[${this.runtime.character.name}] MessageBusService: Notified message completion`
-      );
-    } catch (completionError) {
-      logger.error(
-        `[${this.runtime.character.name}] MessageBusService: Error notifying completion:`,
-        completionError instanceof Error ? completionError.message : String(completionError)
-      );
-    }
+      // Wait for response with timeout
+      await new Promise<void>((resolve) => {
+        responseTimeoutId = setTimeout(() => {
+          if (!responseReceived) {
+            logger.error(
+              `[${this.runtime.character.name}] MessageBusService: ⏱️ TIMEOUT! No response from agent after 30 seconds. Agent may be stuck or not configured properly.`
+            );
+          }
+          resolve();
+        }, 30000);
+      });
+
+      // Notify completion after handling
+      try {
+        const room = await this.runtime.getRoom(agentRoomId);
+        const world = await this.runtime.getWorld(agentWorldId);
+        const channelId = room?.channelId as UUID;
+        const serverId = world?.serverId as UUID;
+        await this.notifyMessageComplete(channelId, serverId);
+        logger.info(
+          `[${this.runtime.character.name}] MessageBusService: Notified message completion`
+        );
+      } catch (completionError) {
+        logger.error(
+          `[${this.runtime.character.name}] MessageBusService: Error notifying completion:`,
+          completionError instanceof Error ? completionError.message : String(completionError)
+        );
+      }
     } catch (error) {
       logger.error(
-        `[${this.runtime.character.name}] MessageBusService: Error in main message processing loop:`,
+        `[${this.runtime.character.name}] MessageBusService: ❌ Error in sendMessage call:`,
         error instanceof Error ? error.message : String(error)
+      );
+      logger.error(
+        `[${this.runtime.character.name}] MessageBusService: Error stack:`,
+        error instanceof Error ? error.stack : ''
       );
     }
   }
 
-  private async handleMessageDeleted(data: any) {
+  private async handleMessageDeleted(data: { messageId: string }) {
     try {
-      logger.info(
-        `[${this.runtime.character.name}] MessageBusService: Received message_deleted event for message ${data.messageId}`
-      );
+      logger.info('[MessageBusService] Message deleted:', data.messageId);
+      // Handle message deletion logic here
+    } catch (error) {
+      logger.error('[MessageBusService] Error handling message deletion:', error);
+    }
+  }
+
+  private async handleMessageUpdated(data: { messageId: string }) {
 
       // Convert the central message ID to the agent's unique memory ID
       const agentMemoryId = createUniqueUuid(this.runtime, data.messageId);

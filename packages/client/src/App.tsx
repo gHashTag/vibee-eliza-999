@@ -1,7 +1,7 @@
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import AgentCreator from './components/agent-creator';
 import { AppSidebar } from './components/app-sidebar';
 import { ConnectionErrorBanner } from './components/connection-error-banner';
@@ -10,7 +10,7 @@ import { AgentLogViewer } from './components/agent-log-viewer';
 import OnboardingTour from './components/onboarding-tour';
 import { Toaster } from './components/ui/toaster';
 import { TooltipProvider } from './components/ui/tooltip';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ConnectionProvider, useConnection } from './context/ConnectionContext';
 import { STALE_TIMES } from './hooks/use-query-hooks';
 import useVersion from './hooks/use-version';
@@ -27,6 +27,7 @@ import { Button } from './components/ui/button';
 import CreateGroupPage from './routes/group-new';
 import AgentSettingsRoute from './routes/agent-settings';
 import clientLogger from '@/lib/logger';
+import LoginPage from './pages/LoginPage';
 
 // Create a query client with optimized settings
 const queryClient = new QueryClient({
@@ -78,9 +79,23 @@ prefetchInitialData();
 function AppContent() {
   useVersion();
   const { status } = useConnection();
+  const { isAuthenticated, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [homeKey, setHomeKey] = useState(Date.now());
   const queryClient = useQueryClient();
+
+  // Показываем логин, если не аутентифицирован
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
 
   useEffect(() => {
     clientLogger.info('[AppContent] Mounted/Updated');

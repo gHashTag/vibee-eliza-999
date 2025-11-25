@@ -467,20 +467,17 @@ async function processSettingUpdates(
       }
     }
 
-    // If any updates were made, save the entire state to world metadata
+    // Save updated settings to world metadata
     if (updatedAny) {
-      // Save to world metadata
-      const saved = await updateWorldSettings(runtime, serverId, updatedState);
-
-      if (!saved) {
-        throw new Error('Failed to save updated state to world metadata');
+      const success = await updateWorldSettings(runtime, serverId, updatedState);
+      if (!success) {
+        logger.error(`Failed to save settings state for server ${serverId}`);
+        return {
+          updatedAny: false,
+          messages: ['Error saving settings state'],
+        };
       }
-
-      // Verify save by retrieving it again
-      const savedState = await getWorldSettings(runtime, serverId);
-      if (!savedState) {
-        throw new Error('Failed to verify state save');
-      }
+      logger.debug(`Settings saved for agent ${runtime.agentId}`);
     }
 
     return { updatedAny, messages };

@@ -1,76 +1,25 @@
-FROM node:23.3.0-slim AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    curl \
-    ffmpeg \
-    g++ \
-    git \
-    make \
-    python3 \
-    unzip && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Устанавливаем bash, git и bun
+RUN apk add --no-cache bash git && npm install -g bun
 
-RUN npm install -g bun@1.2.21 turbo@2.3.3
+# Копируем основные файлы конфигурации
+COPY package.json bunfig.toml ./
 
-RUN ln -s /usr/bin/python3 /usr/bin/python
+# Копируем все файлы из git
+COPY . .
 
-# CRITICAL: bun.lock is required for bun workspace resolution
-COPY package.json turbo.json tsconfig.json lerna.json renovate.json .npmrc bun.lock build-utils.ts instrument.js ./
-COPY scripts ./scripts
-COPY packages ./packages
+# Удаляем ненужные файлы из .dockerignore
+RUN rm -rf node_modules dist build .env pnpm-workspace.yaml pnpm-lock.yaml 2>/dev/null || true
 
-RUN SKIP_POSTINSTALL=1 bun install --no-cache
+# Устанавливаем зависимости с bun
+RUN bun install
 
-# Add verbose logging and memory monitoring for build diagnostics
-RUN echo "=== Build Environment Info ===" && \
-    echo "Node version: $(node --version)" && \
-    echo "Bun version: $(bun --version)" && \
-    echo "CPU info: $(nproc) cores" && \
-    echo "Disk space: $(df -h /)" && \
-    echo "=== Starting Build ===" && \
-    TURBO_CONCURRENCY=2 bun run build --concurrency=2 --verbosity=1 || (echo "=== Build Failed - System State ===" && df -h / && exit 1)
+# Собираем сервер напрямую
+RUN cd packages/server && bun run build
 
-FROM node:23.3.0-slim
-
-WORKDIR /app
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    curl \
-    ffmpeg \
-    git \
-    python3 \
-    unzip && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN npm install -g bun@1.2.21 turbo@2.3.3
-
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/turbo.json ./
-COPY --from=builder /app/tsconfig.json ./
-COPY --from=builder /app/lerna.json ./
-COPY --from=builder /app/renovate.json ./
-COPY --from=builder /app/.npmrc ./
-COPY --from=builder /app/bun.lock ./
-COPY --from=builder /app/build-utils.ts ./
-COPY --from=builder /app/instrument.js ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/scripts ./scripts
-# Copy built dist files from builder stage
-COPY --from=builder /app/packages/cli/dist ./packages/cli/dist
-COPY --from=builder /app/packages/core/dist ./packages/core/dist
-COPY --from=builder /app/packages/server/dist ./packages/server/dist
-COPY --from=builder /app/packages/client/dist ./packages/client/dist
-
-ENV NODE_ENV=production
-
+# Запускаем сервер
 EXPOSE 3000
-
-CMD ["bun", "packages/cli/dist/index.js", "start"]
+CMD ["node", "packages/server/dist/entrypoint.js"]

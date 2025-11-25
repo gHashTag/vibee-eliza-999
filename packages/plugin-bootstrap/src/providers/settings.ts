@@ -3,10 +3,7 @@
 
 import {
   ChannelType,
-  findWorldsForOwner,
-  getWorldSettings,
   logger,
-  World,
   type IAgentRuntime,
   type Memory,
   type Provider,
@@ -14,6 +11,7 @@ import {
   type Setting,
   type State,
   type WorldSettings,
+  type UUID,
 } from '@elizaos/core';
 
 /**
@@ -129,15 +127,7 @@ export const settingsProvider: Provider = {
   description: 'Current settings for the server',
   get: async (runtime: IAgentRuntime, message: Memory, state?: State): Promise<ProviderResult> => {
     try {
-      // Parallelize the initial database operations to improve performance
-      // These operations can run simultaneously as they don't depend on each other
-      const [room, userWorlds] = await Promise.all([
-        runtime.getRoom(message.roomId),
-        findWorldsForOwner(runtime, message.entityId),
-      ]).catch((error) => {
-        logger.error(`Error fetching initial data: ${error}`);
-        throw new Error('Failed to retrieve room or user world information');
-      });
+      const room = await runtime.getRoom(message.roomId);
 
       if (!room) {
         logger.error('No room found for settings provider');
@@ -152,85 +142,16 @@ export const settingsProvider: Provider = {
         };
       }
 
-      if (!room.worldId) {
-        logger.debug('No world found for settings provider -- settings provider will be skipped');
-        return {
-          data: {
-            settings: [],
-          },
-          values: {
-            settings: 'Room does not have a worldId -- settings provider will be skipped',
-          },
-          text: 'Room does not have a worldId -- settings provider will be skipped',
-        };
-      }
-
       const type = room.type;
       const isOnboarding = type === ChannelType.DM;
 
-      let world: World | null | undefined = null;
-      let serverId: string | undefined = undefined;
-      let worldSettings: WorldSettings | null = null;
+      // Read settings from world metadata
+      const worldId = room.serverId as UUID || room.id;
+      const world = await runtime.getWorld(worldId);
+      const worldSettings = (world?.metadata?.settings as WorldSettings) || {};
 
-      if (isOnboarding) {
-        // In onboarding mode, use the user's world directly
-        // Look for worlds with settings metadata, or create one if none exists
-        world = userWorlds?.find((world) => world.metadata?.settings !== undefined);
-
-        if (!world && userWorlds && userWorlds.length > 0) {
-          // If user has worlds but none have settings, use the first one and initialize settings
-          world = userWorlds[0];
-          if (!world.metadata) {
-            world.metadata = {};
-          }
-          world.metadata.settings = {};
-          await runtime.updateWorld(world);
-          logger.info(`Initialized settings for user's world ${world.id}`);
-        }
-
-        if (!world) {
-          logger.error('No world found for user during onboarding');
-          throw new Error('No server ownership found for onboarding');
-        }
-
-        serverId = world.serverId;
-
-        // Fetch world settings based on the server ID
-        try {
-          worldSettings = await getWorldSettings(runtime, serverId);
-        } catch (error) {
-          logger.error(`Error fetching world settings: ${error}`);
-          throw new Error(`Failed to retrieve settings for server ${serverId}`);
-        }
-      } else {
-        // For non-onboarding, we need to get the world associated with the room
-        try {
-          world = await runtime.getWorld(room.worldId);
-
-          if (!world) {
-            logger.error(`No world found for room ${room.worldId}`);
-            throw new Error(`No world found for room ${room.worldId}`);
-          }
-
-          serverId = world.serverId;
-
-          // Once we have the serverId, get the settings
-          if (serverId) {
-            worldSettings = await getWorldSettings(runtime, serverId);
-          } else {
-            logger.error(`No server ID found for world ${room.worldId}`);
-          }
-        } catch (error) {
-          logger.error(`Error processing world data: ${error}`);
-          throw new Error('Failed to process world information');
-        }
-      }
-
-      // If no server found after recovery attempts
-      if (!serverId) {
-        logger.info(
-          `No server ownership found for user ${message.entityId} after recovery attempt`
-        );
+      if (Object.keys(worldSettings).length === 0) {
+        logger.info(`No settings found for agent ${runtime.agentId}`);
         return isOnboarding
           ? {
               data: {
@@ -238,33 +159,9 @@ export const settingsProvider: Provider = {
               },
               values: {
                 settings:
-                  "The user doesn't appear to have ownership of any servers. They should make sure they're using the correct account.",
+                  "The agent doesn't appear to have any settings configured yet. Settings can be configured through the web interface or via Telegram commands.",
               },
-              text: "The user doesn't appear to have ownership of any servers. They should make sure they're using the correct account.",
-            }
-          : {
-              data: {
-                settings: [],
-              },
-              values: {
-                settings: 'Error: No configuration access',
-              },
-              text: 'Error: No configuration access',
-            };
-      }
-
-      if (!worldSettings) {
-        logger.info(`No settings state found for server ${serverId}`);
-        return isOnboarding
-          ? {
-              data: {
-                settings: [],
-              },
-              values: {
-                settings:
-                  "The user doesn't appear to have any settings configured for this server. They should configure some settings for this server.",
-              },
-              text: "The user doesn't appear to have any settings configured for this server. They should configure some settings for this server.",
+              text: "The agent doesn't appear to have any settings configured yet. Settings can be configured through the web interface or via Telegram commands.",
             }
           : {
               data: {

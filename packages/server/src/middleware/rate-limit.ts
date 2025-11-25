@@ -18,6 +18,11 @@ export const createApiRateLimit = () => {
     },
     standardHeaders: true, // Return rate limit info in the `RateLimitInfo` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    keyGenerator: (req) => {
+      // Handle trust proxy properly for rate limiting
+      const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+      return ip;
+    },
     handler: (req, res) => {
       const clientIp = req.ip || 'unknown';
       logger.warn(`[SECURITY] Rate limit exceeded for IP: ${clientIp}`);

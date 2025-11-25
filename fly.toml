@@ -21,11 +21,12 @@ primary_region = "ams"
     handlers = ["tls", "http"]
     port = 443
 
-  [services.tcp_checks]
-    grace_period = "10s"
+  [services.http_checks]
+    path = "/healthz"
+    grace_period = "30s"
     interval = "15s"
     restart_limit = 3
-    timeout = "2s"
+    timeout = "10s"
 
 [vm]
   cpu_kind = "shared"

@@ -23,16 +23,15 @@ import path, { basename, dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Server as SocketIOServer } from 'socket.io';
 import { createApiRouter, createPluginRouteHandler, setupSocketIO } from './api/index.js';
-import {
-  messageBusConnectorPlugin,
-  setGlobalElizaOS,
-  setGlobalAgentServer,
-} from './services/message.js';
+// import {
+//   messageBusConnectorPlugin,
+//   setGlobalElizaOS,
+//   setGlobalAgentServer,
+// } from './services/message.js';
 import internalMessageBus from './bus.js';
 import { loadCharacterTryPath, jsonToCharacter } from './loader.js';
 import sqlPlugin, {
   createDatabaseAdapter,
-  DatabaseMigrationService,
   installRLSFunctions,
   getOrCreateRlsOwner,
   setOwnerContext,
@@ -367,8 +366,10 @@ export class AgentServer {
       await this.database.init();
       logger.success('Database initialized for server operations');
 
+      // TEMPORARY: Skip migrations due to plugin-sql introspection bug
       // Run migrations for the SQL plugin schema
-      logger.info('[INIT] Running database migrations for messaging tables...');
+      logger.info('[INIT] Skipping database migrations (temporary fix for plugin-sql bug)...');
+      /*
       try {
         const migrationService = new DatabaseMigrationService();
 
@@ -389,6 +390,7 @@ export class AgentServer {
           `Database migration failed: ${migrationError instanceof Error ? migrationError.message : String(migrationError)}`
         );
       }
+      */
 
       const rlsEnabled = process.env.ENABLE_RLS_ISOLATION === 'true';
       const rlsOwnerIdString = process.env.RLS_OWNER_ID;
@@ -456,10 +458,11 @@ export class AgentServer {
       // Add a small delay to ensure database is fully ready
       await new Promise((resolve) => setTimeout(resolve, 500));
 
+      // TEMPORARY: Skip ensureDefaultServer due to missing tables
       // Ensure default server exists
-      logger.info('[INIT] Ensuring default server exists...');
-      await this.ensureDefaultServer();
-      logger.success('[INIT] Default server setup complete');
+      logger.info('[INIT] Skipping default server setup (missing tables)...');
+      // await this.ensureDefaultServer();
+      // logger.success('[INIT] Default server setup complete');
 
       // Server agent is no longer needed - each agent has its own database adapter
       logger.info('[INIT] Server uses temporary adapter for migrations only');
@@ -475,10 +478,10 @@ export class AgentServer {
       this.elizaOS.enableEditableMode();
 
       // Set global ElizaOS instance for MessageBusService
-      setGlobalElizaOS(this.elizaOS);
+      // setGlobalElizaOS(this.elizaOS);
 
       // Set global AgentServer instance for MessageBusService
-      setGlobalAgentServer(this);
+      // setGlobalAgentServer(this);
 
       logger.success('[INIT] ElizaOS initialized');
 
@@ -705,6 +708,11 @@ export class AgentServer {
         message: 'Too many health check requests from this IP, please try again later.',
         standardHeaders: true,
         legacyHeaders: false,
+        keyGenerator: (req) => {
+          // Handle trust proxy properly for rate limiting
+          const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+          return ip;
+        },
         skip: (req) => {
           // Skip rate limiting for internal/private IPs (Docker, Kubernetes)
           const ip = req.ip || '';

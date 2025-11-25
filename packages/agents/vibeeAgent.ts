@@ -1,6 +1,6 @@
 import { type Character } from "@elizaos/core";
-import { telegramCraftPlugin } from "../../plugin-telegram-craft/src/index";
-import { vibeFaceAvatarPlugin } from "../../plugin-vibe-face-avatar/src/index";
+import { telegramCraftPlugin } from "@elizaos/plugin-telegram-craft";
+// import { vibeFaceAvatarPlugin } from "../../plugin-vibe-face-avatar/dist/index.js";
 
 /**
  * VIBEE - Главный AI-агент проекта VIBEE
@@ -18,7 +18,7 @@ export const vibeeAgent: Character = {
     telegramCraftPlugin as any,
 
     // Face Avatar Plugin - для обучения LoRA и генерации
-    vibeFaceAvatarPlugin as any,
+    // vibeFaceAvatarPlugin as any,  // TEMPORARY: Commented out
   ],
   settings: {
     secrets: {},

@@ -918,3 +918,4 @@ INFISICAL_ENVIRONMENT=dev
 
 # NODE_ENV для development режима
 NODE_ENV=development Слушай, запомни: все ключи здесь лежат .env
+- use shellcheck for bash

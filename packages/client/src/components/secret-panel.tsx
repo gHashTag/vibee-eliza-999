@@ -258,7 +258,10 @@ export const SecretPanel = forwardRef<SecretPanelRef, SecretPanelProps>(
           }
           // Keep required secrets even if not in parsed content
           if (env.isRequired) {
-            return { ...env, value: '', isModified: env.value !== '' };
+            // Load from localStorage if exists
+            const localStorageKey = `eliza_secret_${env.name}`;
+            const localValue = localStorage.getItem(localStorageKey);
+            return { ...env, value: localValue || '', isModified: env.value !== (localValue || '') };
           }
           // Remove non-required secrets that aren't in parsed content
           return null;
@@ -358,11 +361,15 @@ export const SecretPanel = forwardRef<SecretPanelRef, SecretPanelProps>(
 
         requiredSecrets.forEach((reqSecret) => {
           if (!existingSecretsMap.has(reqSecret.name)) {
+            // Try to load from localStorage first, then global environment
+            const localStorageKey = `eliza_secret_${reqSecret.name}`;
+            const localValue = localStorage.getItem(localStorageKey);
+
             // Check if this secret exists in global environment
             // Don't populate the value - let the UI show it's using global
             allSecrets.push({
               name: reqSecret.name,
-              value: '', // Keep empty to show it's using global
+              value: localValue || '', // Try localStorage first, then empty
               isNew: true,
               isModified: false,
               isDeleted: false,
@@ -476,9 +483,12 @@ export const SecretPanel = forwardRef<SecretPanelRef, SecretPanelProps>(
         requiredSecrets.forEach((reqSecret) => {
           if (!existingNames.has(reqSecret.name)) {
             // Don't auto-populate from global - let UI show it's using global
+            // Load from localStorage if exists
+            const localStorageKey = `eliza_secret_${reqSecret.name}`;
+            const localValue = localStorage.getItem(localStorageKey);
             updatedEnvs.push({
               name: reqSecret.name,
-              value: '', // Keep empty to show it's using global
+              value: localValue || '', // Try localStorage first, then empty
               isNew: true,
               isModified: false,
               isDeleted: false,
@@ -542,6 +552,14 @@ export const SecretPanel = forwardRef<SecretPanelRef, SecretPanelProps>(
           if (!currentEnvNames.has(secretName) && !deletedKeys.includes(secretName)) {
             // Mark this secret for deletion
             secrets[secretName] = null;
+          }
+        });
+
+        // Save non-deleted secrets to localStorage for persistence
+        envs.forEach((env) => {
+          if (!deletedKeys.includes(env.name) && env.value && env.value.trim() !== '') {
+            const localStorageKey = `eliza_secret_${env.name}`;
+            localStorage.setItem(localStorageKey, env.value);
           }
         });
 
@@ -703,6 +721,10 @@ export const SecretPanel = forwardRef<SecretPanelRef, SecretPanelProps>(
             plugin: reqSecret?.plugin,
           };
 
+          // Immediately save to localStorage
+          const localStorageKey = `eliza_secret_${name}`;
+          localStorage.setItem(localStorageKey, cleanValue);
+
           const updatedEnvs = [...envs, newEnv];
           // Sort: required secrets first, then alphabetically
           updatedEnvs.sort((a, b) => {
@@ -720,6 +742,9 @@ export const SecretPanel = forwardRef<SecretPanelRef, SecretPanelProps>(
               env.name === name ? { ...env, value: cleanValue, isModified: true } : env
             )
           );
+          // Immediately save to localStorage
+          const localStorageKey = `eliza_secret_${name}`;
+          localStorage.setItem(localStorageKey, cleanValue);
           setName('');
           setValue('');
         }
@@ -746,6 +771,10 @@ export const SecretPanel = forwardRef<SecretPanelRef, SecretPanelProps>(
       if (updatedEnvs[index].value !== cleanValue) {
         updatedEnvs[index].value = cleanValue;
         updatedEnvs[index].isModified = true;
+
+        // Immediately save to localStorage
+        const localStorageKey = `eliza_secret_${updatedEnvs[index].name}`;
+        localStorage.setItem(localStorageKey, cleanValue);
       }
       setEnvs(updatedEnvs);
       setEditingIndex(null);
@@ -774,6 +803,10 @@ export const SecretPanel = forwardRef<SecretPanelRef, SecretPanelProps>(
 
     const removeEnv = (index: number) => {
       const keyToRemove = envs[index].name;
+
+      // Clear from localStorage
+      const localStorageKey = `eliza_secret_${keyToRemove}`;
+      localStorage.removeItem(localStorageKey);
 
       setDeletedKeys([...deletedKeys, keyToRemove]);
 

@@ -129,8 +129,13 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
       }
     }
 
-    // Run migrations with options
-    await this.migrationService.runAllPluginMigrations(options);
+    // Run migrations with options (TEMPORARY: Disabled due to introspection bug)
+    const skipMigrations = process.env.SKIP_SQL_MIGRATIONS === 'true';
+    if (!skipMigrations) {
+      await this.migrationService.runAllPluginMigrations(options);
+    } else {
+      logger.info('[SQL Plugin] Skipping migrations (SKIP_SQL_MIGRATIONS=true)');
+    }
   }
 
   /**
@@ -3361,7 +3366,24 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
         updatedAt: now,
       };
 
+      logger.debug(`[DB] createMessage - messageToInsert before insert: ${JSON.stringify({
+        id: messageToInsert.id,
+        channelId: messageToInsert.channelId,
+        authorId: messageToInsert.authorId,
+        hasChannelId: 'channelId' in messageToInsert,
+        hasAuthorId: 'authorId' in messageToInsert
+      })}`);
+
       await this.db.insert(messageTable).values(messageToInsert);
+
+      logger.debug(`[DB] createMessage - messageToInsert after insert: ${JSON.stringify({
+        id: messageToInsert.id,
+        channelId: messageToInsert.channelId,
+        authorId: messageToInsert.authorId,
+        hasChannelId: 'channelId' in messageToInsert,
+        hasAuthorId: 'authorId' in messageToInsert
+      })}`);
+
       return messageToInsert;
     });
   }

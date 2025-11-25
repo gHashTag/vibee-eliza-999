@@ -837,11 +837,74 @@ npm install -g @modelcontextprotocol/server-everything
 
 ## TROUBLESHOOTING
 
+### TypeScript Configuration for Workspace Packages
+
+**⚠️ CRITICAL: TypeScript tsconfig.json Configuration**
+
+When working with workspace packages in this monorepo, follow these rules:
+
+1. **DO NOT ADD `paths` FOR WORKSPACE PACKAGES**
+   - Workspace packages (`@elizaos/*`) are automatically resolved via symlinks in `node_modules`
+   - Adding `paths` configuration can conflict with automatic resolution and cause "Cannot find module" errors
+   - **Original configuration did NOT have paths** - check git history before adding them
+
+2. **USE `moduleResolution: "bundler"`**
+   - The original configuration uses `moduleResolution: "bundler"` (NOT `node`)
+   - Changing to `node` can break module resolution for workspace packages
+   - Always check git history to see original `tsconfig.json` configuration
+
+3. **Workspace Package Resolution Flow:**
+   ```
+   Import: @elizaos/core
+   ↓
+   TypeScript looks in: node_modules/@elizaos/core (symlink)
+   ↓
+   Resolves to: packages/core (via symlink)
+   ↓
+   Uses package.json "types" field: dist/index.d.ts
+   ```
+
+4. **If TypeScript Cannot Find Workspace Packages:**
+   - ✅ Check that packages are installed: `bun install`
+   - ✅ Verify symlinks exist: `ls -la node_modules/@elizaos/`
+   - ✅ Restart TypeScript server in IDE (Cmd+Shift+P → "TypeScript: Restart TS Server")
+   - ✅ Check original tsconfig.json: `git show HEAD:packages/server/tsconfig.json`
+   - ❌ DO NOT add paths configuration
+   - ❌ DO NOT change moduleResolution to "node"
+
+5. **Example of CORRECT tsconfig.json (packages/server):**
+   ```json
+   {
+     "compilerOptions": {
+       "moduleResolution": "bundler",
+       "baseUrl": ".",
+       "types": ["node"],
+       // NO paths configuration for @elizaos/* packages
+     }
+   }
+   ```
+
+6. **Example of INCORRECT tsconfig.json:**
+   ```json
+   {
+     "compilerOptions": {
+       "moduleResolution": "node",  // ❌ Wrong - should be "bundler"
+       "paths": {                    // ❌ Wrong - should NOT have paths
+         "@elizaos/core": ["../../core/src"]
+       }
+     }
+   }
+   ```
+
 ### Common Issues
 
 1. **Build Failures:** Check TypeScript errors with `bun run build`
 2. **Test Failures:** Run `bun test` and check individual package tests
-3. **Import Errors:** Verify correct use of `@elizaos/core` vs `packages/core`
+3. **Import Errors:** 
+   - Verify correct use of `@elizaos/core` vs `packages/core`
+   - **If "Cannot find module @elizaos/*":** Check tsconfig.json - it should NOT have paths, should use `moduleResolution: "bundler"`
+   - Restart TypeScript server in IDE
+   - Check git history for original tsconfig.json configuration
 4. **Environment Issues:** Check `.env` file against `.env.example`
 
 ### Performance Considerations

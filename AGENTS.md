@@ -43,3 +43,36 @@
 
 - Copy `.env.example` to `.env`; never commit secrets. Required: Node `23.x`, Bun `1.2.x`.
 - Post-install initializes submodules; if needed, rerun `bash ./scripts/init-submodules.sh`.
+
+## TypeScript Configuration for Workspace Packages
+
+**⚠️ CRITICAL RULE: Never Add `paths` for Workspace Packages**
+
+When working with TypeScript configuration in workspace packages:
+
+1. **DO NOT add `paths` configuration** for `@elizaos/*` packages in `tsconfig.json`
+   - Workspace packages are automatically resolved via symlinks in `node_modules`
+   - Adding `paths` can conflict with automatic resolution
+   - **Always check git history** before modifying `tsconfig.json`: `git show HEAD:packages/server/tsconfig.json`
+
+2. **USE `moduleResolution: "bundler"`** (NOT `node`)
+   - Original configuration uses `"bundler"` for workspace package resolution
+   - Changing to `"node"` can break module resolution
+
+3. **If TypeScript cannot find workspace packages:**
+   - Run `bun install` to ensure symlinks are created
+   - Restart TypeScript server in IDE
+   - Check original config: `git show HEAD:packages/<package>/tsconfig.json`
+   - **DO NOT add paths** - this will break resolution
+
+4. **Example CORRECT configuration:**
+   ```json
+   {
+     "compilerOptions": {
+       "moduleResolution": "bundler",
+       "baseUrl": ".",
+       "types": ["node"]
+       // NO paths for @elizaos/* packages
+     }
+   }
+   ```

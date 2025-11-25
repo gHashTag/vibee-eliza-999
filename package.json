@@ -1,6 +1,7 @@
 {
   "name": "vibee",
   "version": "1.4.4",
+  "main": "vibee.character.json",
   "module": "index.ts",
   "type": "module",
   "engines": {

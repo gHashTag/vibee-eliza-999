@@ -17,12 +17,10 @@ RUN find . -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
 # Очищаем кэш bun
 RUN bun run --cwd /app store prune
 
-# Собираем plugin-sql с исправлениями PGLite (принудительно)
-RUN bun run build:plugin-sql
-
-# Собираем сервер
+# Собираем ВСЕ пакеты в правильном порядке (core → plugin-sql → server)
+# turbo автоматически определит правильный порядок зависимостей
 RUN bun run build
 
 # Запускаем сервер
 EXPOSE 3000
-CMD ["node", "packages/server/dist/index.js"]
+CMD ["node", "packages/server/dist/entrypoint.js"]

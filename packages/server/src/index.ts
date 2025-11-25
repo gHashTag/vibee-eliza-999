@@ -452,11 +452,9 @@ export class AgentServer {
       // Add a small delay to ensure database is fully ready
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // TEMPORARY: Skip ensureDefaultServer due to missing tables
       // Ensure default server exists
-      logger.info('[INIT] Skipping default server setup (missing tables)...');
-      // await this.ensureDefaultServer();
-      // logger.success('[INIT] Default server setup complete');
+      await this._ensureDefaultServer();
+      logger.success('[INIT] Default server setup complete');
 
       // Server agent is no longer needed - each agent has its own database adapter
       logger.info('[INIT] Server uses temporary adapter for migrations only');
@@ -489,7 +487,6 @@ export class AgentServer {
     }
   }
 
-  /*
   private async _ensureDefaultServer(): Promise<void> {
     try {
       // When RLS is enabled, create a server per owner instead of a shared default server
@@ -570,7 +567,6 @@ export class AgentServer {
       throw error; // Re-throw to prevent startup if default server can't be created
     }
   }
-  */
 
   /**
    * Initializes the server with the provided configuration.

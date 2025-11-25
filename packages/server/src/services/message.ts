@@ -5,10 +5,10 @@ import {
   createUniqueUuid,
   logger,
   validateUuid,
-  type Content,
-  type IAgentRuntime,
+  Content,
+  IAgentRuntime,
   type Plugin,
-  type UUID,
+  UUID,
   ElizaOS,
 } from '@elizaos/core';
 import type { MessageMetadata } from '@elizaos/api-client';
@@ -89,6 +89,7 @@ export class MessageBusService extends Service {
   static serviceType = 'message-bus-service';
   capabilityDescription = 'Manages connection and message synchronization with the message server.';
 
+  protected runtime: IAgentRuntime;
   private boundHandleIncomingMessage: (data: unknown) => void;
   private boundHandleServerAgentUpdate: (data: any) => Promise<void>;
   private boundHandleMessageDeleted: (data: any) => Promise<void>;
@@ -98,6 +99,7 @@ export class MessageBusService extends Service {
 
   constructor(runtime: IAgentRuntime) {
     super(runtime);
+    this.runtime = runtime;
     this.serverInstance = getGlobalAgentServer();
     this.boundHandleIncomingMessage = (data: unknown) => {
       this.handleIncomingMessage(data).catch((error) => {
@@ -120,8 +122,12 @@ export class MessageBusService extends Service {
   }
 
   static async stop(runtime: IAgentRuntime): Promise<void> {
-    const service = new MessageBusService(runtime);
-    await service.stop();
+    const service = runtime.getService(MessageBusService.serviceType) as MessageBusService;
+    if (service) {
+      await service.stop();
+    } else {
+      logger.warn(`MessageBusService not found in runtime for stopping.`);
+    }
   }
 
   private async connectToMessageBus() {
@@ -423,7 +429,7 @@ export class MessageBusService extends Service {
   public async handleIncomingMessage(data: unknown) {
     // Variables to track response from agent
     let responseReceived = false;
-    let responseTimeoutId: NodeJS.Timeout | null = null;
+    let responseTimeoutId: any = null;
 
     // Validate the incoming data structure
     if (!data || typeof data !== 'object') {
@@ -667,7 +673,7 @@ export class MessageBusService extends Service {
   }
 
   private async handleMessageUpdated(data: { messageId: string }) {
-
+    try {
       // Convert the central message ID to the agent's unique memory ID
       const agentMemoryId = createUniqueUuid(this.runtime, data.messageId);
 

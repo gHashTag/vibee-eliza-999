@@ -11,7 +11,13 @@ COPY . .
 # Устанавливаем все зависимости
 RUN bun install
 
-# Собираем plugin-sql с исправлениями PGLite
+# Удаляем все существующие dist директории для чистой сборки
+RUN find . -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
+
+# Очищаем кэш bun
+RUN bun run --cwd /app store prune
+
+# Собираем plugin-sql с исправлениями PGLite (принудительно)
 RUN bun run build:plugin-sql
 
 # Собираем сервер

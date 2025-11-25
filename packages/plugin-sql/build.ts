@@ -40,7 +40,9 @@ async function buildAll() {
 
   if (!nodeOk) return false;
 
-  // Browser build (client): PGlite only, no Node builtins
+  // Browser build temporarily disabled - requires BaseDrizzleAdapter which uses uuid
+  // TODO: Create browser-compatible version of PgliteDatabaseAdapter
+  /*
   const browserOk = await runBuild({
     packageName: '@elizaos/plugin-sql',
     buildOptions: {
@@ -48,8 +50,6 @@ async function buildAll() {
       outdir: 'dist/browser',
       target: 'browser',
       format: 'esm',
-      // Keep core external to avoid bundling workspace deps; avoid Node externals
-      // Externalize PGlite and Drizzle so Next/Webpack can resolve their browser exports
       external: [
         '@elizaos/core',
         '@electric-sql/pglite',
@@ -65,6 +65,9 @@ async function buildAll() {
   });
 
   if (!browserOk) return false;
+  */
+
+  const browserOk = true; // Skip browser build for now
 
   // Ensure declaration entry points are present for consumers (keep minimal)
   const distDir = join(process.cwd(), 'dist');

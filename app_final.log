@@ -1,0 +1,159 @@
+ Info       [Sentry] Initialized successfully for monitoring
+ Info       Using local @elizaos/cli installation
+[36m Info      [39m [Sentry] Initialized successfully for monitoring
+
+[38;5;27m⠀⠀⠀⠀⠀⠀⠀⠀⢀⣐⣿⣿⢰⡀⠀⠀⠀[38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+[38;5;27m⠀⠀⠀⠀⠀⢀⣴⠤⠾⠛⠛⣿⣶⣇⠀⠀⡆[38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+[38;5;27m⢰⣋⡳⡄⠀⢨⣭⡀⠀⡤⠀⣀⣝⢿⣶⣿⡅[38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+[38;5;27m⢸⣯⠀⣇⠀⣼⣿⣿⣆⢷⣴⣿⣿⡏⣛⡉⠀[38;5;255m ⢸⣿⣿⣿⣿⣿⣿⢸⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⣾⣿⣿⣧⠀⠀⠀[38;5;255m⢸⠟⢀⣴⣿⣿⣿⣿⣦⡀⣠⣾⣿⣿⣿⣿⣦⡙⢿[0m
+[38;5;27m⠀⠙⢷⣮⢸⣿⣿⣿⣿⣷⣯⣟⣏⣼⣷⣅⠾[38;5;255m ⢸⣿⣇⣀⣀⣀⠀⢸⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⠀⠀⣠⣿⣿⠟⠁⠀⠀⣼⣿⡟⣿⣿⣆⠀⠀[38;5;255m⠀⠀⣿⣿⠋⠀⠈⠻⣿⡇⣿⣿⣅⣀⣀⡛⠛⠃⠀[0m
+[38;5;27m⠀⠀⠀⠁⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⠀[38;5;255m ⢸⣿⡿⠿⠿⠿⠀⢸⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⣠⣾⣿⠟⠁⠀⠀⠀⣰⣿⣿⣁⣸⣿⣿⡄⠀[38;5;255m⠀⠀⣿⣿ ⠀⠀ ⣿⣿⢈⣛⠿⠿⠿⣿⣷⡄⠀[0m
+[38;5;27m⠀⠀⠀⠀⠸⣿⣿⣿⣿⣿⣿⣿⣿⣉⡟⠀⠀[38;5;255m ⢸⣿⣧⣤⣤⣤⣤⢸⣿⣿⣦⣤⣤⣤⡄⣿⣿⡇⣾⣿⣿⣧⣤⣤⣤⡄⢰⣿⣿⠟⠛⠛⠻⣿⣿⡄[38;5;255m⢠⡀⠻⣿⣿⣦⣴⣿⣿⠇⢿⣿⣦⣤⣤⣿⣿⠇⣠[0m
+[38;5;27m⠀⠀⠀⠀⢰⡈⠛⠿⣿⣿⣿⣿⣿⠋⠀  [38;5;255m ⠘⠛⠛⠛⠛⠛⠛⠈⠛⠛⠛⠛⠛⠛⠃⠛⠛⠃⠛⠛⠛⠛⠛⠛⠛⠃⠛⠛⠃⠀⠀⠀⠀⠙⠛⠃[38;5;255m⠘⠛⠀⠈⠛⠛⠛⠛⠁⠀⠀⠙⠛⠛⠛⠛⠁⠚⠛[0m
+[38;5;27m⠀⠀⠀⠀⢸⣿⡦⠀⠀⠉⠛⠿⠃⠀⠀⠀ [38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+
+[38;5;51mVersion: monorepo[0m
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[36m Info      [39m Successfully loaded character from: /Users/playra/vibee-eliza-999/vibee.character.json
+[36m Info      [39m Successfully loaded character: VIBEE
+[36m Info      [39m [START] Entering AgentServer.start()...
+[36m Info      [39m [START] isInitialized: false
+[36m Info      [39m [START] Initializing AgentServer...
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+[36m Info      [39m [INIT] Database Dir for SQL plugin: /Users/playra/vibee-eliza-999/.eliza/.elizadb
+[36m Info      [39m [INIT] Skipping database migrations (temporary fix for plugin-sql bug)...
+This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). The promise rejected with the reason:
+ExitStatus {
+  [0mname[2m:[0m [0m[32m[0m[32m"ExitStatus"[0m[0m[0m[2m,[0m
+  [0mmessage[2m:[0m [0m[32m[0m[32m"Program terminated with exit(1)"[0m[0m[0m[2m,[0m
+  [0mstatus[2m:[0m [0m[33m1[0m[0m[2m,[0m
+  [0m__sentry_captured__[2m:[0m [0m[33mtrue[0m[0m[2m,[0m
+}
+[36m Info      [39m [INIT] Skipping default server setup (missing tables)...
+[36m Info      [39m [INIT] Server uses temporary adapter for migrations only
+[36m Info      [39m [INIT] Initializing ElizaOS...
+[36m Info      [39m Public health check endpoints enabled: /healthz and /health (rate limited: 100 req/min)
+[36m Info      [39m Server authentication is DISABLED for public access (demo mode).
+[36m Info      [39m Web UI enabled
+[36m Info      [39m [STATIC] Found client files at: /Users/playra/vibee-eliza-999/packages/server/dist/client
+[36m Info      [39m [STATIC] Serving static files from: /Users/playra/vibee-eliza-999/packages/server/dist/client
+[0m[1m31179 |[0m     [0m[35mif[0m (!keyGenerator) {
+[0m[1m31180 |[0m       [0m[35mreturn[0m[0m[2m;[0m
+[0m[1m31181 |[0m     }
+[0m[1m31182 |[0m     [0m[35mconst[0m src = keyGenerator[0m[3m[1m.toString[0m()[0m[2m;[0m
+[0m[1m31183 |[0m     [0m[35mif[0m ((src[0m[3m[1m.includes[0m([0m[32m"req.ip"[0m) || src[0m[3m[1m.includes[0m([0m[32m"request.ip"[0m)) && !src[0m[3m[1m.includes[0m([0m[32m"ipKeyGenerator"[0m)) {
+[0m[1m31184 |[0m       [0m[35mthrow[0m [0m[35mnew[0m [0m[1mValidationError[0m([0m[32m"ERR_ERL_KEY_GEN_IPV6"[0m, [0m[32m"Custom keyGenerator appears to use request IP without calling the ipKeyGenerator helper function for IPv6 addresses. This could allow IPv6 users to bypass limits."[0m)[0m[2m;[0m
+                    [31m[1m^[0m
+[0m[31mValidationError[0m[2m:[0m [1mCustom keyGenerator appears to use request IP without calling the ipKeyGenerator helper function for IPv6 addresses. This could allow IPv6 users to bypass limits. See https://express-rate-limit.github.io/ERR_ERL_KEY_GEN_IPV6/ for more information.[0m
+ help[0m[2m:[0m [0m[32m"https://express-rate-limit.github.io/ERR_ERL_KEY_GEN_IPV6/"[0m[0m[2m,[0m
+ code[0m[2m:[0m [32m"ERR_ERL_KEY_GEN_IPV6"[0m
+
+[0m      [2mat [0m[0m[1m[3mkeyGeneratorIpFallback[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m31184[0m[2m:[33m13[0m[2m)[0m
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m31214[0m[2m:[33m22[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3mparseOptions[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m31272[0m[2m:[33m16[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3mrateLimit[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m31346[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3mcreateApiRouter[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m43340[0m[2m:[33m15[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3minitializeServer[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61573[0m[2m:[33m25[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3minitializeServer[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61226[0m[2m:[33m26[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3minitialize[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61158[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync start[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61727[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[2masync <anonymous>[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/cli/src/commands/start/index.ts[0m[2m:[0m[33m159[0m[2m:[33m20[0m[2m)[0m
+
+[36m Info      [39m [Jobs API] Started job cleanup interval
+[36m Info      [39m [SocketIO] Router initialized with 0 agents
+[36m Info      [39m [SocketIO] Setting up Socket.IO event listeners
+[36m Info      [39m [SocketIO] Registered message types: 1: ROOM_JOINING, 2: SEND_MESSAGE, 3: MESSAGE, 4: ACK, 5: THINKING, 6: CONTROL, ROOM_JOINING: 1, SEND_MESSAGE: 2, MESSAGE: 3, ACK: 4, THINKING: 5, CONTROL: 6
+[36m Info      [39m [START] AgentServer initialized successfully
+[36m Info      [39m [START] Resolving port... (config: undefined)
+[36m Info      [39m [START] Resolved port: 3000
+[36m Info      [39m [START] Server instance exists: true
+[36m Info      [39m [START] Calling startHttpServer(3000)...
+[36m Info      [39m [HTTPSERVER] Entering startHttpServer()...
+[36m Info      [39m [HTTPSERVER] Port: 3000
+[36m Info      [39m [HTTPSERVER] Creating HTTP server...
+[36m Info      [39m [HTTPSERVER] this.app exists: true
+[36m Info      [39m [HTTPSERVER] Current agents count: 0
+[36m Info      [39m [HTTPSERVER] Environment: development
+[36m Info      [39m [HTTPSERVER] Host: 0.0.0.0
+[36m Info      [39m [HTTPSERVER] Calling this.server.listen(3000, 0.0.0.0)...
+[36m Info      [39m [HTTPSERVER] HTTP server setup completed without errors
+[36m Info      [39m [HTTPSERVER] Server is now listening!
+AgentServer is listening on port 3000
+[36m Info      [39m [HTTPSERVER] Resolving promise - server is listening!
+[36m Info      [39m [START] startHttpServer completed successfully
+[36m Info      [39m [START] Set SERVER_PORT=3000
+[36m Info      [39m Final plugins being loaded: {
+  [0mplugins[2m:[0m [ [0m[32m"@elizaos/plugin-sql"[0m[0m[0m[2m,[0m [0m[32m"bootstrap"[0m[0m[0m[2m,[0m [0m[32m"telegram-craft"[0m[0m ][0m[2m,[0m
+}
+[36m Info      [39m plugin-sql init starting...
+[36m Info      [39m Database adapter created and registered
+[36m Info      [39m #VIBEE  Registering service: task
+[36m Info      [39m #VIBEE  Registering service: embedding-generation
+🔧 Initializing Telegram Craft Plugin...
+✅ [Plugin] TelegramService will be auto-registered by ElizaOS
+🔍 [Plugin] Services in plugin definition: [0m[33m1[0m
+🔍 [Plugin] Service types: [ [0m[32m"telegram-craft"[0m[0m ]
+✅ Telegram Craft Plugin initialized with strategy: mtproto
+📦 Registered 6 actions
+📡 Registered 5 providers
+⚙️  Registered 1 services
+[36m Info      [39m #VIBEE  Registering service: telegram-craft
+[36m Info      [39m #VIBEE  Running plugin migrations...
+[36m Info      [39m #VIBEE  Found 1 plugins with schemas to migrate.
+[36m Info      [39m [RuntimeMigrator] Initializing migration system...
+[0m[31m[1m[97m[41m Error     [49m[39m[22m #VIBEE  Failed query: CREATE SCHEMA migrations
+params:  {
+  [0merror[2m:[0m [0m[1m36 |[0m   [0m[35masync[0m queryWithCache(queryString, params, query) {
+[0m[1m37 |[0m     [0m[35mif[0m ([0m[33mthis[0m.cache === [0m[35mvoid[0m [0m[33m0[0m || is([0m[33mthis[0m.cache, NoopCache) || [0m[33mthis[0m.queryMetadata === [0m[35mvoid[0m [0m[33m0[0m) {
+[0m[1m38 |[0m       [0m[35mtry[0m {
+[0m[1m39 |[0m         [0m[35mreturn[0m [0m[35mawait[0m query()[0m[2m;[0m
+[0m[1m40 |[0m       } [0m[35mcatch[0m (e) {
+[0m[1m41 |[0m         [0m[35mthrow[0m [0m[35mnew[0m [0m[1mDrizzleQueryError[0m(queryString, params, e)[0m[2m;[0m
+                   [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1mFailed query: CREATE SCHEMA migrations
+params: [0m
+  query[0m[2m:[0m [0m[32m"CREATE SCHEMA migrations"[0m[0m[2m,[0m
+ params[0m[2m:[0m [][0m[2m,[0m
+  cause[0m[2m:[0m [0m[36m[Object ...][0m[0m[2m,[0m
+
+[0m      [2mat [0m[0m[1m[3mqueryWithCache[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mnode_modules/drizzle-orm/pg-core/session.js[0m[2m:[0m[33m41[0m[2m:[33m15[0m[2m)[0m
+[0m[2m,[0m
+} Failed to run plugin migrations[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m #VIBEE  Runtime initialization failed: Failed query: CREATE SCHEMA migrations
+params: [0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m #VIBEE  Failed to register service task: Failed query: CREATE SCHEMA migrations
+params: [0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m #VIBEE  Failed to register service embedding-generation: Failed query: CREATE SCHEMA migrations
+params: [0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m #VIBEE  Failed to register service telegram-craft: Failed query: CREATE SCHEMA migrations
+params: [0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m #VIBEE  Plugin bootstrap failed to register service task: Failed query: CREATE SCHEMA migrations
+params: [0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m #VIBEE  Plugin bootstrap failed to register service embedding-generation: Failed query: CREATE SCHEMA migrations
+params: [0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m #VIBEE  Plugin telegram-craft failed to register service telegram-craft: Failed query: CREATE SCHEMA migrations
+params: [0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m An error occurred: {
+  [0merror[2m:[0m [0m[1m36 |[0m   [0m[35masync[0m queryWithCache(queryString, params, query) {
+[0m[1m37 |[0m     [0m[35mif[0m ([0m[33mthis[0m.cache === [0m[35mvoid[0m [0m[33m0[0m || is([0m[33mthis[0m.cache, NoopCache) || [0m[33mthis[0m.queryMetadata === [0m[35mvoid[0m [0m[33m0[0m) {
+[0m[1m38 |[0m       [0m[35mtry[0m {
+[0m[1m39 |[0m         [0m[35mreturn[0m [0m[35mawait[0m query()[0m[2m;[0m
+[0m[1m40 |[0m       } [0m[35mcatch[0m (e) {
+[0m[1m41 |[0m         [0m[35mthrow[0m [0m[35mnew[0m [0m[1mDrizzleQueryError[0m(queryString, params, e)[0m[2m;[0m
+                       [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1mFailed query: CREATE SCHEMA migrations
+params: [0m
+  query[0m[2m:[0m [0m[32m"CREATE SCHEMA migrations"[0m[0m[2m,[0m
+ params[0m[2m:[0m [][0m[2m,[0m
+  cause[0m[2m:[0m [0m[36m[Object ...][0m[0m[2m,[0m
+
+[0m      [2mat [0mqueryWithCache[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mnode_modules/drizzle-orm/pg-core/session.js[0m[2m:[0m[33m41[0m[2m:[33m19[0m[2m)[0m
+[0m      [2mat [0mprocessTicksAndRejections[2m ([0m[0m[36mnative[0m[2m:[0m[33m7[0m[2m:[33m39[0m[2m)[0m
+[0m[2m,[0m
+}[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m Error details: {
+  [0mmessage[2m:[0m [0m[32m[0m[32m"Failed query: CREATE SCHEMA migrations\nparams: "[0m[0m[0m[2m,[0m
+}[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m Stack trace: {
+  [0mstack[2m:[0m [0m[32m[0m[32m"Error: Failed query: CREATE SCHEMA migrations\nparams: \n    at queryWithCache (/Users/playra/vibee-eliza-999/node_modules/drizzle-orm/pg-core/session.js:41:19)\n    at processTicksAndRejections (native:7:39)"[0m[0m[0m[2m,[0m
+}[0m

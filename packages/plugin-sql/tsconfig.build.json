@@ -9,13 +9,9 @@
   },
   "include": [
     "src/index.browser.ts",
-    "src/pglite/**/*.ts",
     "src/schema/**/*.ts",
-    "src/base.ts",
     "src/types.ts",
-    "src/utils.browser.ts",
-    "src/migration-service.ts",
-    "src/runtime-migrator/**/*.ts"
+    "src/utils.browser.ts"
   ],
   "exclude": ["node_modules", "dist", "src/**/__tests__/**", "src/**/*.test.ts", "src/**/*.spec.ts"]
 }

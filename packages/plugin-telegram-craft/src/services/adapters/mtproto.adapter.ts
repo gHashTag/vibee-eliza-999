@@ -1,6 +1,6 @@
 import { TelegramClient } from "telegram";
-import { StringSession } from "telegram/sessions";
-import { NewMessage, NewMessageEvent } from "telegram/events";
+import { StringSession } from "telegram/sessions/index.js";
+import { NewMessage, NewMessageEvent } from "telegram/events/index.js";
 import {
   ITelegramAdapter,
   ITelegramConfig,

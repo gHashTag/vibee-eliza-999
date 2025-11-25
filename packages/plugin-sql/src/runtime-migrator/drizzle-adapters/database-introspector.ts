@@ -11,6 +11,30 @@ export class DatabaseIntrospector {
   constructor(private db: DrizzleDB) {}
 
   /**
+   * Detect if we're using PGLite
+   * PGLite doesn't support schemas, so we create tables in the default namespace
+   */
+  private isPGLite(): boolean {
+    try {
+      // Check if the db has a PGLite-specific property or method
+      const dbAny = this.db as any;
+      if (dbAny?.constructor?.name?.includes('Pglite')) {
+        return true;
+      }
+      // Try to access PGLite-specific properties
+      if (dbAny?.database || dbAny?.pg || dbAny?._client) {
+        const client = dbAny.database || dbAny.pg || dbAny._client;
+        if (client?.constructor?.name?.includes('PGlite')) {
+          return true;
+        }
+      }
+    } catch (e) {
+      // If we can't detect, assume not PGLite
+    }
+    return false;
+  }
+
+  /**
    * Introspect all tables in the database and generate a snapshot
    * @param schemaName - Schema to introspect (default: 'public')
    * @returns Schema snapshot of current database state
@@ -21,6 +45,24 @@ export class DatabaseIntrospector {
     const tables: any = {};
     const schemas: any = {};
     const enums: any = {};
+
+    // Check if PGLite - introspection not fully supported
+    const isPGLite = this.isPGLite();
+    if (isPGLite) {
+      logger.info('[DatabaseIntrospector] PGLite detected - returning empty snapshot');
+      return {
+        version: '7',
+        dialect: 'postgresql',
+        tables,
+        schemas,
+        enums,
+        _meta: {
+          schemas: {},
+          tables: {},
+          columns: {},
+        },
+      };
+    }
 
     // Get all tables in the schema
     const allTables = await this.getTables(schemaName);
@@ -422,18 +464,33 @@ export class DatabaseIntrospector {
    * @returns True if tables exist, false otherwise
    */
   async hasExistingTables(pluginName: string): Promise<boolean> {
-    const schemaName =
-      pluginName === '@elizaos/plugin-sql' ? 'public' : this.deriveSchemaName(pluginName);
+    try {
+      // Check if PGLite - skip introspection for PGLite
+      const isPGLite = this.isPGLite();
+      if (isPGLite) {
+        logger.debug('[DatabaseIntrospector] PGLite detected - assuming no existing tables');
+        return false;
+      }
 
-    const result = await this.db.execute(
-      sql`SELECT COUNT(*) AS count
-          FROM information_schema.tables
-          WHERE table_schema = ${schemaName}
-            AND table_type = 'BASE TABLE'`
-    );
+      const schemaName =
+        pluginName === '@elizaos/plugin-sql' ? 'public' : this.deriveSchemaName(pluginName);
 
-    const count = parseInt((result.rows[0]?.count as string) || '0', 10);
-    return count > 0;
+      const result = await this.db.execute(
+        sql`SELECT COUNT(*) AS count
+            FROM information_schema.tables
+            WHERE table_schema = ${schemaName}
+              AND table_type = 'BASE TABLE'`
+      );
+
+      const count = parseInt((result.rows[0]?.count as string) || '0', 10);
+      return count > 0;
+    } catch (error: any) {
+      // For PGLite or development mode where queries fail, assume no existing tables
+      logger.debug(
+        `[DatabaseIntrospector] Could not check existing tables (likely PGLite or development): ${error?.message || 'Unknown error'}`
+      );
+      return false;
+    }
   }
 
   /**

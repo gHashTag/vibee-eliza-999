@@ -23,11 +23,9 @@ import path, { basename, dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Server as SocketIOServer } from 'socket.io';
 import { createApiRouter, createPluginRouteHandler, setupSocketIO } from './api/index.js';
-// import {
-//   messageBusConnectorPlugin,
-//   setGlobalElizaOS,
-//   setGlobalAgentServer,
-// } from './services/message.js';
+import {
+  messageBusConnectorPlugin,
+} from './services/message.js';
 import internalMessageBus from './bus.js';
 import { loadCharacterTryPath, jsonToCharacter } from './loader.js';
 import sqlPlugin, {
@@ -38,9 +36,9 @@ import sqlPlugin, {
   assignAgentToOwner,
   applyRLSToNewTables,
   uninstallRLS,
+  DatabaseMigrationService,
 } from '@elizaos/plugin-sql';
 import { encryptedCharacter, stringToUuid, type Plugin } from '@elizaos/core';
-import { sql } from 'drizzle-orm';
 
 // Sentry setup with error handling - DO NOT BLOCK on errors
 import * as Sentry from '@sentry/node';
@@ -366,10 +364,7 @@ export class AgentServer {
       await this.database.init();
       logger.success('Database initialized for server operations');
 
-      // TEMPORARY: Skip migrations due to plugin-sql introspection bug
       // Run migrations for the SQL plugin schema
-      logger.info('[INIT] Skipping database migrations (temporary fix for plugin-sql bug)...');
-      /*
       try {
         const migrationService = new DatabaseMigrationService();
 
@@ -390,7 +385,6 @@ export class AgentServer {
           `Database migration failed: ${migrationError instanceof Error ? migrationError.message : String(migrationError)}`
         );
       }
-      */
 
       const rlsEnabled = process.env.ENABLE_RLS_ISOLATION === 'true';
       const rlsOwnerIdString = process.env.RLS_OWNER_ID;
@@ -495,7 +489,8 @@ export class AgentServer {
     }
   }
 
-  private async ensureDefaultServer(): Promise<void> {
+  /*
+  private async _ensureDefaultServer(): Promise<void> {
     try {
       // When RLS is enabled, create a server per owner instead of a shared default server
       const rlsEnabled = process.env.ENABLE_RLS_ISOLATION === 'true';
@@ -575,6 +570,7 @@ export class AgentServer {
       throw error; // Re-throw to prevent startup if default server can't be created
     }
   }
+  */
 
   /**
    * Initializes the server with the provided configuration.
@@ -593,8 +589,8 @@ export class AgentServer {
       // Initialize middleware and database
       this.app = express();
 
-      // Trust proxy for proper rate limiting behind load balancers
-      this.app.set('trust proxy', true);
+      // Trust proxy for proper rate limiting behind load balancers (disabled in dev to avoid IPv6 issues)
+      // this.app.set('trust proxy', true);
 
       // Security headers first - before any other middleware
       const isProd = process.env.NODE_ENV === 'production';
@@ -708,11 +704,7 @@ export class AgentServer {
         message: 'Too many health check requests from this IP, please try again later.',
         standardHeaders: true,
         legacyHeaders: false,
-        keyGenerator: (req) => {
-          // Handle trust proxy properly for rate limiting
-          const ip = req.ip || req.connection?.remoteAddress || 'unknown';
-          return ip;
-        },
+        // Removed custom keyGenerator to avoid IPv6 issues
         skip: (req) => {
           // Skip rate limiting for internal/private IPs (Docker, Kubernetes)
           const ip = req.ip || '';

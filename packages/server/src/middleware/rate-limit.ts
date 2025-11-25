@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { logger } from '@elizaos/core';
 import { validateChannelId } from '../api/shared/validation';
 
@@ -18,11 +18,7 @@ export const createApiRateLimit = () => {
     },
     standardHeaders: true, // Return rate limit info in the `RateLimitInfo` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    keyGenerator: (req) => {
-      // Handle trust proxy properly for rate limiting
-      const ip = req.ip || req.connection?.remoteAddress || 'unknown';
-      return ip;
-    },
+    keyGenerator: ipKeyGenerator as any, // Use the official ipKeyGenerator for IPv6 support
     handler: (req, res) => {
       const clientIp = req.ip || 'unknown';
       logger.warn(`[SECURITY] Rate limit exceeded for IP: ${clientIp}`);

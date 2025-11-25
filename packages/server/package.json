@@ -58,6 +58,7 @@
   },
   "gitHead": "255e37c0e4a76da0b776219db5ebb9dadf20e89f",
   "dependencies": {
+    "@elizaos/api-client": "workspace:*",
     "@elizaos/core": "workspace:*",
     "@elizaos/plugin-sql": "workspace:*",
     "@elizaos/plugin-telegram-craft": "workspace:*",

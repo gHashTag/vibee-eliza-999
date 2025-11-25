@@ -493,16 +493,22 @@ export class MessageBusService extends Service {
 
       // Prepare world and room IDs
       const { agentWorldId, agentRoomId } = await this.ensureWorldAndRoomExist(message);
-      logger.info(`[${this.runtime.character.name}] MessageBusService: Ensured world and room exist`);
+      logger.info(
+        `[${this.runtime.character.name}] MessageBusService: Ensured world and room exist`
+      );
       const agentAuthorEntityId = await this.ensureAuthorEntityExists(message);
-      logger.info(`[${this.runtime.character.name}] MessageBusService: Ensured author entity exists`);
+      logger.info(
+        `[${this.runtime.character.name}] MessageBusService: Ensured author entity exists`
+      );
 
       // Generate deterministic memory ID
       const uniqueMemoryId = createUniqueUuid(
         this.runtime,
         `${message.id}-${this.runtime.agentId}`
       );
-      logger.info(`[${this.runtime.character.name}] MessageBusService: Generated unique memory ID: ${uniqueMemoryId}`);
+      logger.info(
+        `[${this.runtime.character.name}] MessageBusService: Generated unique memory ID: ${uniqueMemoryId}`
+      );
 
       // Check if this memory already exists (in case of duplicate processing)
       const existingMemory = await this.runtime.getMemoryById(uniqueMemoryId);
@@ -512,7 +518,9 @@ export class MessageBusService extends Service {
         );
         return;
       }
-      logger.info(`[${this.runtime.character.name}] MessageBusService: Memory does not exist, proceeding`);
+      logger.info(
+        `[${this.runtime.character.name}] MessageBusService: Memory does not exist, proceeding`
+      );
 
       // Prepare message content
       const messageContent: Content = {
@@ -601,23 +609,29 @@ export class MessageBusService extends Service {
               logger.info(
                 `[${this.runtime.character.name}] MessageBusService: Successfully sent agent response to bus`
               );
-          },
-          onError: async (error: Error) => {
-            responseReceived = true;
-            if (responseTimeoutId) {
-              clearTimeout(responseTimeoutId);
-            }
-            logger.error(
-              `[${this.runtime.character.name}] MessageBusService: ❌ onError called! Error processing message via elizaOS.sendMessage()`,
-              error.message
-            );
-            logger.error(
-              `[${this.runtime.character.name}] MessageBusService: Error stack:`,
-              error.stack
-            );
-          },
-        }
-      );
+            },
+            onError: async (error: Error) => {
+              responseReceived = true;
+              if (responseTimeoutId) {
+                clearTimeout(responseTimeoutId);
+              }
+              logger.error(
+                `[${this.runtime.character.name}] MessageBusService: ❌ onError called! Error processing message via elizaOS.sendMessage()`,
+                error.message
+              );
+              logger.error(
+                `[${this.runtime.character.name}] MessageBusService: Error stack:`,
+                error.stack
+              );
+            },
+          }
+        );
+      } catch (innerError) {
+        logger.error(
+          `[${this.runtime.character.name}] MessageBusService: Error during elizaOS.sendMessage execution:`,
+          innerError instanceof Error ? innerError.message : String(innerError)
+        );
+      }
 
       logger.info(
         `[${this.runtime.character.name}] MessageBusService: elizaOS.sendMessage() call completed, waiting for response...`
@@ -668,38 +682,8 @@ export class MessageBusService extends Service {
       logger.info('[MessageBusService] Message deleted:', data.messageId);
       // Handle message deletion logic here
     } catch (error) {
-      logger.error('[MessageBusService] Error handling message deletion:', error);
-    }
-  }
-
-  private async handleMessageUpdated(data: { messageId: string }) {
-    try {
-      // Convert the central message ID to the agent's unique memory ID
-      const agentMemoryId = createUniqueUuid(this.runtime, data.messageId);
-
-      // Try to find and delete the existing memory
-      const existingMemory = await this.runtime.getMemoryById(agentMemoryId);
-
-      if (existingMemory) {
-        if (!this.runtime.messageService) {
-          logger.error(
-            `[${this.runtime.character.name}] MessageBusService: messageService is not initialized, cannot delete message`
-          );
-          return;
-        }
-
-        await this.runtime.messageService.deleteMessage(this.runtime, existingMemory);
-        logger.debug(
-          `[${this.runtime.character.name}] MessageBusService: Successfully processed message deletion for ${data.messageId}`
-        );
-      } else {
-        logger.warn(
-          `[${this.runtime.character.name}] MessageBusService: No memory found for deleted message ${data.messageId}`
-        );
-      }
-    } catch (error) {
       logger.error(
-        `[${this.runtime.character.name}] MessageBusService: Error handling message deletion:`,
+        '[MessageBusService] Error handling message deletion:',
         error instanceof Error ? error.message : String(error)
       );
     }

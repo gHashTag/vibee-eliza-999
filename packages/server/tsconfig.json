@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "target": "ESNext",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["node"],
     "jsx": "react-jsx",
     "rootDir": "src",
     "moduleResolution": "bundler",

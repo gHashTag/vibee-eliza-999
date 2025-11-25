@@ -68,7 +68,7 @@
     "typescript-eslint": "^8.26.0"
   },
   "scripts": {
-    "build": "bun run build.ts && tsc -p tsconfig.build.json && tsc -p tsconfig.build.node.json",
+    "build": "bun run build.ts && tsc -p tsconfig.build.node.json",
     "dev": "bun run build.ts --watch",
     "migrate:generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate",

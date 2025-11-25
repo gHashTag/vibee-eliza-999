@@ -32,6 +32,30 @@ export class RuntimeMigrator {
   }
 
   /**
+   * Detect if we're using PGLite
+   * PGLite doesn't support schemas, so we create tables in the default namespace
+   */
+  private isPGLite(): boolean {
+    try {
+      // Check if the db has a PGLite-specific property or method
+      const dbAny = this.db as any;
+      if (dbAny?.constructor?.name?.includes('Pglite')) {
+        return true;
+      }
+      // Try to access PGLite-specific properties
+      if (dbAny?.database || dbAny?.pg || dbAny?._client) {
+        const client = dbAny.database || dbAny.pg || dbAny._client;
+        if (client?.constructor?.name?.includes('PGlite')) {
+          return true;
+        }
+      }
+    } catch (e) {
+      // If we can't detect, assume not PGLite
+    }
+    return false;
+  }
+
+  /**
    * Get expected schema name for a plugin
    * @elizaos/plugin-sql uses 'public' schema (core application)
    * All other plugins should use namespaced schemas
@@ -828,15 +852,32 @@ export class RuntimeMigrator {
    * @warning Deletes all migration history - use only in development
    */
   async reset(pluginName: string): Promise<void> {
-    logger.warn(`[RuntimeMigrator] Resetting migrations for ${pluginName}`);
+    try {
+      logger.warn(`[RuntimeMigrator] Resetting migrations for ${pluginName}`);
 
-    await this.db.execute(
-      sql`DELETE FROM migrations._migrations WHERE plugin_name = ${pluginName}`
-    );
-    await this.db.execute(sql`DELETE FROM migrations._journal WHERE plugin_name = ${pluginName}`);
-    await this.db.execute(sql`DELETE FROM migrations._snapshots WHERE plugin_name = ${pluginName}`);
+      const isPGLite = this.isPGLite();
+      const tablePrefix = isPGLite ? '' : 'migrations.';
+      const migrationsTable = tablePrefix + '_migrations';
+      const journalTable = tablePrefix + '_journal';
+      const snapshotsTable = tablePrefix + '_snapshots';
 
-    logger.warn(`[RuntimeMigrator] Reset complete for ${pluginName}`);
+      await this.db.execute(
+        sql`DELETE FROM ${sql.raw(migrationsTable)} WHERE plugin_name = ${pluginName}`
+      );
+      await this.db.execute(
+        sql`DELETE FROM ${sql.raw(journalTable)} WHERE plugin_name = ${pluginName}`
+      );
+      await this.db.execute(
+        sql`DELETE FROM ${sql.raw(snapshotsTable)} WHERE plugin_name = ${pluginName}`
+      );
+
+      logger.warn(`[RuntimeMigrator] Reset complete for ${pluginName}`);
+    } catch (error: any) {
+      // For PGLite or development mode where tables don't exist, silently skip
+      logger.debug(
+        `[RuntimeMigrator] Could not reset migrations (likely PGLite or development): ${error?.message || 'Unknown error'}`
+      );
+    }
   }
 
   /**

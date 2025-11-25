@@ -255,7 +255,9 @@ export async function generateMigrationSQL(
 
   // Create schemas first (following drizzle-kit pattern)
   for (const schema of schemasToCreate) {
-    statements.push(`CREATE SCHEMA IF NOT EXISTS "${schema}";`);
+    // PGLite doesn't support "IF NOT EXISTS", so we just create the schema
+    // If it already exists, the error will be caught at runtime
+    statements.push(`CREATE SCHEMA "${schema}";`);
   }
 
   // Phase 2: Generate CREATE TABLE statements for new tables (WITHOUT foreign keys)

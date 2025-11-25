@@ -1,0 +1,13 @@
+$ bun run build.ts
+🚀 Building @elizaos/plugin-vibe-face-avatar...
+
+✓ Cleaned dist directory (3.44ms)
+✓ Configuration prepared (0.30ms)
+
+Bundling with Bun...
+✓ Built 2 file(s) - 0.24MB (16.51ms)
+✓ Post-build tasks completed (0.50ms)
+TypeScript config not found at ./tsconfig.build.json, skipping d.ts generation
+
+✅ @elizaos/plugin-vibe-face-avatar build complete!
+⏱️  Total build time: 21.55ms

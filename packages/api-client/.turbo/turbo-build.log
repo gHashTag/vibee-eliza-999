@@ -1,0 +1,15 @@
+$ bun run build.ts
+🚀 Building @elizaos/api-client...
+
+✓ Cleaned dist directory (32.94ms)
+✓ Configuration prepared (0.29ms)
+
+Bundling with Bun...
+✓ Built 2 file(s) - 0.12MB (10.92ms)
+Generating TypeScript declarations...
+✓ TypeScript declarations generated successfully (2538.69ms)
+✓ Post-build tasks completed (2538.72ms)
+
+✅ @elizaos/api-client build complete!
+⏱️  Total build time: 2583.43ms
+✓ Created root index.d.ts

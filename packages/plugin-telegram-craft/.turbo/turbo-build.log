@@ -1,0 +1,11 @@
+$ bun run build.ts
+🚀 Building @elizaos/plugin-telegram-craft...
+
+✓ Cleaned dist directory (2.00ms)
+✓ Configuration prepared (0.23ms)
+
+Bundling with Bun...
+✓ Built 2 file(s) - 0.22MB (5.12ms)
+
+✅ @elizaos/plugin-telegram-craft build complete!
+⏱️  Total build time: 7.63ms

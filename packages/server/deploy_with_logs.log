@@ -1,0 +1,221 @@
+==> Verifying app config
+Validating --config path unset--
+[32m✓[0m Configuration is valid
+--> Verified app config
+==> Building image
+Waiting for depot builder...
+
+==> Building image with Depot
+--> build:  (​)
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile:
+#1 transferring dockerfile: 749B 0.8s done
+#1 DONE 0.8s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 0.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context:
+#3 transferring context: 2B 0.5s done
+#3 DONE 0.6s
+
+#4 [1/9] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+#4 resolve docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435 done
+#4 DONE 0.0s
+
+#5 [2/9] WORKDIR /app
+#5 CACHED
+
+#6 [internal] load build context
+#6 ...
+
+#7 [3/9] RUN npm install -g pnpm
+#7 2.163 
+#7 2.163 added 1 package in 2s
+#7 2.163 
+#7 2.163 1 package is looking for funding
+#7 2.163   run `npm fund` for details
+#7 2.165 npm notice
+#7 2.165 npm notice New major version of npm available! 10.8.2 -> 11.6.3
+#7 2.165 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.3
+#7 2.165 npm notice To update run: npm install -g npm@11.6.3
+#7 2.165 npm notice
+#7 DONE 2.3s
+
+#6 [internal] load build context
+#6 transferring context: 5.59MB 5.0s
+#6 transferring context: 27.81MB 10.0s
+#6 transferring context: 62.07MB 15.1s
+#6 transferring context: 70.62MB 16.6s done
+#6 DONE 16.7s
+
+#8 [4/9] COPY . .
+#8 DONE 1.5s
+
+#9 [5/9] RUN ls -la
+#9 0.104 total 472
+#9 0.104 drwxr-xr-x    1 root     root          4096 Nov 25 06:28 .
+#9 0.104 drwxr-xr-x    1 root     root          4096 Nov 25 06:29 ..
+#9 0.104 drwxr-xr-x    3 root     root          4096 Nov 25 06:28 .eliza
+#9 0.104 -rw-r--r--    1 root     root            54 Nov 23 09:48 .env.example
+#9 0.104 -rw-r--r--    1 root     root            76 Nov 23 09:48 .gitignore
+#9 0.104 drwxr-xr-x    2 root     root          4096 Nov 25 06:28 .turbo
+#9 0.104 -rw-r--r--    1 root     root           673 Nov 24 14:35 Dockerfile
+#9 0.104 -rw-r--r--    1 root     root          8348 Nov 24 15:49 README.md
+#9 0.104 -rw-r--r--    1 root     root          3031 Nov 24 16:41 build.ts
+#9 0.104 -rw-r--r--    1 root     root           279 Nov 23 09:48 bunfig.toml
+#9 0.104 -rw-r--r--    1 root     root          8739 Nov 24 18:08 deploy6.log
+#9 0.104 -rw-r--r--    1 root     root           861 Nov 25 06:28 deploy_with_logs.log
+#9 0.104 drwxr-xr-x   11 root     root          4096 Nov 25 06:27 dist
+#9 0.104 drwxr-xr-x    3 root     root          4096 Nov 25 06:12 drizzle
+#9 0.104 -rw-------    1 root     root           339 Nov 25 06:12 drizzle.config.ts
+#9 0.104 drwxr-xr-x    2 root     root          4096 Nov 25 06:28 examples
+#9 0.104 drwxr-xr-x    6 root     root          4096 Nov 25 06:17 node_modules
+#9 0.104 -rw-r--r--    1 root     root          2407 Nov 25 06:12 package.json
+#9 0.104 drwxr-xr-x    2 root     root          4096 Nov 25 06:28 scripts
+#9 0.104 drwxr-xr-x   12 root     root          4096 Nov 25 06:09 src
+#9 0.104 -rw-r--r--    1 root     root           385 Nov 23 09:48 tsconfig.build.json
+#9 0.104 -rw-r--r--    1 root     root           779 Nov 23 09:48 tsconfig.json
+#9 0.104 -rw-r--r--    1 root     root        375166 Nov 24 17:06 tsconfig.tsbuildinfo
+#9 DONE 0.1s
+
+#10 [6/9] RUN printf "packages:\n  - 'packages/*'\n  - 'plugin-specification/*'\n" > pnpm-workspace.yaml
+#10 DONE 0.1s
+
+#11 [7/9] RUN cat pnpm-workspace.yaml
+#11 0.083 packages:
+#11 0.083   - 'packages/*'
+#11 0.083   - 'plugin-specification/*'
+#11 DONE 0.1s
+
+#12 [8/9] RUN pnpm install
+#12 0.815  WARN  Moving @types/pg that was installed by a different package manager to "node_modules/.ignored"
+#12 0.816  WARN  Moving prettier that was installed by a different package manager to "node_modules/.ignored"
+#12 0.817  WARN  Moving drizzle-orm that was installed by a different package manager to "node_modules/.ignored"
+#12 1.322  ERR_PNPM_WORKSPACE_PKG_NOT_FOUND  In : "@elizaos/client@workspace:*" is in the dependencies but no package named "@elizaos/client" is present in the workspace
+#12 1.322 
+#12 1.322 This error happened while installing a direct dependency of /app
+#12 1.322 
+#12 1.322 Packages found in the workspace: 
+#12 ERROR: process "/bin/sh -c pnpm install" did not complete successfully: exit code: 1
+------
+ > [8/9] RUN pnpm install:
+0.815  WARN  Moving @types/pg that was installed by a different package manager to "node_modules/.ignored"
+0.816  WARN  Moving prettier that was installed by a different package manager to "node_modules/.ignored"
+0.817  WARN  Moving drizzle-orm that was installed by a different package manager to "node_modules/.ignored"
+1.322  ERR_PNPM_WORKSPACE_PKG_NOT_FOUND  In : "@elizaos/client@workspace:*" is in the dependencies but no package named "@elizaos/client" is present in the workspace
+1.322 
+1.322 This error happened while installing a direct dependency of /app
+1.322 
+1.322 Packages found in the workspace: 
+------
+==> Building image
+Waiting for depot builder...
+
+==> Building image with Depot
+--> build:  (​)
+#1 [internal] load build definition from Dockerfile
+#1 DONE 0.0s
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile:
+#1 transferring dockerfile: 749B 0.8s done
+#1 DONE 0.8s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 0.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context:
+#3 transferring context: 2B 0.5s done
+#3 DONE 0.6s
+
+#4 [1/9] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+#4 resolve docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435 done
+#4 DONE 0.0s
+
+#5 [2/9] WORKDIR /app
+#5 CACHED
+
+#6 [internal] load build context
+#6 ...
+
+#7 [3/9] RUN npm install -g pnpm
+#7 1.497 
+#7 1.497 added 1 package in 1s
+#7 1.497 
+#7 1.497 1 package is looking for funding
+#7 1.497   run `npm fund` for details
+#7 1.499 npm notice
+#7 1.499 npm notice New major version of npm available! 10.8.2 -> 11.6.3
+#7 1.499 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.3
+#7 1.499 npm notice To update run: npm install -g npm@11.6.3
+#7 1.499 npm notice
+#7 DONE 1.6s
+
+#6 [internal] load build context
+#6 transferring context: 309.75kB 2.0s done
+#6 DONE 2.0s
+
+#8 [4/9] COPY . .
+#8 DONE 0.7s
+
+#9 [5/9] RUN ls -la
+#9 0.117 total 476
+#9 0.117 drwxr-xr-x    1 root     root          4096 Nov 25 06:29 .
+#9 0.117 drwxr-xr-x    1 root     root          4096 Nov 25 06:29 ..
+#9 0.117 drwxr-xr-x    3 root     root          4096 Nov 25 06:28 .eliza
+#9 0.117 -rw-r--r--    1 root     root            54 Nov 23 09:48 .env.example
+#9 0.117 -rw-r--r--    1 root     root            76 Nov 23 09:48 .gitignore
+#9 0.117 drwxr-xr-x    2 root     root          4096 Nov 25 06:28 .turbo
+#9 0.117 -rw-r--r--    1 root     root           673 Nov 24 14:35 Dockerfile
+#9 0.117 -rw-r--r--    1 root     root          8348 Nov 24 15:49 README.md
+#9 0.117 -rw-r--r--    1 root     root          3031 Nov 24 16:41 build.ts
+#9 0.117 -rw-r--r--    1 root     root           279 Nov 23 09:48 bunfig.toml
+#9 0.117 -rw-r--r--    1 root     root          8739 Nov 24 18:08 deploy6.log
+#9 0.117 -rw-r--r--    1 root     root          5876 Nov 25 06:29 deploy_with_logs.log
+#9 0.117 drwxr-xr-x   11 root     root          4096 Nov 25 06:27 dist
+#9 0.117 drwxr-xr-x    3 root     root          4096 Nov 25 06:12 drizzle
+#9 0.117 -rw-------    1 root     root           339 Nov 25 06:12 drizzle.config.ts
+#9 0.117 drwxr-xr-x    2 root     root          4096 Nov 25 06:28 examples
+#9 0.117 drwxr-xr-x    6 root     root          4096 Nov 25 06:17 node_modules
+#9 0.117 -rw-r--r--    1 root     root          2407 Nov 25 06:12 package.json
+#9 0.117 drwxr-xr-x    2 root     root          4096 Nov 25 06:28 scripts
+#9 0.117 drwxr-xr-x   12 root     root          4096 Nov 25 06:09 src
+#9 0.117 -rw-r--r--    1 root     root           385 Nov 23 09:48 tsconfig.build.json
+#9 0.117 -rw-r--r--    1 root     root           779 Nov 23 09:48 tsconfig.json
+#9 0.117 -rw-r--r--    1 root     root        375166 Nov 24 17:06 tsconfig.tsbuildinfo
+#9 DONE 0.1s
+
+#10 [6/9] RUN printf "packages:\n  - 'packages/*'\n  - 'plugin-specification/*'\n" > pnpm-workspace.yaml
+#10 DONE 0.1s
+
+#11 [7/9] RUN cat pnpm-workspace.yaml
+#11 0.085 packages:
+#11 0.085   - 'packages/*'
+#11 0.085   - 'plugin-specification/*'
+#11 DONE 0.1s
+
+#12 [8/9] RUN pnpm install
+#12 0.850  WARN  Moving @types/pg that was installed by a different package manager to "node_modules/.ignored"
+#12 0.851  WARN  Moving prettier that was installed by a different package manager to "node_modules/.ignored"
+#12 0.853  WARN  Moving drizzle-orm that was installed by a different package manager to "node_modules/.ignored"
+#12 1.339  ERR_PNPM_WORKSPACE_PKG_NOT_FOUND  In : "@elizaos/client@workspace:*" is in the dependencies but no package named "@elizaos/client" is present in the workspace
+#12 1.339 
+#12 1.339 This error happened while installing a direct dependency of /app
+#12 1.339 
+#12 1.339 Packages found in the workspace: 
+#12 ERROR: process "/bin/sh -c pnpm install" did not complete successfully: exit code: 1
+------
+ > [8/9] RUN pnpm install:
+0.850  WARN  Moving @types/pg that was installed by a different package manager to "node_modules/.ignored"
+0.851  WARN  Moving prettier that was installed by a different package manager to "node_modules/.ignored"
+0.853  WARN  Moving drizzle-orm that was installed by a different package manager to "node_modules/.ignored"
+1.339  ERR_PNPM_WORKSPACE_PKG_NOT_FOUND  In : "@elizaos/client@workspace:*" is in the dependencies but no package named "@elizaos/client" is present in the workspace
+1.339 
+1.339 This error happened while installing a direct dependency of /app
+1.339 
+1.339 Packages found in the workspace: 
+------
+Error: failed to fetch an image or build from source: error building: failed to solve: process "/bin/sh -c pnpm install" did not complete successfully: exit code: 1

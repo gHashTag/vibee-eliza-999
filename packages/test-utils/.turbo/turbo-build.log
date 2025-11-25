@@ -1,0 +1,14 @@
+$ bun run build.ts
+🚀 Building @elizaos/test-utils...
+
+✓ Cleaned dist directory (7.64ms)
+✓ Configuration prepared (0.31ms)
+
+Bundling with Bun...
+✓ Built 2 file(s) - 0.27MB (23.68ms)
+Generating TypeScript declarations...
+✓ TypeScript declarations generated successfully (1947.03ms)
+✓ Post-build tasks completed (1946.69ms)
+
+✅ @elizaos/test-utils build complete!
+⏱️  Total build time: 1979.30ms

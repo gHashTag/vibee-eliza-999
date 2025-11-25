@@ -1,0 +1,14 @@
+$ bun run build.ts
+🚀 Building @elizaos/plugin-dummy-services...
+
+✓ Cleaned dist directory (6.75ms)
+✓ Configuration prepared (0.25ms)
+
+Bundling with Bun...
+✓ Built 2 file(s) - 0.11MB (17.79ms)
+Generating TypeScript declarations...
+✓ TypeScript declarations generated successfully (1677.62ms)
+✓ Post-build tasks completed (1677.65ms)
+
+✅ @elizaos/plugin-dummy-services build complete!
+⏱️  Total build time: 1702.91ms

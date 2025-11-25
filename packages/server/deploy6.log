@@ -1,0 +1,204 @@
+==> Verifying app config
+Validating --config path unset--
+[32m✓[0m Configuration is valid
+--> Verified app config
+==> Building image
+Waiting for depot builder...
+
+==> Building image with Depot
+--> build:  (​)
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile:
+#1 transferring dockerfile: 749B 0.8s done
+#1 DONE 0.8s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 0.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context:
+#3 transferring context: 2B 0.5s done
+#3 DONE 0.6s
+
+#4 [1/9] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+#4 resolve docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435 done
+#4 DONE 0.0s
+
+#5 [2/9] WORKDIR /app
+#5 CACHED
+
+#6 [internal] load build context
+#6 ...
+
+#7 [3/9] RUN npm install -g pnpm
+#7 2.412 
+#7 2.412 added 1 package in 2s
+#7 2.412 
+#7 2.412 1 package is looking for funding
+#7 2.412   run `npm fund` for details
+#7 2.415 npm notice
+#7 2.415 npm notice New major version of npm available! 10.8.2 -> 11.6.3
+#7 2.415 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.3
+#7 2.415 npm notice To update run: npm install -g npm@11.6.3
+#7 2.415 npm notice
+#7 DONE 2.5s
+
+#6 [internal] load build context
+#6 transferring context: 6.07MB 5.0s
+#6 transferring context: 19.11MB 10.0s
+#6 transferring context: 27.61MB 15.1s
+#6 transferring context: 36.22MB 20.1s
+#6 transferring context: 47.39MB 25.1s
+#6 transferring context: 55.81MB 30.2s
+#6 transferring context: 62.98MB 32.8s done
+#6 DONE 32.9s
+
+#8 [4/9] COPY . .
+#8 DONE 0.8s
+
+#9 [5/9] RUN ls -la
+#9 0.105 total 452
+#9 0.105 drwxr-xr-x    1 root     root          4096 Nov 24 18:07 .
+#9 0.105 drwxr-xr-x    1 root     root          4096 Nov 24 18:08 ..
+#9 0.105 drwxr-xr-x    3 root     root          4096 Nov 24 18:07 .eliza
+#9 0.105 -rw-r--r--    1 root     root            54 Nov 23 09:48 .env.example
+#9 0.105 -rw-r--r--    1 root     root            76 Nov 23 09:48 .gitignore
+#9 0.105 drwxr-xr-x    2 root     root          4096 Nov 24 18:07 .turbo
+#9 0.105 -rw-r--r--    1 root     root           673 Nov 24 14:35 Dockerfile
+#9 0.105 -rw-r--r--    1 root     root          8348 Nov 24 15:49 README.md
+#9 0.105 -rw-r--r--    1 root     root          3031 Nov 24 16:41 build.ts
+#9 0.105 -rw-r--r--    1 root     root           279 Nov 23 09:48 bunfig.toml
+#9 0.105 -rw-r--r--    1 root     root           861 Nov 24 18:07 deploy6.log
+#9 0.105 drwxr-xr-x   10 root     root          4096 Nov 24 18:07 dist
+#9 0.105 drwxr-xr-x    2 root     root          4096 Nov 24 18:07 examples
+#9 0.105 drwxr-xr-x    4 root     root          4096 Nov 23 09:49 node_modules
+#9 0.105 -rw-r--r--    1 root     root          2228 Nov 24 16:41 package.json
+#9 0.105 drwxr-xr-x    2 root     root          4096 Nov 24 18:07 scripts
+#9 0.105 drwxr-xr-x   10 root     root          4096 Nov 24 18:05 src
+#9 0.105 -rw-r--r--    1 root     root           385 Nov 23 09:48 tsconfig.build.json
+#9 0.105 -rw-r--r--    1 root     root           779 Nov 23 09:48 tsconfig.json
+#9 0.105 -rw-r--r--    1 root     root        375166 Nov 24 17:06 tsconfig.tsbuildinfo
+#9 DONE 0.1s
+
+#10 [6/9] RUN printf "packages:\n  - 'packages/*'\n  - 'plugin-specification/*'\n" > pnpm-workspace.yaml
+#10 DONE 0.1s
+
+#11 [7/9] RUN cat pnpm-workspace.yaml
+#11 0.058 packages:
+#11 0.058   - 'packages/*'
+#11 0.058   - 'plugin-specification/*'
+#11 DONE 0.1s
+
+#12 [8/9] RUN pnpm install
+#12 0.847  WARN  Moving prettier that was installed by a different package manager to "node_modules/.ignored"
+#12 1.019  ERR_PNPM_WORKSPACE_PKG_NOT_FOUND  In : "@elizaos/client@workspace:*" is in the dependencies but no package named "@elizaos/client" is present in the workspace
+#12 1.019 
+#12 1.019 This error happened while installing a direct dependency of /app
+#12 1.019 
+#12 1.019 Packages found in the workspace: 
+#12 ERROR: process "/bin/sh -c pnpm install" did not complete successfully: exit code: 1
+------
+ > [8/9] RUN pnpm install:
+0.847  WARN  Moving prettier that was installed by a different package manager to "node_modules/.ignored"
+1.019  ERR_PNPM_WORKSPACE_PKG_NOT_FOUND  In : "@elizaos/client@workspace:*" is in the dependencies but no package named "@elizaos/client" is present in the workspace
+1.019 
+1.019 This error happened while installing a direct dependency of /app
+1.019 
+1.019 Packages found in the workspace: 
+------
+==> Building image
+Waiting for depot builder...
+
+==> Building image with Depot
+--> build:  (​)
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile:
+#1 transferring dockerfile: 749B 0.8s done
+#1 DONE 0.8s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context:
+#3 transferring context: 2B 0.5s done
+#3 DONE 0.6s
+
+#4 [1/9] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+#4 resolve docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435 done
+#4 DONE 0.0s
+
+#5 [2/9] WORKDIR /app
+#5 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 101.54kB 1.3s done
+#6 DONE 1.3s
+
+#7 [3/9] RUN npm install -g pnpm
+#7 1.661 
+#7 1.661 added 1 package in 1s
+#7 1.661 
+#7 1.661 1 package is looking for funding
+#7 1.661   run `npm fund` for details
+#7 1.663 npm notice
+#7 1.663 npm notice New major version of npm available! 10.8.2 -> 11.6.3
+#7 1.663 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.3
+#7 1.663 npm notice To update run: npm install -g npm@11.6.3
+#7 1.663 npm notice
+#7 DONE 1.8s
+
+#8 [4/9] COPY . .
+#8 DONE 0.4s
+
+#9 [5/9] RUN ls -la
+#9 0.103 total 456
+#9 0.104 drwxr-xr-x    1 root     root          4096 Nov 24 18:08 .
+#9 0.104 drwxr-xr-x    1 root     root          4096 Nov 24 18:08 ..
+#9 0.104 drwxr-xr-x    3 root     root          4096 Nov 24 18:07 .eliza
+#9 0.104 -rw-r--r--    1 root     root            54 Nov 23 09:48 .env.example
+#9 0.104 -rw-r--r--    1 root     root            76 Nov 23 09:48 .gitignore
+#9 0.104 drwxr-xr-x    2 root     root          4096 Nov 24 18:07 .turbo
+#9 0.104 -rw-r--r--    1 root     root           673 Nov 24 14:35 Dockerfile
+#9 0.104 -rw-r--r--    1 root     root          8348 Nov 24 15:49 README.md
+#9 0.104 -rw-r--r--    1 root     root          3031 Nov 24 16:41 build.ts
+#9 0.104 -rw-r--r--    1 root     root           279 Nov 23 09:48 bunfig.toml
+#9 0.104 -rw-r--r--    1 root     root          5226 Nov 24 18:08 deploy6.log
+#9 0.104 drwxr-xr-x   10 root     root          4096 Nov 24 18:07 dist
+#9 0.104 drwxr-xr-x    2 root     root          4096 Nov 24 18:07 examples
+#9 0.104 drwxr-xr-x    4 root     root          4096 Nov 23 09:49 node_modules
+#9 0.104 -rw-r--r--    1 root     root          2228 Nov 24 16:41 package.json
+#9 0.104 drwxr-xr-x    2 root     root          4096 Nov 24 18:07 scripts
+#9 0.104 drwxr-xr-x   10 root     root          4096 Nov 24 18:05 src
+#9 0.104 -rw-r--r--    1 root     root           385 Nov 23 09:48 tsconfig.build.json
+#9 0.104 -rw-r--r--    1 root     root           779 Nov 23 09:48 tsconfig.json
+#9 0.104 -rw-r--r--    1 root     root        375166 Nov 24 17:06 tsconfig.tsbuildinfo
+#9 DONE 0.1s
+
+#10 [6/9] RUN printf "packages:\n  - 'packages/*'\n  - 'plugin-specification/*'\n" > pnpm-workspace.yaml
+#10 DONE 0.1s
+
+#11 [7/9] RUN cat pnpm-workspace.yaml
+#11 0.093 packages:
+#11 0.093   - 'packages/*'
+#11 0.093   - 'plugin-specification/*'
+#11 DONE 0.1s
+
+#12 [8/9] RUN pnpm install
+#12 0.875  WARN  Moving prettier that was installed by a different package manager to "node_modules/.ignored"
+#12 1.024  ERR_PNPM_WORKSPACE_PKG_NOT_FOUND  In : "@elizaos/client@workspace:*" is in the dependencies but no package named "@elizaos/client" is present in the workspace
+#12 1.024 
+#12 1.024 This error happened while installing a direct dependency of /app
+#12 1.024 
+#12 1.024 Packages found in the workspace: 
+#12 ERROR: process "/bin/sh -c pnpm install" did not complete successfully: exit code: 1
+------
+ > [8/9] RUN pnpm install:
+0.875  WARN  Moving prettier that was installed by a different package manager to "node_modules/.ignored"
+1.024  ERR_PNPM_WORKSPACE_PKG_NOT_FOUND  In : "@elizaos/client@workspace:*" is in the dependencies but no package named "@elizaos/client" is present in the workspace
+1.024 
+1.024 This error happened while installing a direct dependency of /app
+1.024 
+1.024 Packages found in the workspace: 
+------
+Error: failed to fetch an image or build from source: error building: failed to solve: process "/bin/sh -c pnpm install" did not complete successfully: exit code: 1

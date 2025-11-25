@@ -1,0 +1,1 @@
+{"version":3,"file":"runtime.d.ts","sourceRoot":"","sources":["../../src/mocks/runtime.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AAEH,OAAO,KAAK,EAEV,aAAa,EACb,gBAAgB,EAKjB,MAAM,eAAe,CAAC;AAGvB;;GAEG;AACH,MAAM,MAAM,oBAAoB,GAAG,OAAO,CAAC,aAAa,GAAG,gBAAgB,CAAC,CAAC;AAE7E;;;;;;;;;;;;;;;;;;;;GAoBG;AACH,wBAAgB,iBAAiB,CAAC,SAAS,GAAE,oBAAyB,GAAG,aAAa,CAwOrF"}

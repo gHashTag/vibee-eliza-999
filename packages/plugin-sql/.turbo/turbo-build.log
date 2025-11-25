@@ -1,0 +1,27 @@
+$ bun run build.ts && tsc -p tsconfig.build.json && tsc -p tsconfig.build.node.json
+🚀 Building @elizaos/plugin-sql...
+
+✓ Cleaned dist/node directory (3.63ms)
+✓ Configuration prepared (0.28ms)
+
+Bundling with Bun...
+✓ Built 2 file(s) - 1.19MB (16.06ms)
+Generating TypeScript declarations...
+✓ TypeScript declarations generated successfully (1999.72ms)
+✓ Post-build tasks completed (1999.74ms)
+
+✅ @elizaos/plugin-sql build complete!
+⏱️  Total build time: 2020.22ms
+🚀 Building @elizaos/plugin-sql...
+
+✓ Cleaned dist/browser directory (5.88ms)
+✓ Configuration prepared (0.05ms)
+
+Bundling with Bun...
+✓ Built 2 file(s) - 2.70MB (36.61ms)
+Generating TypeScript declarations...
+✓ TypeScript declarations generated successfully (1920.76ms)
+✓ Post-build tasks completed (1920.85ms)
+
+✅ @elizaos/plugin-sql build complete!
+⏱️  Total build time: 1963.48ms

@@ -1,0 +1,198 @@
+==> Verifying app config
+Validating /Users/playra/vibee-eliza-999/fly.toml
+[32m✓[0m Configuration is valid
+--> Verified app config
+==> Building image
+Waiting for depot builder...
+
+==> Building image with Depot
+--> build:  (​)
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile:
+#1 transferring dockerfile: 782B 0.8s done
+#1 DONE 0.8s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 0.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context:
+#3 transferring context: 314B 0.9s done
+#3 DONE 0.9s
+
+#4 [1/8] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+#4 resolve docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435 done
+#4 DONE 0.0s
+
+#5 [2/8] WORKDIR /app
+#5 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 4.55MB 4.9s
+#6 ...
+
+#7 [3/8] RUN apk add --no-cache bash git && npm install -g bun
+#7 0.182 fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/APKINDEX.tar.gz
+#7 0.317 fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/community/x86_64/APKINDEX.tar.gz
+#7 0.762 (1/16) Installing ncurses-terminfo-base (6.5_p20250503-r0)
+#7 0.776 (2/16) Installing libncursesw (6.5_p20250503-r0)
+#7 0.791 (3/16) Installing readline (8.2.13-r1)
+#7 0.807 (4/16) Installing bash (5.2.37-r0)
+#7 0.832 Executing bash-5.2.37-r0.post-install
+#7 0.837 (5/16) Installing brotli-libs (1.1.0-r2)
+#7 0.855 (6/16) Installing c-ares (1.34.5-r0)
+#7 0.865 (7/16) Installing libunistring (1.3-r0)
+#7 0.885 (8/16) Installing libidn2 (2.3.7-r0)
+#7 0.894 (9/16) Installing nghttp2-libs (1.65.0-r0)
+#7 0.902 (10/16) Installing libpsl (0.21.5-r3)
+#7 0.911 (11/16) Installing zstd-libs (1.5.7-r0)
+#7 0.925 (12/16) Installing libcurl (8.14.1-r2)
+#7 0.940 (13/16) Installing libexpat (2.7.3-r0)
+#7 0.949 (14/16) Installing pcre2 (10.46-r0)
+#7 0.964 (15/16) Installing git (2.49.1-r0)
+#7 1.048 (16/16) Installing git-init-template (2.49.1-r0)
+#7 1.059 Executing busybox-1.37.0-r19.trigger
+#7 1.071 OK: 24 MiB in 34 packages
+#7 9.203 
+#7 9.203 added 5 packages in 8s
+#7 9.204 npm notice
+#7 9.204 npm notice New major version of npm available! 10.8.2 -> 11.6.3
+#7 9.204 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.3
+#7 9.204 npm notice To update run: npm install -g npm@11.6.3
+#7 9.204 npm notice
+#7 ...
+
+#6 [internal] load build context
+#6 transferring context: 16.55MB 10.0s
+#6 ...
+
+#7 [3/8] RUN apk add --no-cache bash git && npm install -g bun
+#7 DONE 13.3s
+
+#6 [internal] load build context
+#6 transferring context: 27.66MB 15.4s
+#6 transferring context: 39.27MB 20.5s
+#6 transferring context: 54.56MB 25.5s
+#6 transferring context: 71.28MB 30.6s
+#6 transferring context: 87.70MB 35.8s
+#6 transferring context: 100.06MB 40.0s done
+#6 DONE 40.1s
+
+#8 [4/8] COPY package.json pnpm-workspace.yaml bunfig.toml ./
+#8 DONE 0.3s
+
+#9 [5/8] COPY . .
+#9 DONE 30.8s
+
+#10 [6/8] RUN rm -rf node_modules dist build .env 2>/dev/null || true
+#10 DONE 0.2s
+
+#11 [7/8] RUN bun install
+#11 0.108 bun install v1.3.3 (274e01c7)
+#11 0.158 Resolving dependencies
+#11 1.268 Resolved, downloaded and extracted [354]
+#11 31.54 Saved lockfile
+#11 31.54 
+#11 31.54 $ bash ./scripts/init-submodules.sh
+#11 31.54 Initializing git submodules...
+#11 31.80 Git submodules initialized successfully
+#11 31.80 $ husky
+#11 31.97 
+#11 31.97 + @types/bun@1.3.2 (v1.3.3 available)
+#11 31.97 + @types/js-yaml@4.0.9
+#11 31.97 + @types/node@24.10.1
+#11 31.97 + @types/uuid@11.0.0
+#11 31.97 + @vitejs/plugin-react@5.1.1
+#11 31.97 + bun@1.3.2 (v1.3.3 available)
+#11 31.97 + husky@9.1.7
+#11 31.97 + lerna@9.0.0
+#11 31.97 + nyc@17.1.0
+#11 31.97 + turbo@2.6.1
+#11 31.97 + typescript@5.9.2 (v5.9.3 available)
+#11 31.97 + @infisical/sdk@4.0.6
+#11 31.97 + @sentry/node@10.26.0
+#11 31.97 + helmet@8.1.0
+#11 31.97 + js-yaml@4.1.1
+#11 31.97 + zod@4.1.11 (v4.1.13 available)
+#11 31.97 
+#11 31.97 2256 packages installed [31.86s]
+#11 DONE 36.0s
+
+#12 [8/8] RUN cd packages/server && bun run build
+#12 2.635 $ bun run build.ts
+#12 2.666 🚀 Building @elizaos/server...
+#12 2.666 
+#12 2.739 ✓ Cleaned dist directory (72.51ms)
+#12 2.740 ✓ Configuration prepared (0.60ms)
+#12 2.740 
+#12 2.740 Bundling with Bun...
+#12 2.828 ✓ Built 2 file(s) - 3.74MB (87.84ms)
+#12 2.829 Generating TypeScript declarations...
+#12 8.078 ✓ TypeScript declarations generated successfully (5250.20ms)
+#12 8.078 ✓ Post-build tasks completed (5250.19ms)
+#12 8.078 
+#12 8.078 ✅ @elizaos/server build complete!
+#12 8.078 ⏱️  Total build time: 5412.26ms
+#12 8.079 
+#12 8.079 Copying client assets...
+#12 8.079 Copying assets...
+#12 8.114 ✓ Assets copied (34.08ms)
+#12 8.114 ✓ Client assets copied
+#12 8.114 ✅ All assets copied in parallel (0.03s)
+#12 DONE 8.4s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 55.6s done
+#13 exporting manifest sha256:ad98a6cfbe576e1492535b052dd62b6fb9ecb732934a330abef3239e2ad5ceaa done
+#13 exporting config sha256:c85ff7af948ffcf3bac6880dc2f77383acb2fda13b3421233750e89fc98430a7 done
+#13 pushing layers for registry.fly.io/vibee-eliza-999-prod:deployment-01KAVKV333NDWP6V01MG0AMN1E@sha256:ad98a6cfbe576e1492535b052dd62b6fb9ecb732934a330abef3239e2ad5ceaa
+#13 pushing layer sha256:ad37c9128739ffbd4c63184e17dae71b976de80cd8d1be76128624a7c10fbecb
+#13 pushing layer sha256:c85ff7af948ffcf3bac6880dc2f77383acb2fda13b3421233750e89fc98430a7
+#13 pushing layer sha256:cbd8b3ad4b18c4b69521b06fce75d585b14873dd0ca2a88c85accb4aae153b2a
+#13 pushing layer sha256:2c1ce468d9f3d941396801f6e3afc8921466650dd05430fe644cd3537713d27f
+#13 pushing layer sha256:771e472c6781dd004412f8821e4bd1a07fc1e0b789e69b3d4ece6815b3df2bfb
+#13 pushing layer sha256:8bb244589a3960670f21efc7cf0a740c668f0096accafe4427f9253196a01049
+#13 pushing layer sha256:364c7e43a1b557092aee38971310c06689deca2dec3d570e324b0d711993a247
+#13 pushing layer sha256:5aef6f28f3ca506f255b9c34a9808b430c83da8335102ef35545390173e635cf
+#13 pushing layer sha256:a8f9541324cf1f293f2c8b077029204bbee44bec8d73b99d2f7c90db43797f01
+#13 pushing layer sha256:c7884155f722c35a1461e4fb62bbac1a839c87a56d9f1f0a669d79beaf909601
+#13 pushing layer sha256:8d0942791389860ba03dcdf662238fd175644a9c8838b45efdf1ce81b8c50ba4
+#13 pushing layer sha256:1065fe2b8251d0e1fb9fbb0f3e52529505b0be8ef14d248754d4e25488896ab5
+#13 pushing layer sha256:c7884155f722c35a1461e4fb62bbac1a839c87a56d9f1f0a669d79beaf909601 2.0s done
+#13 pushing layer sha256:364c7e43a1b557092aee38971310c06689deca2dec3d570e324b0d711993a247 2.3s done
+#13 pushing layer sha256:771e472c6781dd004412f8821e4bd1a07fc1e0b789e69b3d4ece6815b3df2bfb 2.6s done
+#13 pushing layer sha256:1065fe2b8251d0e1fb9fbb0f3e52529505b0be8ef14d248754d4e25488896ab5 3.2s done
+#13 pushing layer sha256:2c1ce468d9f3d941396801f6e3afc8921466650dd05430fe644cd3537713d27f 3.5s done
+#13 pushing layer sha256:c85ff7af948ffcf3bac6880dc2f77383acb2fda13b3421233750e89fc98430a7 3.6s done
+#13 pushing layer sha256:8bb244589a3960670f21efc7cf0a740c668f0096accafe4427f9253196a01049 3.5s done
+#13 pushing layer sha256:8d0942791389860ba03dcdf662238fd175644a9c8838b45efdf1ce81b8c50ba4 3.5s done
+#13 pushing layer sha256:ad37c9128739ffbd4c63184e17dae71b976de80cd8d1be76128624a7c10fbecb 4.0s done
+#13 pushing layer sha256:a8f9541324cf1f293f2c8b077029204bbee44bec8d73b99d2f7c90db43797f01 12.8s done
+#13 pushing layer sha256:5aef6f28f3ca506f255b9c34a9808b430c83da8335102ef35545390173e635cf 16.8s done
+#13 pushing layers for registry.fly.io/vibee-eliza-999-prod:deployment-01KAVKV333NDWP6V01MG0AMN1E@sha256:ad98a6cfbe576e1492535b052dd62b6fb9ecb732934a330abef3239e2ad5ceaa 19.7s done
+#13 pushing layer sha256:cbd8b3ad4b18c4b69521b06fce75d585b14873dd0ca2a88c85accb4aae153b2a 19.7s done
+#13 pushing manifest for registry.fly.io/vibee-eliza-999-prod:deployment-01KAVKV333NDWP6V01MG0AMN1E@sha256:ad98a6cfbe576e1492535b052dd62b6fb9ecb732934a330abef3239e2ad5ceaa
+#13 pushing manifest for registry.fly.io/vibee-eliza-999-prod:deployment-01KAVKV333NDWP6V01MG0AMN1E@sha256:ad98a6cfbe576e1492535b052dd62b6fb9ecb732934a330abef3239e2ad5ceaa 0.1s done
+#13 DONE 75.4s
+--> Build Summary:  (​)
+[38;5;252m--> Building image done[0m
+image: registry.fly.io/vibee-eliza-999-prod:deployment-01KAVKV333NDWP6V01MG0AMN1E
+image size: 1.7 GB
+
+Watch your deployment at https://fly.io/apps/vibee-eliza-999-prod/monitoring
+
+Updating existing machines in 'vibee-eliza-999-prod' with immediate strategy
+> Acquiring lease for 185e929f7d1d68
+> Acquired lease for 185e929f7d1d68
+> Updating machine config for 185e929f7d1d68
+> Updating 185e929f7d1d68 [app]
+> Updated machine config for 185e929f7d1d68
+✔ Machine 185e929f7d1d68 is now in a good state
+> Clearing lease for 185e929f7d1d68
+✔ Cleared lease for 185e929f7d1d68
+Checking DNS configuration for vibee-eliza-999-prod.fly.dev
+✓ DNS configuration verified
+
+Visit your newly deployed app at https://vibee-eliza-999-prod.fly.dev/
+

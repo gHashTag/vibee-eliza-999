@@ -1,0 +1,28 @@
+$ bun run build.ts
+
+Pre-build tasks...
+✓ Generated version.ts with CLI version 1.6.5-alpha.45
+  ✓ Version file generated (0.02s)
+Templates have been copied and updated successfully.
+  ✓ Templates copied (0.08s)
+✅ Pre-build tasks completed (0.08s)
+🚀 Building @elizaos/cli...
+
+✓ Cleaned dist directory (63.81ms)
+✓ Configuration prepared (1.00ms)
+
+Bundling with Bun...
+✓ Built 2 file(s) - 38.71MB (390.13ms)
+Generating TypeScript declarations...
+✓ TypeScript declarations generated successfully (2365.44ms)
+✓ Post-build tasks completed (2365.46ms)
+
+✅ @elizaos/cli build complete!
+⏱️  Total build time: 2820.86ms
+
+Post-build tasks...
+Copying assets...
+  ✓ Version file copied to dist/version.js
+✓ Assets copied (3.83ms)
+  ✓ Templates copied to dist
+✅ Post-build tasks completed (0.00s)

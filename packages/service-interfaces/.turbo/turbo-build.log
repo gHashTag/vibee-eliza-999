@@ -1,0 +1,31 @@
+$ bun run build.ts
+🚀 Starting dual build process for @elizaos/service-interfaces
+🔨 Building for Node.js...
+🚀 Building @elizaos/service-interfaces...
+
+🌐 Building for Browser...
+🚀 Building @elizaos/service-interfaces...
+
+📝 Generating TypeScript declarations...
+   Compiling TypeScript declarations...
+✓ Cleaned dist/node directory (2.59ms)
+✓ Configuration prepared (0.22ms)
+
+Bundling with Bun...
+✓ Cleaned dist/browser directory (4.32ms)
+✓ Configuration prepared (0.03ms)
+
+Bundling with Bun...
+✓ Built 2 file(s) - 0.05MB (36.18ms)
+
+✅ @elizaos/service-interfaces build complete!
+⏱️  Total build time: 39.46ms
+✅ Node.js build complete in 0.04s
+✓ Built 2 file(s) - 0.05MB (40.96ms)
+
+✅ @elizaos/service-interfaces build complete!
+⏱️  Total build time: 45.39ms
+✅ Browser build complete in 0.04s
+✅ TypeScript declarations generated in 1.24s
+
+🎉 All builds complete in 1.24s

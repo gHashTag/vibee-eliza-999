@@ -1,0 +1,156 @@
+==> Verifying app config
+Validating /Users/playra/vibee-eliza-999/fly.toml
+[32m✓[0m Configuration is valid
+--> Verified app config
+==> Building image
+Waiting for depot builder...
+
+==> Building image with Depot
+--> build:  (​)
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile:
+#1 transferring dockerfile: 777B 0.8s done
+#1 DONE 0.8s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 0.3s
+
+#3 [internal] load .dockerignore
+#3 transferring context:
+#3 transferring context: 314B 0.8s done
+#3 DONE 0.8s
+
+#4 [1/8] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+#4 resolve docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435 done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 4.55MB 5.0s
+#5 transferring context: 4.55MB 5.0s done
+#5 DONE 5.1s
+
+#6 [2/8] WORKDIR /app
+#6 CACHED
+
+#7 [3/8] RUN apk add --no-cache bash git && npm install -g bun
+#7 CACHED
+
+#8 [4/8] COPY package.json pnpm-workspace.yaml bunfig.toml ./
+#8 CACHED
+
+#9 [5/8] COPY . .
+#9 DONE 28.6s
+
+#10 [6/8] RUN rm -rf node_modules dist build .env 2>/dev/null || true
+#10 DONE 0.3s
+
+#11 [7/8] RUN bun install
+#11 0.149 bun install v1.3.3 (274e01c7)
+#11 0.236 Resolving dependencies
+#11 1.871 Resolved, downloaded and extracted [354]
+#11 33.67 Saved lockfile
+#11 33.67 
+#11 33.67 $ bash ./scripts/init-submodules.sh
+#11 33.67 Initializing git submodules...
+#11 33.79 Git submodules initialized successfully
+#11 33.79 $ husky
+#11 33.87 
+#11 33.87 + @types/bun@1.3.2 (v1.3.3 available)
+#11 33.87 + @types/js-yaml@4.0.9
+#11 33.87 + @types/node@24.10.1
+#11 33.87 + @types/uuid@11.0.0
+#11 33.87 + @vitejs/plugin-react@5.1.1
+#11 33.87 + bun@1.3.2 (v1.3.3 available)
+#11 33.87 + husky@9.1.7
+#11 33.87 + lerna@9.0.0
+#11 33.87 + nyc@17.1.0
+#11 33.87 + turbo@2.6.1
+#11 33.87 + typescript@5.9.2 (v5.9.3 available)
+#11 33.87 + @infisical/sdk@4.0.6
+#11 33.87 + @sentry/node@10.26.0
+#11 33.87 + helmet@8.1.0
+#11 33.87 + js-yaml@4.1.1
+#11 33.87 + zod@4.1.11 (v4.1.13 available)
+#11 33.87 
+#11 33.87 2256 packages installed [33.75s]
+#11 DONE 39.6s
+
+#12 [8/8] RUN cd packages/server && bun run build
+#12 3.155 $ bun run build.ts
+#12 3.187 🚀 Building @elizaos/server...
+#12 3.187 
+#12 3.259 ✓ Cleaned dist directory (71.60ms)
+#12 3.259 ✓ Configuration prepared (0.66ms)
+#12 3.259 
+#12 3.259 Bundling with Bun...
+#12 3.343 ✓ Built 1 file(s) - 1.87MB (83.23ms)
+#12 3.344 Generating TypeScript declarations...
+#12 8.519 ✓ TypeScript declarations generated successfully (5176.09ms)
+#12 8.519 ✓ Post-build tasks completed (5176.10ms)
+#12 8.519 
+#12 8.519 ✅ @elizaos/server build complete!
+#12 8.519 ⏱️  Total build time: 5332.84ms
+#12 8.520 
+#12 8.520 Copying client assets...
+#12 8.520 Copying assets...
+#12 8.559 ✓ Assets copied (38.76ms)
+#12 8.559 ✓ Client assets copied
+#12 8.559 ✅ All assets copied in parallel (0.04s)
+#12 DONE 8.8s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 51.4s done
+#13 exporting manifest sha256:ff2e7778a810cddd5a141c054a213f96d436daf7c02009ea446654e2ec12b86e done
+#13 exporting config sha256:ba623fa6b332749b0e18fa3b7880cb42c20b6df47fac39d33282f63572399acc done
+#13 pushing layers for registry.fly.io/vibee-eliza-999-prod:deployment-01KAV7ZMG7S3MCT1NM59V505VS@sha256:ff2e7778a810cddd5a141c054a213f96d436daf7c02009ea446654e2ec12b86e
+#13 pushing layer sha256:ba623fa6b332749b0e18fa3b7880cb42c20b6df47fac39d33282f63572399acc
+#13 pushing layer sha256:8bb244589a3960670f21efc7cf0a740c668f0096accafe4427f9253196a01049
+#13 pushing layer sha256:477d32dc029eeda597c64698e4ef5c7c9e9113f2e1906ce4cd10f638126e6998
+#13 pushing layer sha256:6c4dd9d9b6f58b3755e43902b439b3428650341397eb133ff0d24fb030836ff1
+#13 pushing layer sha256:ce21ea050c17ea1b363ae020de9140a52130586e6536bb9eb427d54db3c06336
+#13 pushing layer sha256:771e472c6781dd004412f8821e4bd1a07fc1e0b789e69b3d4ece6815b3df2bfb
+#13 pushing layer sha256:364c7e43a1b557092aee38971310c06689deca2dec3d570e324b0d711993a247
+#13 pushing layer sha256:1065fe2b8251d0e1fb9fbb0f3e52529505b0be8ef14d248754d4e25488896ab5
+#13 pushing layer sha256:6de214934828010839eb74486d9e75e4f4f8d68e8aeb20ab863ce94043e265c7
+#13 pushing layer sha256:6244c0f6efb38c84549520357129977e93a94762ed0f25fd22677ccde30dcd0e
+#13 pushing layer sha256:2c1ce468d9f3d941396801f6e3afc8921466650dd05430fe644cd3537713d27f
+#13 pushing layer sha256:c7884155f722c35a1461e4fb62bbac1a839c87a56d9f1f0a669d79beaf909601
+#13 pushing layer sha256:364c7e43a1b557092aee38971310c06689deca2dec3d570e324b0d711993a247 0.3s done
+#13 pushing layer sha256:477d32dc029eeda597c64698e4ef5c7c9e9113f2e1906ce4cd10f638126e6998 0.6s done
+#13 pushing layer sha256:c7884155f722c35a1461e4fb62bbac1a839c87a56d9f1f0a669d79beaf909601 1.1s done
+#13 pushing layer sha256:1065fe2b8251d0e1fb9fbb0f3e52529505b0be8ef14d248754d4e25488896ab5 3.3s done
+#13 pushing layer sha256:6244c0f6efb38c84549520357129977e93a94762ed0f25fd22677ccde30dcd0e 3.3s done
+#13 pushing layer sha256:2c1ce468d9f3d941396801f6e3afc8921466650dd05430fe644cd3537713d27f 3.3s done
+#13 pushing layer sha256:ba623fa6b332749b0e18fa3b7880cb42c20b6df47fac39d33282f63572399acc 3.4s done
+#13 pushing layer sha256:8bb244589a3960670f21efc7cf0a740c668f0096accafe4427f9253196a01049 3.3s done
+#13 pushing layer sha256:771e472c6781dd004412f8821e4bd1a07fc1e0b789e69b3d4ece6815b3df2bfb 3.3s done
+#13 pushing layer sha256:6c4dd9d9b6f58b3755e43902b439b3428650341397eb133ff0d24fb030836ff1 3.7s done
+#13 pushing layer sha256:6de214934828010839eb74486d9e75e4f4f8d68e8aeb20ab863ce94043e265c7 13.1s done
+#13 pushing layers for registry.fly.io/vibee-eliza-999-prod:deployment-01KAV7ZMG7S3MCT1NM59V505VS@sha256:ff2e7778a810cddd5a141c054a213f96d436daf7c02009ea446654e2ec12b86e 15.1s done
+#13 pushing layer sha256:ce21ea050c17ea1b363ae020de9140a52130586e6536bb9eb427d54db3c06336 15.1s done
+#13 pushing manifest for registry.fly.io/vibee-eliza-999-prod:deployment-01KAV7ZMG7S3MCT1NM59V505VS@sha256:ff2e7778a810cddd5a141c054a213f96d436daf7c02009ea446654e2ec12b86e
+#13 pushing manifest for registry.fly.io/vibee-eliza-999-prod:deployment-01KAV7ZMG7S3MCT1NM59V505VS@sha256:ff2e7778a810cddd5a141c054a213f96d436daf7c02009ea446654e2ec12b86e 0.1s done
+#13 DONE 66.7s
+--> Build Summary:  (​)
+[38;5;252m--> Building image done[0m
+image: registry.fly.io/vibee-eliza-999-prod:deployment-01KAV7ZMG7S3MCT1NM59V505VS
+image size: 1.5 GB
+
+Watch your deployment at https://fly.io/apps/vibee-eliza-999-prod/monitoring
+
+Updating existing machines in 'vibee-eliza-999-prod' with rolling strategy
+> Acquiring lease for 185e929f7d1d68
+> Acquired lease for 185e929f7d1d68
+> Updating machine config for 185e929f7d1d68
+> Updating 185e929f7d1d68 [app]
+> Updated machine config for 185e929f7d1d68
+> Waiting for machine 185e929f7d1d68 to reach a good state
+> Machine 185e929f7d1d68 reached started state
+> Running smoke checks on machine 185e929f7d1d68
+> Running machine checks on machine 185e929f7d1d68
+> Checking health of machine 185e929f7d1d68
+✖ Unrecoverable error: timeout reached waiting for health checks to pass for machine 185e929f7d1d68: failed to get VM 185e929f7d1d68: Get "https://api.machines.dev/v1/apps/vibee-eliza-999-prod/machines/185e929f7d1d68": net/http: request canceled
+> Clearing lease for 185e929f7d1d68
+✔ Cleared lease for 185e929f7d1d68
+Error: failed to update machine 185e929f7d1d68: Unrecoverable error: timeout reached waiting for health checks to pass for machine 185e929f7d1d68: failed to get VM 185e929f7d1d68: Get "https://api.machines.dev/v1/apps/vibee-eliza-999-prod/machines/185e929f7d1d68": net/http: request canceled

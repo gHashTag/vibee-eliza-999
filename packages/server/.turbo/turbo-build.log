@@ -1,0 +1,96 @@
+$ bun run build.ts
+🚀 Building @elizaos/server...
+
+✓ Cleaned dist directory (55.20ms)
+✓ Configuration prepared (0.34ms)
+
+Bundling with Bun...
+✓ Built 2 file(s) - 4.38MB (126.27ms)
+Generating TypeScript declarations...
+src/services/message.ts(660,3): error TS1472: 'catch' or 'finally' expected.
+src/services/message.ts(702,3): error TS1128: Declaration or statement expected.
+src/services/message.ts(702,11): error TS1434: Unexpected keyword or identifier.
+src/services/message.ts(702,42): error TS1005: ',' expected.
+src/services/message.ts(702,49): error TS1005: ';' expected.
+src/services/message.ts(732,3): error TS1128: Declaration or statement expected.
+src/services/message.ts(732,11): error TS1434: Unexpected keyword or identifier.
+src/services/message.ts(733,16): error TS1005: ',' expected.
+src/services/message.ts(734,17): error TS1005: ',' expected.
+src/services/message.ts(735,12): error TS1005: ',' expected.
+src/services/message.ts(736,28): error TS1109: Expression expected.
+src/services/message.ts(737,21): error TS1109: Expression expected.
+src/services/message.ts(738,5): error TS1005: ';' expected.
+src/services/message.ts(825,3): error TS1434: Unexpected keyword or identifier.
+src/services/message.ts(826,16): error TS1005: ',' expected.
+src/services/message.ts(827,17): error TS1005: ',' expected.
+src/services/message.ts(828,12): error TS1005: ',' expected.
+src/services/message.ts(829,14): error TS1005: ',' expected.
+src/services/message.ts(830,28): error TS1109: Expression expected.
+src/services/message.ts(831,21): error TS1109: Expression expected.
+src/services/message.ts(832,5): error TS1005: ';' expected.
+src/services/message.ts(906,3): error TS1434: Unexpected keyword or identifier.
+src/services/message.ts(907,16): error TS1005: ',' expected.
+src/services/message.ts(908,17): error TS1005: ',' expected.
+src/services/message.ts(909,12): error TS1005: ',' expected.
+src/services/message.ts(910,14): error TS1005: ',' expected.
+src/services/message.ts(911,28): error TS1109: Expression expected.
+src/services/message.ts(912,21): error TS1109: Expression expected.
+src/services/message.ts(913,5): error TS1005: ';' expected.
+src/services/message.ts(984,3): error TS1128: Declaration or statement expected.
+src/services/message.ts(984,11): error TS1434: Unexpected keyword or identifier.
+src/services/message.ts(984,49): error TS1109: Expression expected.
+src/services/message.ts(984,66): error TS1109: Expression expected.
+src/services/message.ts(984,74): error TS1005: ';' expected.
+src/services/message.ts(1002,3): error TS1128: Declaration or statement expected.
+src/services/message.ts(1002,27): error TS1005: ';' expected.
+src/services/message.ts(1003,11): error TS1005: ':' expected.
+src/services/message.ts(1003,18): error TS1005: ',' expected.
+src/services/message.ts(1003,43): error TS1005: '(' expected.
+src/services/message.ts(1003,45): error TS1136: Property assignment expected.
+src/services/message.ts(1004,21): error TS1005: ';' expected.
+src/services/message.ts(1005,5): error TS1109: Expression expected.
+src/services/message.ts(1014,3): error TS1128: Declaration or statement expected.
+src/services/message.ts(1016,31): error TS1005: ';' expected.
+src/services/message.ts(1016,33): error TS1434: Unexpected keyword or identifier.
+src/services/message.ts(1082,3): error TS1434: Unexpected keyword or identifier.
+src/services/message.ts(1082,15): error TS1005: ';' expected.
+src/services/message.ts(1082,29): error TS1109: Expression expected.
+src/services/message.ts(1083,11): error TS1005: ',' expected.
+src/services/message.ts(1083,82): error TS1005: ',' expected.
+src/services/message.ts(1084,23): error TS1005: ',' expected.
+src/services/message.ts(1084,75): error TS1005: ',' expected.
+src/services/message.ts(1085,23): error TS1005: ',' expected.
+src/services/message.ts(1085,85): error TS1005: ',' expected.
+src/services/message.ts(1086,23): error TS1005: ',' expected.
+src/services/message.ts(1086,78): error TS1005: ',' expected.
+src/services/message.ts(1087,23): error TS1005: ',' expected.
+src/services/message.ts(1087,78): error TS1005: ',' expected.
+src/services/message.ts(1089,1): error TS1128: Declaration or statement expected.
+✗ Failed to generate TypeScript declarations (2389.42ms)
+Error details: Failed with exit code 2
+⚠ TypeScript declarations generation failed: 241 |   }
+242 | 
+243 |   console.log('Generating TypeScript declarations...');
+244 |   try {
+245 |     // Use incremental compilation for faster subsequent builds
+246 |     await $`tsc --emitDeclarationOnly --project ${tsconfigPath} --composite false --incremental false --types node,bun`;
+                     ^
+ShellError: Failed with exit code 2
+ exitCode: 2,
+   stdout: "src/services/message.ts(660,3): error TS1472: 'catch' or 'finally' expected.\nsrc/services/message.ts(702,3): error TS1128: Declaration or statement expected.\nsrc/services/message.ts(702,11): error TS1434: Unexpected keyword or identifier.\nsrc/services/message.ts(702,42): error TS1005: ',' expected.\nsrc/services/message.ts(702,49): error TS1005: ';' expected.\nsrc/services/message.ts(732,3): error TS1128: Declaration or statement expected.\nsrc/services/message.ts(732,11): error TS1434: Unexpected keyword or identifier.\nsrc/services/message.ts(733,16): error TS1005: ',' expected.\nsrc/services/message.ts(734,17): error TS1005: ',' expected.\nsrc/services/message.ts(735,12): error TS1005: ',' expected.\nsrc/services/message.ts(736,28): error TS1109: Expression expected.\nsrc/services/message.ts(737,21): error TS1109: Expression expected.\nsrc/services/message.ts(738,5): error TS1005: ';' expected.\nsrc/services/message.ts(825,3): error TS1434: Unexpected keyword or identifier.\nsrc/services/message.ts(826,16): error TS1005: ',' expected.\nsrc/services/message.ts(827,17): error TS1005: ',' expected.\nsrc/services/message.ts(828,12): error TS1005: ',' expected.\nsrc/services/message.ts(829,14): error TS1005: ',' expected.\nsrc/services/message.ts(830,28): error TS1109: Expression expected.\nsrc/services/message.ts(831,21): error TS1109: Expression expected.\nsrc/services/message.ts(832,5): error TS1005: ';' expected.\nsrc/services/message.ts(906,3): error TS1434: Unexpected keyword or identifier.\nsrc/services/message.ts(907,16): error TS1005: ',' expected.\nsrc/services/message.ts(908,17): error TS1005: ',' expected.\nsrc/services/message.ts(909,12): error TS1005: ',' expected.\nsrc/services/message.ts(910,14): error TS1005: ',' expected.\nsrc/services/message.ts(911,28): error TS1109: Expression expected.\nsrc/services/message.ts(912,21): error TS1109: Expression expected.\nsrc/services/message.ts(913,5): error TS1005: ';' expected.\nsrc/services/message.ts(984,3): error TS1128: Declaration or statement expected.\nsrc/services/message.ts(984,11): error TS1434: Unexpected keyword or identifier.\nsrc/services/message.ts(984,49): error TS1109: Expression expected.\nsrc/services/message.ts(984,66): error TS1109: Expression expected.\nsrc/services/message.ts(984,74): error TS1005: ';' expected.\nsrc/services/message.ts(1002,3): error TS1128: Declaration or statement expected.\nsrc/services/message.ts(1002,27): error TS1005: ';' expected.\nsrc/services/message.ts(1003,11): error TS1005: ':' expected.\nsrc/services/message.ts(1003,18): error TS1005: ',' expected.\nsrc/services/message.ts(1003,43): error TS1005: '(' expected.\nsrc/services/message.ts(1003,45): error TS1136: Property assignment expected.\nsrc/services/message.ts(1004,21): error TS1005: ';' expected.\nsrc/services/message.ts(1005,5): error TS1109: Expression expected.\nsrc/services/message.ts(1014,3): error TS1128: Declaration or statement expected.\nsrc/services/message.ts(1016,31): error TS1005: ';' expected.\nsrc/services/message.ts(1016,33): error TS1434: Unexpected keyword or identifier.\nsrc/services/message.ts(1082,3): error TS1434: Unexpected keyword or identifier.\nsrc/services/message.ts(1082,15): error TS1005: ';' expected.\nsrc/services/message.ts(1082,29): error TS1109: Expression expected.\nsrc/services/message.ts(1083,11): error TS1005: ',' expected.\nsrc/services/message.ts(1083,82): error TS1005: ',' expected.\nsrc/services/message.ts(1084,23): error TS1005: ',' expected.\nsrc/services/message.ts(1084,75): error TS1005: ',' expected.\nsrc/services/message.ts(1085,23): error TS1005: ',' expected.\nsrc/services/message.ts(1085,85): error TS1005: ',' expected.\nsrc/services/message.ts(1086,23): error TS1005: ',' expected.\nsrc/services/message.ts(1086,78): error TS1005: ',' expected.\nsrc/services/message.ts(1087,23): error TS1005: ',' expected.\nsrc/services/message.ts(1087,78): error TS1005: ',' expected.\nsrc/services/message.ts(1089,1): error TS1128: Declaration or statement expected.\n",
+   stderr: "",
+
+      at new ShellPromise (75:16)
+      at BunShell (191:35)
+      at generateDts (/Users/playra/vibee-eliza-999/build-utils.ts:246:11)
+
+✓ Post-build tasks completed (2389.92ms)
+
+✅ @elizaos/server build complete!
+⏱️  Total build time: 2572.25ms
+
+Copying client assets...
+Copying assets...
+✓ Assets copied (9.67ms)
+✓ Client assets copied
+✅ All assets copied in parallel (0.01s)

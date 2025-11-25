@@ -1,0 +1,293 @@
+==> Verifying app config
+Validating /Users/playra/vibee-eliza-999/fly.toml
+[32m✓[0m Configuration is valid
+--> Verified app config
+==> Building image
+Waiting for depot builder...
+
+==> Building image with Depot
+--> build:  (​)
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile:
+#1 transferring dockerfile: 782B 0.8s done
+#1 DONE 0.8s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 0.3s
+
+#3 [internal] load .dockerignore
+#3 transferring context:
+#3 transferring context: 314B 0.8s done
+#3 DONE 0.8s
+
+#4 [1/8] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+#4 resolve docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435 done
+#4 DONE 0.0s
+
+#5 [2/8] WORKDIR /app
+#5 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 9.31MB 5.1s
+#6 ...
+
+#7 [3/8] RUN apk add --no-cache bash git && npm install -g bun
+#7 0.173 fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/APKINDEX.tar.gz
+#7 0.345 fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/community/x86_64/APKINDEX.tar.gz
+#7 0.813 (1/16) Installing ncurses-terminfo-base (6.5_p20250503-r0)
+#7 0.827 (2/16) Installing libncursesw (6.5_p20250503-r0)
+#7 0.847 (3/16) Installing readline (8.2.13-r1)
+#7 0.861 (4/16) Installing bash (5.2.37-r0)
+#7 0.897 Executing bash-5.2.37-r0.post-install
+#7 0.902 (5/16) Installing brotli-libs (1.1.0-r2)
+#7 0.928 (6/16) Installing c-ares (1.34.5-r0)
+#7 0.940 (7/16) Installing libunistring (1.3-r0)
+#7 0.969 (8/16) Installing libidn2 (2.3.7-r0)
+#7 0.980 (9/16) Installing nghttp2-libs (1.65.0-r0)
+#7 0.989 (10/16) Installing libpsl (0.21.5-r3)
+#7 0.998 (11/16) Installing zstd-libs (1.5.7-r0)
+#7 1.015 (12/16) Installing libcurl (8.14.1-r2)
+#7 1.031 (13/16) Installing libexpat (2.7.3-r0)
+#7 1.040 (14/16) Installing pcre2 (10.46-r0)
+#7 1.057 (15/16) Installing git (2.49.1-r0)
+#7 1.161 (16/16) Installing git-init-template (2.49.1-r0)
+#7 1.172 Executing busybox-1.37.0-r19.trigger
+#7 1.185 OK: 24 MiB in 34 packages
+#7 9.011 
+#7 9.011 added 5 packages in 7s
+#7 9.013 npm notice
+#7 9.013 npm notice New major version of npm available! 10.8.2 -> 11.6.3
+#7 9.013 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.3
+#7 9.013 npm notice To update run: npm install -g npm@11.6.3
+#7 9.013 npm notice
+#7 ...
+
+#6 [internal] load build context
+#6 transferring context: 27.31MB 10.2s
+#6 ...
+
+#7 [3/8] RUN apk add --no-cache bash git && npm install -g bun
+#7 DONE 13.6s
+
+#6 [internal] load build context
+#6 transferring context: 40.30MB 15.3s
+#6 transferring context: 53.98MB 20.4s
+#6 transferring context: 65.47MB 25.6s
+#6 transferring context: 77.43MB 31.0s
+#6 transferring context: 88.31MB 36.0s
+#6 transferring context: 98.93MB 41.1s
+#6 transferring context: 111.86MB 46.3s
+#6 transferring context: 123.42MB 51.3s
+#6 transferring context: 144.02MB 56.4s
+#6 transferring context: 157.63MB 61.6s
+#6 transferring context: 168.68MB 66.7s
+#6 transferring context: 182.75MB 71.8s
+#6 transferring context: 197.65MB 76.9s
+#6 transferring context: 209.42MB 82.0s
+#6 transferring context: 219.98MB 87.0s
+#6 transferring context: 236.94MB 92.1s
+#6 transferring context: 248.66MB 97.2s
+#6 transferring context: 262.23MB 102.3s
+#6 transferring context: 275.89MB 107.3s
+#6 transferring context: 289.68MB 112.3s
+#6 transferring context: 306.54MB 117.4s
+#6 transferring context: 323.68MB 122.5s
+#6 transferring context: 336.23MB 127.5s
+#6 transferring context: 349.06MB 132.6s
+#6 transferring context: 363.37MB 137.6s
+#6 transferring context: 374.28MB 142.7s
+#6 transferring context: 388.19MB 147.8s
+#6 transferring context: 401.89MB 152.8s
+#6 transferring context: 414.08MB 157.8s
+#6 transferring context: 430.36MB 162.9s
+#6 transferring context: 446.76MB 168.0s
+#6 transferring context: 456.30MB 173.1s
+#6 transferring context: 473.71MB 178.2s
+#6 transferring context: 489.21MB 183.2s
+#6 transferring context: 500.30MB 188.3s
+#6 transferring context: 510.13MB 193.3s
+#6 transferring context: 522.52MB 198.4s
+#6 transferring context: 536.85MB 203.6s
+#6 transferring context: 545.68MB 208.6s
+#6 transferring context: 555.33MB 213.7s
+#6 transferring context: 563.60MB 218.8s
+#6 transferring context: 575.56MB 223.9s
+#6 transferring context: 586.95MB 228.9s
+#6 transferring context: 600.25MB 234.0s
+#6 transferring context: 613.98MB 239.1s
+#6 transferring context: 622.81MB 244.2s
+#6 transferring context: 634.33MB 249.2s
+#6 transferring context: 648.04MB 254.3s
+#6 transferring context: 659.61MB 259.5s
+#6 transferring context: 671.84MB 264.5s
+#6 transferring context: 679.10MB 269.7s
+#6 transferring context: 686.84MB 275.0s
+#6 transferring context: 701.50MB 280.0s
+#6 transferring context: 714.47MB 285.2s
+#6 transferring context: 731.20MB 290.3s
+#6 transferring context: 745.63MB 295.5s
+#6 transferring context: 756.95MB 300.6s
+#6 transferring context: 766.30MB 305.6s
+#6 transferring context: 777.06MB 310.7s
+#6 transferring context: 789.20MB 315.8s
+#6 transferring context: 799.33MB 320.9s
+#6 transferring context: 809.98MB 326.0s
+#6 transferring context: 823.45MB 331.0s
+#6 transferring context: 836.50MB 336.1s
+#6 transferring context: 847.56MB 341.2s
+#6 transferring context: 855.28MB 346.3s
+#6 transferring context: 865.29MB 351.4s
+#6 transferring context: 877.76MB 356.5s
+#6 transferring context: 895.17MB 361.5s
+#6 transferring context: 915.76MB 366.6s
+#6 transferring context: 933.17MB 371.7s
+#6 transferring context: 947.91MB 376.8s
+#6 transferring context: 960.69MB 381.8s
+#6 transferring context: 977.07MB 386.8s
+#6 transferring context: 995.71MB 392.1s
+#6 transferring context: 1.01GB 397.2s
+#6 transferring context: 1.03GB 402.2s
+#6 transferring context: 1.05GB 407.3s
+#6 transferring context: 1.06GB 412.4s
+#6 transferring context: 1.07GB 417.4s
+#6 transferring context: 1.08GB 422.5s
+#6 transferring context: 1.09GB 427.5s
+#6 transferring context: 1.11GB 432.5s
+#6 transferring context: 1.11GB 437.6s
+#6 transferring context: 1.12GB 442.6s
+#6 transferring context: 1.13GB 447.7s
+#6 transferring context: 1.14GB 452.8s
+#6 transferring context: 1.15GB 457.9s
+#6 transferring context: 1.17GB 462.9s
+#6 transferring context: 1.18GB 468.0s
+#6 transferring context: 1.19GB 473.0s
+#6 transferring context: 1.20GB 478.2s
+#6 transferring context: 1.22GB 483.2s
+#6 transferring context: 1.23GB 488.3s
+#6 transferring context: 1.24GB 493.3s
+#6 transferring context: 1.25GB 498.4s
+#6 transferring context: 1.26GB 503.5s
+#6 transferring context: 1.27GB 508.5s
+#6 transferring context: 1.30GB 513.6s
+#6 transferring context: 1.30GB 515.5s done
+#6 DONE 515.6s
+
+#8 [4/8] COPY package.json pnpm-workspace.yaml bunfig.toml ./
+#8 DONE 0.2s
+
+#9 [5/8] COPY . .
+#9 DONE 17.6s
+
+#10 [6/8] RUN rm -rf node_modules dist build .env 2>/dev/null || true
+#10 DONE 0.2s
+
+#11 [7/8] RUN bun install
+#11 0.092 bun install v1.3.3 (274e01c7)
+#11 0.143 Resolving dependencies
+#11 1.186 Resolved, downloaded and extracted [354]
+#11 31.52 Saved lockfile
+#11 31.52 
+#11 31.52 $ bash ./scripts/init-submodules.sh
+#11 31.52 Initializing git submodules...
+#11 31.99 Git submodules initialized successfully
+#11 31.99 $ husky
+#11 32.71 
+#11 32.71 + @types/bun@1.3.2 (v1.3.3 available)
+#11 32.71 + @types/js-yaml@4.0.9
+#11 32.71 + @types/node@24.10.1
+#11 32.71 + @types/uuid@11.0.0
+#11 32.71 + @vitejs/plugin-react@5.1.1
+#11 32.71 + bun@1.3.2 (v1.3.3 available)
+#11 32.71 + husky@9.1.7
+#11 32.71 + lerna@9.0.0
+#11 32.71 + nyc@17.1.0
+#11 32.71 + turbo@2.6.1
+#11 32.71 + typescript@5.9.2 (v5.9.3 available)
+#11 32.71 + @infisical/sdk@4.0.6
+#11 32.71 + @sentry/node@10.26.0
+#11 32.71 + helmet@8.1.0
+#11 32.71 + js-yaml@4.1.1
+#11 32.71 + zod@4.1.11 (v4.1.13 available)
+#11 32.71 
+#11 32.71 2256 packages installed [32.62s]
+#11 DONE 36.0s
+
+#12 [8/8] RUN cd packages/server && bun run build
+#12 2.706 $ bun run build.ts
+#12 2.742 🚀 Building @elizaos/server...
+#12 2.742 
+#12 2.811 ✓ Cleaned dist directory (68.24ms)
+#12 2.811 ✓ Configuration prepared (0.81ms)
+#12 2.811 
+#12 2.811 Bundling with Bun...
+#12 2.902 ✓ Built 2 file(s) - 3.74MB (90.95ms)
+#12 2.904 Generating TypeScript declarations...
+#12 11.95 ✓ TypeScript declarations generated successfully (9047.76ms)
+#12 11.95 ✓ Post-build tasks completed (9047.90ms)
+#12 11.95 
+#12 11.95 ✅ @elizaos/server build complete!
+#12 11.95 ⏱️  Total build time: 9209.14ms
+#12 11.95 
+#12 11.95 Copying client assets...
+#12 11.95 Copying assets...
+#12 12.01 ✓ Assets copied (61.88ms)
+#12 12.01 ✓ Client assets copied
+#12 12.01 ✅ All assets copied in parallel (0.06s)
+#12 DONE 12.4s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 57.6s done
+#13 exporting manifest sha256:a3adde0eaebdd7a264f30a97bd2c363a83d4aa8ef243406f42d1434aeb25a9e1 done
+#13 exporting config sha256:f3c3b194d173b4688c7818e4e43dc0583a9487fbceb68d15049194b340a76c07 done
+#13 pushing layers for registry.fly.io/vibee-eliza-999-prod:deployment-01KAVHRTZBQGJ1DZMZ97JK6K70@sha256:a3adde0eaebdd7a264f30a97bd2c363a83d4aa8ef243406f42d1434aeb25a9e1
+#13 pushing layer sha256:9c644b852263b25d0e23a539cc4c325e7bdf12ed534db5bb05c78191e198b937
+#13 pushing layer sha256:1065fe2b8251d0e1fb9fbb0f3e52529505b0be8ef14d248754d4e25488896ab5
+#13 pushing layer sha256:f3c3b194d173b4688c7818e4e43dc0583a9487fbceb68d15049194b340a76c07
+#13 pushing layer sha256:e0ffc73e36d9c44b45b7a70cfcc7beee022481cebfd1ed473fd8afd39e23509f
+#13 pushing layer sha256:0cbed8b8a25ea515e54960d23c5afbd9d5c79b1f8d45846947b53c80f52f9748
+#13 pushing layer sha256:364c7e43a1b557092aee38971310c06689deca2dec3d570e324b0d711993a247
+#13 pushing layer sha256:b74567074e87aee478252339b1f0944fb63f0d250df482c3d3269b53ab36036b
+#13 pushing layer sha256:2c1ce468d9f3d941396801f6e3afc8921466650dd05430fe644cd3537713d27f
+#13 pushing layer sha256:c7884155f722c35a1461e4fb62bbac1a839c87a56d9f1f0a669d79beaf909601
+#13 pushing layer sha256:d4b3c01c44b513dc5f9d455973d1ee23e4c5801b67ef3583f8c7352a4bbcfcf1
+#13 pushing layer sha256:8bb244589a3960670f21efc7cf0a740c668f0096accafe4427f9253196a01049
+#13 pushing layer sha256:771e472c6781dd004412f8821e4bd1a07fc1e0b789e69b3d4ece6815b3df2bfb
+#13 pushing layer sha256:364c7e43a1b557092aee38971310c06689deca2dec3d570e324b0d711993a247 0.6s done
+#13 pushing layer sha256:8bb244589a3960670f21efc7cf0a740c668f0096accafe4427f9253196a01049 0.8s done
+#13 pushing layer sha256:2c1ce468d9f3d941396801f6e3afc8921466650dd05430fe644cd3537713d27f 1.1s done
+#13 pushing layer sha256:1065fe2b8251d0e1fb9fbb0f3e52529505b0be8ef14d248754d4e25488896ab5 1.6s done
+#13 pushing layer sha256:c7884155f722c35a1461e4fb62bbac1a839c87a56d9f1f0a669d79beaf909601 3.3s done
+#13 pushing layer sha256:f3c3b194d173b4688c7818e4e43dc0583a9487fbceb68d15049194b340a76c07 3.3s done
+#13 pushing layer sha256:b74567074e87aee478252339b1f0944fb63f0d250df482c3d3269b53ab36036b 3.4s done
+#13 pushing layer sha256:771e472c6781dd004412f8821e4bd1a07fc1e0b789e69b3d4ece6815b3df2bfb 3.3s done
+#13 pushing layer sha256:9c644b852263b25d0e23a539cc4c325e7bdf12ed534db5bb05c78191e198b937 3.9s done
+#13 pushing layer sha256:0cbed8b8a25ea515e54960d23c5afbd9d5c79b1f8d45846947b53c80f52f9748 12.3s done
+#13 pushing layer sha256:d4b3c01c44b513dc5f9d455973d1ee23e4c5801b67ef3583f8c7352a4bbcfcf1 16.4s done
+#13 pushing layers for registry.fly.io/vibee-eliza-999-prod:deployment-01KAVHRTZBQGJ1DZMZ97JK6K70@sha256:a3adde0eaebdd7a264f30a97bd2c363a83d4aa8ef243406f42d1434aeb25a9e1 19.4s done
+#13 pushing layer sha256:e0ffc73e36d9c44b45b7a70cfcc7beee022481cebfd1ed473fd8afd39e23509f 19.4s done
+#13 pushing manifest for registry.fly.io/vibee-eliza-999-prod:deployment-01KAVHRTZBQGJ1DZMZ97JK6K70@sha256:a3adde0eaebdd7a264f30a97bd2c363a83d4aa8ef243406f42d1434aeb25a9e1
+#13 pushing manifest for registry.fly.io/vibee-eliza-999-prod:deployment-01KAVHRTZBQGJ1DZMZ97JK6K70@sha256:a3adde0eaebdd7a264f30a97bd2c363a83d4aa8ef243406f42d1434aeb25a9e1 0.1s done
+#13 DONE 77.2s
+--> Build Summary:  (​)
+2025/11/25 01:35:59 error releasing builder: deadline_exceeded: context deadline exceeded
+[38;5;252m--> Building image done[0m
+image: registry.fly.io/vibee-eliza-999-prod:deployment-01KAVHRTZBQGJ1DZMZ97JK6K70
+image size: 1.7 GB
+
+Watch your deployment at https://fly.io/apps/vibee-eliza-999-prod/monitoring
+
+Updating existing machines in 'vibee-eliza-999-prod' with immediate strategy
+> Acquiring lease for 185e929f7d1d68
+> Acquired lease for 185e929f7d1d68
+> Updating machine config for 185e929f7d1d68
+> Updating 185e929f7d1d68 [app]
+> Updated machine config for 185e929f7d1d68
+✔ Machine 185e929f7d1d68 is now in a good state
+> Clearing lease for 185e929f7d1d68
+✔ Cleared lease for 185e929f7d1d68
+Checking DNS configuration for vibee-eliza-999-prod.fly.dev
+✓ DNS configuration verified
+
+Visit your newly deployed app at https://vibee-eliza-999-prod.fly.dev/
+

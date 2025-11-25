@@ -762,8 +762,19 @@ export class RuntimeMigrator {
 
     try {
       // Start manual transaction
-      await this.db.execute(sql`BEGIN`);
-      transactionStarted = true;
+      try {
+        await this.db.execute(sql`BEGIN`);
+        transactionStarted = true;
+      } catch (beginError) {
+        // PGLite may have issues with BEGIN - try without it or continue
+        if (this.isPGLite()) {
+          logger.warn('[RuntimeMigrator] PGLite BEGIN failed, continuing without explicit transaction:', String(beginError));
+          // For PGLite, we'll execute without explicit BEGIN/COMMIT
+          transactionStarted = false;
+        } else {
+          throw beginError;
+        }
+      }
 
       // Execute all SQL statements
       for (const stmt of sqlStatements) {
@@ -789,8 +800,19 @@ export class RuntimeMigrator {
       // Store snapshot
       await this.snapshotStorage.saveSnapshot(pluginName, idx, snapshot);
 
-      // Commit the transaction
-      await this.db.execute(sql`COMMIT`);
+      // Commit the transaction (if started)
+      if (transactionStarted) {
+        try {
+          await this.db.execute(sql`COMMIT`);
+        } catch (commitError) {
+          // PGLite may have issues with COMMIT - try to continue
+          if (this.isPGLite()) {
+            logger.warn('[RuntimeMigrator] PGLite COMMIT failed, continuing:', String(commitError));
+          } else {
+            throw commitError;
+          }
+        }
+      }
 
       logger.info(`[RuntimeMigrator] Recorded migration ${tag} for ${pluginName}`);
     } catch (error) {

@@ -21,7 +21,7 @@ export const roomTable = pgTable('rooms', {
   id: uuid('id')
     .notNull()
     .primaryKey()
-    .default(sql`gen_random_uuid()`),
+    .defaultRandom(),
   agentId: uuid('agentId').references(() => agentTable.id, {
     onDelete: 'cascade',
   }),

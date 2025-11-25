@@ -1,0 +1,114 @@
+ Info       Using local @elizaos/cli installation
+  🔍 Resolving [2/20] [24D[0K  🔍 media-typer [27/26] [27D[0K  🔍 Resolving [28/28] [25D[0K  🔍 unpipe [29/28] [22D[0K  🔍 Resolving [30/38] [25D[0K  🔍 @azure/core-lro [69/72] [31D[0K  🔍 @azure/core-lro [73/74] [31D[0K  🔍 @azure/core-lro [75/75] [31D[0K  🔍 @azure/core-lro [77/82] [31D[0K  🔍 @azure/core-lro [79/82] [31D[0K  🔍 @azure/core-lro [84/86] [31D[0K  🔍 @azure/core-lro [88/88] [31D[0K  🔍 @azure/core-lro [89/89] [31D[0K  🔍 @azure/core-lro [90/90] [31D[0K  🔍 @azure/core-lro [91/92] [31D[0K  🔍 @azure/core-lro [92/92] [31D[0K  🔍 @azure/core-lro [94/94] [31D[0K  🔍 @azure/core-lro [96/96] [31D[0K  🔍 @azure/core-lro [97/97] [31D[0K  🔍 @azure/core-lro [98/98] [31D[0K  🔍 @azure/core-lro [100/101] [33D[0K  🔍 @azure/core-lro [102/104] [33D[0K  🔍 @azure/core-lro [104/106] [33D[0K  🔍 @azure/core-lro [105/106] [33D[0K  🔍 @azure/core-lro [107/107] [33D[0K  🔍 @azure/core-lro [108/108] [33D[0K  🔍 @azure/core-lro [109/109] [33D[0K  🔍 @azure/core-lro [111/112] [33D[0K  🔍 @azure/core-lro [113/113] [33D[0K  🔍 @azure/core-lro [114/114] [33D[0K  🔍 @azure/core-lro [116/117] [33D[0K  🔍 @azure/core-lro [118/118] [33D[0K  🔍 @azure/core-lro [119/119] [33D[0K  🔍 @azure/core-lro [120/120] [33D[0K  🔍 @azure/core-lro [122/123] [33D[0K  🔍 @azure/core-lro [124/124] [33D[0K  🔍 @azure/core-lro [126/132] [33D[0K  🔍 @azure/core-lro [127/137] [33D[0K  🔍 gcp-metadata [132/138] [30D[0K  🔍 glob [138/143] [22D[0K  🔍 glob [143/150] [22D[0K  🔍 foreground-child [149/155] [34D[0K  🔍 foreground-child [154/161] [34D[0K  🔍 strip-ansi [161/167] [28D[0K  🔍 strip-ansi [167/169] [28D[0K  🔍 strip-ansi [168/170] [28D[0K  🔍 strip-ansi [171/171] [28D[0K  🔍 @langchain/google-common [173/173] [42D[0K  🔍 @langchain/google-common [175/175] [42D[0K  🔍 @langchain/google-common [177/180] [42D[0K  🔍 @types/node-fetch [179/185] [35D[0K  🔍 @types/node-fetch [180/186] [35D[0K  🔍 es-errors [189/197] [27D[0K  🔍 es-errors [190/197] [27D[0K  🔍 es-define-property [197/198] [36D[0K  🔍 es-define-property [198/199] [36D[0K  🔍 es-define-property [201/202] [36D[0K  🔍 es-define-property [202/204] [36D[0K  🔍 p-retry [204/207] [25D[0K  🔍 p-retry [205/207] [25D[0K  🔍 p-retry [207/208] [25D[0K  🔍 p-retry [208/208] [25D[0K  🔍 p-retry [209/209] [25D[0K  🔍 p-retry [210/210] [25D[0K  🔍 p-retry [211/211] [25D[0K  🔍 p-retry [212/213] [25D[0K  🔍 p-retry [213/213] [25D[0K  🔍 yargs [216/232] [23D[0K  🔍 yargs-parser [219/232] [30D[0K  🔍 @protobufjs/base64 [233/233] [36D[0K  🔍 @protobufjs/base64 [234/244] [36D[0K  🔍 @protobufjs/base64 [235/244] [36D[0K  🔍 @types/send [247/254] [29D[0K  🔍 side-channel-weakmap [254/254] [36m Info      [39m [Sentry] Initialized successfully for monitoring
+
+[38;5;27m⠀⠀⠀⠀⠀⠀⠀⠀⢀⣐⣿⣿⢰⡀⠀⠀⠀[38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+[38;5;27m⠀⠀⠀⠀⠀⢀⣴⠤⠾⠛⠛⣿⣶⣇⠀⠀⡆[38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+[38;5;27m⢰⣋⡳⡄⠀⢨⣭⡀⠀⡤⠀⣀⣝⢿⣶⣿⡅[38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+[38;5;27m⢸⣯⠀⣇⠀⣼⣿⣿⣆⢷⣴⣿⣿⡏⣛⡉⠀[38;5;255m ⢸⣿⣿⣿⣿⣿⣿⢸⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⣾⣿⣿⣧⠀⠀⠀[38;5;255m⢸⠟⢀⣴⣿⣿⣿⣿⣦⡀⣠⣾⣿⣿⣿⣿⣦⡙⢿[0m
+[38;5;27m⠀⠙⢷⣮⢸⣿⣿⣿⣿⣷⣯⣟⣏⣼⣷⣅⠾[38;5;255m ⢸⣿⣇⣀⣀⣀⠀⢸⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⠀⠀⣠⣿⣿⠟⠁⠀⠀⣼⣿⡟⣿⣿⣆⠀⠀[38;5;255m⠀⠀⣿⣿⠋⠀⠈⠻⣿⡇⣿⣿⣅⣀⣀⡛⠛⠃⠀[0m
+[38;5;27m⠀⠀⠀⠁⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⠀[38;5;255m ⢸⣿⡿⠿⠿⠿⠀⢸⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⣠⣾⣿⠟⠁⠀⠀⠀⣰⣿⣿⣁⣸⣿⣿⡄⠀[38;5;255m⠀⠀⣿⣿ ⠀⠀ ⣿⣿⢈⣛⠿⠿⠿⣿⣷⡄⠀[0m
+[38;5;27m⠀⠀⠀⠀⠸⣿⣿⣿⣿⣿⣿⣿⣿⣉⡟⠀⠀[38;5;255m ⢸⣿⣧⣤⣤⣤⣤⢸⣿⣿⣦⣤⣤⣤⡄⣿⣿⡇⣾⣿⣿⣧⣤⣤⣤⡄⢰⣿⣿⠟⠛⠛⠻⣿⣿⡄[38;5;255m⢠⡀⠻⣿⣿⣦⣴⣿⣿⠇⢿⣿⣦⣤⣤⣿⣿⠇⣠[0m
+[38;5;27m⠀⠀⠀⠀⢰⡈⠛⠿⣿⣿⣿⣿⣿⠋⠀  [38;5;255m ⠘⠛⠛⠛⠛⠛⠛⠈⠛⠛⠛⠛⠛⠛⠃⠛⠛⠃⠛⠛⠛⠛⠛⠛⠛⠃⠛⠛⠃⠀⠀⠀⠀⠙⠛⠃[38;5;255m⠘⠛⠀⠈⠛⠛⠛⠛⠁⠀⠀⠙⠛⠛⠛⠛⠁⠚⠛[0m
+[38;5;27m⠀⠀⠀⠀⢸⣿⡦⠀⠀⠉⠛⠿⠃⠀⠀⠀ [38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+
+[38;5;51mVersion: monorepo[0m
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[36m Info      [39m Successfully loaded character from: /Users/playra/vibee-eliza-999/vibee.character.json
+[36m Info      [39m Successfully loaded character: VIBEE
+[36m Info      [39m [START] Entering AgentServer.start()...
+[36m Info      [39m [START] isInitialized: false
+[36m Info      [39m [START] Initializing AgentServer...
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+[36m Info      [39m [INIT] Database Dir for SQL plugin: /Users/playra/vibee-eliza-999/.eliza/.elizadb
+[36m Info      [39m [RuntimeMigrator] Initializing migration system...
+[38D[0K  🔍 side-channel-weakmap [255/254] [38D[0K  🔍 side-channel-weakmap [255/254] [38D[0K[36m Info      [39m [RuntimeMigrator] Migration system initialized
+[36m Info      [39m DatabaseMigrationService initialized with database and runtime migrator
+[36m Info      [39m Registered schema for plugin: @elizaos/plugin-sql
+[36m Info      [39m Discovered 1 plugin schemas out of 1 plugins
+[36m Info      [39m [DatabaseMigrationService] Starting migrations
+[36m Info      [39m [DatabaseMigrationService] Environment: DEVELOPMENT
+[36m Info      [39m [DatabaseMigrationService] Plugins to migrate: 1
+[36m Info      [39m [RuntimeMigrator] Starting migration for plugin: @elizaos/plugin-sql
+[36m Info      [39m [RuntimeMigrator] Initializing migration system...
+[36m Info      [39m [RuntimeMigrator] Migration system initialized
+[1m[30m[43m Warn      [49m[39m[22m [RuntimeMigrator] Could not install extension vector: Failed query: CREATE EXTENSION IF NOT EXISTS "vector"
+params: 
+[1m[30m[43m Warn      [49m[39m[22m [RuntimeMigrator] Could not install extension fuzzystrmatch: Failed query: CREATE EXTENSION IF NOT EXISTS "fuzzystrmatch"
+params: 
+[36m Info      [39m [RuntimeMigrator] Executing 61 SQL statements for @elizaos/plugin-sql
+[0m[31m[1m[97m[41m Error     [49m[39m[22m [RuntimeMigrator] Migration failed for @elizaos/plugin-sql: {"query":"BEGIN","params":[],"cause":{"name":"ExitStatus","message":"Program terminated with exit(1)","status":1}}[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m [DatabaseMigrationService] ❌ Failed: @elizaos/plugin-sql {"query":"BEGIN","params":[],"cause":{"name":"ExitStatus","message":"Program terminated with exit(1)","status":1}}[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m [DatabaseMigrationService] Migrations failed: 1 failed, 0 succeeded[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m [INIT] Failed to run database migrations: {
+  [0merror[2m:[0m [0m[1m8117 |[0m       logger10[0m[3m[1m.info[0m([0m[32m`[DatabaseMigrationService] All [0m${successCount}[0m[32m migrations completed successfully`[0m)[0m[2m;[0m
+[0m[1m8118 |[0m     } [0m[35melse[0m {
+[0m[1m8119 |[0m       logger10[0m[3m[1m.error[0m([0m[32m`[DatabaseMigrationService] Migrations failed: [0m${failureCount}[0m[32m failed, [0m${successCount}[0m[32m succeeded`[0m)[0m[2m;[0m
+[0m[1m8120 |[0m       [0m[35mconst[0m errorSummary = errors2[0m[3m[1m.map[0m((e) => [0m[32m`[0m${e.pluginName}[0m[32m: [0m${e.error.message}[0m[32m`[0m)[0m[3m[1m.join[0m([0m[32m`[0m
+[0m[1m8121 |[0m   [0m[32m`);[0m
+[0m[1m8122 |[0m       [0m[35mthrow[0m [0m[35mnew[0m [0m[1mError[0m([0m[32m`[0m${failureCount}[0m[32m migration(s) failed:[0m
+                       [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1m1 migration(s) failed:
+  @elizaos/plugin-sql: Failed query: BEGIN
+params: [0m
+[0m      [2mat [0m[0m[1m[3mrunAllPluginMigrations[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/plugin-sql/dist/node/index.node.js[0m[2m:[0m[33m8122[0m[2m:[33m17[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync initialize[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61112[0m[2m:[33m32[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync start[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61673[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[2masync <anonymous>[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/cli/src/commands/start/index.ts[0m[2m:[0m[33m159[0m[2m:[33m20[0m[2m)[0m
+[0m[2m,[0m
+}[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m Failed to initialize AgentServer (async operations): {
+  [0merror[2m:[0m [0m[1m61111 |[0m         migrationService[0m[3m[1m.discoverAndRegisterPluginSchemas[0m([sqlPlugin])[0m[2m;[0m
+[0m[1m61112 |[0m         [0m[35mawait[0m migrationService[0m[3m[1m.runAllPluginMigrations[0m()[0m[2m;[0m
+[0m[1m61113 |[0m         logger33[0m[3m[1m.success[0m([0m[32m"[INIT] Database migrations completed successfully"[0m)[0m[2m;[0m
+[0m[1m61114 |[0m       } [0m[35mcatch[0m (migrationError) {
+[0m[1m61115 |[0m         logger33[0m[3m[1m.error[0m({ error: migrationError }, [0m[32m"[INIT] Failed to run database migrations:"[0m)[0m[2m;[0m
+[0m[1m61116 |[0m         [0m[35mthrow[0m [0m[35mnew[0m [0m[1mError[0m([0m[32m`Database migration failed: [0m${migrationError [0m[35minstanceof[0m Error ? migrationError.message : String(migrationError)}[0m[32m`[0m)[0m[2m;[0m
+                          [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1mDatabase migration failed: 1 migration(s) failed:
+  @elizaos/plugin-sql: Failed query: BEGIN
+params: [0m
+[0m      [2mat [0m[0m[1m[3minitialize[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61116[0m[2m:[33m19[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync start[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61673[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[2masync <anonymous>[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/cli/src/commands/start/index.ts[0m[2m:[0m[33m159[0m[2m:[33m20[0m[2m)[0m
+[0m[2m,[0m
+}[0m
+[0m[1m61111 |[0m         migrationService[0m[3m[1m.discoverAndRegisterPluginSchemas[0m([sqlPlugin])[0m[2m;[0m
+[0m[1m61112 |[0m         [0m[35mawait[0m migrationService[0m[3m[1m.runAllPluginMigrations[0m()[0m[2m;[0m
+[0m[1m61113 |[0m         logger33[0m[3m[1m.success[0m([0m[32m"[INIT] Database migrations completed successfully"[0m)[0m[2m;[0m
+[0m[1m61114 |[0m       } [0m[35mcatch[0m (migrationError) {
+[0m[1m61115 |[0m         logger33[0m[3m[1m.error[0m({ error: migrationError }, [0m[32m"[INIT] Failed to run database migrations:"[0m)[0m[2m;[0m
+[0m[1m61116 |[0m         [0m[35mthrow[0m [0m[35mnew[0m [0m[1mError[0m([0m[32m`Database migration failed: [0m${migrationError [0m[35minstanceof[0m Error ? migrationError.message : String(migrationError)}[0m[32m`[0m)[0m[2m;[0m
+                          [31m[1m^[0m
+[0merror[0m[2m:[0m [1mDatabase migration failed: 1 migration(s) failed:
+  @elizaos/plugin-sql: Failed query: BEGIN
+params: [0m
+[0m      [2mat [0m[0m[1m[3minitialize[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61116[0m[2m:[33m19[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync start[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61673[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[2masync <anonymous>[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/cli/src/commands/start/index.ts[0m[2m:[0m[33m159[0m[2m:[33m20[0m[2m)[0m
+
+[0m      [2mat [0m[0m[2m<anonymous>[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m49645[0m[2m:[33m15[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3minitialize[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61168[0m[2m:[33m15[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync start[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61673[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[2masync <anonymous>[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/cli/src/commands/start/index.ts[0m[2m:[0m[33m159[0m[2m:[33m20[0m[2m)[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m An error occurred: {
+  [0merror[2m:[0m [0m[1m61111 |[0m         migrationService[0m[3m[1m.discoverAndRegisterPluginSchemas[0m([sqlPlugin])[0m[2m;[0m
+[0m[1m61112 |[0m         [0m[35mawait[0m migrationService[0m[3m[1m.runAllPluginMigrations[0m()[0m[2m;[0m
+[0m[1m61113 |[0m         logger33[0m[3m[1m.success[0m([0m[32m"[INIT] Database migrations completed successfully"[0m)[0m[2m;[0m
+[0m[1m61114 |[0m       } [0m[35mcatch[0m (migrationError) {
+[0m[1m61115 |[0m         logger33[0m[3m[1m.error[0m({ error: migrationError }, [0m[32m"[INIT] Failed to run database migrations:"[0m)[0m[2m;[0m
+[0m[1m61116 |[0m         [0m[35mthrow[0m [0m[35mnew[0m [0m[1mError[0m([0m[32m`Database migration failed: [0m${migrationError [0m[35minstanceof[0m Error ? migrationError.message : String(migrationError)}[0m[32m`[0m)[0m[2m;[0m
+                          [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1mDatabase migration failed: 1 migration(s) failed:
+  @elizaos/plugin-sql: Failed query: BEGIN
+params: [0m
+[0m      [2mat [0m[0m[1m[3minitialize[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61116[0m[2m:[33m19[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync start[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61673[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[2masync <anonymous>[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/cli/src/commands/start/index.ts[0m[2m:[0m[33m159[0m[2m:[33m20[0m[2m)[0m
+[0m[2m,[0m
+}[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m Error details: {
+  [0mmessage[2m:[0m [0m[32m[0m[32m"Database migration failed: 1 migration(s) failed:\n  @elizaos/plugin-sql: Failed query: BEGIN\nparams: "[0m[0m[0m[2m,[0m
+}[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m Stack trace: {
+  [0mstack[2m:[0m [0m[32m[0m[32m"Error: Database migration failed: 1 migration(s) failed:\n  @elizaos/plugin-sql: Failed query: BEGIN\nparams: \n    at initialize (/Users/playra/vibee-eliza-999/packages/server/dist/index.js:61116:19)\n    at async start (/Users/playra/vibee-eliza-999/packages/server/dist/index.js:61673:18)\n    at async <anonymous> (/Users/playra/vibee-eliza-999/packages/cli/src/commands/start/index.ts:159:20)\n    at processTicksAndRejections (native:7:39)"[0m[0m[0m[2m,[0m
+}[0m

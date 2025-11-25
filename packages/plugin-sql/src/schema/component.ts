@@ -11,7 +11,7 @@ import { worldTable } from './world';
 export const componentTable = pgTable('components', {
   id: uuid('id')
     .primaryKey()
-    .default(sql`gen_random_uuid()`)
+    .defaultRandom()
     .notNull(),
 
   // Foreign keys

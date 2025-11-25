@@ -1,0 +1,165 @@
+ Info       Using local @elizaos/cli installation
+[36m Info      [39m [Sentry] Initialized successfully for monitoring
+
+[38;5;27m⠀⠀⠀⠀⠀⠀⠀⠀⢀⣐⣿⣿⢰⡀⠀⠀⠀[38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+[38;5;27m⠀⠀⠀⠀⠀⢀⣴⠤⠾⠛⠛⣿⣶⣇⠀⠀⡆[38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+[38;5;27m⢰⣋⡳⡄⠀⢨⣭⡀⠀⡤⠀⣀⣝⢿⣶⣿⡅[38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+[38;5;27m⢸⣯⠀⣇⠀⣼⣿⣿⣆⢷⣴⣿⣿⡏⣛⡉⠀[38;5;255m ⢸⣿⣿⣿⣿⣿⣿⢸⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⣾⣿⣿⣧⠀⠀⠀[38;5;255m⢸⠟⢀⣴⣿⣿⣿⣿⣦⡀⣠⣾⣿⣿⣿⣿⣦⡙⢿[0m
+[38;5;27m⠀⠙⢷⣮⢸⣿⣿⣿⣿⣷⣯⣟⣏⣼⣷⣅⠾[38;5;255m ⢸⣿⣇⣀⣀⣀⠀⢸⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⠀⠀⣠⣿⣿⠟⠁⠀⠀⣼⣿⡟⣿⣿⣆⠀⠀[38;5;255m⠀⠀⣿⣿⠋⠀⠈⠻⣿⡇⣿⣿⣅⣀⣀⡛⠛⠃⠀[0m
+[38;5;27m⠀⠀⠀⠁⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⠀[38;5;255m ⢸⣿⡿⠿⠿⠿⠀⢸⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⣠⣾⣿⠟⠁⠀⠀⠀⣰⣿⣿⣁⣸⣿⣿⡄⠀[38;5;255m⠀⠀⣿⣿ ⠀⠀ ⣿⣿⢈⣛⠿⠿⠿⣿⣷⡄⠀[0m
+[38;5;27m⠀⠀⠀⠀⠸⣿⣿⣿⣿⣿⣿⣿⣿⣉⡟⠀⠀[38;5;255m ⢸⣿⣧⣤⣤⣤⣤⢸⣿⣿⣦⣤⣤⣤⡄⣿⣿⡇⣾⣿⣿⣧⣤⣤⣤⡄⢰⣿⣿⠟⠛⠛⠻⣿⣿⡄[38;5;255m⢠⡀⠻⣿⣿⣦⣴⣿⣿⠇⢿⣿⣦⣤⣤⣿⣿⠇⣠[0m
+[38;5;27m⠀⠀⠀⠀⢰⡈⠛⠿⣿⣿⣿⣿⣿⠋⠀  [38;5;255m ⠘⠛⠛⠛⠛⠛⠛⠈⠛⠛⠛⠛⠛⠛⠃⠛⠛⠃⠛⠛⠛⠛⠛⠛⠛⠃⠛⠛⠃⠀⠀⠀⠀⠙⠛⠃[38;5;255m⠘⠛⠀⠈⠛⠛⠛⠛⠁⠀⠀⠙⠛⠛⠛⠛⠁⠚⠛[0m
+[38;5;27m⠀⠀⠀⠀⢸⣿⡦⠀⠀⠉⠛⠿⠃⠀⠀⠀ [38;5;255m ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[38;5;255m⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[0m
+
+[38;5;51mVersion: monorepo[0m
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[36m Info      [39m Successfully loaded character from: /Users/playra/vibee-eliza-999/vibee.character.json
+[36m Info      [39m Successfully loaded character: VIBEE
+[36m Info      [39m [START] Entering AgentServer.start()...
+[36m Info      [39m [START] isInitialized: false
+[36m Info      [39m [START] Initializing AgentServer...
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+[36m Info      [39m [INIT] Database Dir for SQL plugin: /Users/playra/vibee-eliza-999/.eliza/.elizadb
+[36m Info      [39m [INIT] Created database directory: /Users/playra/vibee-eliza-999/.eliza
+[36m Info      [39m [RuntimeMigrator] Initializing migration system...
+[36m Info      [39m [RuntimeMigrator] Migration system initialized
+[36m Info      [39m DatabaseMigrationService initialized with database and runtime migrator
+[36m Info      [39m Registered schema for plugin: @elizaos/plugin-sql
+[36m Info      [39m Discovered 1 plugin schemas out of 1 plugins
+[36m Info      [39m [DatabaseMigrationService] Starting migrations
+[36m Info      [39m [DatabaseMigrationService] Environment: DEVELOPMENT
+[36m Info      [39m [DatabaseMigrationService] Plugins to migrate: 1
+[36m Info      [39m [RuntimeMigrator] Starting migration for plugin: @elizaos/plugin-sql
+[36m Info      [39m [RuntimeMigrator] Initializing migration system...
+[36m Info      [39m [RuntimeMigrator] Migration system initialized
+[36m Info      [39m [RuntimeMigrator] Executing 61 SQL statements for @elizaos/plugin-sql
+[36m Info      [39m [RuntimeMigrator] Recorded migration 0000_@elizaos/plugin-sql_mieq2fn0 for @elizaos/plugin-sql
+[36m Info      [39m [RuntimeMigrator] Migration completed successfully for @elizaos/plugin-sql
+[36m Info      [39m [DatabaseMigrationService] ✅ Completed: @elizaos/plugin-sql
+[36m Info      [39m [DatabaseMigrationService] All 1 migrations completed successfully
+[36m Info      [39m [INIT] Skipping default server setup (missing tables)...
+[36m Info      [39m [INIT] Server uses temporary adapter for migrations only
+[36m Info      [39m [INIT] Initializing ElizaOS...
+[36m Info      [39m Public health check endpoints enabled: /healthz and /health (rate limited: 100 req/min)
+[36m Info      [39m Server authentication is DISABLED for public access (demo mode).
+[36m Info      [39m Web UI enabled
+[36m Info      [39m [STATIC] Found client files at: /Users/playra/vibee-eliza-999/packages/server/dist/client
+[36m Info      [39m [STATIC] Serving static files from: /Users/playra/vibee-eliza-999/packages/server/dist/client
+[36m Info      [39m [Jobs API] Started job cleanup interval
+[36m Info      [39m [SocketIO] Router initialized with 0 agents
+[36m Info      [39m [SocketIO] Setting up Socket.IO event listeners
+[36m Info      [39m [SocketIO] Registered message types: 1: ROOM_JOINING, 2: SEND_MESSAGE, 3: MESSAGE, 4: ACK, 5: THINKING, 6: CONTROL, ROOM_JOINING: 1, SEND_MESSAGE: 2, MESSAGE: 3, ACK: 4, THINKING: 5, CONTROL: 6
+[36m Info      [39m [START] AgentServer initialized successfully
+[36m Info      [39m [START] Resolving port... (config: undefined)
+[36m Info      [39m [START] Resolved port: 3000
+[36m Info      [39m [START] Server instance exists: true
+[36m Info      [39m [START] Calling startHttpServer(3000)...
+[36m Info      [39m [HTTPSERVER] Entering startHttpServer()...
+[36m Info      [39m [HTTPSERVER] Port: 3000
+[36m Info      [39m [HTTPSERVER] Creating HTTP server...
+[36m Info      [39m [HTTPSERVER] this.app exists: true
+[36m Info      [39m [HTTPSERVER] Current agents count: 0
+[36m Info      [39m [HTTPSERVER] Environment: development
+[36m Info      [39m [HTTPSERVER] Host: 0.0.0.0
+[36m Info      [39m [HTTPSERVER] Calling this.server.listen(3000, 0.0.0.0)...
+[36m Info      [39m [HTTPSERVER] HTTP server setup completed without errors
+[36m Info      [39m [HTTPSERVER] Server is now listening!
+AgentServer is listening on port 3000
+[36m Info      [39m [HTTPSERVER] Resolving promise - server is listening!
+[36m Info      [39m [START] startHttpServer completed successfully
+[36m Info      [39m [START] Set SERVER_PORT=3000
+[36m Info      [39m Final plugins being loaded: {
+  [0mplugins[2m:[0m [ [0m[32m"@elizaos/plugin-sql"[0m[0m[0m[2m,[0m [0m[32m"bootstrap"[0m[0m[0m[2m,[0m [0m[32m"telegram-craft"[0m[0m ][0m[2m,[0m
+}
+[36m Info      [39m plugin-sql init starting...
+[36m Info      [39m Database adapter created and registered
+[36m Info      [39m #VIBEE  Registering service: task
+[36m Info      [39m #VIBEE  Registering service: embedding-generation
+🔧 Initializing Telegram Craft Plugin...
+✅ [Plugin] TelegramService will be auto-registered by ElizaOS
+🔍 [Plugin] Services in plugin definition: [0m[33m1[0m
+🔍 [Plugin] Service types: [ [0m[32m"telegram-craft"[0m[0m ]
+✅ Telegram Craft Plugin initialized with strategy: mtproto
+📦 Registered 6 actions
+📡 Registered 5 providers
+⚙️  Registered 1 services
+[36m Info      [39m #VIBEE  Registering service: telegram-craft
+[36m Info      [39m #VIBEE  Running plugin migrations...
+[36m Info      [39m #VIBEE  Found 1 plugins with schemas to migrate.
+[36m Info      [39m [RuntimeMigrator] Initializing migration system...
+[36m Info      [39m [RuntimeMigrator] Migration system initialized
+[36m Info      [39m DatabaseMigrationService initialized with database and runtime migrator
+[36m Info      [39m Registered schema for plugin: @elizaos/plugin-sql
+[36m Info      [39m [DatabaseMigrationService] Starting migrations
+[36m Info      [39m [DatabaseMigrationService] Environment: DEVELOPMENT
+[36m Info      [39m [DatabaseMigrationService] Plugins to migrate: 1
+[36m Info      [39m [RuntimeMigrator] Starting migration for plugin: @elizaos/plugin-sql
+[36m Info      [39m [RuntimeMigrator] Initializing migration system...
+[36m Info      [39m [RuntimeMigrator] Migration system initialized
+[36m Info      [39m [RuntimeMigrator] No actionable changes for @elizaos/plugin-sql
+[36m Info      [39m [DatabaseMigrationService] ✅ Completed: @elizaos/plugin-sql
+[36m Info      [39m [DatabaseMigrationService] All 1 migrations completed successfully
+[36m Info      [39m #VIBEE  Plugin migrations completed successfully.
+[36m Info      [39m #VIBEE  Plugin migrations completed.
+[1m[30m[43m Warn      [49m[39m[22m #VIBEE  [AgentRuntime][VIBEE] No TEXT_EMBEDDING model registered. Skipping embedding dimension setup.
+[36m Info      [39m [EmbeddingService] Starting embedding generation service
+[1m[30m[43m Warn      [49m[39m[22m [EmbeddingService] No TEXT_EMBEDDING model registered. Embedding service will not be initialized.
+🚀 [TelegramService] start() called
+⚠️ [TelegramService] Adapter not initialized, initializing now...
+🔧 [TelegramService] Initializing from ENV with strategy: mtproto
+🔧 [MTProto] API ID from ENV: ✅ SET
+🔧 [MTProto] API Hash from ENV: ✅ SET
+🔧 [MTProto] Session from ENV: ✅ SET
+🔧 [MTProto] Creating adapter instance from ENV...
+[33m[2025-11-25T22:20:03.351] [INFO] - [Running gramJS version 2.26.21][0m
+✅ [MTProto] Adapter instance created from ENV
+[36m Info      [39m #VIBEE  Service embedding-generation registered successfully
+✅ [TelegramService] Initialized from ENV successfully
+[36m Info      [39m #VIBEE  Service task registered successfully
+🚀 [TelegramService] Connecting adapter...
+🔗 Connecting to Telegram via MTProto...
+🔑 Using existing session string
+[33m[2025-11-25T22:20:03.355] [INFO] - [Connecting to 149.154.167.51:80/TCPFull...][0m
+[36m Info      [39m #VIBEE  Registering service: message-bus-service
+[36m Info      [39m [AgentServer] Registered MessageBusConnector for agent VIBEE
+[0m[31m[1m[97m[41m Error     [49m[39m[22m #VIBEE  Failed to register service message-bus-service: AgentServer not initialized. Call setGlobalAgentServer() before using MessageBusService.[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m #VIBEE  Plugin internal-message-bus-connector failed to register service message-bus-service: AgentServer not initialized. Call setGlobalAgentServer() before using MessageBusService.[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m Failed to register agent: {
+  [0merror[2m:[0m [0m[1m61914 |[0m     logger33[0m[3m[1m.warn[0m([0m[32m`[AgentServer] Remove participant operation not directly supported in database adapter`[0m)[0m[2m;[0m
+[0m[1m61915 |[0m   }
+[0m[1m61916 |[0m   [0m[35masync[0m addAgentToServer(serverId, agentId) {
+[0m[1m61917 |[0m     [0m[35mconst[0m server = [0m[35mawait[0m [0m[33mthis[0m[0m[3m[1m.getServerById[0m(serverId)[0m[2m;[0m
+[0m[1m61918 |[0m     [0m[35mif[0m (!server) {
+[0m[1m61919 |[0m       [0m[35mthrow[0m [0m[35mnew[0m [0m[1mError[0m([0m[32m`Server [0m${serverId}[0m[32m not found`[0m)[0m[2m;[0m
+                        [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1mServer 00000000-0000-0000-0000-000000000000 not found[0m
+[0m      [2mat [0m[0m[1m[3maddAgentToServer[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61919[0m[2m:[33m17[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync registerAgent[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61634[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync startAgents[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61050[0m[2m:[33m20[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync start[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61708[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[2masync <anonymous>[0m[2m ([0m[0m[36m/Users/playra/vibee-eliza-999/packages/cli/dist/index.js[0m[2m:[0m[33m311074[0m[2m:[33m24[0m[2m)[0m
+[0m[2m,[0m
+}[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m An error occurred: {
+  [0merror[2m:[0m [0m[1m61914 |[0m     logger33[0m[3m[1m.warn[0m([0m[32m`[AgentServer] Remove participant operation not directly supported in database adapter`[0m)[0m[2m;[0m
+[0m[1m61915 |[0m   }
+[0m[1m61916 |[0m   [0m[35masync[0m addAgentToServer(serverId, agentId) {
+[0m[1m61917 |[0m     [0m[35mconst[0m server = [0m[35mawait[0m [0m[33mthis[0m[0m[3m[1m.getServerById[0m(serverId)[0m[2m;[0m
+[0m[1m61918 |[0m     [0m[35mif[0m (!server) {
+[0m[1m61919 |[0m       [0m[35mthrow[0m [0m[35mnew[0m [0m[1mError[0m([0m[32m`Server [0m${serverId}[0m[32m not found`[0m)[0m[2m;[0m
+                        [31m[1m^[0m
+[0m[31merror[0m[2m:[0m [1mServer 00000000-0000-0000-0000-000000000000 not found[0m
+[0m      [2mat [0m[0m[1m[3maddAgentToServer[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61919[0m[2m:[33m17[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync registerAgent[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61634[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync startAgents[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61050[0m[2m:[33m20[0m[2m)[0m
+[0m      [2mat [0m[0m[1m[3masync start[0m[2m ([0m[0m[36m[2m/Users/playra/vibee-eliza-999/[0m[36mpackages/server/dist/index.js[0m[2m:[0m[33m61708[0m[2m:[33m18[0m[2m)[0m
+[0m      [2mat [0m[0m[2masync <anonymous>[0m[2m ([0m[0m[36m/Users/playra/vibee-eliza-999/packages/cli/dist/index.js[0m[2m:[0m[33m311074[0m[2m:[33m24[0m[2m)[0m
+[0m[2m,[0m
+}[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m Error details: {
+  [0mmessage[2m:[0m [0m[32m[0m[32m"Server 00000000-0000-0000-0000-000000000000 not found"[0m[0m[0m[2m,[0m
+}[0m
+[0m[31m[1m[97m[41m Error     [49m[39m[22m Stack trace: {
+  [0mstack[2m:[0m [0m[32m[0m[32m"Error: Server 00000000-0000-0000-0000-000000000000 not found\n    at addAgentToServer (/Users/playra/vibee-eliza-999/packages/server/dist/index.js:61919:17)\n    at async registerAgent (/Users/playra/vibee-eliza-999/packages/server/dist/index.js:61634:18)\n    at async startAgents (/Users/playra/vibee-eliza-999/packages/server/dist/index.js:61050:20)\n    at async start (/Users/playra/vibee-eliza-999/packages/server/dist/index.js:61708:18)\n    at async <anonymous> (/Users/playra/vibee-eliza-999/packages/cli/dist/index.js:311074:24)\n    at processTicksAndRejections (native:7:39)"[0m[0m[0m[2m,[0m
+}[0m
+[33mwarn[0m[2m:[0m Could not decode sourcemap in '/Users/playra/vibee-eliza-999/packages/cli/dist/index.js': UnsupportedFormat

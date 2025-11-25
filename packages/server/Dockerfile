@@ -2,26 +2,20 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Устанавливаем pnpm глобально
-RUN npm install -g pnpm
+# Устанавливаем bun глобально
+RUN npm install -g bun
 
 # Копируем файлы
 COPY . .
 
-# Проверяем, что скопировалось
-RUN ls -la
+# Устанавливаем все зависимости
+RUN bun install
 
-# Создаем pnpm-workspace.yaml
-RUN printf "packages:\n  - 'packages/*'\n  - 'plugin-specification/*'\n" > pnpm-workspace.yaml
-
-# Проверяем workspace
-RUN cat pnpm-workspace.yaml
-
-# Устанавливаем все зависимости в workspace
-RUN pnpm install
+# Собираем plugin-sql с исправлениями PGLite
+RUN bun run build:plugin-sql
 
 # Собираем сервер
-RUN pnpm --filter @elizaos/server run build
+RUN bun run build
 
 # Запускаем сервер
 EXPOSE 3000

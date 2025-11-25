@@ -15,7 +15,7 @@ export const participantTable = pgTable(
     id: uuid('id')
       .notNull()
       .primaryKey()
-      .default(sql`gen_random_uuid()`),
+      .defaultRandom(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .default(sql`now()`)
       .notNull(),

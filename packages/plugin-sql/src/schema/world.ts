@@ -12,7 +12,7 @@ export const worldTable = pgTable('worlds', {
   id: uuid('id')
     .notNull()
     .primaryKey()
-    .default(sql`gen_random_uuid()`),
+    .defaultRandom(),
   agentId: uuid('agentId')
     .notNull()
     .references(() => agentTable.id, { onDelete: 'cascade' }),

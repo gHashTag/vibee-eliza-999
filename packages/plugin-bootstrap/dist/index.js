@@ -95,7 +95,7 @@ import {
   getLocalServerUrl
 } from "@elizaos/core";
 
-// ../../node_modules/uuid/dist-node/stringify.js
+// ../../node_modules/uuid/dist/esm/stringify.js
 var byteToHex = [];
 for (let i = 0;i < 256; ++i) {
   byteToHex.push((i + 256).toString(16).slice(1));
@@ -104,8 +104,8 @@ function unsafeStringify(arr, offset = 0) {
   return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
 }
 
-// ../../node_modules/uuid/dist-node/rng.js
-import { randomFillSync } from "node:crypto";
+// ../../node_modules/uuid/dist/esm/rng.js
+import { randomFillSync } from "crypto";
 var rnds8Pool = new Uint8Array(256);
 var poolPtr = rnds8Pool.length;
 function rng() {
@@ -116,12 +116,15 @@ function rng() {
   return rnds8Pool.slice(poolPtr, poolPtr += 16);
 }
 
-// ../../node_modules/uuid/dist-node/native.js
-import { randomUUID } from "node:crypto";
+// ../../node_modules/uuid/dist/esm/native.js
+import { randomUUID } from "crypto";
 var native_default = { randomUUID };
 
-// ../../node_modules/uuid/dist-node/v4.js
-function _v4(options, buf, offset) {
+// ../../node_modules/uuid/dist/esm/v4.js
+function v4(options, buf, offset) {
+  if (native_default.randomUUID && !buf && !options) {
+    return native_default.randomUUID();
+  }
   options = options || {};
   const rnds = options.random ?? options.rng?.() ?? rng();
   if (rnds.length < 16) {
@@ -140,12 +143,6 @@ function _v4(options, buf, offset) {
     return buf;
   }
   return unsafeStringify(rnds);
-}
-function v4(options, buf, offset) {
-  if (native_default.randomUUID && !buf && !options) {
-    return native_default.randomUUID();
-  }
-  return _v4(options, buf, offset);
 }
 var v4_default = v4;
 // src/actions/imageGeneration.ts
@@ -7758,5 +7755,5 @@ export {
   actionStateProvider
 };
 
-//# debugId=855D23B70BB76FA364756E2164756E21
+//# debugId=AF616B17C5B1F3AD64756E2164756E21
 //# sourceMappingURL=index.js.map

@@ -5,20 +5,21 @@ WORKDIR /app
 # Устанавливаем bun глобально
 RUN npm install -g bun
 
-# Копируем файлы
-COPY . .
+# Сначала копируем только конфигурационные файлы для workspace
+COPY package.json bunfig.toml ./
 
-# Устанавливаем все зависимости
+# Копируем ВСЕ packages (включая server)
+COPY packages ./packages
+COPY scripts ./scripts
+COPY tsconfig.json ./
+
+# Устанавливаем зависимости (теперь увидит workspace packages)
 RUN bun install
 
 # Удаляем все существующие dist директории для чистой сборки
 RUN find . -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
 
-# Очищаем кэш bun
-RUN bun run --cwd /app store prune
-
 # Собираем ВСЕ пакеты в правильном порядке (core → plugin-sql → server)
-# turbo автоматически определит правильный порядок зависимостей
 RUN bun run build
 
 # Запускаем сервер

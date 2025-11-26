@@ -1,6 +1,7 @@
 import { type Character } from "@elizaos/core";
-import { telegramCraftPlugin } from "@elizaos/plugin-telegram-craft";
-// import { vibeFaceAvatarPlugin } from "../../plugin-vibe-face-avatar/dist/index.js";
+
+// Import plugin without type checking since it doesn't have .d.ts
+const telegramCraftPlugin = require("@elizaos/plugin-telegram-craft");
 
 /**
  * VIBEE - Главный AI-агент проекта VIBEE
@@ -15,7 +16,7 @@ export const vibeeAgent: Character = {
     "@elizaos/plugin-bootstrap",
 
     // Telegram Craft Plugin - для мониторинга групп
-    telegramCraftPlugin as any,
+    telegramCraftPlugin.telegramCraftPlugin as any,
 
     // Face Avatar Plugin - для обучения LoRA и генерации
     // vibeFaceAvatarPlugin as any,  // TEMPORARY: Commented out
@@ -42,7 +43,7 @@ export const vibeeAgent: Character = {
 - /status - статус системы и агентов
 - /help - справка по командам
 
-Всегда отвечай на русном языке. Будь дружелюбным, полезным и информативным. Используй эмодзи для лучшего восприятия. Объясняй сложные вещи простыми словами.`,
+Всегда отвечай на русском языке. Будь дружелюбным, полезным и информативным. Используй эмодзи для лучшего восприятия. Объясняй сложные вещи простыми словами.`,
 
   bio: [
     "Главный AI-агент проекта VIBEE",

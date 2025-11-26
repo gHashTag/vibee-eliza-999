@@ -42,33 +42,44 @@ async function main() {
     },
   });
 
-  await runtime.initialize();
+  try {
+    await runtime.initialize();
 
-  // With character context (default)
-  console.log('\n--- With Character Context ---');
-  const withCharacter = await runtime.generateText(
-    'What do you think about artificial intelligence?'
-  );
-  console.log(withCharacter.text);
+    // With character context (default)
+    console.log('\n--- With Character Context ---');
+    const withCharacter = await runtime.generateText(
+      'What do you think about artificial intelligence?'
+    );
+    console.log(withCharacter.text);
 
-  // Without character context
-  console.log('\n--- Without Character Context ---');
-  const withoutCharacter = await runtime.generateText('Translate to Spanish: Hello, how are you?', {
-    includeCharacter: false,
-  });
-  console.log(withoutCharacter.text);
+    // Without character context
+    console.log('\n--- Without Character Context ---');
+    const withoutCharacter = await runtime.generateText('Translate to Spanish: Hello, how are you?', {
+      includeCharacter: false,
+    });
+    console.log(withoutCharacter.text);
 
-  // With custom parameters
-  console.log('\n--- With Custom Parameters ---');
-  const creative = await runtime.generateText('Write a haiku about coding', {
-    temperature: 0.9,
-    maxTokens: 100,
-  });
-  console.log(creative.text);
+    // With custom parameters
+    console.log('\n--- With Custom Parameters ---');
+    const creative = await runtime.generateText('Write a haiku about coding', {
+      temperature: 0.9,
+      maxTokens: 100,
+    });
+    console.log(creative.text);
 
-  await runtime.stop();
+    await runtime.stop();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Fatal error:', errorMessage);
+    await runtime.stop();
+    process.exit(1);
+  }
 }
 
 if (import.meta.main) {
-  main();
+  main().catch((error) => {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Unhandled error:', errorMessage);
+    process.exit(1);
+  });
 }

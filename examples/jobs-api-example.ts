@@ -7,58 +7,71 @@ async function simpleJobExample() {
   const API_URL = 'http://localhost:3000/api/messaging';
   const API_KEY = 'your-api-key';
 
-  // 1. Create a job (send a one-off message to an agent)
-  const createResponse = await fetch(`${API_URL}/jobs`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
-    },
-    body: JSON.stringify({
-      agentId: 'your-agent-uuid',
-      userId: 'your-user-uuid',
-      content: 'What is the current market status for Bitcoin?',
-      metadata: {
-        source: 'api-example',
-      },
-      timeoutMs: 30000, // 30 seconds timeout
-    }),
-  });
-
-  const jobData = await createResponse.json();
-  console.log('Job created:', jobData);
-  // { jobId: "...", status: "processing", createdAt: ..., expiresAt: ... }
-
-  // 2. Poll for the result
-  const jobId = jobData.jobId;
-  let completed = false;
-  const pollInterval = 1000; // Poll every 1 second
-  const maxAttempts = 30;
-
-  for (let attempt = 0; attempt < maxAttempts && !completed; attempt++) {
-    await new Promise((resolve) => setTimeout(resolve, pollInterval));
-
-    const statusResponse = await fetch(`${API_URL}/jobs/${jobId}`, {
+  try {
+    // 1. Create a job (send a one-off message to an agent)
+    const createResponse = await fetch(`${API_URL}/jobs`, {
+      method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         'x-api-key': API_KEY,
       },
+      body: JSON.stringify({
+        agentId: 'your-agent-uuid',
+        userId: 'your-user-uuid',
+        content: 'What is the current market status for Bitcoin?',
+        metadata: {
+          source: 'api-example',
+        },
+        timeoutMs: 30000, // 30 seconds timeout
+      }),
     });
 
-    const status = await statusResponse.json();
-    console.log(`Poll attempt ${attempt + 1}:`, status.status);
-
-    if (status.status === 'completed') {
-      console.log('Agent response:', status.result.message.content);
-      console.log('Processing time:', status.result.processingTimeMs, 'ms');
-      completed = true;
-    } else if (status.status === 'failed' || status.status === 'timeout') {
-      console.error('Job failed:', status.error);
-      completed = true;
+    if (!createResponse.ok) {
+      throw new Error(`Failed to create job: ${createResponse.statusText}`);
     }
-  }
 
-  if (!completed) {
-    console.error('Job timed out after', maxAttempts, 'attempts');
+    const jobData = await createResponse.json();
+    console.log('Job created:', jobData);
+    // { jobId: "...", status: "processing", createdAt: ..., expiresAt: ... }
+
+    // 2. Poll for the result
+    const jobId = jobData.jobId;
+    let completed = false;
+    const pollInterval = 1000; // Poll every 1 second
+    const maxAttempts = 30;
+
+    for (let attempt = 0; attempt < maxAttempts && !completed; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+
+      const statusResponse = await fetch(`${API_URL}/jobs/${jobId}`, {
+        headers: {
+          'x-api-key': API_KEY,
+        },
+      });
+
+      if (!statusResponse.ok) {
+        throw new Error(`Failed to get job status: ${statusResponse.statusText}`);
+      }
+
+      const status = await statusResponse.json();
+      console.log(`Poll attempt ${attempt + 1}:`, status.status);
+
+      if (status.status === 'completed') {
+        console.log('Agent response:', status.result.message.content);
+        console.log('Processing time:', status.result.processingTimeMs, 'ms');
+        completed = true;
+      } else if (status.status === 'failed' || status.status === 'timeout') {
+        console.error('Job failed:', status.error);
+        completed = true;
+      }
+    }
+
+    if (!completed) {
+      console.error('Job timed out after', maxAttempts, 'attempts');
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error in simple job example:', errorMessage);
   }
 }
 
@@ -66,37 +79,51 @@ async function simpleJobExample() {
 async function jobWithJWTExample() {
   const API_URL = 'http://localhost:3000/api';
 
-  // 1. Login to get JWT token
-  const loginResponse = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email: 'user@example.com',
-      username: 'user',
-      cdpUserId: 'your-user-uuid',
-    }),
-  });
+  try {
+    // 1. Login to get JWT token
+    const loginResponse = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: 'user@example.com',
+        username: 'user',
+        cdpUserId: 'your-user-uuid',
+      }),
+    });
 
-  const { token } = await loginResponse.json();
+    if (!loginResponse.ok) {
+      throw new Error(`Login failed: ${loginResponse.statusText}`);
+    }
 
-  // 2. Create job with JWT
-  const createResponse = await fetch(`${API_URL}/messaging/jobs`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      agentId: 'agent-uuid',
-      userId: 'your-user-uuid',
-      content: 'Analyze the DeFi market trends',
-    }),
-  });
+    const { token } = await loginResponse.json();
 
-  const job = await createResponse.json();
-  return job;
+    // 2. Create job with JWT
+    const createResponse = await fetch(`${API_URL}/messaging/jobs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        agentId: 'agent-uuid',
+        userId: 'your-user-uuid',
+        content: 'Analyze the DeFi market trends',
+      }),
+    });
+
+    if (!createResponse.ok) {
+      throw new Error(`Failed to create job: ${createResponse.statusText}`);
+    }
+
+    const job = await createResponse.json();
+    return job;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error in JWT example:', errorMessage);
+    throw error;
+  }
 }
 
 // Example 3: Helper function for polling with async/await
@@ -124,6 +151,11 @@ async function pollJobUntilComplete(
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const response = await fetch(`${apiUrl}/jobs/${jobId}`, { headers });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get job status: ${response.statusText}`);
+    }
+
     const status = await response.json();
 
     if (status.status === 'completed') {
@@ -155,34 +187,43 @@ async function pollJobUntilComplete(
 async function helperExample() {
   const API_KEY = 'your-api-key';
 
-  // Create job
-  const createResponse = await fetch('http://localhost:3000/api/messaging/jobs', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
-    },
-    body: JSON.stringify({
-      agentId: 'agent-uuid',
-      userId: 'user-uuid',
-      content: 'What are the top 5 DeFi protocols by TVL?',
-    }),
-  });
+  try {
+    // Create job
+    const createResponse = await fetch('http://localhost:3000/api/messaging/jobs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+      },
+      body: JSON.stringify({
+        agentId: 'agent-uuid',
+        userId: 'user-uuid',
+        content: 'What are the top 5 DeFi protocols by TVL?',
+      }),
+    });
 
-  const { jobId } = await createResponse.json();
+    if (!createResponse.ok) {
+      throw new Error(`Failed to create job: ${createResponse.statusText}`);
+    }
 
-  // Poll until complete
-  const result = await pollJobUntilComplete(jobId, {
-    apiKey: API_KEY,
-    interval: 1000,
-    maxAttempts: 30,
-  });
+    const { jobId } = await createResponse.json();
 
-  if (result.success) {
-    console.log('Agent response:', result.result?.message.content);
-    console.log('Time taken:', result.processingTimeMs, 'ms');
-  } else {
-    console.error('Job failed:', result.error);
+    // Poll until complete
+    const result = await pollJobUntilComplete(jobId, {
+      apiKey: API_KEY,
+      interval: 1000,
+      maxAttempts: 30,
+    });
+
+    if (result.success) {
+      console.log('Agent response:', result.result?.message.content);
+      console.log('Time taken:', result.processingTimeMs, 'ms');
+    } else {
+      console.error('Job failed:', result.error);
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error in helper example:', errorMessage);
   }
 }
 
@@ -308,7 +349,8 @@ async function sdkStyleExample() {
 
     console.log('Agent response:', result.result.message.content);
   } catch (error) {
-    console.error('Error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error:', errorMessage);
   }
 }
 
@@ -321,4 +363,3 @@ export {
   JobsAPIClient,
   sdkStyleExample,
 };
-

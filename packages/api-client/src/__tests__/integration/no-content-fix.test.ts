@@ -39,7 +39,7 @@ describe('No Content Response Fix Integration', () => {
         json: async () => {
           throw new Error('No content to parse');
         },
-      } as Response;
+      } as unknown as Response;
     };
 
     const result = await agentsService.deleteAgent('test-agent-id' as any);
@@ -69,7 +69,7 @@ describe('No Content Response Fix Integration', () => {
         json: async () => {
           throw new Error('No content');
         },
-      } as Response;
+      } as unknown as Response;
     };
 
     const result = await agentsService.deleteAgentLog('test-agent-id' as any, 'test-log-id' as any);
@@ -92,7 +92,7 @@ describe('No Content Response Fix Integration', () => {
         json: async () => {
           throw new Error('No content');
         },
-      } as Response;
+      } as unknown as Response;
     };
 
     const result = await memoryService.clearAgentMemories('test-agent-id' as any);
@@ -117,7 +117,7 @@ describe('No Content Response Fix Integration', () => {
         json: async () => {
           throw new Error('No content');
         },
-      } as Response;
+      } as unknown as Response;
     };
 
     // Test multiple operations that return 204
@@ -149,7 +149,7 @@ describe('No Content Response Fix Integration', () => {
         json: async () => {
           throw new Error('No content');
         },
-      } as Response;
+      } as unknown as Response;
     };
 
     const result = await agentsService.deleteAgent('test-agent-id' as any);
@@ -169,7 +169,7 @@ describe('No Content Response Fix Integration', () => {
         json: async () => {
           throw new Error('Malformed JSON');
         },
-      } as Response;
+      } as unknown as Response;
     };
 
     const result = await agentsService.deleteAgent('test-agent-id' as any);
@@ -189,7 +189,7 @@ describe('No Content Response Fix Integration', () => {
         json: async () => {
           throw new Error('No content');
         },
-      }) as Response;
+      }) as unknown as Response;
 
     const result = await agentsService.deleteAgent('test-agent-id' as any);
 

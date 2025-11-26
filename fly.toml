@@ -3,7 +3,8 @@ app = "vibee-eliza-999-prod"
 primary_region = "ams"
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = "packages/server/Dockerfile"
+  context = "."
 
 [env]
   PORT = "3000"

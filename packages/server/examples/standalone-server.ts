@@ -44,7 +44,7 @@ async function createStandaloneServer() {
     await server.initialize(serverOptions);
 
     // Register custom middleware if needed
-    server.registerMiddleware((req, res, next) => {
+    server.registerMiddleware((req: Request, res: Response, next: NextFunction) => {
       // Custom request processing
       res.setHeader('X-Powered-By', 'ElizaOS-Standalone');
       next();
@@ -54,7 +54,8 @@ async function createStandaloneServer() {
 
     return server;
   } catch (error) {
-    logger.error('❌ Failed to create server:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error('❌ Failed to create server:', errorMessage);
     throw error;
   }
 }
@@ -88,7 +89,8 @@ async function startServer() {
     process.on('SIGTERM', gracefulShutdown);
     process.on('SIGINT', gracefulShutdown);
   } catch (error) {
-    logger.error('❌ Server startup failed:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error('❌ Server startup failed:', errorMessage);
     process.exit(1);
   }
 }
@@ -98,5 +100,9 @@ export { createStandaloneServer, startServer };
 
 // Direct execution
 if (import.meta.url === `file://${process.argv[1]}`) {
-  startServer();
+  startServer().catch((error) => {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error('Fatal error:', errorMessage);
+    process.exit(1);
+  });
 }

@@ -110,6 +110,81 @@ export function checkForDataLoss(diff: SchemaDiff): DataLossCheck {
 }
 
 /**
+ * Sort tables by foreign key dependencies
+ * Tables that are referenced by foreign keys should be created first
+ * @param tableNames - Array of table names to sort
+ * @param tables - Table definitions from snapshot
+ * @returns Sorted array of table names
+ */
+function sortTablesByDependencies(
+  tableNames: string[],
+  tables: { [key: string]: any }
+): string[] {
+  // Build dependency graph
+  const graph: Map<string, Set<string>> = new Map();
+  const inDegree: Map<string, number> = new Map();
+
+  // Initialize all tables
+  for (const tableName of tableNames) {
+    graph.set(tableName, new Set());
+    inDegree.set(tableName, 0);
+  }
+
+  // Build edges: if table A references table B, then B should come before A
+  for (const tableName of tableNames) {
+    const table = tables[tableName];
+    if (table?.foreignKeys) {
+      for (const fkName in table.foreignKeys) {
+        const fk = table.foreignKeys[fkName];
+        const referencedTable = fk.tableTo;
+
+        // Only add edge if referenced table is also being created
+        if (tableNames.includes(referencedTable)) {
+          // Add edge from referencedTable to current table
+          graph.get(referencedTable)!.add(tableName);
+          inDegree.set(tableName, (inDegree.get(tableName) || 0) + 1);
+        }
+      }
+    }
+  }
+
+  // Topological sort (Kahn's algorithm)
+  const result: string[] = [];
+  const queue: string[] = [];
+
+  // Start with tables that have no dependencies (in-degree = 0)
+  for (const [tableName, degree] of inDegree) {
+    if (degree === 0) {
+      queue.push(tableName);
+    }
+  }
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    result.push(current);
+
+    // Remove edges from current table
+    for (const dependent of graph.get(current)!) {
+      inDegree.set(dependent, inDegree.get(dependent)! - 1);
+
+      // If all dependencies are resolved, add to queue
+      if (inDegree.get(dependent) === 0) {
+        queue.push(dependent);
+      }
+    }
+  }
+
+  // If result doesn't include all tables, there might be circular dependencies
+  // In that case, return original order
+  if (result.length !== tableNames.length) {
+    logger.warn('[RuntimeMigrator] Circular dependency detected in tables, using original order');
+    return tableNames;
+  }
+
+  return result;
+}
+
+/**
  * Normalize SQL types for comparison
  * Handles equivalent type variations between introspected DB and schema definitions
  */
@@ -260,11 +335,15 @@ export async function generateMigrationSQL(
     statements.push(`CREATE SCHEMA "${schema}";`);
   }
 
+  // Phase 2: Sort tables by dependencies before creating
+  // Tables with foreign key references should be created after their referenced tables
+  const sortedTables = sortTablesByDependencies(diff.tables.created, currentSnapshot.tables);
+
   // Phase 2: Generate CREATE TABLE statements for new tables (WITHOUT foreign keys)
   const createTableStatements: string[] = [];
   const foreignKeyStatements: string[] = [];
 
-  for (const tableName of diff.tables.created) {
+  for (const tableName of sortedTables) {
     const table = currentSnapshot.tables[tableName];
     if (table) {
       const { tableSQL, fkSQLs } = generateCreateTableSQL(tableName, table);
@@ -492,7 +571,10 @@ function generateCreateTableSQL(
   const foreignKeys = table.foreignKeys || {};
   for (const [fkName, fkDef] of Object.entries(foreignKeys)) {
     const fk = fkDef as any;
+    // Add DROP CONSTRAINT IF EXISTS before ADD CONSTRAINT to make migration idempotent
+    const dropFKSQL = `ALTER TABLE "${schema}"."${tableName}" DROP CONSTRAINT IF EXISTS "${fkName}";`;
     const fkSQL = `ALTER TABLE "${schema}"."${tableName}" ADD CONSTRAINT "${fkName}" FOREIGN KEY (${fk.columnsFrom.map((c: string) => `"${c}"`).join(', ')}) REFERENCES "${fk.schemaTo || 'public'}"."${fk.tableTo}" (${fk.columnsTo.map((c: string) => `"${c}"`).join(', ')})${fk.onDelete ? ` ON DELETE ${fk.onDelete}` : ''}${fk.onUpdate ? ` ON UPDATE ${fk.onUpdate}` : ''};`;
+    fkSQLs.push(dropFKSQL);
     fkSQLs.push(fkSQL);
   }
 
@@ -518,7 +600,10 @@ function generateColumnDefinition(name: string, def: any): string {
   // Add DEFAULT value - properly formatted
   if (def.default !== undefined) {
     const defaultValue = formatDefaultValue(def.default, def.type);
-    sql += ` DEFAULT ${defaultValue}`;
+    // Only add DEFAULT if the formatted value is not empty
+    if (defaultValue && defaultValue.trim() !== '') {
+      sql += ` DEFAULT ${defaultValue}`;
+    }
   }
 
   return sql;
@@ -546,7 +631,8 @@ function generateAddColumnSQL(table: string, column: string, definition: any): s
   // Default value - needs proper formatting based on type
   if (definition.default !== undefined) {
     const defaultValue = formatDefaultValue(definition.default, definition.type);
-    if (defaultValue) {
+    // Only add DEFAULT if the formatted value is not empty
+    if (defaultValue && defaultValue.trim() !== '') {
       parts.push(`DEFAULT ${defaultValue}`);
     }
   }
@@ -617,9 +703,15 @@ function generateAlterColumnSQL(table: string, column: string, changes: any): st
   if (changes.to?.default !== changes.from?.default) {
     if (changes.to?.default !== undefined) {
       const defaultValue = formatDefaultValue(changes.to.default, changes.to?.type);
-      statements.push(
-        `ALTER TABLE ${tableNameWithSchema} ALTER COLUMN "${column}" SET DEFAULT ${defaultValue};`
-      );
+      // Only add SET DEFAULT if the formatted value is not empty
+      if (defaultValue && defaultValue.trim() !== '') {
+        statements.push(
+          `ALTER TABLE ${tableNameWithSchema} ALTER COLUMN "${column}" SET DEFAULT ${defaultValue};`
+        );
+      } else {
+        // If empty default, drop it
+        statements.push(`ALTER TABLE ${tableNameWithSchema} ALTER COLUMN "${column}" DROP DEFAULT;`);
+      }
     } else {
       statements.push(`ALTER TABLE ${tableNameWithSchema} ALTER COLUMN "${column}" DROP DEFAULT;`);
     }
@@ -691,6 +783,13 @@ function formatDefaultValue(value: any, type: string): string {
     return 'NULL';
   }
 
+  // Handle UUID types - PGLite doesn't support SQL UUID generation
+  if (type && (type.toLowerCase().includes('uuid') || type === 'uuid')) {
+    // For PGLite, don't add DEFAULT clause for UUIDs
+    // UUID generation will be handled at the application level
+    return '';
+  }
+
   // Handle boolean
   if (type && (type.toLowerCase().includes('boolean') || type.toLowerCase() === 'bool')) {
     if (value === true || value === 'true' || value === 't' || value === 1) {
@@ -721,12 +820,10 @@ function formatDefaultValue(value: any, type: string): string {
     }
 
     // SQL functions like now(), gen_random_uuid(), etc.
+    // PGLite doesn't support most SQL functions, so we skip them
     if (value.match(/^\w+\(\)/i) || (value.includes('(') && value.includes(')'))) {
-      // PGLite compatibility: replace gen_random_uuid() with compatible alternative
-      if (value.includes('gen_random_uuid()')) {
-        return "lower(hex(random()::text || hex(random()::text))::uuid)";
-      }
-      return value;
+      // Skip SQL functions for PGLite compatibility
+      return '';
     }
 
     // SQL expressions starting with CURRENT_
@@ -798,7 +895,9 @@ function generateCreateForeignKeySQL(fk: any): string {
   const columnsFrom = fk.columnsFrom.map((c: string) => `"${c}"`).join(', ');
   const columnsTo = fk.columnsTo.map((c: string) => `"${c}"`).join(', ');
 
-  let sql = `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
+  // Drop constraint if exists first (for idempotency)
+  let sql = `ALTER TABLE "${schemaFrom}"."${tableFrom}" DROP CONSTRAINT IF EXISTS "${fk.name}"; `;
+  sql += `ALTER TABLE "${schemaFrom}"."${tableFrom}" ADD CONSTRAINT "${fk.name}" FOREIGN KEY (${columnsFrom}) REFERENCES "${schemaTo}"."${fk.tableTo}" (${columnsTo})`;
 
   if (fk.onDelete) {
     sql += ` ON DELETE ${fk.onDelete}`;

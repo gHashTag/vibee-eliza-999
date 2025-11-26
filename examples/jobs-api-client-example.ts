@@ -1,6 +1,6 @@
 /**
  * Jobs API Client Usage Examples
- * 
+ *
  * This example demonstrates various ways to use the Jobs API through the ElizaOS API client.
  * The Jobs API provides a simplified request/response pattern for one-off agent interactions.
  */
@@ -31,7 +31,11 @@ async function example1_simpleAsk() {
         );
         console.log('Agent response:', response);
     } catch (error) {
-        console.error('Error:', error.message);
+        if (error instanceof Error) {
+            console.error('Error:', error.message);
+        } else {
+            console.error('Error:', String(error));
+        }
     }
 }
 
@@ -64,7 +68,11 @@ async function example2_createAndPoll() {
             console.error('Job failed:', result.job.error);
         }
     } catch (error) {
-        console.error('Error:', error.message);
+        if (error instanceof Error) {
+            console.error('Error:', error.message);
+        } else {
+            console.error('Error:', String(error));
+        }
     }
 }
 
@@ -95,7 +103,11 @@ async function example3_exponentialBackoff() {
             console.log('Time taken:', result.timeMs, 'ms');
         }
     } catch (error) {
-        console.error('Error:', error.message);
+        if (error instanceof Error) {
+            console.error('Error:', error.message);
+        } else {
+            console.error('Error:', String(error));
+        }
     }
 }
 
@@ -127,7 +139,11 @@ async function example4_manualControl() {
             console.log('Response:', result.job.result?.message.content);
         }
     } catch (error) {
-        console.error('Error:', error.message);
+        if (error instanceof Error) {
+            console.error('Error:', error.message);
+        } else {
+            console.error('Error:', String(error));
+        }
     }
 }
 
@@ -172,7 +188,11 @@ async function example5_batchQuestions() {
             }
         });
     } catch (error) {
-        console.error('Error:', error.message);
+        if (error instanceof Error) {
+            console.error('Error:', error.message);
+        } else {
+            console.error('Error:', String(error));
+        }
     }
 }
 
@@ -201,7 +221,11 @@ async function example6_listAndManage() {
         const allJobs = await client.jobs.list({ limit: 10 });
         console.log(`\nTotal jobs in system: ${allJobs.total}`);
     } catch (error) {
-        console.error('Error:', error.message);
+        if (error instanceof Error) {
+            console.error('Error:', error.message);
+        } else {
+            console.error('Error:', String(error));
+        }
     }
 }
 
@@ -228,7 +252,11 @@ async function example7_healthMonitoring() {
         console.log('  Failure rate:', (health.metrics.failureRate * 100).toFixed(2), '%');
         console.log('  Timeout rate:', (health.metrics.timeoutRate * 100).toFixed(2), '%');
     } catch (error) {
-        console.error('Error:', error.message);
+        if (error instanceof Error) {
+            console.error('Error:', error.message);
+        } else {
+            console.error('Error:', String(error));
+        }
     }
 }
 
@@ -243,7 +271,11 @@ async function example8_errorHandling() {
         const response = await client.jobs.ask(userId, 'Test question');
         console.log('Response:', response);
     } catch (error) {
-        console.error('Failed to get response:', error.message);
+        if (error instanceof Error) {
+            console.error('Failed to get response:', error.message);
+        } else {
+            console.error('Failed to get response:', String(error));
+        }
     }
 
     // Pattern 2: Check result success
@@ -309,6 +341,12 @@ async function main() {
 
 // Run if executed directly
 if (import.meta.main) {
-    main().catch(console.error);
+    main().catch((error) => {
+        if (error instanceof Error) {
+            console.error('Fatal error:', error.message);
+        } else {
+            console.error('Fatal error:', String(error));
+        }
+    });
 }
 

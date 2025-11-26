@@ -24,7 +24,7 @@ import {
 } from '@elizaos/core';
 import bootstrapPlugin from '@elizaos/plugin-bootstrap';
 import openaiPlugin from '@elizaos/plugin-openai';
-import sqlPlugin, { DatabaseMigrationService, createDatabaseAdapter } from '@elizaos/plugin-sql';
+import sqlPlugin, { DatabaseMigrationService, createDatabaseAdapter, type IDatabaseAdapter } from '@elizaos/plugin-sql';
 import * as clack from '@clack/prompts';
 import 'node:crypto';
 import fs from 'node:fs';
@@ -140,7 +140,7 @@ class AgentInitializer {
     };
   }
 
-  private static async setupDatabase(config: AppConfiguration, agentId: UUID): Promise<void> {
+  private static async setupDatabase(config: AppConfiguration, agentId: UUID): Promise<IDatabaseAdapter> {
     if (!config.postgresUrl && config.pgliteDataDir !== CONSTANTS.DEFAULT_PGLITE_DATA_DIR) {
       fs.mkdirSync(config.pgliteDataDir, { recursive: true });
     }
@@ -230,7 +230,8 @@ class AgentInitializer {
         character,
       };
     } catch (error) {
-      task.stop(`❌ Initialization failed: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      task.stop(`❌ Initialization failed: ${errorMessage}`);
       throw error;
     }
   }
@@ -309,7 +310,7 @@ class ChatInterface {
   private isExitCommand(input: string | symbol): boolean {
     if (clack.isCancel(input)) return true;
     if (typeof input === 'string') {
-      return CONSTANTS.EXIT_COMMANDS.includes(input.toLowerCase());
+      return CONSTANTS.EXIT_COMMANDS.includes(input.toLowerCase() as 'quit' | 'exit');
     }
     return false;
   }
@@ -353,7 +354,8 @@ class ChatInterface {
           this.displayResponse(result.response);
         }
       } catch (error) {
-        console.error('Error in chat loop:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('Error in chat loop:', errorMessage);
         clack.note('An error occurred. Please try again.', '❌ Error');
       }
     }
@@ -374,7 +376,8 @@ class StandaloneChatApp {
       await chatInterface.startChatLoop();
       await session.runtime.stop();
     } catch (error) {
-      console.error('Fatal error:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Fatal error:', errorMessage);
       process.exit(1);
     }
   }
@@ -386,7 +389,8 @@ class StandaloneChatApp {
 
 if (import.meta.main) {
   StandaloneChatApp.run().catch((error) => {
-    console.error('Unhandled error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Unhandled error:', errorMessage);
     process.exit(1);
   });
 }

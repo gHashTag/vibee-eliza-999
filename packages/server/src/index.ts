@@ -38,6 +38,7 @@ import sqlPlugin, {
   uninstallRLS,
   DatabaseMigrationService,
 } from '@elizaos/plugin-sql';
+import { sql } from 'drizzle-orm';
 import { encryptedCharacter, stringToUuid, type Plugin } from '@elizaos/core';
 
 // Sentry setup with error handling - DO NOT BLOCK on errors

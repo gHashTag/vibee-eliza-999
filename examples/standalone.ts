@@ -56,108 +56,115 @@ import fs from 'node:fs';
 import { v4 as uuidv4 } from 'uuid';
 
 async function main(): Promise<void> {
-  // Basic env checks
-  const openaiKey = process.env.OPENAI_API_KEY || '';
-  if (!openaiKey) {
-    console.error(
-      'OPENAI_API_KEY is not set; set it in your environment to use @elizaos/plugin-openai.'
+  try {
+    // Basic env checks
+    const openaiKey = process.env.OPENAI_API_KEY || '';
+    if (!openaiKey) {
+      console.error(
+        'OPENAI_API_KEY is not set; set it in your environment to use @elizaos/plugin-openai.'
+      );
+      process.exit(1);
+    }
+
+    // Database selection: prefer POSTGRES_URL if set, else PGLite at ./.eliza/.elizadb
+    const postgresUrl = process.env.POSTGRES_URL || '';
+    const pgliteDir = process.env.PGLITE_PATH || 'memory://';
+
+    // Ensure local data directory exists for PGLite
+    if (!postgresUrl) {
+      fs.mkdirSync(pgliteDir, { recursive: true });
+    }
+
+    // Character definition
+    const character: Character = {
+      name: 'StandaloneAgent',
+      username: 'standalone',
+      bio: 'An ElizaOS agent running without the HTTP server.',
+      adjectives: ['helpful', 'concise'],
+    };
+
+    // Pre-create DB adapter and run migrations (server usually does this)
+    const agentId = stringToUuid(character.name);
+    const adapter = createDatabaseAdapter(
+      { dataDir: pgliteDir, postgresUrl: postgresUrl || undefined },
+      agentId
     );
+    await adapter.init();
+
+    const migrator = new DatabaseMigrationService();
+    // @ts-ignore getDatabase is available on the adapter base class
+    await migrator.initializeWithDatabase(adapter.getDatabase());
+    migrator.discoverAndRegisterPluginSchemas([sqlPlugin]);
+    await migrator.runAllPluginMigrations();
+
+    // Build the runtime with required plugins and settings
+    const runtime = new AgentRuntime({
+      character,
+      plugins: [sqlPlugin, bootstrapPlugin, openaiPlugin],
+      settings: {
+        OPENAI_API_KEY: openaiKey,
+        POSTGRES_URL: postgresUrl || undefined,
+        PGLITE_PATH: pgliteDir,
+      },
+    });
+
+    // Use the prepared adapter so the SQL plugin skips creating a second adapter
+    runtime.registerDatabaseAdapter(adapter);
+    await runtime.initialize();
+
+    // Ensure a basic DM world/room mapping exists for this conversation
+    const userId = uuidv4() as UUID;
+    const worldId = stringToUuid('standalone-world');
+    const roomId = stringToUuid('standalone-room');
+
+    await runtime.ensureConnection({
+      entityId: userId,
+      roomId,
+      worldId,
+      name: 'LocalUser',
+      source: 'cli',
+      channelId: 'standalone-channel',
+      serverId: 'standalone-server',
+      type: ChannelType.DM,
+    });
+
+    // Compose a test message from the user with proper metadata
+    const message: Memory = createMessageMemory({
+      id: uuidv4() as UUID,
+      entityId: userId,
+      roomId,
+      content: {
+        text: 'Hello! Who are you?',
+        source: 'cli',
+        channelType: ChannelType.DM,
+      },
+    });
+
+    console.log('User:', message.content.text);
+
+    // Send the message through the bootstrap message handler and print the response(s)
+    await runtime.emitEvent(EventType.MESSAGE_RECEIVED, {
+      runtime,
+      message,
+      callback: async (content: Content) => {
+        if (content?.text) {
+          console.log(`${character.name}:`, content.text);
+        } else if (content?.thought) {
+          console.log(`${character.name} (thought):`, content.thought);
+        }
+      },
+    });
+
+    await runtime.stop();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Fatal error in standalone runtime:', errorMessage);
     process.exit(1);
   }
-
-  // Database selection: prefer POSTGRES_URL if set, else PGLite at ./.eliza/.elizadb
-  const postgresUrl = process.env.POSTGRES_URL || '';
-  const pgliteDir = process.env.PGLITE_PATH || 'memory://';
-
-  // Ensure local data directory exists for PGLite
-  if (!postgresUrl) {
-    fs.mkdirSync(pgliteDir, { recursive: true });
-  }
-
-  // Character definition
-  const character: Character = {
-    name: 'StandaloneAgent',
-    username: 'standalone',
-    bio: 'An ElizaOS agent running without the HTTP server.',
-    adjectives: ['helpful', 'concise'],
-  };
-
-  // Pre-create DB adapter and run migrations (server usually does this)
-  const agentId = stringToUuid(character.name);
-  const adapter = createDatabaseAdapter(
-    { dataDir: pgliteDir, postgresUrl: postgresUrl || undefined },
-    agentId
-  );
-  await adapter.init();
-
-  const migrator = new DatabaseMigrationService();
-  // @ts-ignore getDatabase is available on the adapter base class
-  await migrator.initializeWithDatabase(adapter.getDatabase());
-  migrator.discoverAndRegisterPluginSchemas([sqlPlugin]);
-  await migrator.runAllPluginMigrations();
-
-  // Build the runtime with required plugins and settings
-  const runtime = new AgentRuntime({
-    character,
-    plugins: [sqlPlugin, bootstrapPlugin, openaiPlugin],
-    settings: {
-      OPENAI_API_KEY: openaiKey,
-      POSTGRES_URL: postgresUrl || undefined,
-      PGLITE_PATH: pgliteDir,
-    },
-  });
-
-  // Use the prepared adapter so the SQL plugin skips creating a second adapter
-  runtime.registerDatabaseAdapter(adapter);
-  await runtime.initialize();
-
-  // Ensure a basic DM world/room mapping exists for this conversation
-  const userId = uuidv4() as UUID;
-  const worldId = stringToUuid('standalone-world');
-  const roomId = stringToUuid('standalone-room');
-
-  await runtime.ensureConnection({
-    entityId: userId,
-    roomId,
-    worldId,
-    name: 'LocalUser',
-    source: 'cli',
-    channelId: 'standalone-channel',
-    serverId: 'standalone-server',
-    type: ChannelType.DM,
-  });
-
-  // Compose a test message from the user with proper metadata
-  const message: Memory = createMessageMemory({
-    id: uuidv4() as UUID,
-    entityId: userId,
-    roomId,
-    content: {
-      text: 'Hello! Who are you?',
-      source: 'cli',
-      channelType: ChannelType.DM,
-    },
-  });
-
-  console.log('User:', message.content.text);
-
-  // Send the message through the bootstrap message handler and print the response(s)
-  await runtime.emitEvent(EventType.MESSAGE_RECEIVED, {
-    runtime,
-    message,
-    callback: async (content: Content) => {
-      if (content?.text) {
-        console.log(`${character.name}:`, content.text);
-      } else if (content?.thought) {
-        console.log(`${character.name} (thought):`, content.thought);
-      }
-    },
-  });
-
-  await runtime.stop();
 }
 
 main().catch((err) => {
-  console.error('Fatal error in standalone runtime:', err);
+  const errorMessage = err instanceof Error ? err.message : String(err);
+  console.error('Unhandled error in standalone runtime:', errorMessage);
   process.exit(1);
 });

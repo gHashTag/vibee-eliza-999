@@ -118,9 +118,13 @@ export async function generateSnapshot(schema: any): Promise<SchemaSnapshot> {
       const sqlType = column.getSQLType();
       const sqlTypeLowered = sqlType.toLowerCase();
 
+      // PGLite doesn't support UUID type - transform to TEXT
+      // This is a known limitation of PGLite
+      const normalizedType = sqlTypeLowered === 'uuid' ? 'text' : sqlType;
+
       const columnToSet: any = {
         name,
-        type: sqlType,
+        type: normalizedType,
         primaryKey,
         notNull,
       };
@@ -133,21 +137,21 @@ export async function generateSnapshot(schema: any): Promise<SchemaSnapshot> {
           if (typeof column.default === 'string') {
             columnToSet.default = `'${escapeSingleQuotes(column.default)}'`;
           } else {
-            if (sqlTypeLowered === 'jsonb' || sqlTypeLowered === 'json') {
-              columnToSet.default = `'${JSON.stringify(column.default)}'::${sqlTypeLowered}`;
+            if (normalizedType === 'jsonb' || normalizedType === 'json') {
+              columnToSet.default = `'${JSON.stringify(column.default)}'::${normalizedType}`;
             } else if (column.default instanceof Date) {
-              if (sqlTypeLowered === 'date') {
+              if (normalizedType === 'date') {
                 columnToSet.default = `'${column.default.toISOString().split('T')[0]}'`;
-              } else if (sqlTypeLowered === 'timestamp') {
+              } else if (normalizedType === 'timestamp') {
                 columnToSet.default = `'${column.default.toISOString().replace('T', ' ').slice(0, 23)}'`;
               } else {
                 columnToSet.default = `'${column.default.toISOString()}'`;
               }
-            } else if (isPgArrayType(sqlTypeLowered) && Array.isArray(column.default)) {
-              columnToSet.default = `'${buildArrayString(column.default, sqlTypeLowered)}'`;
+            } else if (isPgArrayType(normalizedType) && Array.isArray(column.default)) {
+              columnToSet.default = `'${buildArrayString(column.default, normalizedType)}'`;
             } else {
               // Should do for all types
-              // columnToSet.default = `'${column.default}'::${sqlTypeLowered}`;
+              // columnToSet.default = `'${column.default}'::${normalizedType}`;
               columnToSet.default = column.default;
             }
           }

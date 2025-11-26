@@ -66,7 +66,7 @@ describe('BaseApiClient', () => {
           get: (name: string) => (name === 'content-length' ? '100' : null),
         },
         json: async () => mockResponse,
-      } as Response;
+      } as unknown as Response;
     };
 
     const result = await client.testGet('/api/test');
@@ -92,7 +92,7 @@ describe('BaseApiClient', () => {
           get: (name: string) => (name === 'content-length' ? '100' : null),
         },
         json: async () => mockResponse,
-      } as Response;
+      } as unknown as Response;
     };
 
     const result = await client.testPost('/api/test', body);
@@ -114,7 +114,7 @@ describe('BaseApiClient', () => {
           get: (name: string) => (name === 'content-length' ? '100' : null),
         },
         json: async () => ({ success: true, data: { uploaded: true } }),
-      } as Response;
+      } as unknown as Response;
     };
 
     const result = await client.testPost('/api/upload', formData);
@@ -132,7 +132,7 @@ describe('BaseApiClient', () => {
           get: (name: string) => (name === 'content-length' ? '100' : null),
         },
         json: async () => ({ success: true, data: [] }),
-      } as Response;
+      } as unknown as Response;
     };
 
     await client.testRequest('GET', '/api/test', {
@@ -158,7 +158,7 @@ describe('BaseApiClient', () => {
           get: (name: string) => (name === 'content-length' ? '100' : null),
         },
         json: async () => errorResponse,
-      }) as Response;
+      }) as unknown as Response;
 
     try {
       await client.testGet('/api/test');
@@ -200,7 +200,7 @@ describe('BaseApiClient', () => {
         json: async () => {
           throw new Error('No content to parse');
         },
-      } as Response;
+      } as unknown as Response;
     };
 
     const result = await client.testRequest<{ success: boolean }>('DELETE', '/api/delete');
@@ -220,7 +220,7 @@ describe('BaseApiClient', () => {
         json: async () => {
           throw new Error('No content to parse');
         },
-      } as Response;
+      } as unknown as Response;
     };
 
     const result = await client.testRequest<{ success: boolean }>('POST', '/api/clear');
@@ -240,7 +240,7 @@ describe('BaseApiClient', () => {
         json: async () => {
           throw new Error('Invalid JSON');
         },
-      } as Response;
+      } as unknown as Response;
     };
 
     const result = await client.testRequest<{ success: boolean }>('POST', '/api/process');
@@ -258,7 +258,7 @@ describe('BaseApiClient', () => {
         json: async () => {
           throw new Error('No content');
         },
-      }) as Response;
+      }) as unknown as Response;
 
     // Test with different expected return types
     const simpleResult = await client.testRequest<{ success: boolean }>('DELETE', '/api/test');
@@ -289,7 +289,7 @@ describe('BaseApiClient', () => {
           get: (name: string) => (name === 'content-length' ? '100' : null),
         },
         json: async () => errorResponse,
-      }) as Response;
+      }) as unknown as Response;
 
     try {
       await client.testGet('/api/test');

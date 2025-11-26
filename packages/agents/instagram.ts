@@ -1,5 +1,4 @@
 import { type Character } from "@elizaos/core";
-import { instagramPlugin } from "../src/instagram-plugin";
 
 /**
  * Instagram Expert Agent
@@ -17,8 +16,8 @@ export const instagramAgent: Character = {
       ? ["@elizaos/plugin-telegram"]
       : []),
 
-    // Instagram plugin
-    instagramPlugin as any,
+    // Instagram plugin - will be added when created
+    // "instagram-plugin",
 
     // Bootstrap
     "@elizaos/plugin-bootstrap",

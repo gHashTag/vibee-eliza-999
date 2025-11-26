@@ -1,16 +1,15 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "DOCKERFILE",
-    "dockerfilePath": "Dockerfile",
+    "builder": "NIXPACKS",
+    "buildCommand": "bun install --frozen-lockfile && bun run build",
     "watchPatterns": [
       "packages/**/*",
       "scripts/**/*",
       "examples/**/*",
       "*.ts",
       "*.js",
-      "*.json",
-      "Dockerfile"
+      "*.json"
     ]
   },
   "deploy": {
@@ -19,7 +18,8 @@
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10,
     "healthcheckPath": "/healthz",
-    "healthcheckTimeout": 300
+    "healthcheckTimeout": 300,
+    "startCommand": "node packages/server/dist/entrypoint.js"
   },
   "environments": {
     "production": {

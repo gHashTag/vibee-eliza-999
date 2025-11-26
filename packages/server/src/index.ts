@@ -25,6 +25,8 @@ import { Server as SocketIOServer } from 'socket.io';
 import { createApiRouter, createPluginRouteHandler, setupSocketIO } from './api/index.js';
 import {
   messageBusConnectorPlugin,
+  setGlobalElizaOS,
+  setGlobalAgentServer,
 } from './services/message.js';
 import internalMessageBus from './bus.js';
 import { loadCharacterTryPath, jsonToCharacter } from './loader.js';
@@ -44,7 +46,9 @@ import { encryptedCharacter, stringToUuid, type Plugin } from '@elizaos/core';
 // Sentry setup with error handling - DO NOT BLOCK on errors
 import * as Sentry from '@sentry/node';
 try {
-  const SENTRY_DSN = process.env.SENTRY_DSN || "https://6775f4493fca5a1dff7fe154e30ecdf2@o4510419597656064.ingest.us.sentry.io/4510419598049280";
+  const SENTRY_DSN =
+    process.env.SENTRY_DSN ||
+    'https://6775f4493fca5a1dff7fe154e30ecdf2@o4510419597656064.ingest.us.sentry.io/4510419598049280';
   Sentry.init({
     dsn: SENTRY_DSN,
     tracesSampleRate: 0.1,
@@ -57,11 +61,7 @@ try {
   console.error('[Sentry] App will continue without error monitoring');
 }
 
-import type {
-  CentralRootMessage,
-  MessageChannel,
-  MessageServer,
-} from './types.js';
+import type { CentralRootMessage, MessageChannel, MessageServer } from './types.js';
 import { existsSync } from 'node:fs';
 
 /**
@@ -471,10 +471,10 @@ export class AgentServer {
       this.elizaOS.enableEditableMode();
 
       // Set global ElizaOS instance for MessageBusService
-      // setGlobalElizaOS(this.elizaOS);
+      setGlobalElizaOS(this.elizaOS);
 
       // Set global AgentServer instance for MessageBusService
-      // setGlobalAgentServer(this);
+      setGlobalAgentServer(this);
 
       logger.success('[INIT] ElizaOS initialized');
 
@@ -1141,7 +1141,8 @@ export class AgentServer {
               code: 500,
             },
           });
-        });
+        }
+      );
 
       // Add a catch-all route for API 404s
       this.app.use((_req, res, next) => {
@@ -1438,13 +1439,29 @@ export class AgentServer {
     // undefined: resolve from env/default, then find available (auto-discovery mode)
     let requestedPort = 3000;
 
+    // Check for standard PORT environment variable (set by Fly.io and other platforms)
+    const platformPort = process.env.PORT;
+    if (platformPort) {
+      const parsed = parseInt(platformPort, 10);
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= 65535) {
+        requestedPort = parsed;
+        logger.info(`[START] Using PORT=${parsed} from platform environment`);
+      } else {
+        logger.warn(`Invalid PORT "${platformPort}" from platform, falling back to 3000`);
+      }
+    }
+
+    // Check for SERVER_PORT environment variable (custom configuration)
     const envPort = process.env.SERVER_PORT;
     if (envPort) {
       const parsed = parseInt(envPort, 10);
       if (!isNaN(parsed) && parsed >= 1 && parsed <= 65535) {
         requestedPort = parsed;
+        logger.info(`[START] Using SERVER_PORT=${parsed} from environment`);
       } else {
-        logger.warn(`Invalid SERVER_PORT "${envPort}", falling back to 3000`);
+        logger.warn(
+          `Invalid SERVER_PORT "${envPort}", using platform/default port ${requestedPort}`
+        );
       }
     }
 
@@ -1575,7 +1592,10 @@ export class AgentServer {
             resolve();
           })
           .on('error', (error: any) => {
-            logger.error({ error, host, port }, `[HTTPSERVER] Failed to bind server to ${host}:${port}:`);
+            logger.error(
+              { error, host, port },
+              `[HTTPSERVER] Failed to bind server to ${host}:${port}:`
+            );
 
             // Provide helpful error messages for common issues
             if (error.code === 'EADDRINUSE') {
@@ -1699,14 +1719,16 @@ export class AgentServer {
   ): Promise<CentralRootMessage> {
     const createdMessage = await (this.database as any).createMessage(data);
 
-    logger.info(`[AgentServer] createMessage returned: ${JSON.stringify({
-      id: createdMessage.id,
-      channelId: createdMessage.channelId,
-      authorId: createdMessage.authorId,
-      hasChannelId: 'channelId' in createdMessage,
-      hasAuthorId: 'authorId' in createdMessage,
-      content: createdMessage.content?.substring(0, 50)
-    })}`);
+    logger.info(
+      `[AgentServer] createMessage returned: ${JSON.stringify({
+        id: createdMessage.id,
+        channelId: createdMessage.channelId,
+        authorId: createdMessage.authorId,
+        hasChannelId: 'channelId' in createdMessage,
+        hasAuthorId: 'authorId' in createdMessage,
+        content: createdMessage.content?.substring(0, 50),
+      })}`
+    );
 
     // Transform message to MessageBusService format (snake_case field names)
     const messageForBus = {
@@ -1724,7 +1746,9 @@ export class AgentServer {
     };
 
     // Emit to internal message bus so MessageBusService instances can process the message
-    logger.info(`[AgentServer] Message created: ${createdMessage.id}, emitting to internal message bus`);
+    logger.info(
+      `[AgentServer] Message created: ${createdMessage.id}, emitting to internal message bus`
+    );
     internalMessageBus.emit('new_message', messageForBus);
 
     return createdMessage;

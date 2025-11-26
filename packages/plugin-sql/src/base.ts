@@ -334,6 +334,10 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
           }
         }
 
+        // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+        // This is a complex insert with many JSONB fields, so we'll use sql.raw for the whole query
+        // For now, we'll keep using Drizzle ORM but explicitly set timestamps
+        // Note: This might need to be converted to sql.raw() if issues persist
         await this.db.transaction(async (tx) => {
           await tx.insert(agentTable).values({
             ...agent,
@@ -675,52 +679,113 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
   async createEntities(entities: Entity[]): Promise<boolean> {
     return this.withDatabase(async () => {
       try {
-        return await this.db.transaction(async (tx) => {
-          // Normalize entity data to ensure names is a proper array
-          const normalizedEntities = entities.map((entity) => {
-            const normalizedNames = this.normalizeEntityNames(entity.names);
-            // Ensure names is always a proper array of strings
-            if (!Array.isArray(normalizedNames)) {
+        // Insert entities one by one using sql template with explicit array formatting
+        // PGLite requires explicit array formatting for text[] columns
+        for (const entity of entities) {
+          logger.debug(`[createEntities] Processing entity: ${entity.id}`);
+          logger.debug(`[createEntities] Original names: ${JSON.stringify(entity.names)}`);
+
+          const normalizedNames = this.normalizeEntityNames(entity.names);
+          logger.debug(`[createEntities] Normalized names: ${JSON.stringify(normalizedNames)}`);
+
+          // Ensure names is always a proper array of strings
+          const finalNames = Array.isArray(normalizedNames)
+            ? normalizedNames
+            : [String(normalizedNames)];
+
+          // Double-check that all elements are strings
+          const validatedNames = finalNames.map((name) => {
+            if (typeof name !== 'string') {
               logger.warn(
-                `Entity names is not an array, normalizing: ${JSON.stringify(normalizedNames)}`
+                `[createEntities] Non-string name found, converting: ${JSON.stringify(name)}`
               );
+              return String(name);
             }
-            // Double-check that names is an array before inserting
-            const finalNames = Array.isArray(normalizedNames)
-              ? normalizedNames
-              : [String(normalizedNames)];
-
-            // Log for debugging
-            if (finalNames.length > 0 && typeof finalNames[0] !== 'string') {
-              logger.error(
-                `Entity names contains non-string values: ${JSON.stringify(finalNames)}`
-              );
-            }
-
-            // Return normalized entity with proper array
-            // Drizzle should handle array serialization automatically for text[] columns
-            return {
-              ...entity,
-              names: finalNames,
-              metadata: entity.metadata || {},
-            };
+            return name;
           });
 
-          await tx.insert(entityTable).values(normalizedEntities);
+          logger.debug(`[createEntities] Final validated names: ${JSON.stringify(validatedNames)}`);
 
-          logger.debug(`${entities.length} Entities created successfully`);
+          // Build PostgreSQL array literal format: {value1,value2}
+          // Escape double quotes and wrap values in double quotes
+          const arrayLiteral =
+            validatedNames.length > 0
+              ? `{${validatedNames.map((name) => `"${String(name).replace(/"/g, '\\"')}"`).join(',')}}`
+              : '{}';
 
-          return true;
-        });
+          logger.debug(`[createEntities] Array literal: ${arrayLiteral}`);
+
+          const metadataJson = JSON.stringify(entity.metadata || {});
+          const escapedMetadata = metadataJson.replace(/'/g, "''");
+
+          logger.debug(`[createEntities] Metadata JSON: ${metadataJson}`);
+          logger.debug(`[createEntities] Escaped metadata: ${escapedMetadata}`);
+
+          // Use sql.raw for the entire query - this matches the pattern in data-persistence.test.ts
+          // which successfully inserts arrays in PGLite using {value1,value2} format
+          const fullQuery = `
+            INSERT INTO "entities" ("id", "agent_id", "created_at", "names", "metadata")
+            VALUES (
+              '${entity.id}',
+              '${entity.agentId}',
+              NOW(),
+              '${arrayLiteral}'::text[],
+              '${escapedMetadata}'::jsonb
+            )
+          `;
+
+          logger.debug(`[createEntities] Full SQL query: ${fullQuery.trim()}`);
+
+          try {
+            await this.db.execute(sql.raw(fullQuery));
+            logger.debug(`[createEntities] Insert successful for entity: ${entity.id}`);
+          } catch (executeError) {
+            const errorDetails = {
+              error: executeError instanceof Error ? executeError.message : String(executeError),
+              stack: executeError instanceof Error ? executeError.stack : undefined,
+              arrayLiteral,
+              validatedNames: JSON.stringify(validatedNames),
+              entityId: entity.id,
+              agentId: entity.agentId,
+            };
+            logger.error(
+              `[createEntities] Execute error details: ${JSON.stringify(errorDetails, null, 2)}`
+            );
+            throw executeError;
+          }
+        }
+
+        logger.debug(`[createEntities] Successfully inserted ${entities.length} entities`);
+        return true;
       } catch (error) {
         logger.error(
-          `Error creating entities, entityId: ${entities[0].id}, (metadata?.)name: ${entities[0].metadata?.name}`,
+          `[createEntities] Error creating entities, entityId: ${entities[0]?.id}, (metadata?.)name: ${entities[0]?.metadata?.name}`,
           error instanceof Error ? error.message : String(error)
         );
-        // trace the full error with stack
-        if (error instanceof Error && error.stack) {
-          logger.trace('Stack trace:', error.stack);
+
+        // Log full error details
+        if (error instanceof Error) {
+          logger.error(`[createEntities] Error name: ${error.name}`);
+          logger.error(`[createEntities] Error message: ${error.message}`);
+          if (error.stack) {
+            logger.error(`[createEntities] Stack trace: ${error.stack}`);
+          }
+          // Try to extract more details if available
+          if ('code' in error) {
+            logger.error(`[createEntities] Error code: ${error.code}`);
+          }
+          if ('detail' in error) {
+            logger.error(`[createEntities] Error detail: ${error.detail}`);
+          }
+          if ('hint' in error) {
+            logger.error(`[createEntities] Error hint: ${error.hint}`);
+          }
+        } else {
+          logger.error(
+            `[createEntities] Unknown error type: ${typeof error}, value: ${JSON.stringify(error)}`
+          );
         }
+
         return false;
       }
     });
@@ -982,11 +1047,35 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
    */
   async createComponent(component: Component): Promise<boolean> {
     return this.withDatabase(async () => {
-      await this.db.insert(componentTable).values({
-        ...component,
-        createdAt: new Date(),
-      });
-      return true;
+      try {
+        // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+        const dataJson = JSON.stringify(component.data || {});
+        const escapedData = dataJson.replace(/'/g, "''");
+
+        const fullQuery = `
+          INSERT INTO "components" ("id", "entityId", "agentId", "roomId", "worldId", "sourceEntityId", "type", "data", "createdAt")
+          VALUES (
+            '${component.id}',
+            '${component.entityId}',
+            '${component.agentId}',
+            '${component.roomId}',
+            ${component.worldId ? `'${component.worldId}'` : 'NULL'},
+            ${component.sourceEntityId ? `'${component.sourceEntityId}'` : 'NULL'},
+            '${String(component.type).replace(/'/g, "''")}',
+            '${escapedData}'::jsonb,
+            NOW()
+          )
+        `;
+
+        logger.debug(`[createComponent] Full SQL query: ${fullQuery.trim()}`);
+        await this.db.execute(sql.raw(fullQuery));
+        return true;
+      } catch (error) {
+        logger.error(
+          `Error creating component: ${error instanceof Error ? error.message : String(error)}, componentId: ${component.id}`
+        );
+        throw error;
+      }
     });
   }
 
@@ -1378,14 +1467,24 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
         // This ensures any problematic characters are properly escaped during JSON serialization
         const jsonString = JSON.stringify(sanitizedBody);
 
-        await this.db.transaction(async (tx) => {
-          await tx.insert(logTable).values({
-            body: sql`${jsonString}::jsonb`,
-            entityId: params.entityId,
-            roomId: params.roomId,
-            type: params.type,
-          });
-        });
+        // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+        const escapedBody = jsonString.replace(/'/g, "''");
+        const escapedType = String(params.type).replace(/'/g, "''");
+
+        const fullQuery = `
+          INSERT INTO "logs" ("id", "created_at", "entityId", "body", "type", "roomId")
+          VALUES (
+            gen_random_uuid(),
+            NOW(),
+            '${params.entityId}',
+            '${escapedBody}'::jsonb,
+            '${escapedType}',
+            '${params.roomId}'
+          )
+        `;
+
+        logger.debug(`[createLog] Full SQL query: ${fullQuery.trim()}`);
+        await this.db.execute(sql.raw(fullQuery));
       } catch (error) {
         logger.error(
           `Failed to create log entry: ${error instanceof Error ? error.message : String(error)}, type: ${params.type}, roomId: ${params.roomId}, entityId: ${params.entityId}`
@@ -1907,36 +2006,54 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
     const metadataToInsert =
       typeof memory.metadata === 'string' ? memory.metadata : JSON.stringify(memory.metadata ?? {});
 
+    // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+    const escapedContent = contentToInsert.replace(/'/g, "''");
+    const escapedMetadata = metadataToInsert.replace(/'/g, "''");
+    const escapedType = String(tableName).replace(/'/g, "''");
+
     await this.db.transaction(async (tx) => {
-      await tx.insert(memoryTable).values([
-        {
-          id: memoryId,
-          type: tableName,
-          content: sql`${contentToInsert}::jsonb`,
-          metadata: sql`${metadataToInsert}::jsonb`,
-          entityId: memory.entityId,
-          roomId: memory.roomId,
-          worldId: memory.worldId, // Include worldId
-          agentId: memory.agentId || this.agentId,
-          unique: memory.unique,
-          createdAt: memory.createdAt ? new Date(memory.createdAt) : new Date(),
-        },
-      ]);
+      // Insert memory
+      const memoryQuery = `
+        INSERT INTO "memories" ("id", "type", "createdAt", "content", "metadata", "entityId", "agentId", "roomId", "worldId", "unique")
+        VALUES (
+          '${memoryId}',
+          '${escapedType}',
+          NOW(),
+          '${escapedContent}'::jsonb,
+          '${escapedMetadata}'::jsonb,
+          ${memory.entityId ? `'${memory.entityId}'` : 'NULL'},
+          '${memory.agentId || this.agentId}',
+          ${memory.roomId ? `'${memory.roomId}'` : 'NULL'},
+          ${memory.worldId ? `'${memory.worldId}'` : 'NULL'},
+          ${memory.unique !== undefined ? (memory.unique ? 'true' : 'false') : 'true'}
+        )
+      `;
 
+      logger.debug(`[createMemory] Memory SQL query: ${memoryQuery.trim()}`);
+      await tx.execute(sql.raw(memoryQuery));
+
+      // Insert embedding if present
       if (memory.embedding && Array.isArray(memory.embedding)) {
-        const embeddingValues: Record<string, unknown> = {
-          id: v4(),
-          memoryId: memoryId,
-          createdAt: memory.createdAt ? new Date(memory.createdAt) : new Date(),
-        };
-
+        const embeddingId = v4();
         const cleanVector = memory.embedding.map((n) =>
           Number.isFinite(n) ? Number(n.toFixed(6)) : 0
         );
 
-        embeddingValues[this.embeddingDimension] = cleanVector;
+        // Format vector as PostgreSQL array literal: {1.0,2.0,3.0}
+        const vectorLiteral = `{${cleanVector.join(',')}}`;
 
-        await tx.insert(embeddingTable).values([embeddingValues]);
+        const embeddingQuery = `
+          INSERT INTO "embeddings" ("id", "memory_id", "created_at", "${this.embeddingDimension}")
+          VALUES (
+            '${embeddingId}',
+            '${memoryId}',
+            NOW(),
+            '${vectorLiteral}'::vector
+          )
+        `;
+
+        logger.debug(`[createMemory] Embedding SQL query: ${embeddingQuery.trim()}`);
+        await tx.execute(sql.raw(embeddingQuery));
       }
     });
 
@@ -2015,14 +2132,22 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
                 .set(updateValues)
                 .where(eq(embeddingTable.memoryId, memory.id));
             } else {
-              // Create new embedding
-              const embeddingValues: Record<string, unknown> = {
-                id: v4(),
-                memoryId: memory.id,
-              };
-              embeddingValues[this.embeddingDimension] = cleanVector;
+              // Create new embedding using sql.raw to avoid PGLite issues with Date serialization
+              const embeddingId = v4();
+              const vectorLiteral = `{${cleanVector.join(',')}}`;
 
-              await tx.insert(embeddingTable).values([embeddingValues]);
+              const embeddingQuery = `
+                INSERT INTO "embeddings" ("id", "memory_id", "created_at", "${this.embeddingDimension}")
+                VALUES (
+                  '${embeddingId}',
+                  '${memory.id}',
+                  NOW(),
+                  '${vectorLiteral}'::vector
+                )
+              `;
+
+              logger.debug(`[updateMemory] Embedding SQL query: ${embeddingQuery.trim()}`);
+              await tx.execute(sql.raw(embeddingQuery));
             }
           }
         });
@@ -2292,19 +2417,60 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
    */
   async createRooms(rooms: Room[]): Promise<UUID[]> {
     return this.withDatabase(async () => {
-      const roomsWithIds = rooms.map((room) => ({
-        ...room,
-        agentId: this.agentId,
-        id: room.id || v4(), // ensure each room has a unique ID
-      }));
+      try {
+        if (rooms.length === 0) {
+          return [];
+        }
 
-      const insertedRooms = await this.db
-        .insert(roomTable)
-        .values(roomsWithIds)
-        .onConflictDoNothing()
-        .returning();
-      const insertedIds = insertedRooms.map((r) => r.id as UUID);
-      return insertedIds;
+        // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+        const valuesClause = rooms
+          .map((room) => {
+            const roomId = room.id || v4();
+            const escapedName = room.name ? String(room.name).replace(/'/g, "''") : '';
+            const metadataJson = JSON.stringify(room.metadata || {});
+            const escapedMetadata = metadataJson.replace(/'/g, "''");
+
+            return `(
+              '${roomId}',
+              '${this.agentId}',
+              '${String(room.source).replace(/'/g, "''")}',
+              '${String(room.type).replace(/'/g, "''")}',
+              ${room.serverId ? `'${String(room.serverId).replace(/'/g, "''")}'` : 'NULL'},
+              ${room.worldId ? `'${room.worldId}'` : 'NULL'},
+              ${room.name ? `'${escapedName}'` : 'NULL'},
+              ${room.metadata ? `'${escapedMetadata}'::jsonb` : 'NULL'},
+              ${room.channelId ? `'${String(room.channelId).replace(/'/g, "''")}'` : 'NULL'},
+              NOW()
+            )`;
+          })
+          .join(',\n            ');
+
+        const fullQuery = `
+          INSERT INTO "rooms" ("id", "agentId", "source", "type", "serverId", "worldId", "name", "metadata", "channelId", "createdAt")
+          VALUES
+            ${valuesClause}
+          ON CONFLICT DO NOTHING
+          RETURNING "id"
+        `;
+
+        logger.debug(`[createRooms] Full SQL query: ${fullQuery.trim()}`);
+        logger.debug(`[createRooms] Rooms count: ${rooms.length}`);
+
+        const result = await this.db.execute(sql.raw(fullQuery));
+
+        // Extract IDs from result
+        if (result.rows && result.rows.length > 0) {
+          return result.rows.map((row: any) => row.id as UUID);
+        }
+
+        // If no rows returned (all conflicts), return the IDs we tried to insert
+        return rooms.map((room) => (room.id || v4()) as UUID);
+      } catch (error) {
+        logger.error(
+          `Error creating rooms: ${error instanceof Error ? error.message : String(error)}, rooms count: ${rooms.length}`
+        );
+        throw error;
+      }
     });
   }
 
@@ -2367,19 +2533,38 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
   async addParticipant(entityId: UUID, roomId: UUID): Promise<boolean> {
     return this.withDatabase(async () => {
       try {
-        await this.db
-          .insert(participantTable)
-          .values({
-            entityId,
-            roomId,
-            agentId: this.agentId,
-          })
-          .onConflictDoNothing();
+        // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+        // This matches the pattern used in createEntities for PGLite compatibility
+        const fullQuery = `
+          INSERT INTO "participants" ("id", "created_at", "entityId", "roomId", "agentId", "roomState")
+          VALUES (
+            gen_random_uuid(),
+            NOW(),
+            '${entityId}',
+            '${roomId}',
+            '${this.agentId}',
+            NULL
+          )
+          ON CONFLICT DO NOTHING
+        `;
+
+        logger.debug(`[addParticipant] Full SQL query: ${fullQuery.trim()}`);
+        logger.debug(
+          `[addParticipant] Entity ID: ${entityId}, Room ID: ${roomId}, Agent ID: ${this.agentId}`
+        );
+
+        await this.db.execute(sql.raw(fullQuery));
+        logger.debug(`[addParticipant] Insert successful`);
         return true;
       } catch (error) {
-        logger.error(
-          `Error adding participant to room: ${error instanceof Error ? error.message : String(error)}, entityId: ${entityId}, roomId: ${roomId}, agentId: ${this.agentId}`
-        );
+        const errorDetails = {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          entityId,
+          roomId,
+          agentId: this.agentId,
+        };
+        logger.error(`Error adding participant to room: ${JSON.stringify(errorDetails, null, 2)}`);
         return false;
       }
     });
@@ -2388,18 +2573,40 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
   async addParticipantsRoom(entityIds: UUID[], roomId: UUID): Promise<boolean> {
     return this.withDatabase(async () => {
       try {
-        const values = entityIds.map((id) => ({
-          entityId: id,
-          roomId,
-          agentId: this.agentId,
-        }));
-        await this.db.insert(participantTable).values(values).onConflictDoNothing().execute();
+        // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+        // Insert all participants in a single query for better performance
+        if (entityIds.length === 0) {
+          return true;
+        }
+
+        const valuesClause = entityIds
+          .map((id) => `(gen_random_uuid(), NOW(), '${id}', '${roomId}', '${this.agentId}', NULL)`)
+          .join(',\n            ');
+
+        const fullQuery = `
+          INSERT INTO "participants" ("id", "created_at", "entityId", "roomId", "agentId", "roomState")
+          VALUES
+            ${valuesClause}
+          ON CONFLICT DO NOTHING
+        `;
+
+        logger.debug(`[addParticipantsRoom] Full SQL query: ${fullQuery.trim()}`);
+        logger.debug(
+          `[addParticipantsRoom] Entity IDs count: ${entityIds.length}, Room ID: ${roomId}, Agent ID: ${this.agentId}`
+        );
+
+        await this.db.execute(sql.raw(fullQuery));
         logger.debug(`${entityIds.length} Entities linked successfully`);
         return true;
       } catch (error) {
-        logger.error(
-          `Error adding participants to room: ${error instanceof Error ? error.message : String(error)}, entityIdSample: ${entityIds[0]}, roomId: ${roomId}, agentId: ${this.agentId}`
-        );
+        const errorDetails = {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          entityIdSample: entityIds[0],
+          roomId,
+          agentId: this.agentId,
+        };
+        logger.error(`Error adding participants to room: ${JSON.stringify(errorDetails, null, 2)}`);
         return false;
       }
     });
@@ -2561,21 +2768,36 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
     metadata?: { [key: string]: unknown };
   }): Promise<boolean> {
     return this.withDatabase(async () => {
-      const id = v4();
-      const saveParams = {
-        id,
-        sourceEntityId: params.sourceEntityId,
-        targetEntityId: params.targetEntityId,
-        agentId: this.agentId,
-        tags: params.tags || [],
-        metadata: params.metadata || {},
-      };
       try {
-        await this.db.insert(relationshipTable).values(saveParams);
+        const id = v4();
+        // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+        const tagsArray = params.tags || [];
+        const tagsLiteral =
+          tagsArray.length > 0
+            ? `{${tagsArray.map((t) => `"${String(t).replace(/"/g, '\\"')}"`).join(',')}}`
+            : '{}';
+        const metadataJson = JSON.stringify(params.metadata || {});
+        const escapedMetadata = metadataJson.replace(/'/g, "''");
+
+        const fullQuery = `
+          INSERT INTO "relationships" ("id", "created_at", "sourceEntityId", "targetEntityId", "agentId", "tags", "metadata")
+          VALUES (
+            '${id}',
+            NOW(),
+            '${params.sourceEntityId}',
+            '${params.targetEntityId}',
+            '${this.agentId}',
+            '${tagsLiteral}'::text[],
+            '${escapedMetadata}'::jsonb
+          )
+        `;
+
+        logger.debug(`[createRelationship] Full SQL query: ${fullQuery.trim()}`);
+        await this.db.execute(sql.raw(fullQuery));
         return true;
       } catch (error) {
         logger.error(
-          `Error creating relationship: ${error instanceof Error ? error.message : String(error)}, saveParams: ${JSON.stringify(saveParams)}`
+          `Error creating relationship: ${error instanceof Error ? error.message : String(error)}, sourceEntityId: ${params.sourceEntityId}, targetEntityId: ${params.targetEntityId}`
         );
         return false;
       }
@@ -2780,11 +3002,26 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
   async createWorld(world: World): Promise<UUID> {
     return this.withDatabase(async () => {
       const newWorldId = world.id || v4();
-      await this.db.insert(worldTable).values({
-        ...world,
-        id: newWorldId,
-        name: world.name || '',
-      });
+      // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+      const metadataJson = JSON.stringify(world.metadata || {});
+      const escapedMetadata = metadataJson.replace(/'/g, "''");
+      const escapedName = (world.name || '').replace(/'/g, "''");
+      const escapedServerId = (world.serverId || 'local').replace(/'/g, "''");
+
+      const fullQuery = `
+        INSERT INTO "worlds" ("id", "agentId", "name", "metadata", "serverId", "createdAt")
+        VALUES (
+          '${newWorldId}',
+          '${this.agentId}',
+          '${escapedName}',
+          '${escapedMetadata}'::jsonb,
+          '${escapedServerId}',
+          NOW()
+        )
+      `;
+
+      logger.debug(`[createWorld] Full SQL query: ${fullQuery.trim()}`);
+      await this.db.execute(sql.raw(fullQuery));
       return newWorldId;
     });
   }
@@ -2848,25 +3085,52 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
     }
     return this.withRetry(async () => {
       return this.withDatabase(async () => {
-        const now = new Date();
-        const metadata = task.metadata || {};
+        try {
+          // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+          const tagsArray = task.tags || [];
+          const tagsLiteral =
+            tagsArray.length > 0
+              ? `{${tagsArray.map((t) => `"${String(t).replace(/"/g, '\\"')}"`).join(',')}}`
+              : '{}';
+          const metadataJson = JSON.stringify(task.metadata || {});
+          const escapedMetadata = metadataJson.replace(/'/g, "''");
+          const escapedName = String(task.name).replace(/'/g, "''");
+          const escapedDescription = task.description
+            ? String(task.description).replace(/'/g, "''")
+            : '';
 
-        const values = {
-          id: task.id as UUID,
-          name: task.name,
-          description: task.description,
-          roomId: task.roomId as UUID,
-          worldId: task.worldId as UUID,
-          tags: task.tags,
-          metadata: metadata,
-          createdAt: now,
-          updatedAt: now,
-          agentId: this.agentId as UUID,
-        };
+          const fullQuery = `
+            INSERT INTO "tasks" ("id", "name", "description", "roomId", "worldId", "entityId", "agent_id", "tags", "metadata", "created_at", "updated_at")
+            VALUES (
+              '${task.id}',
+              '${escapedName}',
+              ${task.description ? `'${escapedDescription}'` : 'NULL'},
+              ${task.roomId ? `'${task.roomId}'` : 'NULL'},
+              '${task.worldId}',
+              ${task.entityId ? `'${task.entityId}'` : 'NULL'},
+              '${this.agentId}',
+              '${tagsLiteral}'::text[],
+              '${escapedMetadata}'::jsonb,
+              NOW(),
+              NOW()
+            )
+            RETURNING "id"
+          `;
 
-        const result = await this.db.insert(taskTable).values(values).returning();
+          logger.debug(`[createTask] Full SQL query: ${fullQuery.trim()}`);
+          const result = await this.db.execute(sql.raw(fullQuery));
 
-        return result[0].id as UUID;
+          // Extract ID from result
+          if (result.rows && result.rows.length > 0) {
+            return result.rows[0].id as UUID;
+          }
+          return task.id as UUID;
+        } catch (error) {
+          logger.error(
+            `Error creating task: ${error instanceof Error ? error.message : String(error)}, taskId: ${task.id}`
+          );
+          throw error;
+        }
       });
     });
   }
@@ -3113,18 +3377,29 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
   }> {
     return this.withDatabase(async () => {
       const newId = data.id || (v4() as UUID);
-      const now = new Date();
-      const serverToInsert = {
-        id: newId,
-        name: data.name,
-        sourceType: data.sourceType,
-        sourceId: data.sourceId,
-        metadata: data.metadata,
-        createdAt: now,
-        updatedAt: now,
-      };
+      // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+      const metadataJson = JSON.stringify(data.metadata || {});
+      const escapedMetadata = metadataJson.replace(/'/g, "''");
+      const escapedName = String(data.name).replace(/'/g, "''");
+      const escapedSourceType = String(data.sourceType).replace(/'/g, "''");
+      const escapedSourceId = data.sourceId ? String(data.sourceId).replace(/'/g, "''") : '';
 
-      await this.db.insert(messageServerTable).values(serverToInsert).onConflictDoNothing(); // In case the ID already exists
+      const fullQuery = `
+        INSERT INTO "message_servers" ("id", "name", "source_type", "source_id", "metadata", "created_at", "updated_at")
+        VALUES (
+          '${newId}',
+          '${escapedName}',
+          '${escapedSourceType}',
+          ${data.sourceId ? `'${escapedSourceId}'` : 'NULL'},
+          ${data.metadata ? `'${escapedMetadata}'::jsonb` : 'NULL'},
+          CURRENT_TIMESTAMP,
+          CURRENT_TIMESTAMP
+        )
+        ON CONFLICT DO NOTHING
+      `;
+
+      logger.debug(`[createMessageServer] Full SQL query: ${fullQuery.trim()}`);
+      await this.db.execute(sql.raw(fullQuery));
 
       // If server already existed, fetch it
       if (data.id) {
@@ -3146,7 +3421,17 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
         }
       }
 
-      return serverToInsert;
+      // Return the inserted server data
+      const now = new Date();
+      return {
+        id: newId,
+        name: data.name,
+        sourceType: data.sourceType,
+        sourceId: data.sourceId,
+        metadata: data.metadata,
+        createdAt: now,
+        updatedAt: now,
+      };
     });
   }
 
@@ -3241,7 +3526,33 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
   }> {
     return this.withDatabase(async () => {
       const newId = data.id || (v4() as UUID);
-      const now = new Date();
+      // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+      const metadataJson = JSON.stringify(data.metadata || {});
+      const escapedMetadata = metadataJson.replace(/'/g, "''");
+      const escapedName = String(data.name).replace(/'/g, "''");
+      const escapedType = String(data.type).replace(/'/g, "''");
+      const escapedSourceType = data.sourceType ? String(data.sourceType).replace(/'/g, "''") : '';
+      const escapedSourceId = data.sourceId ? String(data.sourceId).replace(/'/g, "''") : '';
+      const escapedTopic = data.topic ? String(data.topic).replace(/'/g, "''") : '';
+
+      const channelQuery = `
+        INSERT INTO "channels" ("id", "server_id", "name", "type", "source_type", "source_id", "topic", "metadata", "created_at", "updated_at")
+        VALUES (
+          '${newId}',
+          '${data.messageServerId}',
+          '${escapedName}',
+          '${escapedType}',
+          ${data.sourceType ? `'${escapedSourceType}'` : 'NULL'},
+          ${data.sourceId ? `'${escapedSourceId}'` : 'NULL'},
+          ${data.topic ? `'${escapedTopic}'` : 'NULL'},
+          ${data.metadata ? `'${escapedMetadata}'::jsonb` : 'NULL'},
+          CURRENT_TIMESTAMP,
+          CURRENT_TIMESTAMP
+        )
+      `;
+
+      logger.debug(`[createChannel] Channel SQL query: ${channelQuery.trim()}`);
+
       const channelToInsert = {
         id: newId,
         messageServerId: data.messageServerId,
@@ -3251,12 +3562,12 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
         sourceId: data.sourceId,
         topic: data.topic,
         metadata: data.metadata,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       await this.db.transaction(async (tx) => {
-        await tx.insert(channelTable).values(channelToInsert);
+        await tx.execute(sql.raw(channelQuery));
 
         if (participantIds && participantIds.length > 0) {
           const participantValues = participantIds.map((userId) => ({
@@ -3374,7 +3685,45 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
   }> {
     return this.withDatabase(async () => {
       const newId = data.messageId || (v4() as UUID);
-      const now = new Date();
+      // Use sql.raw for the entire query to avoid PGLite issues with Date serialization
+      const rawMessageJson = JSON.stringify(data.rawMessage || {});
+      const escapedRawMessage = rawMessageJson.replace(/'/g, "''");
+      const metadataJson = JSON.stringify(data.metadata || {});
+      const escapedMetadata = metadataJson.replace(/'/g, "''");
+      const escapedContent = String(data.content).replace(/'/g, "''");
+      const escapedSourceType = data.sourceType ? String(data.sourceType).replace(/'/g, "''") : '';
+      const escapedSourceId = data.sourceId ? String(data.sourceId).replace(/'/g, "''") : '';
+
+      const messageQuery = `
+        INSERT INTO "central_messages" ("id", "channel_id", "author_id", "content", "raw_message", "source_type", "source_id", "metadata", "in_reply_to_root_message_id", "created_at", "updated_at")
+        VALUES (
+          '${newId}',
+          '${data.channelId}',
+          '${data.authorId}',
+          '${escapedContent}',
+          ${data.rawMessage ? `'${escapedRawMessage}'::jsonb` : 'NULL'},
+          ${data.sourceType ? `'${escapedSourceType}'` : 'NULL'},
+          ${data.sourceId ? `'${escapedSourceId}'` : 'NULL'},
+          ${data.metadata ? `'${escapedMetadata}'::jsonb` : 'NULL'},
+          ${data.inReplyToRootMessageId ? `'${data.inReplyToRootMessageId}'` : 'NULL'},
+          CURRENT_TIMESTAMP,
+          CURRENT_TIMESTAMP
+        )
+      `;
+
+      logger.debug(`[createMessage] Full SQL query: ${messageQuery.trim()}`);
+      logger.debug(
+        `[DB] createMessage - messageToInsert before insert: ${JSON.stringify({
+          id: newId,
+          channelId: data.channelId,
+          authorId: data.authorId,
+          hasChannelId: true,
+          hasAuthorId: true,
+        })}`
+      );
+
+      await this.db.execute(sql.raw(messageQuery));
+
       const messageToInsert = {
         id: newId,
         channelId: data.channelId,
@@ -3385,21 +3734,9 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
         sourceId: data.sourceId,
         metadata: data.metadata,
         inReplyToRootMessageId: data.inReplyToRootMessageId,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
-
-      logger.debug(
-        `[DB] createMessage - messageToInsert before insert: ${JSON.stringify({
-          id: messageToInsert.id,
-          channelId: messageToInsert.channelId,
-          authorId: messageToInsert.authorId,
-          hasChannelId: 'channelId' in messageToInsert,
-          hasAuthorId: 'authorId' in messageToInsert,
-        })}`
-      );
-
-      await this.db.insert(messageTable).values(messageToInsert);
 
       logger.debug(
         `[DB] createMessage - messageToInsert after insert: ${JSON.stringify({

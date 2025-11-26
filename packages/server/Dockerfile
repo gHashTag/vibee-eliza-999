@@ -2,8 +2,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Устанавливаем bun глобально
-RUN npm install -g bun
+# Устанавливаем bash и bun
+RUN apk add --no-cache bash && npm install -g bun
 
 # Сначала копируем только конфигурационные файлы для workspace
 COPY package.json bunfig.toml ./

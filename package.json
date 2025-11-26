@@ -96,8 +96,17 @@
   "dependencies": {
     "@infisical/sdk": "^4.0.6",
     "@sentry/node": "^10.26.0",
+    "@langchain/core": "^1.0.0",
+    "@langchain/textsplitters": "^1.0.0",
+    "adze": "^2.2.5",
+    "crypto-browserify": "^3.12.0",
+    "dotenv": "^17.2.3",
+    "glob": "^11.0.3",
+    "handlebars": "^4.7.8",
     "helmet": "^8.1.0",
     "js-yaml": "^4.1.0",
+    "pdfjs-dist": "^5.2.133",
+    "unique-names-generator": "^4.7.1",
     "uuid": "^11.0.5",
     "zod": "4.1.11"
   }

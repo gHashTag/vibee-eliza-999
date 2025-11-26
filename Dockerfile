@@ -3,22 +3,19 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Устанавливаем bash, git и bun
-RUN apk add --no-cache bash git && npm install -g bun
+RUN apk add --no-cache bash git && npm install -g bun@1.2.4
 
-# Копируем основные файлы конфигурации
-COPY package.json bunfig.toml ./
+# Копируем конфигурационные файлы
+COPY package.json bunfig.toml pnpm-workspace.yaml ./
 
-# Копируем все файлы из git
+# Устанавливаем зависимости
+RUN bun install --frozen-lockfile
+
+# Копируем весь исходный код
 COPY . .
 
-# Удаляем ненужные файлы из .dockerignore
-RUN rm -rf node_modules dist build .env pnpm-workspace.yaml pnpm-lock.yaml 2>/dev/null || true
-
-# Устанавливаем зависимости с bun
-RUN bun install
-
-# Собираем сервер напрямую
-RUN cd packages/server && bun run build
+# Собираем все пакеты через turbo
+RUN bun run build
 
 # Запускаем сервер
 EXPOSE 3000

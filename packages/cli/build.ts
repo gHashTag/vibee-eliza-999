@@ -5,8 +5,10 @@
 
 import { createBuildRunner, copyAssets } from './build-utils';
 import { $ } from 'bun';
-import { existsSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import fs from 'node:fs/promises';
+import path from 'node:path';
+import type { BunPlugin } from 'bun';
 
 // Custom pre-build step to copy templates and generate version
 async function preBuild() {
@@ -41,6 +43,53 @@ async function preBuild() {
   console.log(`✅ Pre-build tasks completed (${elapsed}s)`);
 }
 
+// Plugin to resolve @/ alias paths
+const pathAliasPlugin: BunPlugin = {
+  name: 'path-alias-resolver',
+  setup(build) {
+    build.onResolve({ filter: /^@\// }, (args) => {
+      // args.path contains the full import path like "@/src/commands/agent"
+      // We need to remove @/ and resolve relative to src/
+      let relativePath = args.path.replace(/^@\//, '');
+
+      // If the path already starts with src/, remove it to avoid duplication
+      if (relativePath.startsWith('src/')) {
+        relativePath = relativePath.replace(/^src\//, '');
+      }
+
+      const basePath = path.resolve(process.cwd(), 'src', relativePath);
+
+      // First, try to find the file with common extensions
+      const extensions = ['.ts', '.tsx', '.js', '.jsx'];
+      for (const ext of extensions) {
+        const fullPath = basePath + ext;
+        if (existsSync(fullPath) && !statSync(fullPath).isDirectory()) {
+          return {
+            path: fullPath,
+          };
+        }
+      }
+
+      // If it's a directory, try to find index files
+      if (existsSync(basePath) && statSync(basePath).isDirectory()) {
+        for (const ext of ['.ts', '.tsx', '.js', '.jsx']) {
+          const indexPath = path.join(basePath, 'index' + ext);
+          if (existsSync(indexPath)) {
+            return {
+              path: indexPath,
+            };
+          }
+        }
+      }
+
+      // If no file found, return the path as-is (Bun will handle the error)
+      return {
+        path: basePath,
+      };
+    });
+  },
+};
+
 // Create and run the standardized build runner
 const run = createBuildRunner({
   packageName: '@elizaos/cli',
@@ -53,7 +102,8 @@ const run = createBuildRunner({
     sourcemap: true,
     minify: false,
     isCli: true,
-    generateDts: true,
+    generateDts: false, // Temporarily disabled due to path alias resolution issues in tsc
+    plugins: [pathAliasPlugin],
     // Assets will be copied after build via onBuildComplete
   },
   onBuildComplete: async (success) => {

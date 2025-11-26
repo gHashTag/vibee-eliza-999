@@ -677,11 +677,34 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
       try {
         return await this.db.transaction(async (tx) => {
           // Normalize entity data to ensure names is a proper array
-          const normalizedEntities = entities.map((entity) => ({
-            ...entity,
-            names: this.normalizeEntityNames(entity.names),
-            metadata: entity.metadata || {},
-          }));
+          const normalizedEntities = entities.map((entity) => {
+            const normalizedNames = this.normalizeEntityNames(entity.names);
+            // Ensure names is always a proper array of strings
+            if (!Array.isArray(normalizedNames)) {
+              logger.warn(
+                `Entity names is not an array, normalizing: ${JSON.stringify(normalizedNames)}`
+              );
+            }
+            // Double-check that names is an array before inserting
+            const finalNames = Array.isArray(normalizedNames)
+              ? normalizedNames
+              : [String(normalizedNames)];
+
+            // Log for debugging
+            if (finalNames.length > 0 && typeof finalNames[0] !== 'string') {
+              logger.error(
+                `Entity names contains non-string values: ${JSON.stringify(finalNames)}`
+              );
+            }
+
+            // Return normalized entity with proper array
+            // Drizzle should handle array serialization automatically for text[] columns
+            return {
+              ...entity,
+              names: finalNames,
+              metadata: entity.metadata || {},
+            };
+          });
 
           await tx.insert(entityTable).values(normalizedEntities);
 
@@ -3366,23 +3389,27 @@ export abstract class BaseDrizzleAdapter extends DatabaseAdapter<any> {
         updatedAt: now,
       };
 
-      logger.debug(`[DB] createMessage - messageToInsert before insert: ${JSON.stringify({
-        id: messageToInsert.id,
-        channelId: messageToInsert.channelId,
-        authorId: messageToInsert.authorId,
-        hasChannelId: 'channelId' in messageToInsert,
-        hasAuthorId: 'authorId' in messageToInsert
-      })}`);
+      logger.debug(
+        `[DB] createMessage - messageToInsert before insert: ${JSON.stringify({
+          id: messageToInsert.id,
+          channelId: messageToInsert.channelId,
+          authorId: messageToInsert.authorId,
+          hasChannelId: 'channelId' in messageToInsert,
+          hasAuthorId: 'authorId' in messageToInsert,
+        })}`
+      );
 
       await this.db.insert(messageTable).values(messageToInsert);
 
-      logger.debug(`[DB] createMessage - messageToInsert after insert: ${JSON.stringify({
-        id: messageToInsert.id,
-        channelId: messageToInsert.channelId,
-        authorId: messageToInsert.authorId,
-        hasChannelId: 'channelId' in messageToInsert,
-        hasAuthorId: 'authorId' in messageToInsert
-      })}`);
+      logger.debug(
+        `[DB] createMessage - messageToInsert after insert: ${JSON.stringify({
+          id: messageToInsert.id,
+          channelId: messageToInsert.channelId,
+          authorId: messageToInsert.authorId,
+          hasChannelId: 'channelId' in messageToInsert,
+          hasAuthorId: 'authorId' in messageToInsert,
+        })}`
+      );
 
       return messageToInsert;
     });

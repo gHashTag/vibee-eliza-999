@@ -18,14 +18,6 @@ const run = createBuildRunner({
     minify: false,
     generateDts: true,
   },
-  onBuildComplete: async (success) => {
-    if (success) {
-      // Create root index.d.ts that re-exports from the nested structure
-      const rootDtsContent = `export * from './api-client/src/index';`;
-      await Bun.write('./dist/index.d.ts', rootDtsContent);
-      console.log('✓ Created root index.d.ts');
-    }
-  },
 });
 
 // Execute the build

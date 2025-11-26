@@ -12,6 +12,7 @@ COPY package.json bunfig.toml ./
 COPY packages ./packages
 COPY scripts ./scripts
 COPY tsconfig.json ./
+COPY turbo.json ./
 
 # Устанавливаем зависимости (теперь увидит workspace packages)
 RUN bun install

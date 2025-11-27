@@ -10,6 +10,7 @@ export default defineConfig(({ mode, command }) => {
   const isBuild = command === 'build';
 
   return {
+    cacheDir: 'node_modules/.vite',
     plugins: [tailwindcss() as unknown as PluginOption, react() as unknown as PluginOption],
     server: {
       port: 5173,
@@ -66,7 +67,7 @@ export default defineConfig(({ mode, command }) => {
       // Enable full sourcemaps in production builds for better error stacks
       sourcemap: true,
       reportCompressedSize: false,
-      minify: 'esbuild',
+      minify: 'terser', // Changed from 'esbuild' to 'terser' to avoid esbuild version mismatch
       chunkSizeWarningLimit: 2200, // Increase chunk size warning limit to accommodate large chunks
       cssMinify: false, // Disable CSS minification to avoid :is() syntax errors in webkit scrollbar styles
       rollupOptions: {
@@ -85,9 +86,19 @@ export default defineConfig(({ mode, command }) => {
               if (id.includes('@elizaos')) {
                 return 'elizaos-vendor';
               }
+              if (id.includes('lucide-react')) {
+                return 'icons-vendor';
+              }
             }
           },
+          chunkFileNames: (chunkInfo) => {
+            const facadeModuleId = chunkInfo.facadeModuleId
+              ? chunkInfo.facadeModuleId.split('/').pop()?.replace('.tsx', '').replace('.ts', '')
+              : 'chunk';
+            return `js/${facadeModuleId}-[hash].js`;
+          },
         },
+        cache: true,
       },
       commonjsOptions: {
         transformMixedEsModules: true,

@@ -51,14 +51,6 @@ export default defineConfig(({ mode, command }) => {
       dedupe: ['react', 'react-dom'],
     },
     optimizeDeps: {
-      esbuildOptions: {
-        // Generate sourcemaps for pre-bundled deps to unminify vendor stack traces
-        sourcemap: true,
-        keepNames: true,
-        define: {
-          global: 'globalThis',
-        },
-      },
       entries: ['./src/entry.tsx'],
       include: ['buffer', 'process', '@elizaos/core', '@elizaos/api-client'],
     },

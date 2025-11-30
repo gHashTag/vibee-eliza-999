@@ -1,0 +1,33 @@
+{
+  "config": {
+    "entrypoints": [
+      "./src/index.browser.ts"
+    ],
+    "outdir": "dist/browser",
+    "target": "browser",
+    "format": "esm",
+    "sourcemap": true,
+    "minify": true,
+    "external": [
+      "@elizaos/core",
+      "@elizaos/server",
+      "@elizaos/client",
+      "@elizaos/api-client",
+      "@elizaos/plugin-*",
+      "sharp",
+      "@hapi/shot",
+      "@opentelemetry/context-async-hooks",
+      "async_hooks",
+      "node:diagnostics_channel",
+      "node:async_hooks",
+      "crypto-browserify"
+    ],
+    "plugins": [],
+    "naming": {
+      "entry": "[dir]/[name].[ext]",
+      "chunk": "[name]-[hash].[ext]",
+      "asset": "[name]-[hash].[ext]"
+    }
+  },
+  "timestamp": 1764185730048
+}

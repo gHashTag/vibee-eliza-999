@@ -1,0 +1,3 @@
+$ bun run build.ts
+✅ VIBEE Agents build complete!
+📦 Output: dist/src/index.js

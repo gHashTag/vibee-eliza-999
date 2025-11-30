@@ -1,0 +1,61 @@
+{
+  "config": {
+    "entrypoints": [
+      "./src/index.node.ts"
+    ],
+    "outdir": "dist/node",
+    "target": "node",
+    "format": "esm",
+    "sourcemap": true,
+    "minify": false,
+    "external": [
+      "node:*",
+      "fs",
+      "path",
+      "crypto",
+      "stream",
+      "buffer",
+      "util",
+      "events",
+      "url",
+      "http",
+      "https",
+      "os",
+      "child_process",
+      "worker_threads",
+      "cluster",
+      "zlib",
+      "querystring",
+      "string_decoder",
+      "tls",
+      "net",
+      "dns",
+      "dgram",
+      "readline",
+      "repl",
+      "vm",
+      "assert",
+      "console",
+      "process",
+      "timers",
+      "perf_hooks",
+      "async_hooks",
+      "@elizaos/core",
+      "@elizaos/server",
+      "@elizaos/client",
+      "@elizaos/api-client",
+      "@elizaos/plugin-*",
+      "dotenv",
+      "sharp",
+      "zod",
+      "@hapi/shot"
+    ],
+    "plugins": [],
+    "naming": {
+      "entry": "[dir]/[name].[ext]",
+      "chunk": "[name]-[hash].[ext]",
+      "asset": "[name]-[hash].[ext]"
+    }
+  },
+  "timestamp": 1764185730047
+}

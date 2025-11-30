@@ -79,8 +79,14 @@ function extractTablesFromSchema(schema: any): PgTable[] {
 /**
  * Generate a snapshot from a Drizzle schema
  * This is a port of Drizzle's pgSerializer.generatePgSnapshot
+ * @param schema - Drizzle schema object
+ * @param isPGLite - Whether the database is PGLite (default: false)
+ *                   If true, UUID types will be converted to TEXT
  */
-export async function generateSnapshot(schema: any): Promise<SchemaSnapshot> {
+export async function generateSnapshot(
+  schema: any,
+  isPGLite: boolean = false
+): Promise<SchemaSnapshot> {
   const dialect = new PgDialect({ casing: undefined });
   const tables: any = {};
   const schemas: any = {};
@@ -120,7 +126,9 @@ export async function generateSnapshot(schema: any): Promise<SchemaSnapshot> {
 
       // PGLite doesn't support UUID type - transform to TEXT
       // This is a known limitation of PGLite
-      const normalizedType = sqlTypeLowered === 'uuid' ? 'text' : sqlType;
+      // ONLY convert UUID to TEXT if we're using PGLite
+      // For real PostgreSQL, keep UUID as UUID to avoid migration conflicts
+      const normalizedType = isPGLite && sqlTypeLowered === 'uuid' ? 'text' : sqlType;
 
       const columnToSet: any = {
         name,

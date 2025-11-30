@@ -1,33 +1,43 @@
-FROM node:20-alpine
+# syntax=docker/dockerfile:1.4
 
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Устанавливаем bash, git и bun
-RUN apk add --no-cache bash git && npm install -g bun
+# Install bun
+RUN npm install -g bun@1.2.21
 
-# Копируем конфигурационные файлы
+# Copy workspace files
 COPY package.json bunfig.toml ./
-
-# Копируем исходный код
 COPY packages ./packages
-COPY scripts ./scripts
 COPY tsconfig.json ./
 COPY turbo.json ./
 COPY build-utils.ts ./
 
-# Устанавливаем зависимости
+# Install dependencies
+RUN --mount=type=cache,target=/root/.bun \
+    bun install --frozen-lockfile
+
+# Build packages - build server directly using package-specific script
+RUN cd /app/packages/server && bun run build
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+# Install bun, bash and git
+RUN npm install -g bun@1.2.21 && apk add --no-cache bash git
+
+# Copy built packages
+COPY --from=builder /app/packages ./packages
+
+# Copy runtime dependencies
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy built-in scripts
+COPY scripts ./scripts
+
+# Set environment
+ENV NODE_ENV=production
 ENV SKIP_POSTINSTALL=1
-RUN bun install
 
-# Собираем packages/core отдельно
-RUN cd packages/core && rm -rf node_modules && cp -r /app/node_modules . && bun run build
-
-# Удаляем все dist директории для чистой сборки
-RUN find packages -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
-
-# Собираем ТОЛЬКО server вручную (сначала устанавливаем зависимости)
-RUN cd packages/server && rm -rf node_modules && cp -r /app/node_modules . && bun install --no-frozen-lockfile && bun run build
-
-# Запускаем сервер
 EXPOSE 3000
-CMD ["node", "packages/server/dist/entrypoint.js"]
+CMD ["bun", "packages/server/dist/entrypoint.js"]

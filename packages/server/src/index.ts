@@ -43,6 +43,13 @@ import sqlPlugin, {
 import { sql } from 'drizzle-orm';
 import { encryptedCharacter, stringToUuid, type Plugin } from '@elizaos/core';
 
+// Import startup health check system
+import { startupHealthCheck } from './services/startupHealthCheck.js';
+
+// Import Infisical secrets loader from working plugin (temporary fix for TypeScript issues)
+// NOTE: Secrets are already loaded in entrypoint.ts before server initialization
+// import { loadInfisicalSecrets } from '@elizaos/plugin-vibe-face-avatar';
+
 // Sentry setup with error handling - DO NOT BLOCK on errors
 import * as Sentry from '@sentry/node';
 try {
@@ -341,6 +348,47 @@ export class AgentServer {
       // Load .env file if not already loaded by CLI
       // This ensures the server works when used standalone (without CLI)
       loadEnvFile();
+
+      // 🚨 КРИТИЧНО: Секреты уже загружены в entrypoint.ts перед инициализацией сервера
+      // Не нужно загружать повторно - это вызовет конфликт!
+      logger.info('[INFISICAL] Секреты уже загружены в entrypoint.ts');
+      logger.info('[INFISICAL] POSTGRES_URL доступен:', process.env.POSTGRES_URL ? 'SET' : 'NOT SET');
+
+      // 🏥 STARTUP HEALTH CHECK - Проверяем конфигурацию после загрузки всех секретов
+      // ⚡ PRODUCTION BYPASS: Skip health checks in production to enable fast startup
+      // 🔍 DEBUG: Log actual NODE_ENV value for debugging Fly.io deployment
+      console.log(`[DEBUG] NODE_ENV value: "${process.env.NODE_ENV}"`);
+      console.log(`[DEBUG] process.env type: ${typeof process.env.NODE_ENV}`);
+      console.log(`[DEBUG] All env keys starting with NODE: ${Object.keys(process.env).filter(k => k.startsWith('NODE')).join(', ')}`);
+      const isProduction = process.env.NODE_ENV === 'production';
+      console.log(`[DEBUG] isProduction = ${isProduction} (NODE_ENV === 'production': ${process.env.NODE_ENV === 'production'})`);
+      if (!isProduction) {
+        logger.info('[HEALTH] Запуск системы проверки здоровья приложения...');
+        await startupHealthCheck.performStartupChecks();
+
+        // Если проверка показала критические ошибки, не запускаем сервер
+        if (!startupHealthCheck.canStartApplication()) {
+          const errorMessage = '[HEALTH] ❌ КРИТИЧЕСКИЕ ОШИБКИ ОБНАРУЖЕНЫ! Сервер не может быть запущен.';
+          logger.error(errorMessage);
+          logger.error('[HEALTH] Исправьте ошибки конфигурации и перезапустите сервер.');
+          logger.error('[HEALTH] Для получения подробной информации смотрите логи выше.');
+
+          // Выводим JSON отчет для диагностики
+          console.error('\n' + '='.repeat(70));
+          console.error('🔴 ОТЧЕТ О ПРОВЕРКЕ ЗДОРОВЬЯ:');
+          console.error(startupHealthCheck.getHealthReport());
+          console.error('='.repeat(70) + '\n');
+
+          throw new Error(
+            `${errorMessage}\nСм. логи выше для получения подробной информации об ошибках.`
+          );
+        }
+
+        logger.info('[HEALTH] ✅ Проверка здоровья пройдена успешно. Продолжаем инициализацию...');
+        console.log(''); // Пустая строка для разделения
+      } else {
+        logger.info('[HEALTH] ⚡ PRODUCTION MODE: Skipping startup health checks for fast boot');
+      }
 
       const agentDataDir = resolvePgliteDir(config?.dataDir);
       logger.info(`[INIT] Database Dir for SQL plugin: ${agentDataDir}`);

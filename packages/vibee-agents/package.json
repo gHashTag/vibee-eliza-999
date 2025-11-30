@@ -1,0 +1,39 @@
+{
+  "name": "@elizaos/vibee-agents",
+  "description": "VIBEE Agents - Production TypeScript agents for VIBEE project",
+  "version": "1.6.5-alpha.46",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "module": "dist/src/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [
+    "vibee",
+    "agents",
+    "elizaos",
+    "project"
+  ],
+  "dependencies": {
+    "@elizaos/core": "workspace:*",
+    "@elizaos/plugin-bootstrap": "workspace:*",
+    "@elizaos/plugin-sql": "workspace:*",
+    "@elizaos/plugin-telegram-craft": "workspace:*",
+    "@elizaos/plugin-vibe-face-avatar": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "prettier": "3.5.3",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "start": "elizaos start",
+    "dev": "elizaos dev",
+    "build": "bun run build.ts",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write ./src",
+    "format:check": "prettier --check ./src"
+  },
+  "files": [
+    "dist"
+  ]
+}
+

@@ -74,6 +74,8 @@ export * from "./actions/setActiveModelAction";
 export * from "./providers/neuroPhotoProvider";
 export * from "./services/replicateService";
 export * from "./services/falService";
+// ⚠️ DEPRECATED: Не экспортируем infisicalLoader - используйте централизованный сервис!
+// export * from "./services/infisicalLoader"; // DEPRECATED - используйте @elizaos/server/services/infisicalSecretLoader
 
 /**
  * Default export

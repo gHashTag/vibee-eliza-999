@@ -35,13 +35,6 @@
         "typescript": "5.9.2",
       },
     },
-    "packages/agents": {
-      "name": "@elizaos/agents",
-      "version": "1.0.0",
-      "dependencies": {
-        "@elizaos/core": "workspace:*",
-      },
-    },
     "packages/api-client": {
       "name": "@elizaos/api-client",
       "version": "1.6.5-alpha.46",
@@ -343,7 +336,6 @@
         "drizzle-orm": "^0.44.2",
         "pg": "^8.13.3",
         "uuid": "^11.0.5",
-        "zod": "^3.24.1",
       },
       "devDependencies": {
         "@eslint/js": "^9.28.0",
@@ -483,7 +475,6 @@
       "name": "@elizaos/server",
       "version": "1.6.5-alpha.46",
       "dependencies": {
-        "@elizaos/agents": "workspace:*",
         "@elizaos/api-client": "workspace:*",
         "@elizaos/core": "workspace:*",
         "@elizaos/plugin-sql": "workspace:*",
@@ -493,7 +484,6 @@
         "@types/express": "^5.0.2",
         "@types/helmet": "^4.0.0",
         "@types/multer": "^2.0.0",
-        "cors": "^2.8.5",
         "dotenv": "^17.2.3",
         "drizzle-orm": "^0.36.4",
         "express": "^5.1.0",
@@ -507,7 +497,6 @@
       },
       "devDependencies": {
         "@elizaos/client": "workspace:*",
-        "@types/cors": "^2.8.17",
         "@types/jsonwebtoken": "^9.0.7",
         "@types/node": "^24.0.1",
         "@types/pg": "^8.11.10",
@@ -544,6 +533,22 @@
         "dotenv": "16.4.5",
         "prettier": "3.5.3",
         "typescript": "5.8.2",
+      },
+    },
+    "packages/vibee-agents": {
+      "name": "@elizaos/vibee-agents",
+      "version": "1.6.5-alpha.46",
+      "dependencies": {
+        "@elizaos/core": "workspace:*",
+        "@elizaos/plugin-bootstrap": "workspace:*",
+        "@elizaos/plugin-sql": "workspace:*",
+        "@elizaos/plugin-telegram-craft": "workspace:*",
+        "@elizaos/plugin-vibe-face-avatar": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^24.1.0",
+        "prettier": "3.5.3",
+        "typescript": "^5.6.3",
       },
     },
   },
@@ -757,8 +762,6 @@
 
     "@electric-sql/pglite": ["@electric-sql/pglite@0.3.14", "", {}, "sha512-3DB258dhqdsArOI1fIt7cb9RpUOgcDg5hXWVgVHAeqVQ/qxtFy605QKs4gx6mFq3jWsSPqDN8TgSEsqC3OfV9Q=="],
 
-    "@elizaos/agents": ["@elizaos/agents@workspace:packages/agents"],
-
     "@elizaos/api-client": ["@elizaos/api-client@workspace:packages/api-client"],
 
     "@elizaos/app": ["@elizaos/app@workspace:packages/app"],
@@ -804,6 +807,8 @@
     "@elizaos/service-interfaces": ["@elizaos/service-interfaces@workspace:packages/service-interfaces"],
 
     "@elizaos/test-utils": ["@elizaos/test-utils@workspace:packages/test-utils"],
+
+    "@elizaos/vibee-agents": ["@elizaos/vibee-agents@workspace:packages/vibee-agents"],
 
     "@emnapi/core": ["@emnapi/core@1.7.1", "", { "dependencies": { "@emnapi/wasi-threads": "1.1.0", "tslib": "^2.4.0" } }, "sha512-o1uhUASyo921r2XtHYOHy7gdkGLge8ghBEQHMWmyJFoXlpU58kIrhhN3w26lpQb6dspetweapMn2CSNwQ8I4wg=="],
 
@@ -4784,8 +4789,6 @@
     "@elizaos/plugin-sql/dotenv": ["dotenv@16.6.1", "", {}, "sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow=="],
 
     "@elizaos/plugin-sql/typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
-
-    "@elizaos/plugin-sql/zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
 
     "@elizaos/plugin-starter/@vitejs/plugin-react-swc": ["@vitejs/plugin-react-swc@3.11.0", "", { "dependencies": { "@rolldown/pluginutils": "1.0.0-beta.27", "@swc/core": "^1.12.11" }, "peerDependencies": { "vite": "^4 || ^5 || ^6 || ^7" } }, "sha512-YTJCGFdNMHCMfjODYtxRNVAYmTWQ1Lb8PulP/2/f/oEEtglw8oKxKIZmmRkyXrVrHfsKOaVkAc3NT9/dMutO5w=="],
 

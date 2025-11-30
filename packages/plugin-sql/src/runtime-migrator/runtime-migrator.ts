@@ -536,7 +536,9 @@ export class RuntimeMigrator {
       await this.extensionManager.installRequiredExtensions(['vector', 'fuzzystrmatch']);
 
       // Generate current snapshot from schema
-      const currentSnapshot = await generateSnapshot(schema);
+      // Pass isPGLite flag to avoid UUID->TEXT conversion for real PostgreSQL
+      const isPGLite = this.isPGLite();
+      const currentSnapshot = await generateSnapshot(schema, isPGLite);
 
       // Ensure all schemas referenced in the snapshot exist
       await this.ensureSchemasExist(currentSnapshot);
@@ -913,7 +915,9 @@ export class RuntimeMigrator {
       logger.info(`[RuntimeMigrator] Checking migration for ${pluginName}...`);
 
       // Generate current snapshot from schema
-      const currentSnapshot = await generateSnapshot(schema);
+      // Pass isPGLite flag to avoid UUID->TEXT conversion for real PostgreSQL
+      const isPGLite = this.isPGLite();
+      const currentSnapshot = await generateSnapshot(schema, isPGLite);
 
       // Load previous snapshot
       const previousSnapshot = await this.snapshotStorage.getLatestSnapshot(pluginName);

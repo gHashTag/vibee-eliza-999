@@ -2,11 +2,34 @@
 /**
  * Скрипт загрузки секретов из Infisical Cloud
  * Загружает все переменные из Infisical и записывает их в .env файл
+ * ✅ С эмодзи и подробным логированием для лучшей видимости
  */
 
 import { InfisicalSDK } from '@infisical/sdk';
 import * as fs from 'fs';
 import * as path from 'path';
+
+// ANSI коды для цветного вывода
+const colors = {
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m',
+};
+
+// Функция для цветного вывода
+const log = {
+  info: (msg: string) => console.log(`${colors.cyan}ℹ️  INFO:${colors.reset} ${msg}`),
+  success: (msg: string) => console.log(`${colors.green}✅ SUCCESS:${colors.reset} ${msg}`),
+  warning: (msg: string) => console.log(`${colors.yellow}⚠️  WARNING:${colors.reset} ${msg}`),
+  error: (msg: string) => console.log(`${colors.red}❌ ERROR:${colors.reset} ${msg}`),
+  step: (msg: string) => console.log(`${colors.magenta}🔄 STEP:${colors.reset} ${msg}`),
+  debug: (msg: string) => console.log(`${colors.blue}🐛 DEBUG:${colors.reset} ${msg}`),
+};
 
 // Путь к .env файлу
 const envPath = path.join(process.cwd(), '.env');
@@ -21,49 +44,90 @@ const infisicalConfig = {
 
 async function loadSecretsFromInfisical() {
   try {
-    console.log('🔐 Подключаемся к Infisical Cloud...');
-    console.log(`📦 Проект: ${infisicalConfig.projectId}`);
-    console.log(`🌍 Среда: ${infisicalConfig.environment}`);
+    log.step('🚀 ЗАПУСК ЗАГРУЗКИ СЕКРЕТОВ ИЗ INFISICAL CLOUD');
+    console.log(`${colors.bright}${colors.cyan}
+╔══════════════════════════════════════════════════════════╗
+║                  🔐 СИСТЕМА ЗАГРУЗКИ СЕКРЕТОВ            ║
+║                    INFISICAL CLOUD                       ║
+╚══════════════════════════════════════════════════════════╝
+${colors.reset}`);
 
-    // Инициализируем SDK Infisical с Universal Auth
+    // Шаг 1: Проверяем наличие конфигурационных переменных
+    log.step('📋 ШАГ 1: Проверка конфигурации Infisical');
+    const missingConfig: string[] = [];
+
+    if (!infisicalConfig.clientId) {
+      missingConfig.push('INFISICAL_CLIENT_ID');
+    }
+    if (!infisicalConfig.clientSecret) {
+      missingConfig.push('INFISICAL_CLIENT_SECRET');
+    }
+    if (!infisicalConfig.projectId) {
+      missingConfig.push('INFISICAL_PROJECT_ID');
+    }
+
+    if (missingConfig.length > 0) {
+      log.error(`❌ ОТСУТСТВУЮТ КОНФИГУРАЦИОННЫЕ ПЕРЕМЕННЫЕ:`);
+      missingConfig.forEach(varName => {
+        log.error(`   ${colors.red}✗ ${varName}${colors.reset}`);
+      });
+      log.error('Проверьте .env файл!');
+      process.exit(1);
+    }
+
+    log.success('✅ Все конфигурационные переменные найдены');
+    log.info(`📦 Project ID: ${colors.yellow}${infisicalConfig.projectId}${colors.reset}`);
+    log.info(`🌍 Environment: ${colors.yellow}${infisicalConfig.environment}${colors.reset}`);
+    log.info(`🔑 Client ID: ${colors.yellow}${infisicalConfig.clientId.substring(0, 8)}...${colors.reset}`);
+
+    // Шаг 2: Проверяем наличие .env файла
+    log.step('📁 ШАГ 2: Проверка .env файла');
+    if (!fs.existsSync(envPath)) {
+      log.error(`❌ .env файл не найден: ${envPath}`);
+      process.exit(1);
+    }
+    log.success(`✅ .env файл найден: ${envPath}`);
+
+    // Шаг 3: Инициализируем SDK
+    log.step('🔧 ШАГ 3: Инициализация Infisical SDK');
     const client = new InfisicalSDK({
       siteUrl: 'https://app.infisical.com',
     });
+    log.success('✅ SDK инициализирован');
 
-    // Аутентифицируемся через Universal Auth
-    console.log('\n🔑 Аутентифицируемся в Infisical...');
+    // Шаг 4: Аутентификация
+    log.step('🔑 ШАГ 4: Аутентификация в Infisical Cloud');
+    log.info('⏳ Выполняется Universal Auth login...');
+
     const authenticatedClient = await client.auth().universalAuth.login({
       clientId: infisicalConfig.clientId,
       clientSecret: infisicalConfig.clientSecret,
     });
 
-    // Получаем все секреты из Infisical
-    console.log('\n📥 Получаем секреты из Infisical...');
-    // Попробуем разные варианты идентификатора проекта
+    log.success('✅ Аутентификация успешна!');
+
+    // Шаг 5: Получение секретов
+    log.step('📥 ШАГ 5: Получение секретов из Infisical');
+    log.info(`🔍 Используем правильный API: secretsClient.listSecrets()`);
+    log.info(`   projectId = ${infisicalConfig.projectId}`);
+    log.info(`   environment = ${infisicalConfig.environment}`);
+
     let secrets;
     try {
-      // Вариант 1: используем последнюю часть ID как projectSlug
-      const lastPart = infisicalConfig.projectId.split('-').pop();
-      console.log(`🔍 Пробуем projectSlug: ${lastPart}`);
-      secrets = await authenticatedClient.secrets().listSecrets({
+      secrets = await authenticatedClient.secretsClient.listSecrets({
         environment: infisicalConfig.environment,
-        projectSlug: lastPart,
+        projectId: infisicalConfig.projectId,
       });
-    } catch (error) {
-      // Вариант 2: используем полный ID как workspaceId
-      console.log('❌ Вариант 1 не сработал, пробуем workspaceId...');
-      secrets = await authenticatedClient.secrets().listSecrets({
-        environment: infisicalConfig.environment,
-        workspaceId: infisicalConfig.projectId,
-      });
+      log.success(`✅ Секреты успешно получены!`);
+    } catch (error: any) {
+      log.error(`❌ Ошибка при получении секретов: ${error.message}`);
+      throw error;
     }
 
-    console.log(`✅ Найдено секретов: ${secrets.secrets.length}`);
+    log.success(`📊 Получено секретов: ${secrets.secrets.length}`);
 
-    // Читаем текущий .env файл
-    let envContent = fs.readFileSync(envPath, 'utf-8');
-
-    // Фильтруем секреты, оставляем только нужные переменные
+    // Шаг 6: Фильтрация важных секретов
+    log.step('🔍 ШАГ 6: Фильтрация важных секретов');
     const importantSecrets = [
       'POSTGRES_URL',
       'OPENAI_API_KEY',
@@ -72,16 +136,50 @@ async function loadSecretsFromInfisical() {
       'TELEGRAM_BOT_TOKEN',
       'DISCORD_API_TOKEN',
       'GOOGLE_GENERATIVE_AI_API_KEY',
+      'FAL_KEY',
+      'SENTRY_DSN',
+      'SENTRY_API_TOKEN',
     ];
 
     const secretsMap = new Map<string, string>();
+    const foundSecrets: string[] = [];
+    const missingSecrets: string[] = [...importantSecrets];
+
     for (const secret of secrets.secrets) {
       if (importantSecrets.includes(secret.secretKey)) {
         secretsMap.set(secret.secretKey, secret.secretValue);
+        const index = missingSecrets.indexOf(secret.secretKey);
+        if (index > -1) {
+          missingSecrets.splice(index, 1);
+        }
+        foundSecrets.push(secret.secretKey);
       }
     }
 
-    // Удаляем старые значения из .env
+    log.success(`🎯 Найдено важных секретов: ${foundSecrets.length}/${importantSecrets.length}`);
+
+    if (foundSecrets.length > 0) {
+      log.info(`${colors.green}✅ НАЙДЕННЫЕ СЕКРЕТЫ:${colors.reset}`);
+      foundSecrets.forEach(secret => {
+        log.info(`   ${colors.green}✓${colors.reset} ${secret}`);
+      });
+    }
+
+    if (missingSecrets.length > 0) {
+      log.warning(`${colors.yellow}⚠️  ОТСУТСТВУЮЩИЕ СЕКРЕТЫ:${colors.reset}`);
+      missingSecrets.forEach(secret => {
+        log.warning(`   ${colors.yellow}✗${colors.reset} ${secret}`);
+      });
+    }
+
+    // Шаг 7: Обновление .env файла
+    log.step('📝 ШАГ 7: Обновление .env файла');
+
+    let envContent = fs.readFileSync(envPath, 'utf-8');
+    log.info('📖 Текущий .env файл прочитан');
+
+    // Удаляем старые значения
+    log.info('🧹 Удаляем старые значения секретов...');
     for (const key of importantSecrets) {
       const regex = new RegExp(`^${key}=.*$`, 'gm');
       envContent = envContent.replace(regex, '');
@@ -90,31 +188,69 @@ async function loadSecretsFromInfisical() {
     // Добавляем новые значения
     let secretsSection = '\n####################################\n';
     secretsSection += '#### 🔑 СЕКРЕТЫ ИЗ INFISICAL CLOUD ####\n';
-    secretsSection += '####################################\n\n';
+    secretsSection += '####################################\n';
+    secretsSection += `# Обновлено: ${new Date().toISOString()}\n`;
+    secretsSection += `# Источник: Infisical Cloud (${infisicalConfig.environment})\n\n`;
 
     for (const [key, value] of secretsMap) {
+      // Показываем только первые и последние символы ключа для безопасности
+      const maskedValue = value.length > 20
+        ? `${value.substring(0, 8)}...${value.substring(value.length - 4)}`
+        : '***скрыто***';
+      log.info(`   ${colors.cyan}→${colors.reset} ${key} = ${maskedValue}`);
       secretsSection += `${key}=${value}\n`;
     }
 
-    // Добавляем секреты в конец файла (перед последней пустой строкой)
+    // Записываем обновленный файл
     envContent = envContent.replace(/\n*$/, '\n');
     envContent += secretsSection;
 
-    // Записываем обновленный .env файл
     fs.writeFileSync(envPath, envContent);
-    console.log('\n✅ Секреты успешно загружены в .env файл');
-    console.log(`📝 Обновленный файл: ${envPath}`);
+    log.success(`✅ .env файл обновлен: ${envPath}`);
 
-    // Выводим загруженные секреты (без значений)
-    console.log('\n📋 Загруженные переменные:');
-    for (const key of secretsMap.keys()) {
-      console.log(`   - ${key}`);
+    // Шаг 8: Итоговая проверка
+    log.step('🎉 ШАГ 8: Итоговая проверка');
+    console.log(`${colors.bright}${colors.green}
+╔══════════════════════════════════════════════════════════╗
+║                    🎊 ЗАГРУЗКА ЗАВЕРШЕНА                ║
+║                   СЕКРЕТЫ ГОТОВЫ К ИСПОЛЬЗОВАНИЮ        ║
+╠══════════════════════════════════════════════════════════╣
+║ ${colors.reset}✅ Загружено секретов: ${foundSecrets.length}${colors.green}
+║ ⚠️  Отсутствует секретов: ${missingSecrets.length}${colors.green}
+║ 📁 Файл: ${envPath}${colors.green}
+╚══════════════════════════════════════════════════════════╝
+${colors.reset}`);
+
+    // Проверка критичных секретов
+    const criticalSecrets = ['TELEGRAM_BOT_TOKEN', 'OPENROUTER_API_KEY', 'POSTGRES_URL'];
+    const missingCritical = criticalSecrets.filter(s => !foundSecrets.includes(s));
+
+    if (missingCritical.length > 0) {
+      log.error(`${colors.red}🚨 КРИТИЧНО: Отсутствуют критичные секреты!${colors.reset}`);
+      missingCritical.forEach(secret => {
+        log.error(`${colors.red}   ❌ ${secret}${colors.reset}`);
+      });
+      log.error('Приложение может не работать корректно!');
+    } else {
+      log.success(`${colors.green}🎯 Все критичные секреты найдены!${colors.reset}`);
     }
 
-    console.log('\n🎉 Готово! Можно запускать приложение');
+    // Эмодзи верификация
+    console.log(`${colors.bright}${colors.green}
+    🎉 ✨ 🚀 ✅ 🎊 🔐 🔑 📦 🌟 💫 🏆 🎯 🚀 ✨ 🎉
+              СИСТЕМА СЕКРЕТОВ ГОТОВА К РАБОТЕ!
+    🎉 ✨ 🚀 ✅ 🎊 🔐 🔑 📦 🌟 💫 🏆 🎯 🚀 ✨ 🎉
+${colors.reset}`);
 
   } catch (error) {
-    console.error('\n❌ Ошибка при загрузке секретов:', error);
+    log.error(`${colors.red}💥 КРИТИЧЕСКАЯ ОШИБКА ПРИ ЗАГРУЗКЕ СЕКРЕТОВ:${colors.reset}`);
+    log.error(`${colors.red}${error}${colors.reset}`);
+    console.log(`${colors.red}
+╔══════════════════════════════════════════════════════════╗
+║                     🚨 ОШИБКА! 🚨                       ║
+║              ЗАГРУЗКА СЕКРЕТОВ НЕ УДАЛАСЬ              ║
+╚══════════════════════════════════════════════════════════╝
+${colors.reset}`);
     process.exit(1);
   }
 }

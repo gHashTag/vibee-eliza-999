@@ -116,10 +116,7 @@ export function checkForDataLoss(diff: SchemaDiff): DataLossCheck {
  * @param tables - Table definitions from snapshot
  * @returns Sorted array of table names
  */
-function sortTablesByDependencies(
-  tableNames: string[],
-  tables: { [key: string]: any }
-): string[] {
+function sortTablesByDependencies(tableNames: string[], tables: { [key: string]: any }): string[] {
   // Build dependency graph
   const graph: Map<string, Set<string>> = new Map();
   const inDegree: Map<string, number> = new Map();
@@ -395,14 +392,152 @@ export async function generateMigrationSQL(
     statements.push(generateDropColumnSQL(deleted.table, deleted.column));
   }
 
-  // Handle column modifications
-  for (const modified of diff.columns.modified) {
+  // CRITICAL: Handle foreign keys before column type changes
+  // When changing a column type, we must drop all foreign keys that reference it
+  // Then restore them after the type change
+  const fksToDropBeforeTypeChange: Array<{ fk: any; reason: string }> = [];
+  const fksToRestoreAfterTypeChange: Array<any> = [];
+
+  // Find all columns that are changing type
+  const columnsChangingType = diff.columns.modified.filter(
+    (modified) => modified.changes.from?.type !== modified.changes.to?.type
+  );
+
+  // For each column changing type, find all foreign keys that reference it
+  // Check both previousSnapshot and currentSnapshot to catch all FKs
+  const allSnapshots = [previousSnapshot, currentSnapshot].filter(Boolean) as SchemaSnapshot[];
+
+  for (const modified of columnsChangingType) {
+    const [schema, tableName] = modified.table.includes('.')
+      ? modified.table.split('.')
+      : ['public', modified.table];
+
+    // Find all foreign keys in all snapshots that reference this column
+    for (const snapshot of allSnapshots) {
+      if (!snapshot) continue;
+
+      for (const tableKey in snapshot.tables) {
+        const table = snapshot.tables[tableKey];
+        if (table?.foreignKeys) {
+          for (const fkName in table.foreignKeys) {
+            const fk = table.foreignKeys[fkName];
+            const fkSchema = fk.schemaTo || 'public';
+            const fkTable = fk.tableTo;
+
+            // Check if this FK references the column being type-changed
+            if (
+              fkSchema === schema &&
+              fkTable === tableName &&
+              fk.columnsTo.includes(modified.column)
+            ) {
+              // This FK references the column being type-changed
+              // We need to drop it before the type change and restore it after
+              // Check if we've already added this FK to avoid duplicates
+              const alreadyAdded = fksToDropBeforeTypeChange.some(
+                ({ fk: existingFk }) =>
+                  existingFk.name === fk.name && existingFk.tableFrom === fk.tableFrom
+              );
+
+              if (!alreadyAdded) {
+                fksToDropBeforeTypeChange.push({
+                  fk,
+                  reason: `References ${modified.table}.${modified.column} (type change: ${modified.changes.from?.type} -> ${modified.changes.to?.type})`,
+                });
+                fksToRestoreAfterTypeChange.push(fk);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Drop foreign keys that reference columns being type-changed
+  // Do this BEFORE any column type changes
+  for (const { fk } of fksToDropBeforeTypeChange) {
+    // Only drop if it's not already being dropped/altered in the diff
+    const isAlreadyHandled =
+      diff.foreignKeys.deleted.some((deleted) => deleted.name === fk.name) ||
+      diff.foreignKeys.altered.some((altered) => altered.old.name === fk.name);
+    if (!isAlreadyHandled) {
+      statements.push(generateDropForeignKeySQL(fk));
+    }
+  }
+
+  // Also drop explicitly deleted/altered foreign keys BEFORE type changes
+  // This ensures all FKs are dropped before any type changes
+  for (const fk of diff.foreignKeys.deleted) {
+    statements.push(generateDropForeignKeySQL(fk));
+  }
+
+  // Drop old version of altered foreign keys BEFORE type changes
+  for (const alteredFK of diff.foreignKeys.altered) {
+    statements.push(generateDropForeignKeySQL(alteredFK.old));
+  }
+
+  // Now handle column type changes
+  // IMPORTANT: Change types of referencing columns FIRST, then referenced columns
+  // This ensures PostgreSQL's type compatibility checks pass
+
+  // Separate columns into two groups:
+  // 1. Referencing columns (columns that are part of foreign keys pointing to other tables)
+  // 2. Referenced columns (columns that are referenced by foreign keys from other tables)
+  const referencingColumns: typeof columnsChangingType = [];
+  const referencedColumns: typeof columnsChangingType = [];
+
+  for (const modified of columnsChangingType) {
+    const [schema, tableName] = modified.table.includes('.')
+      ? modified.table.split('.')
+      : ['public', modified.table];
+
+    // Check if this column is referenced by any foreign key
+    // Compare both schema and table name
+    // Store schema in a variable to ensure it's used (for linter)
+    const columnSchema = schema;
+    const isReferenced = fksToDropBeforeTypeChange.some(({ fk }) => {
+      const fkSchema = fk.schemaTo || 'public';
+      return (
+        fkSchema === columnSchema &&
+        fk.tableTo === tableName &&
+        fk.columnsTo.includes(modified.column)
+      );
+    });
+
+    if (isReferenced) {
+      referencedColumns.push(modified);
+    } else {
+      referencingColumns.push(modified);
+    }
+  }
+
+  // First, change types of referencing columns (e.g., components.worldId)
+  for (const modified of referencingColumns) {
     const alterStatements = generateAlterColumnSQL(
       modified.table,
       modified.column,
       modified.changes
     );
     statements.push(...alterStatements);
+  }
+
+  // Then, change types of referenced columns (e.g., worlds.id)
+  for (const modified of referencedColumns) {
+    const alterStatements = generateAlterColumnSQL(
+      modified.table,
+      modified.column,
+      modified.changes
+    );
+    statements.push(...alterStatements);
+  }
+
+  // Restore foreign keys that were dropped before type changes
+  for (const fk of fksToRestoreAfterTypeChange) {
+    // Only restore if it's not being deleted or altered in the diff
+    const isDeleted = diff.foreignKeys.deleted.some((deleted) => deleted.name === fk.name);
+    const isAltered = diff.foreignKeys.altered.some((altered) => altered.old.name === fk.name);
+    if (!isDeleted && !isAltered) {
+      statements.push(generateCreateForeignKeySQL(fk));
+    }
   }
 
   // Generate DROP INDEX statements (including altered ones - drop old version)
@@ -473,17 +608,8 @@ export async function generateMigrationSQL(
     statements.push(generateDropCheckConstraintSQL(constraint));
   }
 
-  // Handle foreign key deletions first (including altered ones)
-  for (const fk of diff.foreignKeys.deleted) {
-    statements.push(generateDropForeignKeySQL(fk));
-  }
-
-  // Drop old version of altered foreign keys
-  for (const alteredFK of diff.foreignKeys.altered) {
-    statements.push(generateDropForeignKeySQL(alteredFK.old));
-  }
-
   // Handle foreign key creations (for existing tables)
+  // Note: Deletions and alterations are handled above before column type changes
   for (const fk of diff.foreignKeys.created) {
     // Only add if it's not part of a new table (those were handled above)
     // Check both with and without schema prefix
@@ -672,7 +798,25 @@ function generateAlterColumnSQL(table: string, column: string, changes: any): st
 
   // Handle type changes - need to handle enums and complex types
   if (changes.to?.type !== changes.from?.type) {
+    const fromType = (changes.from?.type || '').toLowerCase();
+    const toType = (changes.to?.type || 'TEXT').toLowerCase();
     const newType = changes.to?.type || 'TEXT';
+
+    // CRITICAL: Prevent UUID to TEXT conversion for real PostgreSQL databases
+    // This conversion should only happen for PGLite, and should be handled at snapshot generation time
+    // If we're trying to change UUID to TEXT, it means isPGLite was incorrectly set to true
+    // or there's a mismatch between the database state and the schema definition
+    if (fromType === 'uuid' && toType === 'text') {
+      logger.error(
+        `[RuntimeMigrator] CRITICAL: Attempting to change ${table}.${column} from UUID to TEXT. ` +
+          `This is only allowed for PGLite databases. If you're using real PostgreSQL, ` +
+          `this indicates a schema mismatch. The column should remain UUID. ` +
+          `Skipping this type change to prevent data loss and foreign key conflicts.`
+      );
+      // Skip this type change - the column should remain UUID
+      // This prevents the migration from failing due to foreign key constraints
+      return statements;
+    }
 
     // Check if we need a USING clause for type conversion
     const needsUsing = checkIfNeedsUsingClause(changes.from?.type, newType);
@@ -710,7 +854,9 @@ function generateAlterColumnSQL(table: string, column: string, changes: any): st
         );
       } else {
         // If empty default, drop it
-        statements.push(`ALTER TABLE ${tableNameWithSchema} ALTER COLUMN "${column}" DROP DEFAULT;`);
+        statements.push(
+          `ALTER TABLE ${tableNameWithSchema} ALTER COLUMN "${column}" DROP DEFAULT;`
+        );
       }
     } else {
       statements.push(`ALTER TABLE ${tableNameWithSchema} ALTER COLUMN "${column}" DROP DEFAULT;`);
@@ -919,7 +1065,7 @@ function generateDropForeignKeySQL(fk: any): string {
       ? fk.tableFrom.split('.')
       : ['public', fk.tableFrom]
     : ['public', ''];
-  return `ALTER TABLE "${schema}"."${tableName}" DROP CONSTRAINT "${fk.name}";`;
+  return `ALTER TABLE "${schema}"."${tableName}" DROP CONSTRAINT IF EXISTS "${fk.name}";`;
 }
 
 /**
@@ -968,7 +1114,7 @@ function generateDropUniqueConstraintSQL(constraint: any): string {
   const table = constraint.table || '';
   const [schema, tableName] = table.includes('.') ? table.split('.') : ['public', table];
 
-  return `ALTER TABLE "${schema}"."${tableName}" DROP CONSTRAINT "${constraint.name}";`;
+  return `ALTER TABLE "${schema}"."${tableName}" DROP CONSTRAINT IF EXISTS "${constraint.name}";`;
 }
 
 /**
@@ -991,5 +1137,5 @@ function generateDropCheckConstraintSQL(constraint: any): string {
   const table = constraint.table || '';
   const [schema, tableName] = table.includes('.') ? table.split('.') : ['public', table];
 
-  return `ALTER TABLE "${schema}"."${tableName}" DROP CONSTRAINT "${constraint.name}";`;
+  return `ALTER TABLE "${schema}"."${tableName}" DROP CONSTRAINT IF EXISTS "${constraint.name}";`;
 }

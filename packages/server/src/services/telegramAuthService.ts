@@ -17,16 +17,23 @@ export interface TelegramUserData {
  * Сервис для аутентификации через Telegram
  */
 export class TelegramAuthService {
-  private botToken: string;
   private jwtSecret: string;
 
   constructor() {
-    this.botToken = process.env.TELEGRAM_BOT_TOKEN || '';
     this.jwtSecret = process.env.SECRET_SALT || crypto.randomBytes(64).toString('hex');
 
-    if (!this.botToken) {
+    // botToken получаем динамически из process.env, который заполняется из Infisical
+    const botToken = this.getBotToken();
+    if (!botToken) {
       console.warn('⚠️ TELEGRAM_BOT_TOKEN not set. Telegram auth will not work!');
     }
+  }
+
+  /**
+   * Получить bot token из переменных окружения (загружается из Infisical при старте)
+   */
+  private getBotToken(): string {
+    return process.env.TELEGRAM_BOT_TOKEN || '';
   }
 
   /**
@@ -41,7 +48,13 @@ export class TelegramAuthService {
       return { valid: false, error: 'Auth data expired' };
     }
 
-    // 2. Проверяем hash
+    // 2. Получаем bot token из переменных окружения (загружен из Infisical)
+    const botToken = this.getBotToken();
+    if (!botToken) {
+      return { valid: false, error: 'Bot token not configured' };
+    }
+
+    // 3. Проверяем hash
     const { hash, ...data } = userData;
 
     const dataCheckString = Object.keys(data)
@@ -52,7 +65,7 @@ export class TelegramAuthService {
     // Создаем secret_key как SHA256 от bot_token
     const secretKey = crypto
       .createHash('sha256')
-      .update(this.botToken)
+      .update(botToken)
       .digest();
 
     // Вычисляем HMAC-SHA256

@@ -22,17 +22,54 @@ export default function LoginPage() {
       return;
     }
 
-    const botId = import.meta.env.VITE_TELEGRAM_BOT_ID || 'YOUR_BOT_ID_HERE';
+    // 🤖 ХАРДКОДИРОВАННЫЕ ЗНАЧЕНИЯ - НЕ ИЗ ПЕРЕМЕННЫХ ОКРУЖЕНИЯ!
+    const BOT_ID = '8309813696';
+    const BOT_NAME = '@agent_vibecoder_bot';
+
+    // Отладочная информация
+    console.log('🤖 VIBEE Bot Configuration (HARDCODED):');
+    console.log('  - Bot ID:', BOT_ID);
+    console.log('  - Bot Name:', BOT_NAME);
+    console.log('  - Bot ID Type:', typeof BOT_ID);
+    console.log('  - Bot ID Length:', BOT_ID.length);
+    console.log('  - Environment:', import.meta.env.MODE);
+
+    // Валидация bot_id - проверяем наличие
+    if (!BOT_ID || BOT_ID.trim() === '') {
+      console.error('❌ BOT_ID is missing or empty');
+      setError('Ошибка конфигурации: Bot ID не найден.');
+      return;
+    }
+
+    // Очищаем от лишних символов и проверяем формат
+    const botId = BOT_ID.trim();
+
+    // Проверяем, что bot_id содержит только цифры (валидный формат Telegram Bot ID)
+    if (!/^\d+$/.test(botId)) {
+      console.error('❌ Invalid bot_id format:', botId);
+      setError(`Неверный формат Bot ID: "${botId}". Ожидаются только цифры.`);
+      return;
+    }
+
+    console.log('✅ Bot ID validated successfully:', botId);
+    console.log('🔑 Will use bot_id:', botId, 'for Telegram Login Widget');
+    console.log('🚀 Starting Telegram authentication...');
 
     setIsLoading(true);
     setError('');
 
+    // 📤 Отправляем данные в Telegram Login Widget
+    const authParams = {
+      bot_id: botId,
+      request_access: true,
+      lang: 'ru'
+    };
+
+    console.log('📤 Telegram auth params:', authParams);
+    console.log('✅ All checks passed! Starting auth...');
+
     window.Telegram.Login.auth(
-      {
-        bot_id: botId,
-        request_access: true,
-        lang: 'ru'
-      },
+      authParams,
       async (user: any) => {
         setIsLoading(false);
 

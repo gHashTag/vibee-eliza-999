@@ -20,11 +20,16 @@ const authLimiter = rateLimit({
  */
 router.post('/telegram', authLimiter, async (req, res) => {
   try {
+    console.log('🚀 Telegram auth request received');
     const telegramData = req.body;
+    console.log('📤 Telegram data received:', JSON.stringify(telegramData, null, 2));
 
     // Верифицируем данные
+    console.log('🔐 Verifying Telegram auth...');
     const verification = telegramAuthService.verifyTelegramAuth(telegramData);
+    console.log('✅ Verification result:', verification);
     if (!verification.valid) {
+      console.log('❌ Verification failed:', verification.error);
       return res.status(401).json({
         success: false,
         error: verification.error || 'Invalid Telegram data'
@@ -32,19 +37,26 @@ router.post('/telegram', authLimiter, async (req, res) => {
     }
 
     // Создаем/находим пользователя
+    console.log('👤 Creating/finding user...');
     const user = await telegramAuthService.findOrCreateUser(telegramData);
+    console.log('✅ User created/found:', user);
 
     // Создаем JWT токен
+    console.log('🎫 Creating JWT token...');
     const token = telegramAuthService.createJWTToken(user);
+    console.log('✅ JWT token created');
 
     // Создаем сессию
+    console.log('💾 Creating user session...');
     const session = await telegramAuthService.createUserSession(
       user.id,
       token,
       req.ip,
       req.get('user-agent')
     );
+    console.log('✅ Session created:', session);
 
+    console.log('🎉 Telegram auth completed successfully');
     res.json({
       success: true,
       token,
@@ -55,10 +67,14 @@ router.post('/telegram', authLimiter, async (req, res) => {
       }
     });
   } catch (error: any) {
-    console.error('Telegram auth error:', error);
+    console.error('💥 Telegram auth error details:');
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    console.error('Error object:', error);
     res.status(500).json({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error',
+      details: error.message
     });
   }
 });

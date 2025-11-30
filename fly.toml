@@ -10,6 +10,12 @@ primary_region = "ams"
   PORT = "3000"
   NODE_ENV = "production"
 
+  # Infisical Cloud Configuration
+  INFISICAL_CLIENT_ID = "88fcf0cd-cce9-4844-bad2-8e19b4bad3ed"
+  INFISICAL_CLIENT_SECRET = "b377e7a60b669ea2317f339dc6cb79ce49d588a7bbed92433bb2a73dedff3314"
+  INFISICAL_PROJECT_ID = "fd763fa3-35d5-4045-93bd-1795c5f00fc3"
+  INFISICAL_ENVIRONMENT = "dev"
+
 [[services]]
   internal_port = 3000
   protocol = "tcp"

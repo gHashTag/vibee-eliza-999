@@ -1,0 +1,10 @@
+{
+  "name": "@elizaos/plugin-telegram-craft",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "dependencies": {
+    "@elizaos/core": "workspace:*",
+    "telegram": "^2.22.2"
+  }
+}

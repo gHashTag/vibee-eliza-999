@@ -22,6 +22,7 @@ export default function LoginPage() {
       return;
     }
 
+    // Бот: @agent_vibecoder_bot (ID: 8309813696)
     const botId = import.meta.env.TELEGRAM_BOT_ID || '8309813696';
 
     setIsLoading(true);
@@ -79,7 +80,7 @@ export default function LoginPage() {
             className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold transition-all duration-200 ${
               isLoading
                 ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 text-white border border-blue-500 hover:border-blue-400'
+                : 'bg-black hover:bg-gray-900 text-white border border-gray-700 hover:border-gray-600'
             }`}
           >
             {isLoading ? (
@@ -103,7 +104,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
               Используя Telegram для входа, вы соглашаетесь с{' '}
-              <a href="#" className="text-blue-400 hover:text-blue-300">
+              <a href="#" className="text-gray-400 hover:text-gray-300">
                 политикой конфиденциальности
               </a>
             </p>

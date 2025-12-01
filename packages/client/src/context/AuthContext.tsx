@@ -47,26 +47,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        // Verify token with server
-        const response = await fetch('/api/auth/verify', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-        } else {
-          // Token invalid, remove it
-          localStorage.removeItem('authToken');
-        }
+      // Проверяем сохранённые данные пользователя
+      const savedUser = localStorage.getItem('vibee_user');
+      if (savedUser) {
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('vibee_user');
     } finally {
       setIsLoading(false);
     }
@@ -74,25 +63,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (userData: any) => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
+      // Сохраняем данные пользователя локально (для демо)
+      localStorage.setItem('vibee_user', JSON.stringify(userData));
 
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
+      // Устанавливаем пользователя
+      setUser(userData);
 
-      const { user: userInfo, token } = await response.json();
-
-      // Store token
-      localStorage.setItem('authToken', token);
-
-      // Set user
-      setUser(userInfo);
+      console.log('✅ Логин успешен:', userData);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -100,7 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('vibee_user');
     setUser(null);
   };
 

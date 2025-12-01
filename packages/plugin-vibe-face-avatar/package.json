@@ -1,0 +1,13 @@
+{
+  "name": "@elizaos/plugin-vibe-face-avatar",
+  "version": "1.6.5-alpha.46",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@elizaos/core": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

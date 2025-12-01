@@ -1,0 +1,31 @@
+{
+  "name": "@elizaos/plugin-dummy-services",
+  "version": "1.6.5-alpha.46",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elizaos-plugins/plugin-dummy-services.git"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@elizaos/core": "workspace:*",
+    "uuid": "^9.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

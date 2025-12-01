@@ -1,0 +1,9 @@
+{
+  "name": "@elizaos/client",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "dependencies": {
+    "@elizaos/core": "workspace:*"
+  }
+}

@@ -7,7 +7,8 @@
 
 import { createRequire } from 'module';
 import { config } from 'dotenv';
-import { AgentServer } from '../dist/index.js';
+// 🔧 FIX: Import AgentServer AFTER environment variables are loaded
+// import { AgentServer } from '../dist/index.js';
 import { loadInfisicalSecrets } from './services/infisicalSecretLoader.js';
 
 // ⚠️ КРИТИЧНО: Загружаем переменные из .env ПЕРЕД началом работы
@@ -21,6 +22,13 @@ const envPath = join(__dirname, '../../../.env');
 
 console.log(`[DOTENV] Loading .env from: ${envPath}`);
 config({ path: envPath });
+
+// 🔍 DEBUG: Check environment variables after dotenv load
+console.log('[DEBUG] Environment variables after dotenv:');
+console.log('[DEBUG] TELEGRAM_BOT_TOKEN:', process.env.TELEGRAM_BOT_TOKEN ? 'SET' : 'NOT SET');
+console.log('[DEBUG] TELEGRAM_BOT_ID:', process.env.TELEGRAM_BOT_ID ? 'SET' : 'NOT SET');
+console.log('[DEBUG] POSTGRES_URL:', process.env.POSTGRES_URL ? 'SET' : 'NOT SET');
+console.log('[DEBUG] OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? 'SET' : 'NOT SET');
 
 const require = createRequire(import.meta.url);
 // Use require to load from compiled JS file to avoid TypeScript rootDir issues
@@ -77,6 +85,8 @@ const start = async () => {
 
     // Ensure SERVER_PORT matches Fly.io PORT (default 4000)
     process.env.SERVER_PORT = process.env.PORT || '4000';
+    // 🔧 FIX: Import AgentServer dynamically AFTER env vars are loaded
+    const { AgentServer } = await import('../dist/index.js');
     const server = new AgentServer();
 
     // 🔐 Добавляем роут для Telegram Login Widget ПОСЛЕ создания сервера

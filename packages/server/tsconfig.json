@@ -15,9 +15,10 @@
   },
   "include": [
     "src/services/infisicalSecretLoader.ts",
+    "src/services/environmentValidator.ts",
     "src/database-init.ts",
     "src/defaultServerCreator.ts",
     "src/entrypoint.ts"
   ],
-  "exclude": ["node_modules", "dist", "src/services/startupHealthCheck.ts", "src/index.ts"]
+  "exclude": ["node_modules", "dist", "src/services/startupHealthCheck.ts"]
 }

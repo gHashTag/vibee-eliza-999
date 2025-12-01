@@ -86,7 +86,7 @@ const start = async () => {
     // Ensure SERVER_PORT matches Fly.io PORT (default 4000)
     process.env.SERVER_PORT = process.env.PORT || '4000';
     // 🔧 FIX: Import AgentServer dynamically AFTER env vars are loaded
-    const { AgentServer } = await import('../dist/index.js');
+    const { AgentServer } = require('./index.js');
     const server = new AgentServer();
 
     // 🔐 Добавляем роут для Telegram Login Widget ПОСЛЕ создания сервера

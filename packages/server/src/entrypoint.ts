@@ -5,10 +5,26 @@
  * @see packages/server/src/services/infisicalSecretLoader.ts
  */
 
-import { AgentServer } from './index.js';
+import { createRequire } from 'module';
+import { config } from 'dotenv';
+import { AgentServer } from '../dist/index.js';
 import { loadInfisicalSecrets } from './services/infisicalSecretLoader.js';
+
+// ⚠️ КРИТИЧНО: Загружаем переменные из .env ПЕРЕД началом работы
+// Используем абсолютный путь для надежности
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const envPath = join(__dirname, '../../../.env');
+
+console.log(`[DOTENV] Loading .env from: ${envPath}`);
+config({ path: envPath });
+
+const require = createRequire(import.meta.url);
 // Use require to load from compiled JS file to avoid TypeScript rootDir issues
-const { vibeeAgent } = require('../../../packages/agents/vibeeAgent.js');
+const { vibeeAgent } = require('../../../packages/vibee-agents/dist/src/index.js');
 
 /**
  * ⚠️ ВАЖНО: Секреты загружаются централизованно через InfisicalSecretLoader
@@ -55,14 +71,51 @@ const start = async () => {
       console.log('🔄 Временно перенаправляем на базу "neondb" для разработки');
     }
 
+    // 🔧 Инициализация базы данных - создаем сервер по умолчанию
+    const { initializeDatabase } = await import('./database-init.js');
+    await initializeDatabase();
+
+    // Ensure SERVER_PORT matches Fly.io PORT (default 4000)
+    process.env.SERVER_PORT = process.env.PORT || '4000';
     const server = new AgentServer();
+
+    // 🔐 Добавляем роут для Telegram Login Widget ПОСЛЕ создания сервера
+    // Это нужно делать ДО await server.start(), но ПОСЛЕ new AgentServer()
+    try {
+      // Проверяем, что server.app существует (должен быть создан в конструкторе или initializeServer)
+      if (server.app) {
+        // Добавляем middleware для /api/auth/telegram
+        server.app.post('/api/auth/telegram', (req, res) => {
+          console.log('🔐 Telegram auth request:', req.body);
+          res.status(200).json({
+            ok: true,
+            user: req.body
+          });
+          console.log('✅ Telegram auth response sent');
+        });
+        console.log('✅ Registered: POST /api/auth/telegram');
+      }
+    } catch (middlewareError) {
+      console.error('❌ Failed to register Telegram auth route:', middlewareError);
+    }
+
+    // 🔧 CRITICAL: Ensure default server exists before starting agents
+    // This works with both PostgreSQL and PGLite
+    console.log('[ENTRYPOINT] Ensuring default server exists in database...');
+    try {
+      const { ensureDefaultServerViaAdapter } = await import('./services/defaultServerCreator.js');
+      await ensureDefaultServerViaAdapter(server);
+      console.log('[ENTRYPOINT] ✅ Default server ensured');
+    } catch (error) {
+      console.error('[ENTRYPOINT] ⚠️  Failed to ensure default server:', error);
+      console.error('[ENTRYPOINT] This may cause agent registration to fail!');
+    }
+
+    // ВРЕМЕННО: Отключаем агентов для тестирования логина
+    // Из-за проблем с PGLite и отсутствующими таблицами
+    console.log('[ENTRYPOINT] ⚠️  Skipping agent registration (temporary for login testing)');
     await server.start({
-      agents: [
-        {
-          character: vibeeAgent,
-          plugins: [],
-        }
-      ]
+      agents: []
     });
   } catch (error) {
     console.error('❌ Fatal error starting server:', error);

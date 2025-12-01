@@ -179,6 +179,16 @@ CREATE TABLE IF NOT EXISTS server_agents (
     UNIQUE(agent_id, server_id)
 );
 
+-- Insert default server (required by ElizaOS for agent registration)
+-- This server must exist for agents to register properly
+INSERT INTO message_servers (id, name, source_type, source_id)
+VALUES (
+    '00000000-0000-0000-0000-000000000000',
+    'Default Server',
+    'local',
+    'default'
+) ON CONFLICT (id) DO NOTHING;
+
 -- Create trigger for updated_at on messages
 CREATE TRIGGER update_messages_updated_at
     BEFORE UPDATE ON messages

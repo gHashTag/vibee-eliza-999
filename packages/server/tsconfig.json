@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "types": ["node"]
+  },
+  "include": [
+    "src/services/infisicalSecretLoader.ts",
+    "src/database-init.ts",
+    "src/defaultServerCreator.ts",
+    "src/entrypoint.ts"
+  ],
+  "exclude": ["node_modules", "dist", "src/services/startupHealthCheck.ts", "src/index.ts"]
+}

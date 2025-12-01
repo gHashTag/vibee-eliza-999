@@ -18,7 +18,8 @@
     "src/services/environmentValidator.ts",
     "src/database-init.ts",
     "src/defaultServerCreator.ts",
-    "src/entrypoint.ts"
+    "src/entrypoint.ts",
+    "src/api/**/*"
   ],
   "exclude": ["node_modules", "dist", "src/services/startupHealthCheck.ts"]
 }

@@ -8,13 +8,12 @@ try {
   console.log('  PROJECT_ID:', process.env.INFISICAL_PROJECT_ID ? 'SET' : 'NOT SET');
   console.log('  ENV:', process.env.INFISICAL_ENVIRONMENT || 'dev');
 
-  const authResponse = await fetch('https://api.infisical.com/api/v2/auth/token', {
+  const authResponse = await fetch('https://app.infisical.com/api/v1/auth/universal-auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       clientId: process.env.INFISICAL_CLIENT_ID,
-      clientSecret: process.env.INFISICAL_CLIENT_SECRET,
-      token: 'infisical-pat'
+      clientSecret: process.env.INFISICAL_CLIENT_SECRET
     })
   });
 
@@ -25,7 +24,7 @@ try {
     console.log('✅ Auth successful!');
     console.log('  Expires:', authData.expiresAt);
 
-    const secretsResponse = await fetch(`https://api.infisical.com/api/v2/secrets?environmentId=${process.env.INFISICAL_PROJECT_ID}&environment=${process.env.INFISICAL_ENVIRONMENT || 'dev'}`, {
+    const secretsResponse = await fetch(`https://app.infisical.com/api/v3/secrets/raw?workspaceId=${process.env.INFISICAL_PROJECT_ID}&environment=${process.env.INFISICAL_ENVIRONMENT || 'dev'}`, {
       headers: {
         'Authorization': `Bearer ${authData.accessToken}`,
         'Content-Type': 'application/json'
@@ -36,12 +35,18 @@ try {
 
     if (secretsResponse.ok) {
       const secretsData = await secretsResponse.json();
-      console.log(`✅ Loaded ${secretsData.secrets.length} secrets!`);
+      console.log('Secrets data keys:', Object.keys(secretsData));
+      if (secretsData.secrets) {
+        console.log('First secret:', secretsData.secrets[0]);
+      } else {
+        console.log('Secrets data:', secretsData);
+      }
+      // console.log(`✅ Loaded ${secretsData.secrets.length} secrets!`);
 
       const critical = ['TELEGRAM_BOT_TOKEN', 'POSTGRES_URL', 'TELEGRAM_BOT_ID', 'OPENROUTER_API_KEY'];
       console.log('\n📋 Critical secrets:');
       for (const key of critical) {
-        const found = secretsData.secrets.find(s => s.key === key);
+        const found = secretsData.secrets.find(s => (s.secretKey === key || s.key === key));
         console.log(`  ${key}:`, found ? '✅' : '❌ MISSING');
       }
     } else {

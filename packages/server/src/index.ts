@@ -22,7 +22,9 @@ import net from 'node:net';
 import path, { basename, dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Server as SocketIOServer } from 'socket.io';
+import { spawnSync } from 'node:child_process';
 import { createApiRouter, createPluginRouteHandler, setupSocketIO } from './api/index.js';
+import { registerTelegramAuthRoutes } from './api/telegram-auth.js';
 import {
   messageBusConnectorPlugin,
   setGlobalElizaOS,
@@ -68,7 +70,38 @@ try {
   console.error('[Sentry] App will continue without error monitoring');
 }
 
-import type { CentralRootMessage, MessageChannel, MessageServer } from './types.js';
+// Inline type definitions to avoid module resolution issues
+interface MessageServer {
+  id: UUID;
+  name: string;
+  sourceType: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface MessageChannel {
+  id: UUID;
+  name: string;
+  serverId: UUID;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface CentralRootMessage {
+  id: UUID;
+  channelId: UUID;
+  serverId: UUID;
+  authorId: UUID;
+  content: string;
+  rawMessage?: any;
+  sourceId?: string;
+  sourceType?: string;
+  inReplyToRootMessageId?: UUID;
+  createdAt: Date;
+  updatedAt: Date;
+  metadata?: any;
+}
+
 import { existsSync } from 'node:fs';
 
 /**
@@ -659,13 +692,17 @@ export class AgentServer {
                   defaultSrc: ["'self'"],
                   styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
                   // this should probably be unlocked too
-                  scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+                  scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://telegram.org'],
                   imgSrc: ["'self'", 'data:', 'blob:', 'https:', 'http:'],
                   fontSrc: ["'self'", 'https:', 'data:'],
                   connectSrc: ["'self'", 'ws:', 'wss:', 'https:', 'http:'],
                   mediaSrc: ["'self'", 'blob:', 'data:'],
                   objectSrc: ["'none'"],
-                  frameSrc: [this.isWebUIEnabled ? "'self'" : "'none'"],
+                  frameSrc: [
+                    this.isWebUIEnabled ? "'self'" : "'none'",
+                    'https://telegram.org',
+                    'https://oauth.telegram.org',
+                  ],
                   baseUri: ["'self'"],
                   formAction: ["'self'"],
                   // upgrade-insecure-requests is added by helmet automatically
@@ -871,18 +908,17 @@ export class AgentServer {
             return;
           }
 
-          res.sendFile(sanitizedFilename, { root: agentUploadsPath }, (err) => {
-            if (err) {
-              if (err.message === 'Request aborted') {
-                logger.warn(`[MEDIA] Download aborted: ${req.originalUrl}`);
-              } else if (!res.headersSent) {
-                logger.warn(`[MEDIA] File not found: ${agentUploadsPath}/${sanitizedFilename}`);
-                res.status(404).json({ error: 'File not found' });
-              }
-            } else {
-              logger.debug(`[MEDIA] Successfully served: ${sanitizedFilename}`);
+          try {
+            res.sendFile(sanitizedFilename, { root: agentUploadsPath });
+            logger.debug(`[MEDIA] Successfully served: ${sanitizedFilename}`);
+          } catch (err: any) {
+            if (err.message === 'Request aborted') {
+              logger.warn(`[MEDIA] Download aborted: ${req.originalUrl}`);
+            } else if (!res.headersSent) {
+              logger.warn(`[MEDIA] File not found: ${agentUploadsPath}/${sanitizedFilename}`);
+              res.status(404).json({ error: 'File not found' });
             }
-          });
+          }
         }
       );
 
@@ -922,22 +958,22 @@ export class AgentServer {
             dotfiles: 'deny' as const,
           };
 
-          res.sendFile(absolutePath, options, (err) => {
-            if (err) {
-              // Fallback to streaming if sendFile fails (non-blocking)
-              const ext = extname(filename).toLowerCase();
-              const mimeType =
-                ext === '.png'
-                  ? 'image/png'
-                  : ext === '.jpg' || ext === '.jpeg'
-                    ? 'image/jpeg'
-                    : 'application/octet-stream';
-              res.setHeader('Content-Type', mimeType);
-              const stream = fs.createReadStream(absolutePath);
-              stream.on('error', () => res.status(404).json({ error: 'File not found' }));
-              stream.pipe(res);
-            }
-          });
+          try {
+            res.sendFile(absolutePath, options);
+          } catch (err) {
+            // Fallback to streaming if sendFile fails (non-blocking)
+            const ext = extname(filename).toLowerCase();
+            const mimeType =
+              ext === '.png'
+                ? 'image/png'
+                : ext === '.jpg' || ext === '.jpeg'
+                  ? 'image/jpeg'
+                  : 'application/octet-stream';
+            res.setHeader('Content-Type', mimeType);
+            const stream = fs.createReadStream(absolutePath);
+            stream.on('error', () => res.status(404).json({ error: 'File not found' }));
+            stream.pipe(res);
+          }
         }
       );
 
@@ -963,16 +999,15 @@ export class AgentServer {
             return;
           }
 
-          res.sendFile(filePath, (err) => {
-            if (err) {
-              logger.warn({ err, filePath }, `[STATIC] Channel media file not found: ${filePath}`);
-              if (!res.headersSent) {
-                res.status(404).json({ error: 'File not found' });
-              }
-            } else {
-              logger.debug(`[STATIC] Served channel media file: ${filePath}`);
+          try {
+            res.sendFile(filePath);
+            logger.debug(`[STATIC] Served channel media file: ${filePath}`);
+          } catch (err: any) {
+            logger.warn({ err, filePath }, `[STATIC] Channel media file not found: ${filePath}`);
+            if (!res.headersSent) {
+              res.status(404).json({ error: 'File not found' });
             }
-          });
+          }
         }
       );
 
@@ -1081,12 +1116,11 @@ export class AgentServer {
               }
               // Also try npm root as fallback (some users might use npm)
               try {
-                const proc = Bun.spawnSync(['npm', 'root', '-g'], {
-                  stdout: 'pipe',
-                  stderr: 'pipe',
+                const proc = spawnSync('npm', ['root', '-g'], {
+                  encoding: 'utf-8',
                 });
-                if (proc.exitCode === 0 && proc.stdout) {
-                  const npmRoot = new TextDecoder().decode(proc.stdout).trim();
+                if (proc.status === 0 && proc.stdout) {
+                  const npmRoot = proc.stdout.trim();
                   const globalServerPath = path.join(npmRoot, '@elizaos/server/dist/client');
                   if (existsSync(path.join(globalServerPath, 'index.html'))) {
                     return globalServerPath;
@@ -1130,6 +1164,17 @@ export class AgentServer {
           ].filter(Boolean),
         ].filter(Boolean);
 
+        // Log all checked paths for debugging
+        logger.info('[STATIC] === CLIENT PATH DIAGNOSTICS ===');
+        logger.info(`[STATIC] Current __dirname: ${__dirname}`);
+        possiblePaths.forEach((p, i) => {
+          if (p) {
+            const exists = existsSync(path.join(p, 'index.html'));
+            logger.info(`[STATIC] Path ${i}: ${p} - ${exists ? '✓ EXISTS' : '✗ NOT FOUND'}`);
+          }
+        });
+        logger.info('[STATIC] === END DIAGNOSTICS ===');
+
         // Log process information for debugging
         logger.debug(`[STATIC] process.argv[0]: ${process.argv[0]}`);
         logger.debug(`[STATIC] process.argv[1]: ${process.argv[1]}`);
@@ -1160,6 +1205,10 @@ export class AgentServer {
           logger.warn('[STATIC] Then rebuild the server: cd packages/server && bun run build');
         }
       }
+
+      // Register Telegram authentication routes (always, independent of clientPath)
+      registerTelegramAuthRoutes(this.app);
+      logger.info('[AUTH] Telegram authentication routes registered');
 
       // *** NEW: Mount the plugin route handler BEFORE static serving ***
       const pluginRouteHandler = createPluginRouteHandler(this.elizaOS!);
@@ -1248,19 +1297,19 @@ export class AgentServer {
 
             // Use sendFile with the directory as root and filename separately
             // This approach is more reliable for Express
-            res.sendFile('index.html', { root: resolvedClientPath }, (err) => {
-              if (err) {
-                logger.warn(`[STATIC] Failed to serve index.html: ${err.message}`);
-                logger.warn(`[STATIC] Attempted root: ${resolvedClientPath}`);
-                logger.warn(`[STATIC] Full path was: ${indexFilePath}`);
-                logger.warn(`[STATIC] Error code: ${(err as any).code || 'unknown'}`);
-                if (!res.headersSent) {
-                  res.status(404).send('Client application not found');
-                }
-              } else {
-                logger.debug(`[STATIC] Successfully served index.html for route: ${req.path}`);
+            // Note: Express v5 doesn't support callback in sendFile
+            try {
+              res.sendFile('index.html', { root: resolvedClientPath });
+              logger.debug(`[STATIC] Successfully served index.html for route: ${req.path}`);
+            } catch (err: any) {
+              logger.warn(`[STATIC] Failed to serve index.html: ${err.message}`);
+              logger.warn(`[STATIC] Attempted root: ${resolvedClientPath}`);
+              logger.warn(`[STATIC] Full path was: ${indexFilePath}`);
+              logger.warn(`[STATIC] Error code: ${err.code || 'unknown'}`);
+              if (!res.headersSent) {
+                res.status(404).send('Client application not found');
               }
-            });
+            }
           } else {
             logger.warn('[STATIC] Client dist path not found in SPA fallback');
             logger.warn('[STATIC] Neither local nor instance clientPath variables are set');
@@ -1955,10 +2004,7 @@ export {
   loadCharacterTryPath,
   hasValidRemoteUrls,
   loadCharacters,
-} from './loader';
-
-// Export types
-export * from './types';
+} from './loader.js';
 
 // Export ElizaOS from core (re-export for convenience)
 export { ElizaOS } from '@elizaos/core';

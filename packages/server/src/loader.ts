@@ -4,7 +4,7 @@ import { logger } from '@elizaos/core';
 /**
  * Загружает персонажа из JSON объекта
  */
-export function jsonToCharacter(json: any): Character {
+export async function jsonToCharacter(json: any): Promise<Character> {
   if (!json.name) {
     throw new Error('Character JSON must have a name');
   }
@@ -14,15 +14,15 @@ export function jsonToCharacter(json: any): Character {
 /**
  * Пытается загрузить персонажа из различных путей
  */
-export function loadCharacterTryPath(filePath: string): Character | null {
+export async function loadCharacterTryPath(characterPath: string): Promise<Character> {
   try {
-    logger.debug(`[LOADER] Attempting to load character from: ${filePath}`);
+    logger.debug(`[LOADER] Attempting to load character from: ${characterPath}`);
     // В production этот файл будет загружаться из файловой системы
-    // Пока возвращаем null для упрощения
-    return null;
+    // Пока возвращаем ошибку для упрощения
+    throw new Error(`Character loading not implemented for path: ${characterPath}`);
   } catch (error) {
-    logger.error({ error }, `[LOADER] Failed to load character from ${filePath}:`);
-    return null;
+    logger.error({ error }, `[LOADER] Failed to load character from ${characterPath}:`);
+    throw error;
   }
 }
 

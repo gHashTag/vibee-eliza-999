@@ -23,6 +23,10 @@ COPY packages ./packages
 # Install dependencies (this creates the workspace symlinks)
 RUN bun install --no-cache
 
+# Fix esbuild binary version mismatch by removing and letting Vite redownload
+RUN rm -rf packages/client/node_modules/vite/node_modules/esbuild && \
+    rm -rf node_modules/vite/node_modules/esbuild
+
 # Build all packages
 RUN bun run build
 
@@ -64,7 +68,7 @@ COPY --from=builder /app/vibee.character.json ./
 RUN bun install --no-cache --frozen-lockfile
 
 # Patch client JavaScript files for Bot ID and styling (MUST be after copy from builder)
-RUN find packages/server/dist/client/assets -name "*.js" -type f -exec sed -i \
+RUN find packages/client/dist/assets -name "*.js" -type f -exec sed -i \
     -e 's/"your_bot_id_here"/"8309813696"/g' \
     -e 's/"YOUR_BOT_ID_HERE"/"8309813696"/g' \
     -e 's/bg-blue-600 hover:bg-blue-700/bg-black hover:bg-gray-900/g' \

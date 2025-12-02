@@ -192,7 +192,7 @@ export class InfisicalSecretLoader {
 
         try {
             // Get access token
-            const tokenResponse = await fetch('https://api.infisical.com/api/v2/auth/token', {
+            const tokenResponse = await fetch(`${config.siteUrl}/api/v2/auth/token`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -202,6 +202,7 @@ export class InfisicalSecretLoader {
                     clientSecret: config.clientSecret,
                     token: 'infisical-pat', // Using PAT authentication
                 }),
+                signal: AbortSignal.timeout(10000), // 10s timeout
             });
 
             if (!tokenResponse.ok) {
@@ -216,11 +217,12 @@ export class InfisicalSecretLoader {
             }
 
             // Fetch secrets
-            const secretsResponse = await fetch(`https://api.infisical.com/api/v2/secrets?environmentId=${config.projectId}&environment=${config.environment}`, {
+            const secretsResponse = await fetch(`${config.siteUrl}/api/v2/secrets?environmentId=${config.projectId}&environment=${config.environment}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
+                signal: AbortSignal.timeout(10000), // 10s timeout
             });
 
             if (!secretsResponse.ok) {
@@ -232,8 +234,10 @@ export class InfisicalSecretLoader {
 
             // Process secrets
             for (const secret of secretList) {
-                if (secret.key && secret.value !== undefined) {
-                    secrets.set(secret.key, secret.value);
+                const key = secret.secretKey || secret.key;
+                const value = secret.secretValue || secret.value;
+                if (key && value !== undefined) {
+                    secrets.set(key, value);
                 }
             }
 

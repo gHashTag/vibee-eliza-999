@@ -22,8 +22,8 @@ primary_region = "ams"
     path = "/healthz"
 
 [env]
+  PORT = "4000"
   NODE_ENV = "production"
-  NODE_PATH = "/app/packages"
 
 [[vm]]
   cpu_kind = "shared"

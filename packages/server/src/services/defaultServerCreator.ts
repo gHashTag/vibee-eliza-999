@@ -14,15 +14,10 @@ export async function ensureDefaultServerViaAdapter(server: any): Promise<void> 
   console.log('[SERVER-CREATOR] Checking if default server exists...');
 
   try {
-    // Получаем database adapter из runtime
-    const runtime = server.getRuntime();
-    if (!runtime) {
-      throw new Error('Server runtime not initialized');
-    }
-
-    const db = runtime.database;
+    // Получаем database adapter напрямую из сервера (AgentServer)
+    const db = server.database;
     if (!db) {
-      throw new Error('Database adapter not available');
+      throw new Error('Database adapter not available in server instance');
     }
 
     // Проверяем существует ли сервер

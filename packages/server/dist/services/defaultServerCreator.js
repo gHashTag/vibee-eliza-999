@@ -11,14 +11,10 @@ export const DEFAULT_SERVER_ID = '00000000-0000-0000-0000-000000000000';
 export async function ensureDefaultServerViaAdapter(server) {
     console.log('[SERVER-CREATOR] Checking if default server exists...');
     try {
-        // Получаем database adapter из runtime
-        const runtime = server.getRuntime();
-        if (!runtime) {
-            throw new Error('Server runtime not initialized');
-        }
-        const db = runtime.database;
+        // Получаем database adapter напрямую из сервера (AgentServer)
+        const db = server.database;
         if (!db) {
-            throw new Error('Database adapter not available');
+            throw new Error('Database adapter not available in server instance');
         }
         // Проверяем существует ли сервер
         console.log('[SERVER-CREATOR] Querying for existing server...');

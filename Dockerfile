@@ -30,15 +30,6 @@ RUN rm -rf packages/client/node_modules/vite/node_modules/esbuild && \
 # Build all packages
 RUN bun run build
 
-# Patch packages/server/dist/index.js to fix ReferenceError: messageBusConnectorPlugin is not defined
-RUN sed -i 's/async registerAgent(runtime) {/async registerAgent(runtime) { var messageBusConnectorPlugin = null;/g' packages/server/dist/index.js
-
-# Patch packages/server/dist/index.js to ensure default server exists before adding agent
-RUN sed -i 's/async addAgentToServer(serverId, agentId) {/async addAgentToServer(serverId, agentId) { await this.ensureDefaultServer();/g' packages/server/dist/index.js
-
-# Patch packages/server/dist/entrypoint.js to fix relative path to vibee-agents
-RUN sed -i "s|require('../../../packages/vibee-agents/dist/src/index.js')|require('/app/packages/vibee-agents/dist/src/index.js')|g" packages/server/dist/entrypoint.js
-
 # Runtime stage: Use a fresh image and copy everything from builder
 FROM node:23.3.0-slim
 

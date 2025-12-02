@@ -30,9 +30,10 @@ console.log('[DEBUG] TELEGRAM_BOT_ID:', process.env.TELEGRAM_BOT_ID ? 'SET' : 'N
 console.log('[DEBUG] POSTGRES_URL:', process.env.POSTGRES_URL ? 'SET' : 'NOT SET');
 console.log('[DEBUG] OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? 'SET' : 'NOT SET');
 
-const require = createRequire(import.meta.url);
-// Use require to load from compiled JS file to avoid TypeScript rootDir issues
-const { vibeeAgent } = require('../../../packages/vibee-agents/dist/src/index.js');
+// Dynamic import using module URL resolution - works in both dev and production
+const vibeeAgentsModulePath = new URL('../../../packages/vibee-agents/dist/src/index.js', import.meta.url).href;
+console.log('[ENTRYPOINT] Loading vibee-agents from:', vibeeAgentsModulePath);
+const { default: vibeeAgents } = await import(vibeeAgentsModulePath);
 
 /**
  * ⚠️ ВАЖНО: Секреты загружаются централизованно через InfisicalSecretLoader
@@ -86,7 +87,7 @@ const start = async () => {
     // Ensure SERVER_PORT matches Fly.io PORT (default 4000)
     process.env.SERVER_PORT = process.env.PORT || '4000';
     // 🔧 FIX: Import AgentServer dynamically AFTER env vars are loaded
-    const { AgentServer } = require('./index.js');
+    const { AgentServer } = await import('./index.js');
     const server = new AgentServer();
 
     // 🔐 Добавляем роут для Telegram Login Widget ПОСЛЕ создания сервера
@@ -121,11 +122,10 @@ const start = async () => {
       console.error('[ENTRYPOINT] This may cause agent registration to fail!');
     }
 
-    // ВРЕМЕННО: Отключаем агентов для тестирования логина
-    // Из-за проблем с PGLite и отсутствующими таблицами
-    console.log('[ENTRYPOINT] ⚠️  Skipping agent registration (temporary for login testing)');
+    // 🔥 ЗАГРУЖАЕМ ВСЕХ АГЕНТОВ с плагинами!
+    console.log('[ENTRYPOINT] 🚀 Loading agents with plugins:', vibeeAgents.agents.map(a => a.character.name));
     await server.start({
-      agents: []
+      agents: vibeeAgents.agents
     });
   } catch (error) {
     console.error('❌ Fatal error starting server:', error);

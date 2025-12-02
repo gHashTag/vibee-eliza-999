@@ -1377,6 +1377,56 @@ export class AgentServer {
         );
       }
 
+      // Register TEXT_LARGE model handler for NeuroPhoto agent using OpenRouter
+      try {
+        const textLargeModelHandler = async (params) => {
+          const openrouterApiKey = runtime.getSetting("OPENROUTER_API_KEY");
+          if (!openrouterApiKey) {
+            throw new Error("OpenRouter API key not configured");
+          }
+
+          const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${openrouterApiKey}`,
+              "HTTP-Referer": "https://vibee-eliza-999-prod-v2.fly.dev",
+              "X-Title": "VIBEE NeuroPhoto",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-3-pro-exp-02-05",
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a helpful AI assistant for NeuroPhoto image generation.",
+                },
+                {
+                  role: "user",
+                  content: params.prompt,
+                },
+              ],
+              temperature: 0.7,
+              max_tokens: 2000,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`OpenRouter API error: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          return data.choices[0].message.content;
+        };
+
+        await runtime.registerModel("TEXT_LARGE", textLargeModelHandler, "server", 0);
+        logger.info(`[AgentServer] Registered TEXT_LARGE model handler (OpenRouter) for agent ${runtime.character.name}`);
+      } catch (e) {
+        logger.error(
+          { error: e },
+          `[AgentServer] WARNING: Failed to register TEXT_LARGE model for agent ${runtime.character.name}`
+        );
+      }
+
       // Register TEE plugin if present
       const teePlugin = runtime.plugins.find((p) => p.name === 'phala-tee-plugin');
       if (teePlugin) {

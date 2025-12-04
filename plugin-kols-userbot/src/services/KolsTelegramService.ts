@@ -207,6 +207,85 @@ export class KolsTelegramService extends Service {
   }
 
   /**
+   * Разбивает длинные сообщения на части для Telegram
+   * Telegram лимит: 4096 символов, но лучше отправлять до 3000 символов
+   */
+  private splitLongMessage(message: string): string[] {
+    const maxLength = 3000; // Используем запас до лимита Telegram
+
+    if (message.length <= maxLength) {
+      return [message];
+    }
+
+    // Пытаемся разбить по абзацам
+    const paragraphs = message.split('\n\n');
+    const parts: string[] = [];
+    let currentPart = '';
+
+    for (const paragraph of paragraphs) {
+      // Если добавление параграфа превысит лимит
+      if (currentPart && (currentPart + '\n\n' + paragraph).length > maxLength) {
+        // Сохраняем текущую часть и начинаем новую
+        parts.push(currentPart.trim());
+        currentPart = paragraph;
+      } else {
+        // Добавляем параграф к текущей части
+        currentPart = currentPart ? currentPart + '\n\n' + paragraph : paragraph;
+      }
+    }
+
+    // Добавляем последнюю часть
+    if (currentPart) {
+      parts.push(currentPart.trim());
+    }
+
+    // Если всё ещё слишком длинно (например, один очень длинный абзац)
+    // разбиваем принудительно по предложениям
+    return parts.map(part => {
+      if (part.length <= maxLength) {
+        return part;
+      }
+
+      // Принудительное разбиение
+      const sentences = part.split(/(?<=[.!?])\s+/);
+      const forcedParts: string[] = [];
+      let currentSentence = '';
+
+      for (const sentence of sentences) {
+        if ((currentSentence + ' ' + sentence).length > maxLength) {
+          if (currentSentence) {
+            forcedParts.push(currentSentence);
+            currentSentence = sentence;
+          } else {
+            // Одно предложение слишком длинно, разбиваем по словам
+            const words = sentence.split(' ');
+            let wordPart = '';
+            for (const word of words) {
+              if ((wordPart + ' ' + word).length > maxLength) {
+                forcedParts.push(wordPart);
+                wordPart = word;
+              } else {
+                wordPart = wordPart ? wordPart + ' ' + word : word;
+              }
+            }
+            if (wordPart) {
+              currentSentence = wordPart;
+            }
+          }
+        } else {
+          currentSentence = currentSentence ? currentSentence + ' ' + sentence : sentence;
+        }
+      }
+
+      if (currentSentence) {
+        forcedParts.push(currentSentence);
+      }
+
+      return forcedParts.join('\n\n');
+    }).flat();
+  }
+
+  /**
    * Отвечает на сообщение как живой ментор (реагирует на ВСЕ сообщения!)
    */
   private async checkTriggersAndReply(message: IKolsMessage): Promise<void> {
@@ -234,15 +313,21 @@ export class KolsTelegramService extends Service {
       console.log(`🤖 [KolsTelegramService] Генерирую LLM ответ для ${message.fromFirstName}...`);
 
       // Создаем промпт для LLM
-      const systemPrompt = `Ты KOLS - наставник по VibeCoding и современной разработке с AI.
+      const systemPrompt = `Ты VIBEE - наставник по VibeCoding и современной разработке с AI.
 
 Пользователь написал: "${message.messageText}"
 
-Твоя задача: ответить как живой ментор на русском языке. БЕЗ приветствий (не пиши "Привет", "Здравствуйте"), БЕЗ обращения по имени, БЕЗ эмодзи.
+Твоя задача: Ответить кратко и по делу на русском языке.
 
-Отвечай по делу, давай конкретные советы, задавай уточняющие вопросы. Твоя экспертиза: VibeCoding, AI-агенты, Claude Code, функциональное программирование, Telegram боты.
+ПРАВИЛА:
+- КОРОТКИЙ ответ: 50-100 слов, 300-500 символов
+- БЕЗ приветствий ("Привет", "Здравствуйте")
+- БЕЗ обращений по имени
+- БЕЗ эмодзи
+- По делу, без воды
+- Если нужен длинный ответ - разбей на части
 
-Ответ должен быть кратким (до 200 слов) и содержательным.`;
+Твоя экспертиза: VibeCoding, AI-агенты, Claude Code, функциональное программирование, Telegram боты.`;
 
       // Генерируем ТОЛЬКО через LLM - БЕЗ FALLBACK!
       if (!this.runtimeRef) {
@@ -252,7 +337,7 @@ export class KolsTelegramService extends Service {
 
       const response = await this.runtimeRef.useModel('TEXT_SMALL', {
         prompt: systemPrompt,
-        maxTokens: 200,
+        maxTokens: 100,  // Уменьшено для более коротких ответов
         temperature: 0.7,
       });
 
@@ -263,10 +348,19 @@ export class KolsTelegramService extends Service {
         return;
       }
 
-      console.log(`✅ [KolsTelegramService] LLM ответ сгенерирован: "${learningMessage.substring(0, 50)}..."`);
+      console.log(`✅ [KolsTelegramService] LLM ответ сгенерирован (${learningMessage.length} символов): "${learningMessage.substring(0, 50)}..."`);
 
-      // Отправляем ответ
-      await this.sendMessage(message.chatId, learningMessage);
+      // Разбиваем длинные сообщения на части (Telegram лимит 4096 символов)
+      const messages = this.splitLongMessage(learningMessage);
+
+      // Отправляем все части сообщения
+      for (const msg of messages) {
+        await this.sendMessage(message.chatId, msg);
+        // Небольшая задержка между сообщениями
+        if (messages.length > 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
 
       console.log('✅ [KolsTelegramService] Ответ отправлен');
 

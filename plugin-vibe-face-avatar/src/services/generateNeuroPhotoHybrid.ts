@@ -25,26 +25,30 @@ export async function generateNeuroPhotoHybrid(
   if (!modelUrl) {
     // No explicit model specified, try to load user's models
     try {
-      const telegramId = parseInt(userId, 10);
-      if (!isNaN(telegramId)) {
-        const modelsResult = await runTaskEither(getUserModelsTask(telegramId, botName));
-        
-        if (modelsResult.isRight() && modelsResult.value.length > 0) {
-          // User has trained models! Use the first one (most recent)
-          const userModel = modelsResult.value[0];
-          effectiveModelUrl = userModel.model_url;
-          effectiveTriggerWord = userModel.trigger_word;
-          
-          console.log(`[NeuroPhoto Hybrid] Using user's personal LoRA: ${userModel.model_name} (trigger: ${effectiveTriggerWord})`);
-          
-          // Auto-inject trigger word if not in prompt
-          if (effectiveTriggerWord && !prompt.includes(effectiveTriggerWord)) {
-            prompt = `${effectiveTriggerWord}, ${prompt}`;
-            console.log(`[NeuroPhoto Hybrid] Injected trigger word: "${effectiveTriggerWord}"`);
-          }
-        } else {
-          console.log('[NeuroPhoto Hybrid] No personal LoRA models found, using default Flux');
+      // Support both UUID and numeric Telegram IDs
+      let userIdentifier: string | number = userId;
+      const parsed = parseInt(userId, 10);
+      if (!isNaN(parsed)) {
+        userIdentifier = parsed;
+      }
+
+      const modelsResult = await runTaskEither(getUserModelsTask(userIdentifier, botName));
+
+      if (modelsResult.isRight() && modelsResult.value.length > 0) {
+        // User has trained models! Use the first one (most recent)
+        const userModel = modelsResult.value[0];
+        effectiveModelUrl = userModel.model_url;
+        effectiveTriggerWord = userModel.trigger_word;
+
+        console.log(`[NeuroPhoto Hybrid] Using user's personal LoRA: ${userModel.model_name} (trigger: ${effectiveTriggerWord})`);
+
+        // Auto-inject trigger word if not in prompt
+        if (effectiveTriggerWord && !prompt.includes(effectiveTriggerWord)) {
+          prompt = `${effectiveTriggerWord}, ${prompt}`;
+          console.log(`[NeuroPhoto Hybrid] Injected trigger word: "${effectiveTriggerWord}"`);
         }
+      } else {
+        console.log('[NeuroPhoto Hybrid] No personal LoRA models found, using default Flux');
       }
     } catch (error) {
       console.warn('[NeuroPhoto Hybrid] Failed to load user models (likely no DB connection):', error);

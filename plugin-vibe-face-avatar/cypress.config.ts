@@ -12,9 +12,18 @@ export default defineConfig({
   },
   e2e: {
     baseUrl: 'http://localhost:5175',
-    supportFile: 'src/__tests__/cypress/support/e2e.ts',
-    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    supportFile: 'src/frontend/cypress/support/e2e.ts',
+    specPattern: 'src/frontend/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     video: true,
+    viewportWidth: 1280,
+    viewportHeight: 720,
+    defaultCommandTimeout: 10000,
+    requestTimeout: 10000,
+    responseTimeout: 30000,
+    retries: {
+      runMode: 2,
+      openMode: 0,
+    },
     setupNodeEvents(on, config) {
       return config;
     },

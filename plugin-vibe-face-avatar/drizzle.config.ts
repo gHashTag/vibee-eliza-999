@@ -1,11 +1,11 @@
 import type { Config } from 'drizzle-kit';
 
 export default {
-  // schema: './src/db/schema.ts', // Commented out - no schema file exists
+  schema: './src/db/schema.ts',
   out: './drizzle/migrations',
-  dialect: 'sqlite',
+  dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL || 'sqlite:./data/dev.sqlite',
+    url: process.env.DATABASE_URL,
   },
   verbose: true,
   strict: true,

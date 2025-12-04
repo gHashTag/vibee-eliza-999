@@ -9,7 +9,11 @@ import { sql } from 'drizzle-orm';
  */
 export const userModels = sqliteTable('user_models', {
   id: text('id').primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
-  telegram_id: integer('telegram_id').notNull(),
+
+  // User identifiers (at least one must be present)
+  telegram_id: integer('telegram_id'),  // Real Telegram user ID (nullable if using web interface)
+  entity_id: text('entity_id'),         // UUID from web interface (nullable if using Telegram)
+
   bot_name: text('bot_name').notNull().default('neuro_face_bot'),
   
   // Model info
@@ -26,7 +30,7 @@ export const userModels = sqliteTable('user_models', {
   is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   
   // Flexible metadata (TEXT для JSON в SQLite)
-  metadata: text('metadata', { mode: 'json' }).default('{}'),
+  metadata: text('metadata'),
   
   // Timestamps
   created_at: text('created_at')
@@ -36,15 +40,20 @@ export const userModels = sqliteTable('user_models', {
 }, (table) => ({
   // Индексы для быстрого поиска
   telegramIdIdx: index('idx_user_models_telegram_id').on(table.telegram_id),
+  entityIdIdx: index('idx_user_models_entity_id').on(table.entity_id),
   botNameIdx: index('idx_user_models_bot_name').on(table.bot_name),
   statusIdx: index('idx_user_models_status').on(table.status),
   isActiveIdx: index('idx_user_models_is_active').on(table.is_active),
-  compositeIdx: index('idx_user_models_telegram_bot').on(table.telegram_id, table.bot_name),
+
+  // Composite indexes for efficient querying
+  telegramBotIdx: index('idx_user_models_telegram_bot').on(table.telegram_id, table.bot_name),
+  entityBotIdx: index('idx_user_models_entity_bot').on(table.entity_id, table.bot_name),
 }));
 
 // Zod schemas for validation
 export const insertUserModelSchema = createInsertSchema(userModels, {
-  telegram_id: z.number().int(),
+  telegram_id: z.number().int().optional(),  // Optional - may not have Telegram ID in web interface
+  entity_id: z.string().uuid().optional(),   // Optional - may not have entity ID in Telegram
   bot_name: z.string().min(1).max(100),
   model_name: z.string().min(1).max(100),
   model_url: z.string().url(),
@@ -53,7 +62,10 @@ export const insertUserModelSchema = createInsertSchema(userModels, {
   status: z.enum(['training', 'completed', 'failed']),
   is_active: z.boolean().default(true),
   metadata: z.record(z.unknown()).default({}),
-});
+}).refine(
+  (data) => data.telegram_id || data.entity_id,  // At least one ID must be present
+  { message: 'Either telegram_id or entity_id must be provided' }
+);
 
 export const selectUserModelSchema = createSelectSchema(userModels);
 

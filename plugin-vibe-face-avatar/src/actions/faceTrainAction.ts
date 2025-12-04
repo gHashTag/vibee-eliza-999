@@ -13,7 +13,30 @@ export const faceTrainAction: Action = {
 
   validate: async (runtime, message) => {
     const text = message.content.text.toLowerCase();
-    return text.includes('/face train') || text.includes('/face add');
+
+    // Commands (legacy support)
+    if (text.includes('/face train') || text.includes('/face add')) {
+      return true;
+    }
+
+    // Natural language intents for training
+    const trainingIntents = [
+      'обучить модель',
+      'создать модель',
+      'сделать модель',
+      'создай модель',
+      'создай лора',
+      'обучить лора',
+      'train model',
+      'create model',
+      'make model',
+      'i want to train',
+      'want to train',
+      'create my model',
+      'make my model',
+    ];
+
+    return trainingIntents.some((intent) => text.includes(intent));
   },
 
   handler: async (runtime, message, state, options, callback): Promise<ActionResult> => {
@@ -21,13 +44,12 @@ export const faceTrainAction: Action = {
     const text = message.content.text;
 
     try {
-      // Parse command: /face train MODEL_NAME
-      const parts = text.split(' ');
-      const modelName = parts.slice(2).join(' ').trim(); // Everything after "/face train"
+      // Parse model name from various formats
+      const modelName = extractModelName(text);
 
       if (!modelName) {
         await callback({
-          text: '❌ Пожалуйста, укажите имя модели. Пример: `/face train MyModel`',
+          text: '❌ Пожалуйста, укажите имя модели.\n\n**Как создать модель:**\nПросто скажите "обучить модель МОЯ_МОДЕЛЬ" и приложите фото.\n\nПример: "обучить модель Alex"',
           error: true,
         });
 
@@ -42,7 +64,7 @@ export const faceTrainAction: Action = {
       const sanitizedName = modelName.replace(/[^a-zA-Z0-9_\s-]/g, '').trim();
       if (sanitizedName.length < 2 || sanitizedName.length > 50) {
         await callback({
-          text: '❌ Имя модели должно содержать от 2 до 50 символов',
+          text: `❌ **Имя модели должно содержать от 2 до 50 символов**\n\nВы указали: "${modelName}"\nДлина: ${sanitizedName.length} символов\n\nПопробуйте короче: "Alex", "John", "MyModel"`,
           error: true,
         });
 
@@ -144,5 +166,43 @@ export const faceTrainAction: Action = {
       { name: 'user', content: { text: '/face train MyFaceModel' } },
       { name: 'assistant', content: { text: 'Модель "MyFaceModel" создана! Загрузите фотографии для обучения.', action: 'FACE_TRAIN' } },
     ],
+    [
+      { name: 'user', content: { text: 'обучить модель Alex' } },
+      { name: 'assistant', content: { text: 'Модель "Alex" создана! Загрузите фотографии для обучения.', action: 'FACE_TRAIN' } },
+    ],
   ] as ActionExample[][],
 };
+
+/**
+ * Extract model name from various text formats
+ */
+function extractModelName(text: string): string | null {
+  const lowerText = text.toLowerCase();
+
+  // Format: /face train MODEL_NAME
+  if (lowerText.includes('/face train') || lowerText.includes('/face add')) {
+    const parts = text.split(' ');
+    const modelName = parts.slice(2).join(' ').trim();
+    return modelName || null;
+  }
+
+  // Format: "обучить модель NAME", "create model NAME", etc.
+  const patterns = [
+    /обучить\s+модель\s+([a-zA-Z0-9_\s-]+)/i,
+    /создать\s+модель\s+([a-zA-Z0-9_\s-]+)/i,
+    /сделать\s+модель\s+([a-zA-Z0-9_\s-]+)/i,
+    /создай\s+модель\s+([a-zA-Z0-9_\s-]+)/i,
+    /train\s+model\s+([a-zA-Z0-9_\s-]+)/i,
+    /create\s+model\s+([a-zA-Z0-9_\s-]+)/i,
+    /make\s+model\s+([a-zA-Z0-9_\s-]+)/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+
+  return null;
+}

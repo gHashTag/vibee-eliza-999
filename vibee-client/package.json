@@ -62,6 +62,10 @@
     "access": "public"
   },
   "dependencies": {
+    "@dicebear/avatars": "^4.10.8",
+    "@dicebear/avatars-avataaars-sprites": "^4.10.8",
+    "@dicebear/avatars-human-sprites": "^4.10.8",
+    "@dicebear/avatars-initials-sprites": "^4.10.8",
     "@elizaos/api-client": "1.6.4",
     "@elizaos/core": "1.6.4",
     "@evilmartians/agent-prism-data": "^0.0.4",

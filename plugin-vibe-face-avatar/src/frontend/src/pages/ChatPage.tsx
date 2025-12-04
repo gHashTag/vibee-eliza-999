@@ -77,6 +77,45 @@ export default function ChatPage() {
     loadModels();
   }, []);
 
+  // Восстановление pendingFiles из localStorage при загрузке
+  useEffect(() => {
+    try {
+      const savedFiles = localStorage.getItem('chat-pending-files');
+      if (savedFiles) {
+        const parsed = JSON.parse(savedFiles);
+        // Создаем blob URLs для сохраненных файлов
+        const filesWithUrls = parsed.map((f: any) => ({
+          ...f,
+          url: f.url.startsWith('blob:') ? f.url : URL.createObjectURL(new Blob([], { type: 'image/jpeg' }))
+        }));
+        setPendingFiles(filesWithUrls);
+      }
+    } catch (error) {
+      console.error('Failed to load pending files from localStorage:', error);
+    }
+  }, []);
+
+  // Сохранение pendingFiles в localStorage при изменении
+  useEffect(() => {
+    try {
+      if (pendingFiles.length > 0) {
+        // Сохраняем метаданные файлов (без blob URLs)
+        const filesToSave = pendingFiles.map(f => ({
+          id: f.id,
+          filename: f.filename,
+          mediaType: f.mediaType,
+          // Сохраняем только базовую информацию, не URL
+          type: f.type
+        }));
+        localStorage.setItem('chat-pending-files', JSON.stringify(filesToSave));
+      } else {
+        localStorage.removeItem('chat-pending-files');
+      }
+    } catch (error) {
+      console.error('Failed to save pending files to localStorage:', error);
+    }
+  }, [pendingFiles]);
+
   // Быстрая генерация с выбранной моделью
   const handleQuickGenerate = async (model: UserModel, prompt: string) => {
     setSelectedModel(model);
@@ -567,7 +606,7 @@ export default function ChatPage() {
                 <ConversationEmptyState>
                   <div className="space-y-2">
                     <h2 className="text-xl font-bold text-quantum-yellow">
-                      Добро пожаловать в VIBEE!
+                      Добро пожаловать в чат VIBEE!
                     </h2>
                     <p className="text-white">
                       Создавайте цифровые копии и генерируйте изображения

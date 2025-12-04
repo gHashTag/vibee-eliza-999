@@ -8,31 +8,33 @@ import { z } from 'zod';
  */
 export const userModels = pgTable('user_models', {
   id: uuid('id').primaryKey().defaultRandom(),
-  telegram_id: bigint('telegram_id', { mode: 'number' }).notNull(),
+  telegram_id: bigint('telegram_id', { mode: 'number' }), // nullable for web users
+  entity_id: varchar('entity_id', { length: 50 }), // nullable for telegram users
   bot_name: varchar('bot_name', { length: 100 }).notNull().default('neuro_face_bot'),
-  
+
   // Model info
   model_name: varchar('model_name', { length: 100 }).notNull(),
   model_url: text('model_url').notNull(), // URL to LoRA model on Fal.ai
   trigger_word: varchar('trigger_word', { length: 50 }).notNull(), // e.g., 'NEURO_SAGE'
-  
+
   // Optional metadata
   gender: varchar('gender', { length: 10 }), // 'male' | 'female' | 'person'
   training_model: varchar('training_model', { length: 100 }), // e.g., 'flux-lora-fast-training'
-  
+
   // Status
   status: varchar('status', { length: 20 }).notNull().default('training'), // 'training' | 'completed' | 'failed'
   is_active: boolean('is_active').notNull().default(true),
-  
-  // Flexible metadata (JSONB для дополнительной информации)
-  metadata: jsonb('metadata').default({}),
-  
+
+  // Flexible metadata (text для SQLite - JSON как строка)
+  metadata: text('metadata'),
+
   // Timestamps
   created_at: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({
   // Индексы для быстрого поиска
   telegramIdIdx: index('idx_user_models_telegram_id').on(table.telegram_id),
+  entityIdIdx: index('idx_user_models_entity_id').on(table.entity_id),
   botNameIdx: index('idx_user_models_bot_name').on(table.bot_name),
   statusIdx: index('idx_user_models_status').on(table.status),
   isActiveIdx: index('idx_user_models_is_active').on(table.is_active),
@@ -42,6 +44,7 @@ export const userModels = pgTable('user_models', {
 // Zod schemas for validation
 export const insertUserModelSchema = createInsertSchema(userModels, {
   telegram_id: z.number().int().positive(),
+  entity_id: z.string().uuid().optional(), // UUID для Socket.IO
   bot_name: z.string().min(1).max(100),
   model_name: z.string().min(1).max(100),
   model_url: z.string().url(),
@@ -49,7 +52,7 @@ export const insertUserModelSchema = createInsertSchema(userModels, {
   gender: z.enum(['male', 'female', 'person']).optional(),
   status: z.enum(['training', 'completed', 'failed']),
   is_active: z.boolean().default(true),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.string().optional(), // JSON как строка для SQLite
 });
 
 export const selectUserModelSchema = createSelectSchema(userModels);

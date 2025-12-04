@@ -4,8 +4,12 @@ export function createApiClientConfig(): ApiClientConfig {
   const getLocalStorageApiKey = () => `eliza-api-key-${window.location.origin}`;
   const apiKey = localStorage.getItem(getLocalStorageApiKey());
 
+  // Определяем API URL: используем ElizaOS API на порту 3000
+  const apiPort = import.meta.env.VITE_API_PORT || '3000';
+  const baseUrl = `http://localhost:${apiPort}`;
+
   const config: ApiClientConfig = {
-    baseUrl: window.location.origin,
+    baseUrl: baseUrl,
     timeout: 30000,
     headers: {
       Accept: 'application/json',

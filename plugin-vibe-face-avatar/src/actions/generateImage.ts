@@ -18,7 +18,7 @@ import { pipe, chain, map } from "../utils/functional/composition";
 import { GenerateImageInputSchema } from "../types/schemas";
 import { generateNeuroPhotoHybrid } from "../services/generateNeuroPhotoHybrid";
 import { getUserModelsTask, UserModelDB } from "../services/modelLoader";
-import { uuidToTelegramId } from "../utils/userHelpers";
+import { getTelegramId } from "../utils/getTelegramId";
 
 const COST_STARS = 7.5;
 
@@ -88,9 +88,16 @@ export const generateImageAction: Action = {
     _options: any,
     callback?: HandlerCallback
   ) => {
+    console.log("🔥🔥🔥 generateImageAction HANDLER CALLED! 🔥🔥🔥");
+    console.log("Message:", JSON.stringify(message, null, 2));
     try {
       const text = message.content?.text || "";
-      const userId = message.userId; // ElizaOS userId (UUID)
+      let userId = message.userId; // ElizaOS userId (UUID)
+
+      // FIX: Если userId отсутствует, пытаемся получить из metadata
+      if (!userId && message.metadata?.raw?.senderId) {
+        userId = message.metadata.raw.senderId;
+      }
 
       if (!userId) {
         await callback?.({
@@ -110,12 +117,15 @@ export const generateImageAction: Action = {
         await callback?.({
           text: `❌ Пожалуйста, опишите какое изображение вы хотите создать.
 
-**Примеры**:
-• /neurophoto красивый закат над океаном
-• /neurophoto футуристический город с летающими машинами
-• /neurophoto портрет кота в космическом шлеме
+**Просто напишите что хотите создать:**
 
-Минимальная длина описания: 3 символа.`,
+**Примеры**:
+• "нарисуй красивый закат над океаном"
+• "создай футуристический город с летающими машинами"
+• "сгенерируй портрет кота в космическом шлеме"
+• "нарисуй супермена"
+
+**Минимальная длина описания: 3 символа.**`,
         });
         return {
             success: false,
@@ -123,11 +133,15 @@ export const generateImageAction: Action = {
         };
       }
 
-      // CRITICAL: Проверяем наличие натренированных моделей
-      // Без модели генерация НЕ работает!
-      const userIdHash = userId ? uuidToTelegramId(userId) : null;
+      // CRITICAL: Получаем идентификаторы пользователя
+      // Поддерживает как реальные Telegram ID, так и UUID для веб-интерфейса
+      const telegramId = getTelegramId(message);
 
-      if (!userIdHash) {
+      // Для веб-интерфейса используем UUID (entity_id) напрямую для поиска моделей
+      // userId - это UUID пользователя из ElizaOS (aa7cf0e2-f10f-49dd-9ec2-0ea7befc8bcf)
+      const userIdentifier = userId || (telegramId ? String(telegramId) : null);
+
+      if (!userIdentifier) {
         await callback?.({
           text: "❌ Не удалось определить пользователя.",
         });
@@ -137,22 +151,26 @@ export const generateImageAction: Action = {
         };
       }
 
-      const modelsTask = getUserModelsTask(userIdHash, "web-chat");
+      logger.info({ userId, telegramId, userIdentifier }, "Using user ID for model lookup");
+
+      // Передаём UUID напрямую - modelLoader умеет искать по entity_id
+      const modelsTask = getUserModelsTask(userIdentifier, 'neuro_face_bot');
       const modelsResult = await modelsTask();
 
       if (modelsResult.isLeft() || modelsResult.value.length === 0) {
         await callback?.({
-          text: `❌ **У вас нет натренированных моделей!**
+          text: `❌ **Сначала создайте свою модель!**
 
-Чтобы генерировать изображения, сначала нужно:
+Чтобы я мог генерировать изображения с вашим лицом, нужно:
 
-1️⃣ Загрузите 10-25 своих фото
-2️⃣ Натренируйте модель командой \`/face train\`
-3️⃣ Дождитесь завершения обучения (10-15 минут)
+1️⃣ Загрузите 10-25 своих фотографий (в хорошем качестве)
+2️⃣ Скажите "обучить модель" и укажите имя модели
+3️⃣ Подождите 10-15 минут пока модель обучится
 
-Только после этого можно использовать \`/neurophoto\`!
+**Как начать:**
+Просто скажите "обучить модель мое_имя" и приложите фото.
 
-**Начните с команды:** \`/face train моя_модель\``,
+Тогда я смогу создавать изображения с вами! 🎨`,
         });
         return {
           success: false,
@@ -168,49 +186,34 @@ export const generateImageAction: Action = {
 ⏱ Это займёт 10-30 секунд...`,
       });
 
-      // Functional pipeline
-      const result = await runTaskEither(
-        pipe(
-            // 1. Validate Input
-            validateInput({
-                prompt,
-                aspectRatio: "9:16",
-                numImages: 1,
-            }),
-            // 2. Generate Image with user's LoRA model
-            chain(async (validatedInput: any) => {
-                // Добавляем trigger_word к промпту
-                let fullPrompt = validatedInput.prompt;
-                if (userModel.trigger_word) {
-                    fullPrompt = `${userModel.trigger_word}, ${fullPrompt}`;
-                }
+      // Prepare generation parameters
+      let fullPrompt = prompt;
+      if (userModel.trigger_word) {
+        fullPrompt = `${userModel.trigger_word}, ${fullPrompt}`;
+      }
 
-                logger.info({
-                  prompt: fullPrompt,
-                  modelUrl: userModel.model_url,
-                  triggerWord: userModel.trigger_word
-                }, "Generating with user's LoRA");
+      logger.info({
+        prompt: fullPrompt,
+        modelUrl: userModel.model_url,
+        triggerWord: userModel.trigger_word
+      }, "Generating with user's LoRA");
 
-                const generationResult = await generateNeuroPhotoHybrid(
-                    fullPrompt,
-                    userModel.model_url, // Используем LoRA модель пользователя
-                    validatedInput.numImages,
-                    userId,
-                    { gender: userModel.gender },
-                    "web-chat"
-                );
+      // Generate Image directly (simplified approach)
+      try {
+        const generationResult = await generateNeuroPhotoHybrid(
+            fullPrompt,
+            userModel.model_url,
+            1,
+            userId,
+            { gender: userModel.gender },
+            "web-chat"
+        );
 
-                if (!generationResult.success) {
-                    throw new Error(generationResult.error || "Generation failed");
-                }
+        if (!generationResult.success) {
+            throw new Error(generationResult.error || "Generation failed");
+        }
 
-                return taskRight({ validatedInput, generationResult, userModel, fullPrompt });
-            }),
-            // 3. Send Result to User
-            chain(async (ctx: any) => {
-                const { generationResult, validatedInput, userModel, fullPrompt } = ctx;
-
-                const resultText = `✨ **Изображение создано!**
+        const resultText = `✨ **Изображение создано!**
 
 ━━━━━━━━━━━━━━━━━━━━
 📝 **Промпт**
@@ -224,40 +227,28 @@ ${fullPrompt}
 
 _Создано с вашей персональной моделью • @999-agents_`;
 
-                if (callback) {
-                    await callback({
-                        text: resultText,
-                        attachments: generationResult.imageUrls.map((url: string, index: number) => ({
-                            id: `neurophoto-${Date.now()}-${index}`,
-                            url,
-                            type: "image",
-                            title: fullPrompt,
-                            description: `Generated by ${userModel.model_name}`,
-                        })),
-                    });
-                }
+        if (callback) {
+            await callback({
+                text: resultText,
+                attachments: generationResult.imageUrls.map((url: string, index: number) => ({
+                    id: `neurophoto-${Date.now()}-${index}`,
+                    url,
+                    type: "image",
+                    title: fullPrompt,
+                    description: `Generated by ${userModel.model_name}`,
+                })),
+            });
+        }
 
-                return taskRight(ctx);
-            })
-        )
-      );
-
-      if (result.isLeft()) {
-        logger.error({ error: result.value }, "Generation failed");
-        await callback?.({
-            text: `❌ Ошибка при генерации: ${result.value.message}`,
-        });
         return {
-            success: false,
-            error: result.value,
+            success: true,
+            text: "Изображение успешно сгенерировано",
+            data: generationResult,
         };
+      } catch (error) {
+        logger.error({ error }, "Generation failed");
+        throw error;
       }
-
-      return {
-        success: true,
-        text: "Изображение успешно сгенерировано",
-        data: result.value.generationResult,
-      };
 
     } catch (error) {
       logger.error({ error }, "Unexpected error in generateImageAction");
@@ -302,7 +293,8 @@ _Создано с вашей персональной моделью • @999-a
 };
 
 function extractPrompt(text: string): string {
-  return text
+  // Try to extract prompt by removing command words
+  const cleaned = text
     .replace(/\/neurophoto/gi, "")
     .replace(/\/generate/gi, "")
     .replace(/нейрофото/gi, "")
@@ -313,4 +305,24 @@ function extractPrompt(text: string): string {
     .replace(/create image/gi, "")
     .replace(/draw/gi, "")
     .trim();
+
+  // If cleaned text is too short, use original text (for natural language)
+  // This handles cases like "нарисуй супермена" -> we want "супермена"
+  if (cleaned.length < 3 && text.length > cleaned.length) {
+    // Extract words after common command words
+    const words = text.split(/\s+/);
+    const commandWords = ['нарисуй', 'создай', 'сгенерируй', 'draw', 'generate'];
+
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i].toLowerCase().replace(/[^\w]/g, '');
+      if (commandWords.includes(word) && i + 1 < words.length) {
+        return words.slice(i + 1).join(' ').trim();
+      }
+    }
+
+    // If no command words found, return original text
+    return text;
+  }
+
+  return cleaned;
 }

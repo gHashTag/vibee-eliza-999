@@ -7,7 +7,8 @@ import { eq, and } from 'drizzle-orm';
  */
 export interface UserModelDB {
   id: string;
-  telegram_id: number;
+  telegram_id?: number | null;   // May be null for web users
+  entity_id?: string | null;     // May be null for Telegram users
   bot_name: string;
   model_name: string;
   model_url: string; // URL to LoRA on Fal.ai
@@ -73,24 +74,44 @@ export const getUserModelsTask = (
           const identifier = userIdentifier as string;
           console.log(`[ModelLoader] Searching for identifier: ${identifier}`);
 
-          // Strategy 1: Direct match on id field (if identifier is a model UUID)
-          models = await db
-            .select()
-            .from(userModels)
-            .where(
-              and(
-                eq(userModels.id, identifier),
-                eq(userModels.bot_name, botName),
-                eq(userModels.is_active, true),
-                eq(userModels.status, 'completed')
+          // Strategy 1: Direct match on entity_id (web interface UUID)
+          if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(identifier)) {
+            console.log(`[ModelLoader] Strategy 1: Trying as entity_id (UUID): ${identifier}`);
+            models = await db
+              .select()
+              .from(userModels)
+              .where(
+                and(
+                  eq(userModels.entity_id, identifier),
+                  eq(userModels.bot_name, botName),
+                  eq(userModels.is_active, true),
+                  eq(userModels.status, 'completed')
+                )
               )
-            )
-            .orderBy(userModels.created_at);
+              .orderBy(userModels.created_at);
+          }
 
-          // Strategy 2: If no models found and identifier looks like telegram ID, try numeric conversion
-          if (models.length === 0 && /^\d+$/.test(identifier)) {
+          // Strategy 2: Direct match on id field (if identifier is a model UUID)
+          if (!models || models.length === 0) {
+            console.log(`[ModelLoader] Strategy 2: Trying as model ID (UUID): ${identifier}`);
+            models = await db
+              .select()
+              .from(userModels)
+              .where(
+                and(
+                  eq(userModels.id, identifier),
+                  eq(userModels.bot_name, botName),
+                  eq(userModels.is_active, true),
+                  eq(userModels.status, 'completed')
+                )
+              )
+              .orderBy(userModels.created_at);
+          }
+
+          // Strategy 3: If no models found and identifier looks like numeric Telegram ID, try numeric conversion
+          if (!models || models.length === 0 && /^\d+$/.test(identifier)) {
             const telegramId = parseInt(identifier, 10);
-            console.log(`[ModelLoader] Strategy 2: Trying as telegram_id: ${telegramId}`);
+            console.log(`[ModelLoader] Strategy 3: Trying as telegram_id: ${telegramId}`);
             models = await db
               .select()
               .from(userModels)
@@ -106,9 +127,20 @@ export const getUserModelsTask = (
           }
         }
 
-        console.log(`[ModelLoader] Found ${models.length} active models for identifier: ${userIdentifier}`);
+        console.log(`[ModelLoader] Found ${models?.length || 0} active models for identifier: ${userIdentifier}`);
 
-        return models as UserModelDB[];
+        // Parse metadata JSON strings into objects (for SQLite text compatibility)
+        const parsedModels = (models || []).map(model => ({
+          ...model,
+          metadata: model.metadata ?
+            (typeof model.metadata === 'string' ?
+              (() => { try { return JSON.parse(model.metadata); } catch { return {}; } })()
+              : model.metadata
+            )
+            : {}
+        }));
+
+        return parsedModels as UserModelDB[];
       } catch (dbError) {
         console.error('[ModelLoader] Database query failed:', dbError);
         // Fallback: return empty array if DB is unavailable
@@ -134,18 +166,27 @@ export const getUserModelByIdTask = (
 ): TaskEither<Error, UserModelDB | null> =>
   tryCatchAsync(
     async () => {
-      try {
-        const [model] = await db
-          .select()
-          .from(userModels)
-          .where(eq(userModels.id, modelId))
-          .limit(1);
-        
-        return (model as UserModelDB) || null;
-      } catch (dbError) {
-        console.error('[ModelLoader] Failed to fetch model by ID:', dbError);
-        return null;
-      }
+      const [model] = await db
+        .select()
+        .from(userModels)
+        .where(eq(userModels.id, modelId))
+        .limit(1);
+
+      if (!model) return null;
+
+      // Parse metadata JSON string into object (for SQLite text compatibility)
+      const parsedModel = {
+        ...model,
+        metadata: model.metadata ?
+          (typeof model.metadata === 'string' ?
+            (() => { try { return JSON.parse(model.metadata); } catch { return {}; } })()
+            : model.metadata
+          )
+          : {}
+      };
+
+      // Return null only if query returns no rows
+      return parsedModel as UserModelDB;
     },
-    (error) => new Error(`Failed to load model: ${error}`)
+    (error) => new Error(`Failed to load model: ${error instanceof Error ? error.message : String(error)}`)
   );

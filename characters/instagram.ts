@@ -12,11 +12,13 @@ export const instagramAgent: Character = {
     "@elizaos/plugin-sql",
     "@elizaos/plugin-openrouter",
 
+    // Communication
+    ...(process.env.TELEGRAM_BOT_TOKEN?.trim()
+      ? ["@elizaos/plugin-telegram"]
+      : []),
+
     // Instagram plugin
     instagramPlugin as any,
-
-    // Telegram bot для получения сообщений (токен из Infisical)
-    "@elizaos/plugin-telegram",
 
     // Bootstrap
     "@elizaos/plugin-bootstrap",
@@ -96,6 +98,51 @@ export const instagramAgent: Character = {
         name: "Instagram Expert",
         content: {
           text: "Запускаю публикацию в Instagram!",
+          action: "INSTAGRAM_POST",
+        },
+      },
+    ],
+    [
+      {
+        name: "{{name1}}",
+        content: {
+          text: "Опубликуй в Инстаграм без текста",
+        },
+      },
+      {
+        name: "Instagram Expert",
+        content: {
+          text: "Публикую пост в Instagram без текстовой подписи!",
+          action: "INSTAGRAM_POST",
+        },
+      },
+    ],
+    [
+      {
+        name: "{{name1}}",
+        content: {
+          text: "опубликуй пост без текста",
+        },
+      },
+      {
+        name: "Instagram Expert",
+        content: {
+          text: "Публикую пост без подписи!",
+          action: "INSTAGRAM_POST",
+        },
+      },
+    ],
+    [
+      {
+        name: "{{name1}}",
+        content: {
+          text: "Опубликуй пост без комментариев",
+        },
+      },
+      {
+        name: "Instagram Expert",
+        content: {
+          text: "Публикую пост без комментариев!",
           action: "INSTAGRAM_POST",
         },
       },

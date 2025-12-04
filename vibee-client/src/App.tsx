@@ -26,6 +26,7 @@ import { Sheet, SheetContent, SheetTrigger } from './components/ui/sheet';
 import { Button } from './components/ui/button';
 import CreateGroupPage from './routes/group-new';
 import AgentSettingsRoute from './routes/agent-settings';
+import { CreateAgentPage } from './pages/create-agent';
 import clientLogger from '@/lib/logger';
 
 // Create a query client with optimized settings
@@ -144,16 +145,7 @@ function AppContent() {
               <Route path="settings/:agentId" element={<AgentSettingsRoute />} />
               <Route path="group/new" element={<CreateGroupPage />} />
               <Route path="agents/new" element={<AgentCreatorRoute />} />
-              <Route
-                path="/create"
-                element={
-                  <div className="flex w-full justify-center px-4 sm:px-6 overflow-y-auto">
-                    <div className="w-full md:max-w-4xl">
-                      <AgentCreator />
-                    </div>
-                  </div>
-                }
-              />
+              <Route path="/create" element={<CreateAgentPage />} />
               <Route
                 path="/logs"
                 element={

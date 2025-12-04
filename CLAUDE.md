@@ -34,6 +34,39 @@ const polzovatel = "Иван"; // переменная на русском
 
 Всегда говорим с пользователем на русском! 🇷🇺
 
+---
+
+# 🚨 КРИТИЧЕСКИ ВАЖНО: КОМАНДА ЗАПУСКА АГЕНТА
+
+## ⚡ ЕДИНСТВЕННАЯ КОМАНДА ЗАПУСКА
+
+**✅ ВСЕГДА ИСПОЛЬЗУЕМ:**
+```bash
+bun dev
+```
+
+**❌ НИКОГДА НЕ ИСПОЛЬЗУЕМ:**
+- `npm run dev`
+- `npm run dev:hot`
+- `bun run dev`
+- `elizaos dev`
+- Любые другие команды!
+
+**🎯 ПОЧЕМУ ТОЛЬКО `bun dev`:**
+
+Это **ОДИН СКРИПТ** который:
+- Запускает агента с правильной конфигурацией
+- Автоматически настраивает все переменные окружения
+- Подключает Infisical секреты
+- Запускает все необходимые сервисы
+- **НИКАКИХ дополнительных команд не нужно!**
+
+**📜 ЗАПОМНИ НАВСЕГДА:** `bun dev` - единственная команда запуска агента VIBEE!
+
+Любые другие команды - это ошибка. Всегда используем только `bun dev`.
+
+---
+
 ## 📋 Project Overview
 
 | Property            | Value                         |
@@ -444,16 +477,12 @@ grep -E "(INFISICAL|TELEGRAM)" .env.dev
 # Install dependencies
 bun install
 
-# Development with hot reload (FASTEST - 10-20x faster!)
-npm run dev:hot
-# - First build: full build via build.ansi.ts
-# - Subsequent changes: only changed files
-# - Auto server restart
-# - Perfect for debugging with Infisical
-
-# OR standard development mode
-npm run dev
-# elizaos dev
+# 🎯 ЕДИНСТВЕННАЯ КОМАНДА ЗАПУСКА АГЕНТА
+bun dev
+# - Автоматически настраивает все окружение
+# - Подключает Infisical секреты
+# - Запускает агента с правильной конфигурацией
+# - ВСЕГДА используем только эту команду!
 
 # Run all tests
 npm test
@@ -529,6 +558,12 @@ npm run check-all
 }
 ```
 
+**🎯 ВАЖНО: Главная команда для запуска агента**
+
+```bash
+bun dev
+```
+
 ### Testing Strategy
 
 #### **Method 1: Rainbow Bridge (⭐ PRIMARY - Autonomous)**
@@ -555,25 +590,21 @@ python3 scripts/rainbow-bridge-runner.py tests/rainbow-bridge-scenarios.json
 5. Generates test report
 6. tears down session
 
-#### **Method 2: Interactive Development (HOT RELOAD)**
+#### **Method 2: Interactive Development**
 
 ```bash
-# ⭐ RECOMMENDED: Hot reload mode (10-20x faster!)
-npm run dev:hot
+# 🎯 ЕДИНСТВЕННАЯ КОМАНДА ЗАПУСКА АГЕНТА
+bun dev
 
-# OR standard dev mode
-npm run dev
-# elizaos dev
-
-# With debug logging
-LOG_LEVEL=debug npm run dev
+# С отладочным логированием
+LOG_LEVEL=debug bun dev
 ```
 
-**Hot Reload Advantages:**
-- First build: full via build.ansi.ts
-- Subsequent: only changed files
-- Auto server restart
-- Perfect for Infisical + debugging
+**Почему только `bun dev`:**
+- Автоматически настраивает все окружение
+- Подключает Infisical секреты
+- Включает hot reload для разработки
+- Один скрипт - все настройки
 
 #### **Method 3: Component Testing**
 
@@ -687,7 +718,7 @@ cd plugin-vibe-face-avatar
 # Install dependencies
 bun install
 
-# Development mode (hot reload)
+# 🎯 ЕДИНСТВЕННАЯ КОМАНДА ЗАПУСКА ПЛАГИНА
 elizaos dev
 
 # Build plugin
@@ -709,7 +740,7 @@ elizaos dev
 
 # Test in full agent
 cd ../../
-npm run dev
+bun dev
 
 # Test LoRA training flow (manual)
 # 1. Send /face add
@@ -1234,7 +1265,7 @@ jobs:
 | **LoRA training fails**                  | Model status stuck on "training"             | Check FAL_KEY in Infisical, verify image formats/limits      |
 | **NeuroPhoto no models**                 | "No models found" message                    | User must train a model first with `/face add`               |
 | **Balance not deducted**                 | Operations succeed but balance unchanged     | Check `calculateServiceCost()` function, verify transaction  |
-| **Hot reload not working**               | Changes require manual restart               | Use `npm run dev:hot` (not `npm run dev`)                    |
+| **Agent not starting**                   | Agent won't run                              | Use `bun dev` (ONLY command for launching!)                  |
 
 ### General Issues
 
@@ -1251,7 +1282,7 @@ jobs:
 
 ```bash
 # Maximum verbosity (see all logs)
-LOG_LEVEL=debug npm run dev
+LOG_LEVEL=debug bun dev
 
 # Check Infisical secrets loaded
 node -e "console.log(Object.keys(process.env).filter(k => k.includes('API') || k.includes('TOKEN')))"
@@ -1397,8 +1428,8 @@ pm2 logs vibee-agent
 # 1. Pull latest secrets
 infisical secrets pull --env=dev
 
-# 2. Start hot reload development
-npm run dev:hot
+# 2. 🎯 ЕДИНСТВЕННАЯ КОМАНДА ЗАПУСКА АГЕНТА
+bun dev
 
 # 3. Make changes
 # - Edit plugin code
@@ -1496,7 +1527,7 @@ less VIBEE_SPECIFICATION.md  # Поиск по разделам
 
 ---
 
-**🎉 Готовы развивать VIBEE!** Начинайте с `npm run dev:hot` и тестируйте с Rainbow Bridge.
+**🎉 Готовы развивать VIBEE!** Начинайте с `bun dev` и тестируйте с Rainbow Bridge.
 
 **🇷🇺 Помните**: Всегда общайтесь на русском языке! Документация, комментарии, ответы пользователю - только русский!
 
@@ -1521,3 +1552,91 @@ less VIBEE_SPECIFICATION.md  # Поиск по разделам
 - https://docs.elizaos.ai/plugins/development - используй лучшие практики
 - https://docs.elizaos.ai/agents/character-interface - настройка персонажей
 - Всегда проверяй Rainbow Bridge после изменений
+
+## 🚀 КОМАНДЫ ЗАПУСКА - ВАЖНО!
+
+**✅ ВСЕГДА ИСПОЛЬЗУЕМ:**
+```bash
+bun dev
+```
+
+**❌ НИКОГДА НЕ ИСПОЛЬЗУЕМ:**
+- `npm run dev`
+- `npm run dev:hot`
+- `bun run dev`
+
+**Почему bun dev?**
+- Это ОДИН скрипт который настроен на то, чтобы все работало
+- Он запускает агента с правильной конфигурацией
+- Никаких дополнительных команд или скриптов не нужно
+
+**📝 ЗАПОМНИТЕ НАВСЕГДА:** `bun dev` - единственная команда запуска агента!
+---
+
+# 🔥🔥🔥 КРИТИЧЕСКИ ВАЖНО - ПРАВИЛА ДЛЯ AI 🔥🔥🔥
+
+## ⛔ ЖЕЛЕЗНЫЕ ПРАВИЛА (НЕ НАРУШАТЬ!):
+
+### 1. ЗАПУСК АГЕНТОВ
+```bash
+bun dev          # ✅ ВСЕГДА запускает ВСЕХ агентов
+bun dev:all      # ✅ Явно запускает всех
+bun dev:single   # ⚠️ Только по просьбе пользователя
+```
+
+### 2. НЕ УДАЛЯТЬ АГЕНТОВ
+- ❌ **НИКОГДА** не удаляй `characters/*.json`
+- ❌ **НИКОГДА** не удаляй персонажей, которых ты не создавал
+- ❌ **НИКОГДА** не удаляй работающих агентов
+- ✅ **ТОЛЬКО ДОБАВЛЯЙ** новых агентов
+
+**Существующие агенты (НЕПРИКАСАЕМЫЕ):**
+- `characters/vibeeAgent.json` - Главный VIBEE
+- `characters/instagramExpert.json` - Instagram
+- `characters/kolsAgent.json` - KOLS мониторинг
+
+### 3. АВАТАРЫ
+- ✅ Генерировать для НОВЫХ агентов
+- ❌ НЕ удалять существующие
+- Путь: `avatars/` и `vibee-client/public/avatars/`
+
+### 4. ПРОВЕРКА ПЕРЕД ИЗМЕНЕНИЯМИ
+```bash
+# Всегда проверяй агентов перед работой
+ls -la characters/*.json
+
+# Проверяй процессы
+ps aux | grep elizaos
+
+# Проверяй логи
+tail -f agent.log
+```
+
+## 📖 Полные правила:
+См. файл `AGENT_RULES.md`
+
+---
+- PostgreSQL - ✅ ИСПРАВЛЕНО
+
+  Исправлены SQL-запросы для
+  работы с PostgreSQL вместо
+  SQLite.
+
+  📝 Итоговый Отчет
+
+  Полный отчет сохранен в
+  /tmp/FIXES_APPLIED.md
+
+  ⚠️ Осталась одна проблема
+
+  При перезапуске возникает ошибка
+   миграции базы данных в самом
+  ElizaOS:
+  Database migration failed:
+  Failed query: CREATE SCHEMA IF
+  NOT EXISTS migrations
+
+  Это проблема в @elizaos/server -
+   он использует SQLite-синтаксис
+  для PostgreSQL. Это не наш код,
+  это библиотека.

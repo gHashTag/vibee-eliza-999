@@ -99,18 +99,13 @@ export class FalProvider implements ImageGenerationProvider {
         };
 
         // Добавляем LoRA если поддерживается
-        if (modelConfig.apiSettings.supportsLoRA) {
+        // НО! Если modelUrl уже содержит trained LoRA модель (fal-ai URL), не добавляем дополнительные LoRA
+        const isLoRATrainedModel = options.modelUrl && options.modelUrl.includes("fal.run/fal-ai/flux-lora");
+
+        if (modelConfig.apiSettings.supportsLoRA && !isLoRATrainedModel) {
           input.loras = [];
-          
-          // 1. Dynamic LoRA from options (User's custom model)
-          if (options.modelUrl) {
-             input.loras.push({
-               path: options.modelUrl,
-               scale: 1.0, // Default scale
-             });
-          }
-          
-          // 2. Default LoRA from constructor (System default)
+
+          // 1. Default LoRA from constructor (System default)
           if (this.defaultLoRA) {
             input.loras.push({
               path: this.defaultLoRA.path,
@@ -118,6 +113,9 @@ export class FalProvider implements ImageGenerationProvider {
             });
           }
         }
+
+        // Если это уже готовая LoRA-модель (из базы данных), используем её напрямую
+        // и НЕ добавляем отдельные LoRA параметры - они уже встроены в модель
 
         // Добавляем опциональные параметры
         if (

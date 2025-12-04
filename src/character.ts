@@ -1,7 +1,6 @@
 import { type Character } from "@elizaos/core";
-import { vibeFaceAvatarPlugin } from "../plugin-vibe-face-avatar/src/index";
-// ✅ Правильный импорт через главную точку входа плагина (изолированная архитектура)
-import { telegramCraftPlugin } from "../plugin-telegram-craft/src";
+// import { vibeFaceAvatarPlugin } from "../plugin-vibe-face-avatar/src/index"; // ВРЕМЕННО ОТКЛЮЧЕН
+// import { instagramPlugin } from "./instagram-plugin/index"; // УДАЛЁН - используется только в Instagram Expert
 
 /**
  * Represents the default character (Eliza) with her specific attributes and behaviors.
@@ -26,8 +25,13 @@ export const character: Character = {
     "@elizaos/plugin-openrouter",
 
     // Custom plugins
-    vibeFaceAvatarPlugin as any, // Плагин Avatar Face (LoRA обучение + NeuroPhoto)
-    telegramCraftPlugin as any, // Плагин Telegram Craft (мониторинг групп)
+    // vibeFaceAvatarPlugin as any, // ВРЕМЕННО ОТКЛЮЧЕН - вызывает ошибки TypeScript
+    // instagramPlugin as any, // УДАЛЁН - публикацией Instagram постов занимается Instagram Expert
+
+    // Communication - для получения сообщений от пользователей
+    ...(process.env.TELEGRAM_BOT_TOKEN?.trim()
+      ? ["@elizaos/plugin-telegram"]
+      : []),
 
     // Embedding-capable plugins (optional, based on available credentials)
     ...(process.env.OPENAI_API_KEY?.trim() ? ["@elizaos/plugin-openai"] : []),
@@ -53,9 +57,10 @@ export const character: Character = {
     process.env.TWITTER_ACCESS_TOKEN_SECRET?.trim()
       ? ["@elizaos/plugin-twitter"]
       : []),
-    ...(process.env.TELEGRAM_BOT_TOKEN?.trim()
-      ? ["@elizaos/plugin-telegram"]
-      : []),
+    // Официальный Telegram плагин ОТКЛЮЧЕН - используем telegramCraftPlugin с MTProto вместо Bot API
+    // ...(process.env.TELEGRAM_BOT_TOKEN?.trim()
+    //   ? ["@elizaos/plugin-telegram"]
+    //   : []),
 
     // Bootstrap plugin
     ...(!process.env.IGNORE_BOOTSTRAP ? ["@elizaos/plugin-bootstrap"] : []),

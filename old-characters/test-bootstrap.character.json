@@ -1,0 +1,17 @@
+{
+  "name": "Test",
+  "plugins": [
+    "@elizaos/plugin-bootstrap"
+  ],
+  "settings": {
+    "secrets": {},
+    "avatar": "https://elizaos.github.io/eliza-avatars/Eliza/portrait.png"
+  },
+  "system": "Test agent",
+  "bio": ["Test"],
+  "topics": ["test"],
+  "style": {
+    "all": ["Будь краток"],
+    "chat": ["Будь краток"]
+  }
+}

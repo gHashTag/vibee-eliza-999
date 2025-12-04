@@ -1,0 +1,68 @@
+{
+  "name": "@vibee/plugin-kols-unified",
+  "version": "1.0.0",
+  "description": "KOLS Unified Plugin - Knowledge Oriented Learning System с Telegram MTProto, автоответами и проактивными сообщениями. Единый переиспользуемый плагин для всех клиентов.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest"
+  },
+  "keywords": [
+    "elizaos",
+    "eliza",
+    "ai-agent",
+    "telegram",
+    "mtproto",
+    "learning",
+    "education",
+    "kols",
+    "openrouter",
+    "proactive-messaging",
+    "auto-reply",
+    "ai"
+  ],
+  "author": "VIBEE Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vibee/plugin-kols-unified.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vibee/plugin-kols-unified/issues"
+  },
+  "homepage": "https://github.com/vibee/plugin-kols-unified#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "peerDependencies": {
+    "@elizaos/core": "^1.0.0",
+    "@elizaos/plugin-openrouter": "^1.0.0",
+    "telegram": "^2.20.0"
+  },
+  "dependencies": {
+    "@elizaos/core": "^1.0.0",
+    "telegram": "^2.20.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  }
+}

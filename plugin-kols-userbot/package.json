@@ -1,0 +1,35 @@
+{
+  "name": "plugin-kols-userbot",
+  "version": "1.0.0",
+  "description": "KOLS USERBOT - Единый плагин для MTProto подключения и проактивного обучения студентов VibeCoding",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "elizaos",
+    "plugin",
+    "telegram",
+    "mtproto",
+    "userbot",
+    "kols",
+    "learning",
+    "vibecoding"
+  ],
+  "author": "KOLS Team",
+  "license": "ISC",
+  "dependencies": {
+    "@elizaos/core": "^1.0.0",
+    "telegram": "^2.21.3"
+  },
+  "devDependencies": {
+    "@elizaos/cli": "^1.6.4",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@elizaos/core": "^1.0.0"
+  }
+}

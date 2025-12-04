@@ -1,3 +1,598 @@
+/* 🎨 TELEGRAM CRAFT - CYRILLIC FONTS & PLATFORM ADAPTATION
+ * Адаптированный CSS для Telegram интеграции KOLS Agent
+ * Использует лучшие кириллические шрифты 2025 года
+ */
+
+/* Import лучших кириллических шрифтов через Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;300;400;500;600;700;800;900;1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100;200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap');
+
+/* ================================
+   BASE VARIABLES
+   ================================ */
+
+:root {
+  /* Telegram Brand Colors */
+  --telegram-blue: #0088cc;
+  --telegram-blue-dark: #006699;
+  --telegram-blue-light: #229ed9;
+  --telegram-gray: #707579;
+  --telegram-gray-light: #999999;
+  --telegram-gray-dark: #505050;
+
+  /* Background Colors */
+  --telegram-bg: #ffffff;
+  --telegram-bg-secondary: #f4f4f5;
+  --telegram-bg-hover: #e5e7eb;
+  --telegram-bg-active: #d1d5db;
+
+  /* Text Colors */
+  --telegram-text: #0f1419;
+  --telegram-text-secondary: #707579;
+  --telegram-text-muted: #999999;
+
+  /* Dark Theme */
+  --telegram-dark-bg: #212121;
+  --telegram-dark-bg-secondary: #181818;
+  --telegram-dark-bg-hover: #2c2c2c;
+  --telegram-dark-text: #ffffff;
+  --telegram-dark-text-secondary: #b0b0b0;
+
+  /* 🎨 Typography Variables */
+  --telegram-font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --telegram-font-secondary: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --telegram-font-accent: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --telegram-font-display: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --telegram-font-code: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Responsive Font Sizes */
+  --telegram-font-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --telegram-font-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+  --telegram-font-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  --telegram-font-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+  --telegram-font-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+  --telegram-font-2xl: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+  --telegram-font-3xl: clamp(1.875rem, 1.6rem + 1.375vw, 2.25rem);
+
+  /* Line Heights */
+  --telegram-leading-tight: 1.25;
+  --telegram-leading-snug: 1.375;
+  --telegram-leading-normal: 1.5;
+  --telegram-leading-relaxed: 1.625;
+  --telegram-leading-loose: 2;
+
+  /* Letter Spacing */
+  --telegram-tracking-tighter: -0.05em;
+  --telegram-tracking-tight: -0.025em;
+  --telegram-tracking-normal: 0em;
+  --telegram-tracking-wide: 0.025em;
+  --telegram-tracking-wider: 0.05em;
+  --telegram-tracking-widest: 0.1em;
+}
+
+/* Dark Theme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --telegram-bg: var(--telegram-dark-bg);
+    --telegram-bg-secondary: var(--telegram-dark-bg-secondary);
+    --telegram-bg-hover: var(--telegram-dark-bg-hover);
+    --telegram-text: var(--telegram-dark-text);
+    --telegram-text-secondary: var(--telegram-dark-text-secondary);
+  }
+}
+
+/* ================================
+   BASE STYLES
+   ================================ */
+
+body {
+  font-family: var(--telegram-font-primary);
+  font-size: var(--telegram-font-base);
+  line-height: var(--telegram-leading-normal);
+  color: var(--telegram-text);
+  background-color: var(--telegram-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ================================
+   TELEGRAM-SPECIFIC COMPONENTS
+   ================================ */
+
+/* Telegram Chat Container */
+.telegram-chat {
+  font-family: var(--telegram-font-primary);
+  background: var(--telegram-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Telegram Message */
+.telegram-message {
+  font-family: var(--telegram-font-secondary);
+  padding: 12px 16px;
+  margin: 4px 0;
+  border-radius: 8px;
+  background: var(--telegram-bg-secondary);
+  transition: background-color 0.2s ease;
+}
+
+.telegram-message:hover {
+  background: var(--telegram-bg-hover);
+}
+
+/* Telegram Message - Outgoing */
+.telegram-message-outgoing {
+  background: linear-gradient(135deg, var(--telegram-blue-light) 0%, var(--telegram-blue) 100%);
+  color: white;
+  margin-left: auto;
+  max-width: 70%;
+  border-radius: 12px 12px 4px 12px;
+}
+
+/* Telegram Message - Incoming */
+.telegram-message-incoming {
+  background: var(--telegram-bg-secondary);
+  color: var(--telegram-text);
+  margin-right: auto;
+  max-width: 70%;
+  border-radius: 12px 12px 12px 4px;
+}
+
+/* Telegram Message Author */
+.telegram-message-author {
+  font-family: var(--telegram-font-accent);
+  font-size: var(--telegram-font-sm);
+  font-weight: 600;
+  color: var(--telegram-blue);
+  margin-bottom: 4px;
+}
+
+/* Telegram Message Text */
+.telegram-message-text {
+  font-family: var(--telegram-font-primary);
+  font-size: var(--telegram-font-base);
+  line-height: var(--telegram-leading-relaxed);
+  word-wrap: break-word;
+}
+
+/* ================================
+   KOLS LEARNING COMPONENTS
+   ================================ */
+
+/* KOLS Lesson Card */
+.kols-lesson-card {
+  font-family: var(--telegram-font-secondary);
+  background: linear-gradient(135deg, rgba(0, 136, 204, 0.1) 0%, rgba(0, 102, 153, 0.1) 100%);
+  border: 2px solid var(--telegram-blue-light);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kols-lesson-card::before {
+  content: '🎓';
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  background: var(--telegram-bg);
+  padding: 0 8px;
+  font-size: 24px;
+}
+
+.kols-lesson-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 136, 204, 0.2);
+  border-color: var(--telegram-blue);
+}
+
+/* KOLS Lesson Title */
+.kols-lesson-title {
+  font-family: var(--telegram-font-display);
+  font-size: var(--telegram-font-xl);
+  font-weight: 700;
+  color: var(--telegram-blue);
+  line-height: var(--telegram-leading-tight);
+  margin: 8px 0 12px 0;
+}
+
+/* KOLS Lesson Content */
+.kols-lesson-content {
+  font-family: var(--telegram-font-primary);
+  font-size: var(--telegram-font-base);
+  line-height: var(--telegram-leading-relaxed);
+  color: var(--telegram-text);
+  margin-bottom: 12px;
+}
+
+/* KOLS Tip Highlight */
+.kols-tip {
+  font-family: var(--telegram-font-secondary);
+  font-weight: 600;
+  color: var(--telegram-blue);
+  background: rgba(0, 136, 204, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin: 0 4px;
+}
+
+/* KOLS Practical Tip */
+.kols-practical-tip {
+  font-family: var(--telegram-font-secondary);
+  font-size: var(--telegram-font-sm);
+  font-weight: 500;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+  border-left: 4px solid var(--telegram-blue);
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  margin-top: 12px;
+  color: var(--telegram-text);
+}
+
+/* KOLS Code Block */
+.kols-code-block {
+  font-family: var(--telegram-font-code);
+  font-size: var(--telegram-font-sm);
+  background: #1a1a1a;
+  color: #e5e5e5;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  overflow-x: auto;
+  line-height: 1.6;
+  margin: 12px 0;
+}
+
+/* ================================
+   TELEGRAM UI ELEMENTS
+   ================================ */
+
+/* Telegram Button */
+.telegram-button {
+  font-family: var(--telegram-font-accent);
+  font-size: var(--telegram-font-base);
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--telegram-blue-light) 0%, var(--telegram-blue) 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.telegram-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
+  background: linear-gradient(135deg, var(--telegram-blue) 0%, var(--telegram-blue-dark) 100%);
+}
+
+.telegram-button:active {
+  transform: translateY(0);
+}
+
+/* Telegram Button - Secondary */
+.telegram-button-secondary {
+  background: var(--telegram-bg-secondary);
+  color: var(--telegram-blue);
+  border: 2px solid var(--telegram-blue-light);
+}
+
+.telegram-button-secondary:hover {
+  background: var(--telegram-blue-light);
+  color: white;
+  border-color: var(--telegram-blue);
+}
+
+/* Telegram Input */
+.telegram-input {
+  font-family: var(--telegram-font-primary);
+  font-size: var(--telegram-font-base);
+  background: var(--telegram-bg);
+  border: 2px solid var(--telegram-bg-hover);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--telegram-text);
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.telegram-input:focus {
+  outline: none;
+  border-color: var(--telegram-blue);
+  box-shadow: 0 0 0 3px rgba(0, 136, 204, 0.1);
+}
+
+.telegram-input::placeholder {
+  color: var(--telegram-text-muted);
+}
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .kols-lesson-card {
+    padding: 16px;
+    margin: 12px 0;
+  }
+
+  .kols-lesson-title {
+    font-size: var(--telegram-font-lg);
+  }
+
+  .telegram-message-outgoing,
+  .telegram-message-incoming {
+    max-width: 85%;
+    font-size: var(--telegram-font-sm);
+  }
+
+  .telegram-button {
+    padding: 10px 20px;
+    font-size: var(--telegram-font-sm);
+  }
+}
+
+/* Tablet Styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .kols-lesson-card {
+    padding: 18px;
+  }
+
+  .kols-lesson-title {
+    font-size: var(--telegram-font-xl);
+  }
+}
+
+/* Desktop Styles */
+@media (min-width: 1025px) {
+  .kols-lesson-card {
+    padding: 24px;
+  }
+
+  .kols-lesson-title {
+    font-size: var(--telegram-font-2xl);
+  }
+
+  .telegram-message-outgoing,
+  .telegram-message-incoming {
+    max-width: 60%;
+  }
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+
+@keyframes telegramFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes telegramSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes telegramSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes telegramPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Animation Classes */
+.animate-telegram-fade-in {
+  animation: telegramFadeIn 0.5s ease-out;
+}
+
+.animate-telegram-slide-in-left {
+  animation: telegramSlideInLeft 0.4s ease-out;
+}
+
+.animate-telegram-slide-in-right {
+  animation: telegramSlideInRight 0.4s ease-out;
+}
+
+.animate-telegram-pulse {
+  animation: telegramPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ================================
+   UTILITY CLASSES
+   ================================ */
+
+/* Font Families */
+.font-telegram-primary { font-family: var(--telegram-font-primary); }
+.font-telegram-secondary { font-family: var(--telegram-font-secondary); }
+.font-telegram-accent { font-family: var(--telegram-font-accent); }
+.font-telegram-display { font-family: var(--telegram-font-display); }
+.font-telegram-code { font-family: var(--telegram-font-code); }
+
+/* Font Sizes */
+.text-telegram-xs { font-size: var(--telegram-font-xs); }
+.text-telegram-sm { font-size: var(--telegram-font-sm); }
+.text-telegram-base { font-size: var(--telegram-font-base); }
+.text-telegram-lg { font-size: var(--telegram-font-lg); }
+.text-telegram-xl { font-size: var(--telegram-font-xl); }
+.text-telegram-2xl { font-size: var(--telegram-font-2xl); }
+.text-telegram-3xl { font-size: var(--telegram-font-3xl); }
+
+/* Line Heights */
+.leading-telegram-tight { line-height: var(--telegram-leading-tight); }
+.leading-telegram-snug { line-height: var(--telegram-leading-snug); }
+.leading-telegram-normal { line-height: var(--telegram-leading-normal); }
+.leading-telegram-relaxed { line-height: var(--telegram-leading-relaxed); }
+.leading-telegram-loose { line-height: var(--telegram-leading-loose); }
+
+/* Letter Spacing */
+.tracking-telegram-tighter { letter-spacing: var(--telegram-tracking-tighter); }
+.tracking-telegram-tight { letter-spacing: var(--telegram-tracking-tight); }
+.tracking-telegram-normal { letter-spacing: var(--telegram-tracking-normal); }
+.tracking-telegram-wide { letter-spacing: var(--telegram-tracking-wide); }
+.tracking-telegram-wider { letter-spacing: var(--telegram-tracking-wider); }
+.tracking-telegram-widest { letter-spacing: var(--telegram-tracking-widest); }
+
+/* ================================
+   SPECIAL EFFECTS
+   ================================ */
+
+/* Gradient Text */
+.telegram-gradient-text {
+  background: linear-gradient(135deg, var(--telegram-blue-light) 0%, var(--telegram-blue) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glass Effect */
+.telegram-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+}
+
+/* Telegram Scrollbar */
+.telegram-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--telegram-blue-light) var(--telegram-bg-secondary);
+}
+
+.telegram-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.telegram-scrollbar::-webkit-scrollbar-track {
+  background: var(--telegram-bg-secondary);
+  border-radius: 3px;
+}
+
+.telegram-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--telegram-blue-light);
+  border-radius: 3px;
+}
+
+.telegram-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--telegram-blue);
+}
+
+/* ================================
+   ACCESSIBILITY
+   ================================ */
+
+/* Focus Styles */
+.telegram-focus:focus-visible {
+  outline: 2px solid var(--telegram-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .telegram-message-outgoing {
+    border: 2px solid var(--telegram-text);
+  }
+
+  .telegram-message-incoming {
+    border: 2px solid var(--telegram-text-secondary);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ================================
+   KOLS SPECIFIC STYLES
+   ================================ */
+
+/* KOLS Status Indicator */
+.kols-status {
+  font-family: var(--telegram-font-secondary);
+  font-size: var(--telegram-font-sm);
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kols-status-online {
+  background: rgba(34, 197, 94, 0.2);
+  color: #16a34a;
+}
+
+.kols-status-learning {
+  background: rgba(0, 136, 204, 0.2);
+  color: var(--telegram-blue);
+}
+
+/* KOLS Badge */
+.kols-badge {
+  font-family: var(--telegram-font-accent);
+  font-size: var(--telegram-font-xs);
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--telegram-blue-light) 0%, var(--telegram-blue) 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: var(--telegram-tracking-wider);
+}
+
+/* ================================
+   TEST MARKERS (для отладки)
+   ================================ */
+
 /* TEST: VIBEE CSS WORKS - Sun Nov 23 00:59:34 +07 2025 */
 
 /* TEST HMR - 01:00:54 */

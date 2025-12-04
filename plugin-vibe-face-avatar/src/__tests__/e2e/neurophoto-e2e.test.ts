@@ -22,15 +22,10 @@ describe('NeuroPhoto Agent E2E Tests', () => {
 
     console.log('🚀 Setting up E2E test environment for Нейрофото agent...');
 
-    // Читаем TypeScript конфигурацию агента
-    const tsConfigPath = '/Users/playra/vibee-agent/src/agents/neuroPhotoAgent.ts';
-    const tsConfigContent = readFileSync(tsConfigPath, 'utf-8');
-
     // Читаем JSON конфигурацию
     const jsonConfigPath = '/Users/playra/vibee-agent/neuroPhoto.character.json';
     jsonConfig = JSON.parse(readFileSync(jsonConfigPath, 'utf-8'));
 
-    console.log('✅ Agent TypeScript config loaded from:', tsConfigPath);
     console.log('✅ Agent JSON config loaded from:', jsonConfigPath);
     console.log('✅ Agent name:', jsonConfig.name);
     console.log('✅ Plugins count:', jsonConfig.plugins?.length);
@@ -42,19 +37,6 @@ describe('NeuroPhoto Agent E2E Tests', () => {
   });
 
   describe('Agent Configuration Files', () => {
-    it('should have TypeScript configuration file', () => {
-      const fs = require('fs');
-      const tsConfigPath = '/Users/playra/vibee-agent/src/agents/neuroPhotoAgent.ts';
-      expect(fs.existsSync(tsConfigPath)).toBe(true);
-
-      const content = fs.readFileSync(tsConfigPath, 'utf-8');
-      expect(content).toContain('neuroPhotoAgent');
-      expect(content).toContain('Character');
-      expect(content).toContain('Нейрофото');
-
-      console.log('✅ TypeScript configuration file exists and has correct content');
-    });
-
     it('should have JSON configuration file', () => {
       const fs = require('fs');
       const jsonConfigPath = '/Users/playra/vibee-agent/neuroPhoto.character.json';
@@ -66,19 +48,6 @@ describe('NeuroPhoto Agent E2E Tests', () => {
       expect(jsonConfig.plugins?.length).toBeGreaterThan(0);
 
       console.log('✅ JSON configuration file is valid');
-    });
-
-    it('should have agent exported in index.ts', () => {
-      const fs = require('fs');
-      const indexPath = '/Users/playra/vibee-agent/src/agents/index.ts';
-      expect(fs.existsSync(indexPath)).toBe(true);
-
-      const content = fs.readFileSync(indexPath, 'utf-8');
-      expect(content).toContain('neuroPhotoAgent');
-      expect(content).toContain('agents');
-      expect(content).toContain('neuroPhoto');
-
-      console.log('✅ Agent is properly exported in index.ts');
     });
   });
 

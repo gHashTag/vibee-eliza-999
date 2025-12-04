@@ -1,0 +1,560 @@
+/* 
+🌑 CYBERPUNK VIBECODER ULTRA DARK THEME
+Сверхтемная киберпанк тема для истинных вампиров кодинга
+OLED-оптимизированная версия с минимальным светом ⚡🧛‍♂️
+*/
+
+/* ============================================ */
+/* 🎨 ЦВЕТОВАЯ ПАЛИТРА CYBERPUNK */
+/* ============================================ */
+
+.theme-dark {
+  /* ULTRA DARK - Истинный черный для OLED */
+  --background-primary: #000000;
+  --background-secondary: #000000;
+  --background-modifier-border: #0a0a0a;
+  --background-modifier-form-field: #0a0a0a;
+  --background-modifier-form-field-highlighted: #111111;
+  
+  /* Неоновые акценты */
+  --accent-h: 200;
+  --accent-s: 100%;
+  --accent-l: 50%;
+  --color-accent: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  --color-accent-1: #00d4ff;
+  --color-accent-2: #bf00ff;
+  
+  /* Приглушенные неоновые цвета для ULTRA DARK */
+  --neon-blue: #0088cc;
+  --neon-purple: #7a00cc;
+  --neon-green: #00cc55;
+  --neon-pink: #cc0055;
+  --neon-yellow: #ccaa00;
+  --neon-orange: #cc4422;
+  
+  /* Приглушенный текст для ULTRA DARK */
+  --text-normal: #999999;
+  --text-muted: #666666;
+  --text-accent: #cccccc;
+  --text-accent-hover: var(--neon-blue);
+  --text-on-accent: #000000;
+  
+  /* Темные интерактивные элементы */
+  --interactive-normal: #0a0a0a;
+  --interactive-hover: #111111;
+  --interactive-accent: var(--neon-blue);
+  --interactive-accent-hover: var(--neon-purple);
+  
+  /* Приглушенные границы для ULTRA DARK */
+  --border-color: rgba(0, 136, 204, 0.2);
+  --divider-color: rgba(122, 0, 204, 0.1);
+}
+
+/* ============================================ */
+/* 🌟 ГЛОБАЛЬНЫЕ СТИЛИ */
+/* ============================================ */
+
+body {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace !important;
+  background: #000000 !important;
+  background-attachment: fixed;
+}
+
+/* ============================================ */
+/* 📝 ЗАГОЛОВКИ С ГЛИТЧ ЭФФЕКТОМ */
+/* ============================================ */
+
+.HyperMD-header-1,
+.cm-header-1,
+h1 {
+  color: var(--neon-blue) !important;
+  font-size: 2.5em !important;
+  font-weight: 900 !important;
+  text-shadow: 
+    0 0 1px var(--neon-blue),
+    0 0 2px var(--neon-blue);
+  position: relative;
+  animation: smooth-glow-blue 4s ease-in-out infinite;
+}
+
+.HyperMD-header-2,
+.cm-header-2,
+h2 {
+  color: var(--neon-purple) !important;
+  font-size: 2em !important;
+  font-weight: 800 !important;
+  text-shadow: 
+    0 0 1px var(--neon-purple),
+    0 0 2px var(--neon-purple);
+  animation: smooth-glow-purple 5s ease-in-out infinite;
+}
+
+.HyperMD-header-3,
+.cm-header-3,
+h3 {
+  color: var(--neon-green) !important;
+  font-size: 1.5em !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 1px var(--neon-green);
+  opacity: 0.9;
+}
+
+.HyperMD-header-4,
+.cm-header-4,
+h4 {
+  color: var(--neon-pink) !important;
+  font-size: 1.2em !important;
+  font-weight: 600 !important;
+  text-shadow: 0 0 1px var(--neon-pink);
+  opacity: 0.85;
+}
+
+/* ============================================ */
+/* ⚡ АНИМАЦИИ */
+/* ============================================ */
+
+/* Плавные анимации без резких переходов */
+@keyframes smooth-glow-blue {
+  0%, 100% { 
+    text-shadow: 
+      0 0 1px var(--neon-blue),
+      0 0 2px var(--neon-blue);
+    opacity: 0.9;
+  }
+  50% { 
+    text-shadow: 
+      0 0 1px var(--neon-blue),
+      0 0 3px var(--neon-blue);
+    opacity: 1;
+  }
+}
+
+@keyframes smooth-glow-purple {
+  0%, 100% { 
+    text-shadow: 
+      0 0 1px var(--neon-purple),
+      0 0 2px var(--neon-purple);
+    opacity: 0.85;
+  }
+  50% { 
+    text-shadow: 
+      0 0 1px var(--neon-purple),
+      0 0 3px var(--neon-purple);
+    opacity: 1;
+  }
+}
+
+@keyframes glitch {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-1px, 1px); }
+  40% { transform: translate(-1px, -1px); }
+  60% { transform: translate(1px, 1px); }
+  80% { transform: translate(1px, -1px); }
+}
+
+@keyframes slide-in {
+  from { 
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================ */
+/* 💻 КОД БЛОКИ */
+/* ============================================ */
+
+.cm-s-obsidian pre.HyperMD-codeblock,
+pre[class*="language-"],
+code[class*="language-"] {
+  background: #0a0a0a !important;
+  border: 1px solid rgba(122, 0, 204, 0.3) !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  box-shadow: 
+    0 0 8px rgba(122, 0, 204, 0.1),
+    inset 0 0 10px rgba(0, 0, 0, 0.8) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* TypeScript подсветка */
+.token.keyword {
+  color: var(--neon-blue) !important;
+  font-weight: bold;
+}
+
+.token.string {
+  color: var(--neon-green) !important;
+}
+
+.token.function {
+  color: var(--neon-yellow) !important;
+}
+
+.token.number {
+  color: var(--neon-orange) !important;
+}
+
+.token.comment {
+  color: var(--text-muted) !important;
+  font-style: italic;
+}
+
+/* Inline код */
+code {
+  background: rgba(10, 10, 10, 0.9) !important;
+  color: var(--neon-green) !important;
+  padding: 3px 6px !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(0, 204, 85, 0.2) !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* ============================================ */
+/* 🔗 ССЫЛКИ И НАВИГАЦИЯ */
+/* ============================================ */
+
+.internal-link,
+.cm-hmd-internal-link {
+  color: var(--neon-blue) !important;
+  text-decoration: none !important;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.internal-link:hover,
+.cm-hmd-internal-link:hover {
+  color: var(--neon-pink) !important;
+  text-shadow: 0 0 2px var(--neon-pink);
+  transform: translateX(2px);
+  transition: all 0.3s ease;
+}
+
+.internal-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--neon-blue);
+  transition: width 0.3s ease;
+}
+
+.internal-link:hover::after {
+  width: 100%;
+  background: var(--neon-pink);
+  box-shadow: 0 0 8px var(--neon-pink);
+}
+
+/* ============================================ */
+/* 📋 СПИСКИ */
+/* ============================================ */
+
+.HyperMD-list-line,
+ul, ol {
+  animation: slide-in 0.5s ease;
+}
+
+li::marker {
+  color: var(--neon-green) !important;
+}
+
+.list-bullet {
+  color: var(--neon-green) !important;
+}
+
+/* Чекбоксы */
+.task-list-item-checkbox {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--neon-blue);
+  border-radius: 3px;
+  background: transparent;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.task-list-item-checkbox:checked {
+  background: var(--neon-green);
+  border-color: var(--neon-green);
+  box-shadow: 0 0 10px var(--neon-green);
+}
+
+.task-list-item-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  color: #000;
+  font-size: 14px;
+  top: -3px;
+  left: 2px;
+}
+
+/* ============================================ */
+/* 🎯 СПЕЦИАЛЬНЫЕ ЭЛЕМЕНТЫ */
+/* ============================================ */
+
+/* Цитаты */
+blockquote {
+  border-left: 4px solid var(--neon-purple) !important;
+  background: linear-gradient(90deg, rgba(191, 0, 255, 0.1), transparent) !important;
+  padding: 15px 20px !important;
+  margin: 20px 0 !important;
+  border-radius: 0 8px 8px 0 !important;
+  position: relative;
+  box-shadow: 0 0 15px rgba(191, 0, 255, 0.2);
+}
+
+blockquote::before {
+  content: '💬';
+  position: absolute;
+  left: -15px;
+  top: 10px;
+  font-size: 20px;
+  background: var(--background-primary);
+  padding: 5px;
+  border-radius: 50%;
+}
+
+/* Теги */
+.tag {
+  background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple)) !important;
+  color: #000 !important;
+  padding: 4px 12px !important;
+  border-radius: 20px !important;
+  font-size: 0.8em !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.tag:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(191, 0, 255, 0.8);
+}
+
+/* ============================================ */
+/* 🖼️ ИНТЕРФЕЙС OBSIDIAN */
+/* ============================================ */
+
+/* Сайдбар */
+.workspace-leaf-content,
+.workspace-split.mod-vertical {
+  background: var(--background-primary) !important;
+  border-right: 1px solid var(--border-color) !important;
+}
+
+/* Заголовок файла */
+.view-header-title {
+  color: var(--neon-blue) !important;
+  font-weight: bold !important;
+  text-shadow: 0 0 5px var(--neon-blue);
+}
+
+/* Табы */
+.workspace-tab-header {
+  background: var(--background-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px 8px 0 0 !important;
+  margin-right: 2px !important;
+  transition: all 0.3s ease;
+}
+
+.workspace-tab-header:hover {
+  background: var(--interactive-hover) !important;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.workspace-tab-header.is-active {
+  background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)) !important;
+  color: #000 !important;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+}
+
+/* Кнопки */
+.clickable-icon {
+  color: var(--text-muted) !important;
+  transition: all 0.3s ease;
+  border-radius: 8px !important;
+  padding: 8px !important;
+}
+
+.clickable-icon:hover {
+  color: var(--neon-blue) !important;
+  background: var(--interactive-hover) !important;
+  transform: scale(1.05);
+  box-shadow: 0 0 5px rgba(0, 136, 204, 0.3);
+  transition: all 0.3s ease;
+}
+
+/* ============================================ */
+/* 🎪 СПЕЦИАЛЬНЫЕ ЭФФЕКТЫ */
+/* ============================================ */
+
+/* Hover эффекты для карточек */
+.nav-file-title,
+.nav-folder-title {
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  padding: 6px 12px;
+}
+
+.nav-file-title:hover,
+.nav-folder-title:hover {
+  background: var(--interactive-hover) !important;
+  color: var(--neon-green) !important;
+  transform: translateX(5px);
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+/* 🔧 FIX: Выравнивание файлов в file explorer */
+/* Улучшенная иерархия с четкими отступами */
+
+/* Сброс базовых отступов */
+.nav-file-title-content {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+.tree-item-self {
+  padding-left: 0 !important;
+}
+
+/* Папки первого уровня - базовый отступ (уменьшен для компактности) */
+.tree-item.nav-folder > .tree-item-self {
+  padding-left: 12px !important;
+}
+
+/* Файлы первого уровня (вне папок) */
+.tree-item.nav-file > .tree-item-self {
+  padding-left: 12px !important;
+}
+
+/* Файлы внутри раскрытых папок - умеренный отступ для четкой иерархии */
+.tree-item.nav-folder > .tree-item-children > .tree-item.nav-file > .tree-item-self {
+  padding-left: 20px !important;
+}
+
+/* Дополнительный отступ для глубоко вложенных элементов */
+.tree-item.nav-folder > .tree-item-children > .tree-item.nav-folder > .tree-item-self {
+  padding-left: 20px !important;
+}
+
+.tree-item.nav-folder > .tree-item-children > .tree-item.nav-folder > .tree-item-children > .tree-item.nav-file > .tree-item-self {
+  padding-left: 28px !important;
+}
+
+/* Визуальная линия для показа вложенности (уменьшен margin) */
+.tree-item-children {
+  border-left: 1px solid rgba(0, 136, 204, 0.2) !important;
+  margin-left: 6px !important;
+}
+
+/* Улучшенное выравнивание иконок папок */
+.nav-folder-title-content::before {
+  margin-right: 6px !important;
+}
+
+/* Более компактное расстояние между файлами */
+.tree-item {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+
+/* Подсветка текущего файла */
+.nav-file-title.is-active {
+  background: linear-gradient(90deg, var(--neon-purple), transparent) !important;
+  color: var(--text-accent) !important;
+  border-left: 3px solid var(--neon-purple) !important;
+  box-shadow: 0 0 20px rgba(191, 0, 255, 0.4);
+}
+
+/* ============================================ */
+/* 📱 АДАПТИВНОСТЬ */
+/* ============================================ */
+
+@media (max-width: 768px) {
+  .HyperMD-header-1,
+  .cm-header-1,
+  h1 {
+    font-size: 2em !important;
+  }
+  
+  .HyperMD-header-2,
+  .cm-header-2,
+  h2 {
+    font-size: 1.5em !important;
+  }
+  
+  pre[class*="language-"],
+  code[class*="language-"] {
+    padding: 15px !important;
+    border-radius: 8px !important;
+  }
+}
+
+/* ============================================ */
+/* 🌟 ФИНАЛЬНЫЕ ШТРИХИ */
+/* ============================================ */
+
+/* Скроллбар */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--neon-blue), var(--neon-purple));
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--neon-purple), var(--neon-pink));
+  box-shadow: 0 0 15px rgba(191, 0, 255, 0.8);
+}
+
+/* Селекция текста */
+::selection {
+  background: rgba(0, 212, 255, 0.3);
+  color: var(--text-accent);
+}
+
+/* Финальный штрих - минимальное свечение для ULTRA DARK */
+.workspace {
+  box-shadow: inset 0 0 50px rgba(0, 136, 204, 0.02);
+}
+
+/* ============================================ */
+/* 🔧 ОПЦИОНАЛЬНЫЕ НАСТРОЙКИ */
+/* ============================================ */
+
+/* 
+🚫 ПОЛНОЕ ОТКЛЮЧЕНИЕ АНИМАЦИЙ (раскомментируй если нужно):
+
+.HyperMD-header-1, .cm-header-1, h1,
+.HyperMD-header-2, .cm-header-2, h2 {
+  animation: none !important;
+}
+
+.clickable-icon:hover,
+.internal-link:hover,
+.cm-hmd-internal-link:hover {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+*/
+
+/* 🌑 CYBERPUNK VIBECODER ULTRA DARK THEME ЗАВЕРШЕНА */

@@ -1,5 +1,6 @@
 import { Plugin } from '@elizaos/core';
 import { InstagramAPIService } from './services/instagramService';
+import { StorageService } from './services/storageService';
 import { instagramPostAction } from './actions/instagramPostAction';
 
 /**
@@ -10,7 +11,7 @@ export const instagramPlugin: Plugin = {
   name: 'instagram-plugin',
   description: 'Плагин для публикации постов в Instagram через Meta Business API',
 
-  services: [InstagramAPIService],
+  services: [InstagramAPIService, StorageService],
 
   actions: [instagramPostAction],
 
@@ -33,6 +34,13 @@ export const instagramPlugin: Plugin = {
     } else {
       console.log('✅ Instagram токены настроены');
     }
+
+    // Проверяем настройки Supabase для хранения файлов
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.log('✅ Supabase настройки обнаружены - файлы будут загружаться в облако');
+    } else {
+      console.log('⚠️ Supabase не настроен - используются прямые URL файлов');
+    }
   },
 
   priority: 10, // Приоритет загрузки плагина
@@ -42,4 +50,5 @@ export default instagramPlugin;
 
 // Экспортируем типы для использования в других модулях
 export { InstagramAPIService } from './services/instagramService';
+export { StorageService } from './services/storageService';
 export * from './types';

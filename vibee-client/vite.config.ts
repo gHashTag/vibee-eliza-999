@@ -31,7 +31,12 @@ export default defineConfig(({ mode, command }) => {
         interval: 150,
       },
       proxy: {
-        '/api': 'http://localhost:3000',
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
         '/socket.io': {
           target: 'http://localhost:3000',
           ws: true,

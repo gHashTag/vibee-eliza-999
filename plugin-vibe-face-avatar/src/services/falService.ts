@@ -1,5 +1,5 @@
 import { fal } from "@fal-ai/client";
-import { IAgentRuntime } from "@elizaos/core";
+import { IAgentRuntime, Service } from "@elizaos/core";
 import {
   TaskEither,
   left,
@@ -18,28 +18,66 @@ export interface IFalService {
   ): TaskEither<Error, ImageGenerationResult>;
 }
 
-export class FalServiceImpl extends BaseLoraServiceImpl implements IFalService {
+export class FalService extends Service implements IFalService {
+  static serviceType = 'fal';
+
   private apiKey: string | null = null;
+  private runtime: IAgentRuntime | null = null;
 
   constructor(runtime: IAgentRuntime) {
     super(runtime);
+    this.runtime = runtime;
+  }
+
+  async start(): Promise<void> {
+    if (!this.runtime) return;
+
+    try {
+      const apiKey = this.runtime.getSetting("FAL_KEY");
+
+      if (!apiKey) {
+        console.warn("⚠️  FAL_KEY не найден. FalService будет неактивен.");
+        return;
+      }
+
+      // Настраиваем Fal.ai клиент
+      fal.config({
+        credentials: apiKey,
+      });
+
+      this.apiKey = apiKey;
+      console.log("✅ FalService инициализирован с Fal.ai");
+    } catch (error) {
+      console.warn("⚠️  FAL_KEY не удалось расшифровать. FalService будет неактивен.");
+      console.warn(`⚠️  Ошибка: ${error instanceof Error ? error.message : String(error)}`);
+      return;
+    }
   }
 
   async initialize(runtime: IAgentRuntime): Promise<void> {
-    const apiKey = runtime.getSetting("FAL_KEY");
+    // Called by plugin init
+    this.runtime = runtime;
+  }
 
-    if (!apiKey) {
-      console.warn("⚠️  FAL_KEY не найден. FalService будет неактивен.");
-      return;
-    }
+  async stop(): Promise<void> {
+    // Cleanup Fal.ai client if needed
+    this.apiKey = null;
+    console.log("🛑 FalService stopped");
+  }
 
-    // Настраиваем Fal.ai клиент
-    fal.config({
-      credentials: apiKey,
-    });
+  get capabilityDescription(): string {
+    return "Fal.ai integration for LoRA training and image generation";
+  }
 
-    this.apiKey = apiKey;
-    console.log("✅ FalService инициализирован с Fal.ai");
+  static async start(runtime: IAgentRuntime): Promise<Service> {
+    const service = new FalService(runtime);
+    await service.start();
+    return service;
+  }
+
+  static async stop(runtime: IAgentRuntime): Promise<unknown> {
+    // Cleanup if needed
+    return undefined;
   }
 
   generateImage(options: GenerateImageOptions): TaskEither<Error, ImageGenerationResult> {
@@ -175,44 +213,3 @@ export class FalServiceImpl extends BaseLoraServiceImpl implements IFalService {
     }
   }
 }
-
-// Экспортируем экземпляр для совместимости с существующим кодом
-export const FalService: IFalService = {
-  apiKey: null,
-
-  async initialize(runtime: IAgentRuntime): Promise<void> {
-    const apiKey = runtime.getSetting("FAL_KEY");
-
-    if (!apiKey) {
-      console.warn("⚠️  FAL_KEY не найден. FalService будет неактивен.");
-      return;
-    }
-
-    fal.config({
-      credentials: apiKey,
-    });
-
-    (FalService as any).apiKey = apiKey;
-    console.log("✅ FalService инициализирован");
-  },
-
-  generateImage(options: GenerateImageOptions): TaskEither<Error, ImageGenerationResult> {
-    if (!(FalService as any).apiKey) {
-      return left(new Error("Fal Service не инициализирован. Проверьте FAL_KEY в настройках."));
-    }
-
-    // Используем fal-ai напрямую для простой генерации
-    const enhancedPrompt = options.prompt + ", high quality, detailed, 8k";
-
-    console.log("🎨 Fal Service: Генерация изображения", options);
-
-    try {
-      // Для простой генерации без LoRA используем fal-ai/flux-schnell
-      return left(
-        new Error("Используйте fal-ai client напрямую или FalServiceImpl для асинхронной генерации")
-      );
-    } catch (error) {
-      return left(error instanceof Error ? error : new Error(String(error)));
-    }
-  },
-};

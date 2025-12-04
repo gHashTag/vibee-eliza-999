@@ -5,22 +5,30 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* 🎨 VIBEE CLIENT - CYRILLIC FONTS & PLATFORM ADAPTATION */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100;200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
+
 @layer base {
   :root {
     --background: 45 30% 94%;
-    --foreground: 45 30% 8%;
+    --foreground: 45 5% 15%;
     --card: 45 25% 90%;
-    --card-foreground: 45 30% 10%;
+    --card-foreground: 45 5% 18%;
     --popover: 45 30% 94%;
-    --popover-foreground: 45 30% 8%;
+    --popover-foreground: 45 5% 15%;
     --primary: 45 100% 65%;
     --primary-foreground: 45 90% 8%;
     --secondary: 45 15% 88%;
-    --secondary-foreground: 45 30% 8%;
+    --secondary-foreground: 45 5% 15%;
     --muted: 45 15% 88%;
     --muted-foreground: 45 20% 50%;
     --accent: 45 100% 70%;
-    --accent-foreground: 45 30% 8%;
+    --accent-foreground: 45 5% 15%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
     --border: 45 20% 85%;
@@ -28,13 +36,46 @@
     --ring: 45 100% 65%;
     --radius: 1rem;
     --sidebar-background: 45 30% 94%;
-    --sidebar-foreground: 45 30% 8%;
+    --sidebar-foreground: 45 5% 15%;
     --sidebar-primary: 45 100% 65%;
     --sidebar-primary-foreground: 45 90% 8%;
     --sidebar-accent: 45 15% 88%;
-    --sidebar-accent-foreground: 45 30% 8%;
+    --sidebar-accent-foreground: 45 5% 15%;
     --sidebar-border: 45 20% 85%;
     --sidebar-ring: 45 100% 65%;
+
+    /* 🎨 VIBEE Typography System */
+    --font-vibee-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-vibee-secondary: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-vibee-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-vibee-accent: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-vibee-code: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, 'Cascadia Code', monospace;
+
+    /* Адаптивные размеры */
+    --vibee-font-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+    --vibee-font-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+    --vibee-font-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+    --vibee-font-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+    --vibee-font-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+    --vibee-font-2xl: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+    --vibee-font-3xl: clamp(1.875rem, 1.6rem + 1.375vw, 2.25rem);
+    --vibee-font-4xl: clamp(2.25rem, 1.9rem + 1.75vw, 3rem);
+    --vibee-font-5xl: clamp(3rem, 2.4rem + 3vw, 4.5rem);
+
+    /* Адаптивные высоты строк */
+    --vibee-leading-tight: 1.2;
+    --vibee-leading-snug: 1.35;
+    --vibee-leading-normal: 1.5;
+    --vibee-leading-relaxed: 1.65;
+    --vibee-leading-loose: 2;
+
+    /* Межбуквенные интервалы */
+    --vibee-tracking-tighter: -0.05em;
+    --vibee-tracking-tight: -0.025em;
+    --vibee-tracking-normal: 0em;
+    --vibee-tracking-wide: 0.025em;
+    --vibee-tracking-wider: 0.05em;
+    --vibee-tracking-widest: 0.1em;
   }
 
   .dark {
@@ -73,24 +114,68 @@
     @apply border-border;
   }
 
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    font-feature-settings: "liga" 1, "calt" 1, "kern" 1;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-vibee-primary);
+    font-size: var(--vibee-font-base);
+    line-height: var(--vibee-leading-normal);
+    letter-spacing: var(--vibee-tracking-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
+  /* 🎨 Typography Utility Classes */
+  .font-vibee-primary { font-family: var(--font-vibee-primary); }
+  .font-vibee-secondary { font-family: var(--font-vibee-secondary); }
+  .font-vibee-display { font-family: var(--font-vibee-display); }
+  .font-vibee-accent { font-family: var(--font-vibee-accent); }
+  .font-vibee-code { font-family: var(--font-vibee-code); }
+
+  /* Responsive Font Sizes */
+  .text-vibee-xs { font-size: var(--vibee-font-xs); }
+  .text-vibee-sm { font-size: var(--vibee-font-sm); }
+  .text-vibee-base { font-size: var(--vibee-font-base); }
+  .text-vibee-lg { font-size: var(--vibee-font-lg); }
+  .text-vibee-xl { font-size: var(--vibee-font-xl); }
+  .text-vibee-2xl { font-size: var(--vibee-font-2xl); }
+  .text-vibee-3xl { font-size: var(--vibee-font-3xl); }
+  .text-vibee-4xl { font-size: var(--vibee-font-4xl); }
+  .text-vibee-5xl { font-size: var(--vibee-font-5xl); }
+
+  /* Line Heights */
+  .leading-vibee-tight { line-height: var(--vibee-leading-tight); }
+  .leading-vibee-snug { line-height: var(--vibee-leading-snug); }
+  .leading-vibee-normal { line-height: var(--vibee-leading-normal); }
+  .leading-vibee-relaxed { line-height: var(--vibee-leading-relaxed); }
+  .leading-vibee-loose { line-height: var(--vibee-leading-loose); }
+
+  /* Letter Spacing */
+  .tracking-vibee-tighter { letter-spacing: var(--vibee-tracking-tighter); }
+  .tracking-vibee-tight { letter-spacing: var(--vibee-tracking-tight); }
+  .tracking-vibee-normal { letter-spacing: var(--vibee-tracking-normal); }
+  .tracking-vibee-wide { letter-spacing: var(--vibee-tracking-wide); }
+  .tracking-vibee-wider { letter-spacing: var(--vibee-tracking-wider); }
+  .tracking-vibee-widest { letter-spacing: var(--vibee-tracking-widest); }
 }
 
+/* 🎨 Scrollbar Styles */
 .scrollbar-hide {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width: none;
-  /* Firefox */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
-  /* Chrome, Safari, Opera */
 }
 
-/* Custom scrollbar styles for visible scrollbars (like Railway) */
 .scrollbar-visible {
   overflow-x: auto;
   overflow-y: hidden;
@@ -117,7 +202,6 @@
   background-color: rgb(107, 114, 128);
 }
 
-/* Dark mode styles */
 .dark .scrollbar-visible {
   scrollbar-color: rgb(75, 85, 99) rgb(31, 41, 55);
 }
@@ -134,6 +218,7 @@
   background-color: rgb(107, 114, 128);
 }
 
+/* 🎨 Timeline Items */
 .vis-item.timeline-item-success {
   background-color: rgba(34, 197, 94, 0.2);
   border-color: rgb(34, 197, 94);
@@ -170,4 +255,370 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* 🎨 VIBEE CLIENT - PLATFORM-SPECIFIC STYLES */
+
+/* Telegram Integration */
+.vibee-telegram-theme {
+  font-family: var(--font-vibee-primary);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  color: white;
+}
+
+.vibee-telegram-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  color: #333;
+}
+
+/* Discord Integration */
+.vibee-discord-theme {
+  font-family: var(--font-vibee-secondary);
+  background: #36393f;
+  border-radius: 8px;
+  padding: 20px;
+  color: #dcddde;
+}
+
+.vibee-discord-sidebar {
+  background: #2f3136;
+  border-radius: 8px 0 0 8px;
+  padding: 16px;
+  color: #72767d;
+}
+
+/* Web App Styling */
+.vibee-web-app {
+  font-family: var(--font-vibee-primary);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.vibee-web-app:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* 🎨 VIBEE Agent Cards */
+.vibee-agent-card {
+  font-family: var(--font-vibee-accent);
+  background: linear-gradient(135deg, var(--card) 0%, var(--muted) 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 16px 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.vibee-agent-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+}
+
+.vibee-agent-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  border-color: var(--primary);
+}
+
+.vibee-agent-title {
+  font-family: var(--font-vibee-display);
+  font-size: var(--vibee-font-2xl);
+  font-weight: 700;
+  line-height: var(--vibee-leading-tight);
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.vibee-agent-subtitle {
+  font-family: var(--font-vibee-secondary);
+  font-size: var(--vibee-font-lg);
+  font-weight: 500;
+  color: var(--muted-foreground);
+  margin-bottom: 16px;
+}
+
+.vibee-agent-description {
+  font-family: var(--font-vibee-primary);
+  font-size: var(--vibee-font-base);
+  line-height: var(--vibee-leading-relaxed);
+  color: var(--card-foreground);
+}
+
+/* 🎨 KOLS Learning Styles */
+.vibee-kols-lesson {
+  font-family: var(--font-vibee-secondary);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 20px 0;
+  position: relative;
+}
+
+.vibee-kols-lesson::before {
+  content: '🎓';
+  position: absolute;
+  top: -12px;
+  left: 24px;
+  background: var(--background);
+  padding: 0 8px;
+  font-size: 24px;
+}
+
+.vibee-kols-title {
+  font-family: var(--font-vibee-display);
+  font-size: var(--vibee-font-2xl);
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 16px;
+  line-height: var(--vibee-leading-tight);
+}
+
+.vibee-kols-content {
+  font-family: var(--font-vibee-primary);
+  font-size: var(--vibee-font-base);
+  line-height: var(--vibee-leading-relaxed);
+  color: var(--foreground);
+  margin-bottom: 16px;
+}
+
+.vibee-kols-tip {
+  font-family: var(--font-vibee-secondary);
+  font-weight: 600;
+  color: var(--primary);
+  background: rgba(102, 126, 234, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin: 0 4px;
+}
+
+.vibee-kols-practical {
+  font-family: var(--font-vibee-secondary);
+  font-size: var(--vibee-font-sm);
+  font-weight: 500;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+  border-left: 4px solid var(--primary);
+  padding: 16px 20px;
+  border-radius: 0 12px 12px 0;
+  margin-top: 16px;
+}
+
+/* 🎨 Avatar Generation Styles */
+.vibee-avatar-card {
+  font-family: var(--font-vibee-primary);
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.vibee-avatar-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.vibee-avatar-card:hover::after {
+  opacity: 1;
+}
+
+.vibee-avatar-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--primary);
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+}
+
+.vibee-avatar-title {
+  font-family: var(--font-vibee-display);
+  font-size: var(--vibee-font-3xl);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 16px;
+}
+
+.vibee-avatar-description {
+  font-family: var(--font-vibee-secondary);
+  font-size: var(--vibee-font-lg);
+  color: var(--muted-foreground);
+  line-height: var(--vibee-leading-relaxed);
+}
+
+/* 🎨 Code Blocks */
+.vibee-code-block {
+  font-family: var(--font-vibee-code);
+  font-size: var(--vibee-font-sm);
+  background: #1a1a1a;
+  color: #d4d4d4;
+  padding: 20px 24px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  overflow-x: auto;
+  line-height: 1.6;
+  position: relative;
+}
+
+.vibee-code-block::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.vibee-code-line {
+  display: block;
+  padding: 2px 0;
+}
+
+/* 🎨 Responsive Design */
+@media (max-width: 768px) {
+  .vibee-agent-card,
+  .vibee-kols-lesson,
+  .vibee-avatar-card {
+    padding: 16px;
+    margin: 12px 0;
+  }
+
+  .vibee-agent-title,
+  .vibee-kols-title,
+  .vibee-avatar-title {
+    font-size: var(--vibee-font-xl);
+  }
+
+  .vibee-web-app {
+    padding: 16px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .vibee-agent-card,
+  .vibee-kols-lesson,
+  .vibee-avatar-card {
+    padding: 20px;
+  }
+
+  .vibee-agent-title,
+  .vibee-kols-title,
+  .vibee-avatar-title {
+    font-size: var(--vibee-font-2xl);
+  }
+}
+
+@media (min-width: 1025px) {
+  .vibee-agent-card,
+  .vibee-kols-lesson,
+  .vibee-avatar-card {
+    padding: 32px;
+  }
+
+  .vibee-agent-title,
+  .vibee-kols-title,
+  .vibee-avatar-title {
+    font-size: var(--vibee-font-3xl);
+  }
+}
+
+/* 🎨 Animations */
+@keyframes vibeeFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes vibeeSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes vibeePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-vibee-fade-in-up {
+  animation: vibeeFadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-vibee-slide-in-left {
+  animation: vibeeSlideInLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-vibee-pulse {
+  animation: vibeePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 🎨 Glassmorphism */
+.vibee-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+}
+
+.dark .vibee-glass {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 🎨 Gradient Text */
+.vibee-gradient-text {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 🎨 Focus States */
+.vibee-focus:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 8px;
 }

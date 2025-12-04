@@ -16,13 +16,16 @@ export const photoUploadAction: Action = {
     const hasAttachments = message.content.attachments && message.content.attachments.length > 0;
 
     // Проверяем, есть ли у пользователя модель в статусе "training"
-    const telegramId = message.entityId || message.id;
+    // entityId может быть UUID для web или telegram_id для Telegram
+    const entityId = message.entityId;
+    if (!entityId) return false;
+
     const trainingModels = await (db as any)
       .select()
       .from(userModels)
       .where(
         and(
-          eq(userModels.telegram_id, parseInt(telegramId, 10)),
+          eq(userModels.entity_id, entityId),
           eq(userModels.status, 'training'),
           eq(userModels.is_active, true)
         )

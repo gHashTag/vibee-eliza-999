@@ -6,6 +6,10 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import { twMerge } from 'tailwind-merge';
 import type { Agent, UUID as CoreUUID } from '@elizaos/core';
 import type { MessageChannel as ClientMessageChannel } from '@/types';
+import Avatars from '@dicebear/avatars';
+import AvataaarsSprites from '@dicebear/avatars-avataaars-sprites';
+import HumanSprites from '@dicebear/avatars-human-sprites';
+import InitialsSprites from '@dicebear/avatars-initials-sprites';
 
 /**
  * Combines multiple class names into a single string.
@@ -107,33 +111,53 @@ export const compressImage = (
   });
 };
 
-const AGENT_AVATAR_PLACEHOLDERS = [
-  '/images/agents/agent1.png', // Assuming these exist
-  '/images/agents/agent2.png',
-  '/images/agents/agent3.png',
-  '/images/agents/agent4.png',
-  '/images/agents/agent5.png',
-];
-
 export const getAgentAvatar = (
-  agent: { id?: UUID; settings?: { avatar?: string | null } } | undefined
+  agent: { id?: UUID; name?: string; settings?: { avatar?: string | null } } | undefined
 ): string => {
+  // Если у агента уже есть аватар - используем его
   if (agent?.settings?.avatar) {
     return agent.settings.avatar;
   }
-  if (agent?.id) {
-    // Simple deterministic assignment based on agent ID
-    let hash = 0;
-    for (let i = 0; i < agent.id.length; i++) {
-      const char = agent.id.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash |= 0; // Convert to 32bit integer
-    }
-    const index = Math.abs(hash) % AGENT_AVATAR_PLACEHOLDERS.length;
-    return AGENT_AVATAR_PLACEHOLDERS[index];
+
+  // Определяем сид для генерации (ID или имя агента)
+  const seed = agent?.id || agent?.name || 'vibee-agent';
+
+  // Создаем детерминированный выбор стиля на основе сида
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash |= 0;
   }
-  // Fallback if no ID or other issue, or if AGENT_AVATAR_PLACEHOLDERS is empty
-  return '/elizaos-icon.png';
+
+  // Выбираем стиль на основе хеша
+  const styleIndex = Math.abs(hash) % 3;
+  const styles = [AvataaarsSprites, HumanSprites, InitialsSprites];
+  const selectedSprites = styles[styleIndex];
+
+  // Генерируем аватар с золотистой цветовой схемой
+  const avatars = new Avatars(selectedSprites);
+
+  const options: any = {
+    radius: 50,
+    width: 200,
+    height: 200,
+    margin: 10,
+  };
+
+  // Золотистая цветовая схема
+  options.backgroundColor = ['ffd700', 'ffc700', 'ffb700', 'ffdd55', 'ffe066', 'ffed4a'];
+
+  if (styleIndex === 2) { // Initials
+    options.backgroundColors = ['ffd700', 'ffc700', 'ffb700', 'ffdd55', 'ffe066', 'ffed4a'];
+    options.fontSize = 80;
+  } else if (styleIndex === 0) { // Avataaars
+    options.mood = ['happy', 'surprised'];
+  } else if (styleIndex === 1) { // Human
+    options.mood = ['happy'];
+  }
+
+  return avatars.create(seed, options);
 };
 
 export const generateGroupName = (

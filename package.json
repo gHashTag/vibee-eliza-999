@@ -59,9 +59,11 @@
     "vite": "^6.0.1"
   },
   "scripts": {
-    "start": "bash scripts/dev-with-infisical.sh",
-    "dev": "bash scripts/dev-with-infisical.sh",
-    "dev:hot": "bash scripts/dev-with-infisical.sh",
+    "start": "bash scripts/start-all.sh",
+    "dev": "bash scripts/start-all.sh",
+    "dev:all": "bash scripts/start-all.sh",
+    "dev:single": "npx elizaos start --character",
+    "dev:hot": "bash scripts/dev-with-infisical.sh characters/vibeeAgent.json",
     "build": "bun run build.ts",
     "lint": "prettier --write ./src",
     "type-check": "tsc --noEmit",

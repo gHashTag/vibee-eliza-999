@@ -1,5 +1,5 @@
 import Replicate from "replicate";
-import { IAgentRuntime } from "@elizaos/core";
+import { IAgentRuntime, Service } from "@elizaos/core";
 import {
   TaskEither,
   left,
@@ -18,27 +18,65 @@ export interface IReplicateService {
   ): TaskEither<Error, ImageGenerationResult>;
 }
 
-export class ReplicateServiceImpl extends BaseLoraServiceImpl implements IReplicateService {
+export class ReplicateService extends Service implements IReplicateService {
+  static serviceType = 'replicate';
+
   private client: Replicate | null = null;
+  private runtime: IAgentRuntime | null = null;
 
   constructor(runtime: IAgentRuntime) {
     super(runtime);
+    this.runtime = runtime;
+  }
+
+  async start(): Promise<void> {
+    if (!this.runtime) return;
+
+    try {
+      const apiKey = this.runtime.getSetting("REPLICATE_API_KEY");
+
+      if (!apiKey) {
+        console.warn("⚠️  REPLICATE_API_KEY не найден. ReplicateService будет неактивен.");
+        return;
+      }
+
+      // Создаем клиент Replicate
+      this.client = new Replicate({
+        auth: apiKey,
+      });
+
+      console.log("✅ ReplicateService инициализирован с Replicate API");
+    } catch (error) {
+      console.warn("⚠️  REPLICATE_API_KEY не удалось расшифровать. ReplicateService будет неактивен.");
+      console.warn(`⚠️  Ошибка: ${error instanceof Error ? error.message : String(error)}`);
+      return;
+    }
   }
 
   async initialize(runtime: IAgentRuntime): Promise<void> {
-    const apiKey = runtime.getSetting("REPLICATE_API_KEY");
+    // Called by plugin init
+    this.runtime = runtime;
+  }
 
-    if (!apiKey) {
-      console.warn("⚠️  REPLICATE_API_KEY не найден. ReplicateService будет неактивен.");
-      return;
-    }
+  async stop(): Promise<void> {
+    // Cleanup Replicate client if needed
+    this.client = null;
+    console.log("🛑 ReplicateService stopped");
+  }
 
-    // Создаем клиент Replicate
-    this.client = new Replicate({
-      auth: apiKey,
-    });
+  get capabilityDescription(): string {
+    return "Replicate integration for image generation with LoRA models";
+  }
 
-    console.log("✅ ReplicateService инициализирован с Replicate API");
+  static async start(runtime: IAgentRuntime): Promise<Service> {
+    const service = new ReplicateService(runtime);
+    await service.start();
+    return service;
+  }
+
+  static async stop(runtime: IAgentRuntime): Promise<unknown> {
+    // Cleanup if needed
+    return undefined;
   }
 
   generateImage(options: GenerateImageOptions): TaskEither<Error, ImageGenerationResult> {
@@ -180,40 +218,3 @@ export class ReplicateServiceImpl extends BaseLoraServiceImpl implements IReplic
     }
   }
 }
-
-// Экспортируем экземпляр для совместимости с существующим кодом
-export const ReplicateService: IReplicateService = {
-  apiKey: null,
-
-  async initialize(runtime: IAgentRuntime): Promise<void> {
-    const apiKey = runtime.getSetting("REPLICATE_API_KEY");
-
-    if (!apiKey) {
-      console.warn("⚠️  REPLICATE_API_KEY не найден. ReplicateService будет неактивен.");
-      return;
-    }
-
-    (ReplicateService as any).apiKey = apiKey;
-    console.log("✅ ReplicateService инициализирован");
-  },
-
-  generateImage(options: GenerateImageOptions): TaskEither<Error, ImageGenerationResult> {
-    if (!(ReplicateService as any).apiKey) {
-      return left(new Error("Replicate Service не инициализирован. Проверьте REPLICATE_API_KEY в настройках."));
-    }
-
-    // Используем Replicate напрямую для простой генерации
-    const enhancedPrompt = options.prompt + ", high quality, detailed, 8k";
-
-    console.log("🎨 Replicate Service: Генерация изображения", options);
-
-    try {
-      // Для простой генерации без LoRA используем flux-schnell
-      return left(
-        new Error("Используйте Replicate client напрямую или ReplicateServiceImpl для асинхронной генерации")
-      );
-    } catch (error) {
-      return left(error instanceof Error ? error : new Error(String(error)));
-    }
-  },
-};

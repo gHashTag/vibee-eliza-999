@@ -11,11 +11,15 @@ export class InstagramAPIService extends Service implements InstagramService {
   private accessToken: string = '';
   private instagramAccountId: string = '';
   private baseUrl = 'https://graph.facebook.com/v18.0';
+  private appId: string = '';
+  private appSecret: string = '';
 
   constructor() {
     super();
     this.accessToken = process.env.INSTAGRAM_ACCESS_TOKEN || '';
     this.instagramAccountId = process.env.INSTAGRAM_ACCOUNT_ID || '';
+    this.appId = process.env.INSTAGRAM_APP_ID || '';
+    this.appSecret = process.env.INSTAGRAM_APP_SECRET || '';
 
     if (!this.accessToken) {
       console.warn('⚠️ INSTAGRAM_ACCESS_TOKEN не найден в Infisical. Плагин Instagram не будет работать.');
@@ -26,9 +30,7 @@ export class InstagramAPIService extends Service implements InstagramService {
     }
   }
 
-  capabilityDescription(): string {
-    return 'Instagram API Service - для публикации постов в Instagram через Meta Business API';
-  }
+  capabilityDescription = 'Instagram API Service - для публикации постов в Instagram через Meta Business API';
 
   static async start(runtime: any) {
     console.log('🐝 Запуск Instagram API сервиса');
@@ -37,6 +39,8 @@ export class InstagramAPIService extends Service implements InstagramService {
     // Загружаем токены из Infisical (переменные окружения)
     service.accessToken = process.env.INSTAGRAM_ACCESS_TOKEN || '';
     service.instagramAccountId = process.env.INSTAGRAM_ACCOUNT_ID || '';
+    service.appId = process.env.INSTAGRAM_APP_ID || '';
+    service.appSecret = process.env.INSTAGRAM_APP_SECRET || '';
 
     if (!service.accessToken) {
       console.warn('⚠️ INSTAGRAM_ACCESS_TOKEN не найден в Infisical. Плагин Instagram не будет работать.');
@@ -44,6 +48,27 @@ export class InstagramAPIService extends Service implements InstagramService {
 
     if (!service.instagramAccountId) {
       console.warn('⚠️ INSTAGRAM_ACCOUNT_ID не найден в Infisical. Плагин Instagram не будет работать.');
+    }
+
+    if (!service.appId) {
+      console.warn('⚠️ INSTAGRAM_APP_ID не найден в Infisical. Автообновление токенов недоступно.');
+    }
+
+    if (!service.appSecret) {
+      console.warn('⚠️ INSTAGRAM_APP_SECRET не найден в Infisical. Автообновление токенов недоступно.');
+    }
+
+    // Проверяем валидность токена при старте
+    if (service.accessToken && service.instagramAccountId) {
+      console.log('🔐 Проверка валидности Instagram токена...');
+      const validation = await service.validateToken();
+
+      if (validation.valid) {
+        console.log('✅ Instagram токен валиден:', validation.expiresAt);
+      } else {
+        console.error('❌ Instagram токен невалиден:', validation.error);
+        console.error('⚠️ Необходимо обновить Instagram токены в Infisical!');
+      }
     }
 
     return service;
@@ -58,10 +83,142 @@ export class InstagramAPIService extends Service implements InstagramService {
   }
 
   /**
+   * Проверка валидности токена Instagram API
+   */
+  async validateToken(): Promise<{ valid: boolean; error?: string; expiresAt?: string; refreshed?: boolean }> {
+    try {
+      if (!this.accessToken || !this.instagramAccountId) {
+        return {
+          valid: false,
+          error: 'INSTAGRAM_ACCESS_TOKEN или INSTAGRAM_ACCOUNT_ID не найдены в Infisical'
+        };
+      }
+
+      // Проверяем токен через Instagram API
+      const response = await fetch(
+        `${this.baseUrl}/me?fields=id,username,account_type&access_token=${this.accessToken}`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.error?.message || 'Неизвестная ошибка';
+
+        // Проверяем, истёк ли токен
+        if (errorMessage.includes('expired') || errorMessage.includes('Session has expired')) {
+          console.log('🔄 Токен истёк, пытаюсь обновить...');
+
+          // Автоматически обновляем токен
+          const refreshResult = await this.refreshToken();
+
+          if (refreshResult.success) {
+            console.log('✅ Токен обновлён успешно!');
+
+            // Проверяем новый токен
+            const retryResponse = await fetch(
+              `${this.baseUrl}/me?fields=id,username,account_type&access_token=${this.accessToken}`
+            );
+
+            if (retryResponse.ok) {
+              const data = await retryResponse.json();
+              return {
+                valid: true,
+                expiresAt: `Account: ${data.username} (${data.account_type})`,
+                refreshed: true
+              };
+            }
+          }
+
+          return {
+            valid: false,
+            error: `❌ Токен истёк: ${errorMessage}`
+          };
+        }
+
+        return {
+          valid: false,
+          error: `❌ Ошибка валидации токена: ${errorMessage}`
+        };
+      }
+
+      const data = await response.json();
+      return {
+        valid: true,
+        expiresAt: `Account: ${data.username} (${data.account_type})`
+      };
+
+    } catch (error) {
+      return {
+        valid: false,
+        error: `❌ Ошибка проверки токена: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
+  }
+
+  /**
+   * Автоматическое обновление Instagram токена
+   */
+  async refreshToken(): Promise<{ success: boolean; newToken?: string; error?: string }> {
+    try {
+      if (!this.appId || !this.appSecret) {
+        return {
+          success: false,
+          error: 'Instagram APP ID или APP SECRET не найдены в Infisical'
+        };
+      }
+
+      if (!this.accessToken) {
+        return {
+          success: false,
+          error: 'Текущий токен не найден для обновления'
+        };
+      }
+
+      console.log('🔄 Обновление Instagram токена через App Secret...');
+
+      // Получаем long-lived token из short-lived
+      const response = await fetch(
+        `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${this.appSecret}&access_token=${this.accessToken}`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return {
+          success: false,
+          error: `❌ Ошибка обновления токена: ${errorData.error?.message || 'Неизвестная ошибка'}`
+        };
+      }
+
+      const data = await response.json();
+
+      console.log('✅ Instagram токен успешно обновлён!');
+      console.log('📊 Новый токен действует:', data.expires_in, 'секунд');
+
+      this.accessToken = data.access_token;
+
+      return {
+        success: true,
+        newToken: data.access_token
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: `❌ Ошибка обновления токена: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
+  }
+
+  /**
    * Публикация поста в Instagram
    */
   async publishPost(post: InstagramPost): Promise<any> {
     try {
+        // Сначала проверяем токен
+        const tokenValidation = await this.validateToken();
+        if (!tokenValidation.valid) {
+          throw new Error(`Instagram токен невалиден: ${tokenValidation.error}`);
+        }
+
         if (!this.accessToken || !this.instagramAccountId) {
           throw new Error('Instagram API токены не настроены');
         }
@@ -106,11 +263,37 @@ export class InstagramAPIService extends Service implements InstagramService {
 
         if (!publishResponse.ok) {
           const error = await publishResponse.text();
+          console.error('❌ [Instagram] Ошибка публикации:', error);
           throw new Error(`Instagram publish error: ${publishResponse.status} - ${error}`);
         }
 
         const result = await publishResponse.json();
-        console.log('✅ Пост опубликован в Instagram:', result);
+        console.log('✅ [Instagram] Пост опубликован! Результат:', JSON.stringify(result, null, 2));
+
+        // Дополнительно получаем permalink для ссылки на пост
+        try {
+          console.log(`📋 [Instagram] Получение деталей поста ID: ${result.id}`);
+          const mediaDetailsResponse = await fetch(
+            `${this.baseUrl}/${result.id}?fields=id,permalink,caption,media_type,media_url,thumbnail_url,timestamp&access_token=${this.accessToken}`
+          );
+
+          if (mediaDetailsResponse.ok) {
+            const mediaDetails = await mediaDetailsResponse.json();
+            console.log('📋 [Instagram] Детали поста:', JSON.stringify(mediaDetails, null, 2));
+            return {
+              ...result,
+              caption: mediaDetails.caption,
+              permalink: mediaDetails.permalink,
+              media_url: mediaDetails.media_url,
+              timestamp: mediaDetails.timestamp,
+            };
+          } else {
+            console.warn('⚠️ [Instagram] Не удалось получить детали поста:', await mediaDetailsResponse.text());
+          }
+        } catch (detailError) {
+          console.warn('⚠️ [Instagram] Ошибка получения деталей поста:', detailError);
+        }
+
         return result;
       } catch (error) {
         console.error('❌ Ошибка публикации в Instagram:', error);

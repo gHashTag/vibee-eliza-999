@@ -8,7 +8,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // Database mode detection
-const DATABASE_URL = process.env.DATABASE_URL;
+// Try POSTGRES_URL first (ElizaOS standard), fallback to DATABASE_URL
+const DATABASE_URL = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 const USE_SQLITE = !DATABASE_URL || DATABASE_URL === 'sqlite' || DATABASE_URL.startsWith('sqlite:');
 
 // Use appropriate schema based on database mode

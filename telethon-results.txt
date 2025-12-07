@@ -1,0 +1,39 @@
+🔍 Анализ пользователя: yar0309
+============================================================
+✅ Подключен к Telegram
+👤 Пользователь найден: Yaroslav (@yar0309) ID: 404348060
+
+1️⃣ Пробуем users.GetFullUser...
+   ✅ Успех! Получили:
+   - Full user: UserFull(id=404348060, settings=PeerSettings(report_spam=False, add_contact=False, block_contact=False, share_contact=False, need_contacts_exception=False, report_geo=False, autoarchived=False, invite_members=False, request_chat_broadcast=False, business_bot_paused=False, business_bot_can_reply=False, geo_distance=None, request_chat_title=None, request_chat_date=None, business_bot_id=None, business_bot_manage_url=None, charge_paid_message_stars=None, registration_month=None, phone_country=None, name_change_date=None, photo_change_date=None), notify_settings=PeerNotifySettings(show_previews=None, silent=None, mute_until=None, ios_sound=None, android_sound=None, other_sound=None, stories_muted=None, stories_hide_sender=None, stories_ios_sound=None, stories_android_sound=None, stories_other_sound=None), common_chats_count=3, blocked=False, phone_calls_available=True, phone_calls_private=True, can_pin_message=True, has_scheduled=False, video_calls_available=False, voice_messages_forbidden=False, translations_disabled=False, stories_pinned_available=True, blocked_my_stories_from=False, wallpaper_overridden=False, contact_require_premium=False, read_dates_private=False, sponsored_enabled=False, can_view_revenue=False, bot_can_manage_emoji_status=False, display_gifts_button=False, about='AI startup founder/CEO', personal_photo=None, profile_photo=Photo(id=1736661694357284808, access_hash=1168595872641649123, file_reference=b'\x00i2\x80\xdb~\xf1\xbf\x13\xdf\xe5\x19A\x1c\x95\xabCa%\xeaI', date=datetime.datetime(2025, 10, 29, 20, 15, 34, tzinfo=datetime.timezone.utc), sizes=[PhotoSize(type='a', w=160, h=160, size=7111), PhotoSize(type='b', w=320, h=320, size=20263), PhotoSize(type='c', w=640, h=640, size=60788), PhotoStrippedSize(type='i', bytes=b'\x01((\x80\x8ai\xa7\x9ac\x9d\xa3&\xa4\xa2F\x81\x04{\x86\xed\xd8\xcewq\xf9Q\x0c\x84!\x19\xefU\x9af)\xb4\x0cz\xd3\xa1\x93<w\xa1\xc5\x82\x92\x1e\xe0\xbb\xb1$\xfetR\xe7\xad\x14\x86<\xd4r\xa9d8\xed\xcdK\x8c\x8aC\xf2\xc7!#\xf8i\x88\xa0I\xc7Z\xb3\x05\xb8\xf2\x04\xdb\xfb\xe3n*\xb5\\\x88\xec\xb1\xf7g8\xab\x96\xc4\xc4N\xc6\x8a\x89\x19\x8a\xb6\xea+2\x8b1\\.vg\xf1\xecj\xd4J$m\xac\xbb\x863\x8a(\xaa\x11"\xc3o\xb5\xbfp\x80\x8fj\xab\xe5\xa3\x1f\x94\x12\xbd\x97\xb0\xfaQE&\xc6\x86\xb4Q\xaa\x9f\x90\x0c\xfb\xd1E\x14\x01')], dc_id=2, has_stickers=False, video_sizes=[]), fallback_photo=None, bot_info=None, pinned_msg_id=None, folder_id=None, ttl_period=None, theme=None, private_forward_name='Yaroslav', bot_group_admin_rights=None, bot_broadcast_admin_rights=None, wallpaper=None, stories=None, business_work_hours=None, business_location=None, business_greeting_message=None, business_away_message=None, business_intro=None, birthday=None, personal_channel_id=None, personal_channel_message=None, stargifts_count=1, starref_program=None, bot_verification=None, send_paid_messages_stars=None, disallowed_gifts=None, stars_rating=None, stars_my_pending_rating=None, stars_my_pending_rating_date=None, main_tab=None, saved_music=None, note=None)
+   - Chats: 0
+   - Users: 1
+
+2️⃣ Пробуем channels.GetChannels...
+   ❌ Ошибка через InputChannel: InputChannel.__init__() got an unexpected keyword argument 'user_id'
+   ❌ Ошибка через get_entity: Invalid channel object. Make sure to pass the right types, for instance making sure that the request is designed for channels or otherwise look for a different one more suited (caused by GetChannelsRequest)
+
+3️⃣ Пробуем messages.GetCommonChats...
+   ✅ Успех! Найдено общих чатов: 3
+      - Aimly.io dev (ID: 5082217642)
+      - Созвон (ID: 5047750765)
+      - AiStars ОФИС (ID: 2643951085)
+
+4️⃣ Сканируем ВСЕ диалоги в поисках пользователя 404348060...
+   ❌ Ошибка сканирования: 'User' object has no attribute 'type'
+
+   📊 ИТОГО: Проверено 1 диалогов
+   🎯 Найдено групп: 0
+
+5️⃣ Анализируем пересылки от пользователя 404348060...
+   📊 Найдено источников пересылок: 0
+
+============================================================
+📊 ИТОГОВЫЙ ОТЧЕТ:
+============================================================
+🎯 Найдено групп через сканирование: 0
+🔄 Найдено групп через пересылки: 0
+
+❌ Группы не найдены или пользователь скрывает активность
+
+👋 Отключен от Telegram

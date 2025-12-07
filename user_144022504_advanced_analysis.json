@@ -1,0 +1,25 @@
+{
+  "user": {
+    "id": 144022504,
+    "first_name": "Dmitrii",
+    "username": "neuro_sage",
+    "total_found": 0
+  },
+  "methods_tested": [
+    "dialogs",
+    "public_channels",
+    "forwards",
+    "bot_api",
+    "raw_api",
+    "web_api"
+  ],
+  "results_by_method": {
+    "dialogs": [],
+    "public_channels": [],
+    "forwards": [],
+    "bot_api": [],
+    "raw_api": {},
+    "web_api": []
+  },
+  "all_groups": {}
+}

@@ -15,7 +15,7 @@
     "@elizaos/plugin-sql",
     "@elizaos/plugin-openrouter",
     "@elizaos/plugin-bootstrap",
-    "plugin-kols-userbot"
+    "plugin-telegram-craft"
   ],
   "settings": {
     "secrets": {

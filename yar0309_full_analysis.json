@@ -1,0 +1,41 @@
+{
+  "user": {
+    "id": 404348060,
+    "first_name": "Yaroslav",
+    "username": "yar0309",
+    "about": "AI startup founder/CEO",
+    "common_chats_count": 3
+  },
+  "methods_results": {
+    "own_dialogs": {
+      "chats": 209,
+      "users": 102
+    },
+    "user_info": {
+      "id": 404348060,
+      "first_name": "Yaroslav",
+      "username": "yar0309",
+      "about": "AI startup founder/CEO",
+      "common_chats_count": 3
+    },
+    "common_groups": 3,
+    "message_groups": 0,
+    "forward_groups": 0,
+    "participant_groups": 0
+  },
+  "total_groups": 3,
+  "groups": {
+    "5082217642": {
+      "title": "Aimly.io dev",
+      "type": "общая группа"
+    },
+    "5047750765": {
+      "title": "Созвон",
+      "type": "общая группа"
+    },
+    "2643951085": {
+      "title": "AiStars ОФИС",
+      "type": "общая группа"
+    }
+  }
+}

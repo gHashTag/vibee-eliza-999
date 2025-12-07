@@ -1,0 +1,45 @@
+[2025-12-05T06:05:26.307Z] [INFO] === GramJS API Testing Started ===
+[2025-12-05T06:05:26.309Z] [INFO] Config: {
+  "botToken": "",
+  "apiId": 94892,
+  "apiHash": "cacf9ad137d228611b49b2ecc6d68d43",
+  "phoneNumber": "+79933420465",
+  "sessionString": "1ApWapzMBu7_l3Ag6iecyMij5-mFLMmQvi5axSimPVoH2QcUb9FBcWJ8Sq3aqEEri2kYJKts-fd2pUYKGWNYxQ10YrBmP7oN-Yoedb1HO1VFolcvKrqFciy63SowMnk80GRLmrqQ7ZHxVmGbd0uO1NhoDG2sBuvCC_B_9CxCpHo8WBL_83yjJND0OaAvXAfedTrPWgjFUn7h_Fn_5B5GnrWsj6g-u14J26NqEqg0bwa1o9TfHTzH0A5xhnUC5-WqdcU23jq_4lfWtwiCafzWf7g16Rm3R48io53Sho2dKL8nyQeAtNWSXmBvcrSmVnfrXQz0EC0qA0XzriuXoHzE-fukmXns725g=",
+  "logFile": "/Users/playra/vibee-agent/gramjs-test-log.txt",
+  "logLevel": "ALL"
+}
+[2025-12-05T06:05:26.309Z] [EVENT] Инициализация клиента с сессией...
+[33m[2025-12-05T13:05:26.309] [INFO] - [Running gramJS version 2.26.21][0m
+[33m[2025-12-05T13:05:26.311] [INFO] - [Connecting to 149.154.167.51:80/TCPFull...][0m
+[33m[2025-12-05T13:05:26.551] [INFO] - [Connection to 149.154.167.51:80/TCPFull complete!][0m
+[33m[2025-12-05T13:05:26.552] [INFO] - [Using LAYER 198 for initial connect][0m
+[2025-12-05T06:05:26.945Z] [EVENT] Клиент подключен как SESSION!
+[2025-12-05T06:05:27.204Z] [EVENT] Аккаунт: @neuro_sage (ID: 144022504)
+[2025-12-05T06:05:27.204Z] [EVENT] 
+=== РЕГИСТРАЦИЯ ОБРАБОТЧИКОВ ===
+[2025-12-05T06:05:27.204Z] [EVENT] ✓ NewMessage handler registered
+[2025-12-05T06:05:27.204Z] [EVENT] ✓ Raw handler registered
+[2025-12-05T06:05:27.205Z] [EVENT] 
+=== НАЧАЛО ПРОСЛУШИВАНИЯ ===
+[2025-12-05T06:05:27.205Z] [EVENT] Ожидание сообщений... (Ctrl+C для выхода)
+[2025-12-05T06:05:57.205Z] [EVENT] 
+=== STATISTICS ===
+[2025-12-05T06:05:57.206Z] [EVENT] {
+  "NewMessage": 0,
+  "Raw": 11,
+  "Connection": 0,
+  "Disconnection": 0,
+  "Errors": 0
+}
+[2025-12-05T06:06:02.925Z] [EVENT] 
+--- NEW MESSAGE #1 ---
+TypeError: Cannot read properties of undefined (reading 'title')
+    at handleNewMessage (/Users/playra/vibee-agent/test-gramjs-api.cjs:128:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async _dispatchUpdate (/Users/playra/vibee-agent/node_modules/telegram/client/updates.js:146:21)
+[2025-12-05T06:06:09.974Z] [EVENT] 
+--- NEW MESSAGE #2 ---
+TypeError: Cannot read properties of undefined (reading 'title')
+    at handleNewMessage (/Users/playra/vibee-agent/test-gramjs-api.cjs:128:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async _dispatchUpdate (/Users/playra/vibee-agent/node_modules/telegram/client/updates.js:146:21)

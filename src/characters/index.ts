@@ -3,14 +3,14 @@
  */
 
 import { Character } from '@elizaos/core';
-import { instagramCharacter } from './instagram';
+import { kolsAgentCharacter } from './kolsAgent.character';
 
 // Экспорт всех персонажей
-export const instagramExpert = instagramCharacter;
+export const kolsAgent = kolsAgentCharacter;
 
 // Словарь всех персонажей для удобного доступа
 export const characters: Record<string, Character> = {
-  instagram: instagramExpert,
+  kols: kolsAgent,
 };
 
 // Экспорт по умолчанию

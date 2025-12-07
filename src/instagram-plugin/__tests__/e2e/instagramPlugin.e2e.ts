@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
+import { describe, it, expect, beforeAll, afterAll, mock } from 'bun:test';
 import { IAgentRuntime, Memory, ActionResult } from '@elizaos/core';
 import { createMockRuntime, createTelegramMessage } from '../mocks/runtime';
 import { instagramPostAction } from '../../actions/instagramPostAction';
@@ -43,7 +43,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       const result = await instagramPostAction.handler(
         runtime,
         message,
-        { message: message.content.text, currentContext: [] },
+        { values: {}, data: {}, text: message.content.text || '', message: message.content.text, currentContext: [] },
         {},
         async (response) => {
           callbackCalled = true;
@@ -54,7 +54,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       expect(callbackCalled).toBe(true);
       expect(callbackMessage).toContain('✅ Пост опубликован в Instagram');
       expect(callbackMessage).toContain('Красивый закат на море');
-      expect(result.success).toBe(true);
+      expect(result?.success).toBe(true);
     });
 
     it('должно публиковать пост с вложением-изображением', async () => {
@@ -75,7 +75,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       const result = await instagramPostAction.handler(
         runtime,
         message,
-        { message: message.content.text, currentContext: [] },
+        { values: {}, data: {}, text: message.content.text || '', message: message.content.text, currentContext: [] },
         {},
         async (response) => {
           callbackCalled = true;
@@ -86,7 +86,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       expect(callbackCalled).toBe(true);
       expect(callbackMessage).toContain('✅ Пост опубликован в Instagram');
       expect(callbackMessage).toContain('Мое первое фото');
-      expect(result.success).toBe(true);
+      expect(result?.success).toBe(true);
     });
 
     it('должно работать с командой /instagram', async () => {
@@ -100,7 +100,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       const result = await instagramPostAction.handler(
         runtime,
         message,
-        { message: message.content.text, currentContext: [] },
+        { values: {}, data: {}, text: message.content.text || '', message: message.content.text, currentContext: [] },
         {},
         async (response) => {
           callbackCalled = true;
@@ -110,7 +110,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
 
       expect(callbackCalled).toBe(true);
       expect(callbackMessage).toContain('✅ Пост опубликован в Instagram');
-      expect(result.success).toBe(true);
+      expect(result?.success).toBe(true);
     });
 
     it('должно обрабатывать хэштеги', async () => {
@@ -124,7 +124,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       const result = await instagramPostAction.handler(
         runtime,
         message,
-        { message: message.content.text, currentContext: [] },
+        { values: {}, data: {}, text: message.content.text || '', message: message.content.text, currentContext: [] },
         {},
         async (response) => {
           callbackCalled = true;
@@ -133,7 +133,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       );
 
       expect(callbackCalled).toBe(true);
-      expect(result.success).toBe(true);
+      expect(result?.success).toBe(true);
     });
 
     it('должно отклонять запрос без изображения', async () => {
@@ -145,7 +145,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       const result = await instagramPostAction.handler(
         runtime,
         message,
-        { message: message.content.text, currentContext: [] },
+        { values: {}, data: {}, text: message.content.text || '', message: message.content.text, currentContext: [] },
         {},
         async (response) => {
           callbackCalled = true;
@@ -156,7 +156,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       expect(callbackCalled).toBe(true);
       expect(errorMessage).toContain('❌ Не удалось опубликовать пост');
       expect(errorMessage).toContain('Прикрепите изображение');
-      expect(result.success).toBe(false);
+      expect(result?.success).toBe(false);
     });
 
     it('должно использовать default caption если подпись не указана', async () => {
@@ -170,7 +170,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       const result = await instagramPostAction.handler(
         runtime,
         message,
-        { message: message.content.text, currentContext: [] },
+        { values: {}, data: {}, text: message.content.text || '', message: message.content.text, currentContext: [] },
         {},
         async (response) => {
           callbackCalled = true;
@@ -180,7 +180,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
 
       expect(callbackCalled).toBe(true);
       expect(callbackMessage).toContain('Пост от VIBEE');
-      expect(result.success).toBe(true);
+      expect(result?.success).toBe(true);
     });
   });
 
@@ -235,7 +235,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       const result = await instagramPostAction.handler(
         runtime,
         message,
-        { message: message.content.text, currentContext: [] },
+        { values: {}, data: {}, text: message.content.text || '', message: message.content.text, currentContext: [] },
         {},
         async (response) => {
           errorMessage = response.text || '';
@@ -243,32 +243,38 @@ describe('Instagram Plugin - E2E Тесты', () => {
       );
 
       expect(errorMessage).toContain('❌ Не удалось опубликовать пост');
-      expect(result.success).toBe(false);
+      expect(result?.success).toBe(false);
     });
 
     it('должно логировать ошибки в runtime', async () => {
       const message = createTelegramMessage('Опубликуй без изображения');
 
       const mockLogger = {
-        info: jest.fn(),
-        error: jest.fn(),
-        warn: jest.fn(),
-        debug: jest.fn(),
+        info: mock(),
+        error: mock(),
+        warn: mock(),
+        debug: mock(),
+        level: 'info',
+        trace: mock(),
+        fatal: mock(),
+        success: mock(),
+        progress: mock(),
+        log: mock(),
       };
 
-      runtime.logger = mockLogger;
+      runtime.logger = mockLogger as any;
 
       const result = await instagramPostAction.handler(
         runtime,
         message,
-        { message: message.content.text, currentContext: [] },
+        { values: {}, data: {}, text: message.content.text || '', message: message.content.text, currentContext: [] },
         {},
         async () => {}
       );
 
       // Проверяем, что ошибка была залогирована
       expect(mockLogger.error).toHaveBeenCalled();
-      expect(result.success).toBe(false);
+      expect(result?.success).toBe(false);
     });
   });
 
@@ -283,7 +289,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       const result = await instagramPostAction.handler(
         runtime,
         message,
-        { message: message.content.text, currentContext: [] },
+        { values: {}, data: {}, text: message.content.text || '', message: message.content.text, currentContext: [] },
         {},
         async () => {}
       );
@@ -292,7 +298,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       const duration = endTime - startTime;
 
       expect(duration).toBeLessThan(5000); // Не более 5 секунд
-      expect(result.success).toBe(true);
+      expect(result?.success).toBe(true);
     });
 
     it('должно обрабатывать множественные вложения (берет первое)', async () => {
@@ -310,7 +316,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       await instagramPostAction.handler(
         runtime,
         message,
-        { message: message.content.text, currentContext: [] },
+        { values: {}, data: {}, text: message.content.text || '', message: message.content.text, currentContext: [] },
         {},
         async (response) => {
           callbackMessage = response.text || '';
@@ -331,7 +337,7 @@ describe('Instagram Plugin - E2E Тесты', () => {
       await instagramPostAction.handler(
         runtime,
         message,
-        { message: message.content.text, currentContext: [] },
+        { values: {}, data: {}, text: message.content.text || '', message: message.content.text, currentContext: [] },
         {},
         async () => {}
       );

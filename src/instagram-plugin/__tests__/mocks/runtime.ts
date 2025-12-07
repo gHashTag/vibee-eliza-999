@@ -1,34 +1,44 @@
-import { IAgentRuntime, Memory } from '@elizaos/core';
+import { IAgentRuntime, Memory, type UUID } from '@elizaos/core';
+import { mock } from 'bun:test';
 
 /**
  * Мок для IAgentRuntime
  */
 export function createMockRuntime(): IAgentRuntime {
   return {
-    agentId: 'test-agent-id',
+    agentId: '00000000-0000-0000-0000-000000000001' as UUID,
     characterName: 'VIBEE',
     databaseAdapter: {} as any,
-    ensureUserExists: jest.fn().mockResolvedValue({
-      id: 'test-user-id',
+    ensureUserExists: mock().mockResolvedValue({
+      id: '00000000-0000-0000-0000-000000000002' as UUID,
       name: 'Test User',
     }),
-    getService: jest.fn().mockReturnValue({
-      publishPost: jest.fn().mockResolvedValue({ id: 'post-123' }),
-      validateToken: jest.fn().mockResolvedValue(true),
+    getService: mock().mockReturnValue({
+      publishPost: mock().mockResolvedValue({ id: 'post-123' }),
+      validateToken: mock().mockResolvedValue(true),
     }),
-    addMemory: jest.fn().mockResolvedValue(undefined),
-    getMemories: jest.fn().mockResolvedValue([]),
-    createMemory: jest.fn().mockResolvedValue(undefined),
-    composeState: jest.fn().mockImplementation(async (message: Memory) => ({
+    addMemory: mock().mockResolvedValue(undefined),
+    getMemories: mock().mockResolvedValue([]),
+    createMemory: mock().mockResolvedValue(undefined),
+    composeState: mock().mockImplementation(async (message: Memory) => ({
+      values: {},
+      data: {},
+      text: message.content.text || '',
       message: message.content.text,
       currentContext: [],
     })),
-    isClientConnected: jest.fn().mockReturnValue(true),
+    isClientConnected: mock().mockReturnValue(true),
     logger: {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
+      info: mock(),
+      error: mock(),
+      warn: mock(),
+      debug: mock(),
+      level: 'info',
+      trace: mock(),
+      fatal: mock(),
+      success: mock(),
+      progress: mock(),
+      log: mock(),
     } as any,
   } as unknown as IAgentRuntime;
 }
@@ -38,9 +48,9 @@ export function createMockRuntime(): IAgentRuntime {
  */
 export function createTelegramMessage(text: string, attachments?: any[]): Memory {
   return {
-    id: 'test-message-id',
-    entityId: 'test-user-id',
-    roomId: 'test-room-id',
+    id: '00000000-0000-0000-0000-000000000003' as UUID,
+    entityId: '00000000-0000-0000-0000-000000000002' as UUID,
+    roomId: '00000000-0000-0000-0000-000000000004' as UUID,
     content: {
       text,
       source: 'telegram',

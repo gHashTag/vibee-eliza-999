@@ -1,3 +1,5 @@
+import { expect } from 'bun:test';
+
 /**
  * Утилиты для тестирования Instagram плагина
  */

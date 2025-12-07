@@ -33,8 +33,11 @@
     "dist",
     "node_modules",
     "src/__tests__/**/*",
+    "src/**/__tests__/**/*",
     "src/**/cypress/**/*",
+    "src/frontend/**/*",
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "**/*.e2e.ts"
   ]
 }

@@ -10,8 +10,9 @@ export class StorageService extends Service {
 
   capabilityDescription = 'Supabase Storage Service - для загрузки файлов в облако';
 
-  private supabase: SupabaseClient;
+  private supabase: SupabaseClient | null = null;
   private bucketName = 'instagram-uploads';
+  private isConfigured = false;
 
   async stop(): Promise<void> {
     console.log('💾 [StorageService] Сервис остановлен');
@@ -19,15 +20,20 @@ export class StorageService extends Service {
 
   constructor() {
     super();
-    try {
-      this.supabase = createClient(
-        process.env.SUPABASE_URL || '',
-        process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      );
-    } catch (error) {
-      console.warn(`⚠️ [StorageService] Ошибка создания Supabase клиента: ${error instanceof Error ? error.message : String(error)}`);
-      // Создаем "пустого" клиента, чтобы избежать null reference ошибок
-      this.supabase = createClient('', '');
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (url && key) {
+      try {
+        this.supabase = createClient(url, key);
+        this.isConfigured = true;
+      } catch (error) {
+        console.warn(`⚠️ [StorageService] Ошибка создания Supabase клиента: ${error instanceof Error ? error.message : String(error)}`);
+        this.isConfigured = false;
+      }
+    } else {
+      console.log('ℹ️ [StorageService] Supabase не настроен - работаем в fallback режиме');
+      this.isConfigured = false;
     }
   }
 
@@ -36,10 +42,9 @@ export class StorageService extends Service {
 
     const service = new StorageService();
 
-    // Проверяем наличие переменных окружения
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.log('ℹ️ [StorageService] SUPABASE_URL или SUPABASE_SERVICE_ROLE_KEY не установлены');
-      console.log('ℹ️ [StorageService] Сервис будет работать в fallback режиме (файлы не будут загружаться в облако)');
+    // Если Supabase не настроен, возвращаем сервис в fallback режиме
+    if (!service.isConfigured || !service.supabase) {
+      console.log('ℹ️ [StorageService] Сервис работает в fallback режиме (файлы не будут загружаться в облако)');
       return service;
     }
 
@@ -51,6 +56,7 @@ export class StorageService extends Service {
         // Если URL пустой или неверный, просто работаем в fallback режиме
         console.log('ℹ️ [StorageService] Подключение к Supabase недоступно');
         console.log('ℹ️ [StorageService] Сервис будет работать в fallback режиме (файлы не будут загружаться в облако)');
+        service.isConfigured = false;
         return service;
       }
 
@@ -93,6 +99,7 @@ export class StorageService extends Service {
     } catch (error) {
       console.warn(`⚠️ [StorageService] Ошибка инициализации: ${error}`);
       console.log('⚠️ [StorageService] Сервис будет работать в fallback режиме (без загрузки в облако)');
+      service.isConfigured = false;
     }
 
     return service;
@@ -110,9 +117,10 @@ export class StorageService extends Service {
       console.log(`📤 [StorageService] Загрузка файла: ${fileUrl}`);
 
       // Проверяем, что Supabase доступен
-      if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      if (!this.isConfigured || !this.supabase) {
         console.log('ℹ️ [StorageService] Supabase недоступен, работаем в fallback режиме');
-        throw new Error('Supabase не настроен. Пожалуйста, установите SUPABASE_URL и SUPABASE_SERVICE_ROLE_KEY');
+        // В fallback режиме возвращаем исходный URL
+        return { url: fileUrl, path: fileUrl };
       }
 
       // Генерируем уникальное имя файла
@@ -170,6 +178,10 @@ export class StorageService extends Service {
     try {
       console.log(`📥 [StorageService] Скачивание файла: ${filePath}`);
 
+      if (!this.isConfigured || !this.supabase) {
+        throw new Error('Supabase не настроен для скачивания файлов');
+      }
+
       const { data, error } = await this.supabase.storage
         .from(this.bucketName)
         .download(filePath);
@@ -193,6 +205,11 @@ export class StorageService extends Service {
     try {
       console.log(`🗑️ [StorageService] Удаление файла: ${filePath}`);
 
+      if (!this.isConfigured || !this.supabase) {
+        console.log('ℹ️ [StorageService] Supabase не настроен, пропускаем удаление');
+        return;
+      }
+
       const { error } = await this.supabase.storage
         .from(this.bucketName)
         .remove([filePath]);
@@ -212,16 +229,23 @@ export class StorageService extends Service {
    * Автоочистка старых файлов (старше 24 часов)
    */
   private scheduleCleanup(): void {
+    if (!this.isConfigured || !this.supabase) {
+      console.log('ℹ️ [StorageService] Автоочистка отключена - Supabase не настроен');
+      return;
+    }
+
     const CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 час
     const MAX_AGE = 24 * 60 * 60 * 1000; // 24 часа
 
     console.log(`⏰ [StorageService] Запуск автоочистки каждые ${CLEANUP_INTERVAL / 1000 / 60} минут`);
 
+    const supabase = this.supabase; // Capture for closure
+
     setInterval(async () => {
       try {
         console.log('🧹 [StorageService] Проверка старых файлов...');
 
-        const { data: files, error } = await this.supabase.storage
+        const { data: files, error } = await supabase.storage
           .from(this.bucketName)
           .list();
 
@@ -243,7 +267,7 @@ export class StorageService extends Service {
 
         if (oldFiles.length > 0) {
           const pathsToDelete = oldFiles.map(file => file.name);
-          await this.supabase.storage
+          await supabase.storage
             .from(this.bucketName)
             .remove(pathsToDelete);
 
@@ -262,6 +286,10 @@ export class StorageService extends Service {
    */
   async getFileInfo(filePath: string): Promise<{ size: number; created: string; publicUrl: string }> {
     try {
+      if (!this.isConfigured || !this.supabase) {
+        throw new Error('Supabase не настроен для получения информации о файлах');
+      }
+
       const { data, error } = await this.supabase.storage
         .from(this.bucketName)
         .list('', {

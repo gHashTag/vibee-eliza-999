@@ -17,6 +17,8 @@ import { startGroupMonitoringAction } from './actions/StartGroupMonitoringAction
 import { addGroupToMonitorAction } from './actions/AddGroupToMonitorAction';
 import { kolsLearningProvider } from './providers/KolsLearningProvider';
 import { KolsLogger } from './utils/logger';
+// Используем централизованную конфигурацию!
+import { isTargetChat } from './config/targetChats';
 
 // Webhook handler для обработки событий Telegram
 async function telegramWebhookHandler(req: any, res: any, runtime: any): Promise<void> {
@@ -32,11 +34,8 @@ async function telegramWebhookHandler(req: any, res: any, runtime: any): Promise
 
       KolsLogger.debug(`WEBHOOK: Сообщение в чате ${chatId}, от ${sender?.first_name || 'Unknown'}`);
 
-      // Проверяем, что это одна из целевых групп
-      const targetGroups = [2643951085, 2298297094, -1002643951085];
-      const normalizedChatId = chatId < -1000000000 ? Math.abs(chatId) - 100000000000 : chatId;
-
-      if (targetGroups.includes(Math.abs(chatId)) || targetGroups.includes(normalizedChatId)) {
+      // Используем централизованную функцию isTargetChat
+      if (isTargetChat(chatId)) {
         KolsLogger.success(`WEBHOOK: Целевая группа ${chatId} - обрабатываем`);
       } else {
         KolsLogger.debug(`WEBHOOK: Группа ${chatId} не в целевом списке - пропускаем`);

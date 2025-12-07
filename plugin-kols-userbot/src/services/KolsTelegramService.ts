@@ -14,13 +14,14 @@ import { IKolsMonitoringStats, IKolsMessage, IKolsGroup } from '../types';
 import { KolsLogger } from '../utils/logger';
 import { KolsProactiveService } from './KolsProactiveService';
 import { GramJSEventMonitor } from './GramJSEventMonitor';
+import { VibeCodingKnowledgeProvider } from '../providers/VibeCodingKnowledgeProvider';
 
 // Импорт централизованной конфигурации
 import {
   getCredentials,
   containsTrigger,
   findTriggers,
-  isTargetChat,
+  shouldProcessChat,
   getTargetChats,
   PROACTIVE_LLM
 } from '../config';
@@ -86,6 +87,7 @@ export class KolsTelegramService extends Service {
   protected runtimeRef: IAgentRuntime | null = null;
   private proactiveService: KolsProactiveService;
   private eventMonitor: GramJSEventMonitor | null = null;
+  private knowledgeProvider: VibeCodingKnowledgeProvider;
   private autoReplyEnabled = true;
   private isMonitoring = false;
   private monitoredGroups: Map<string, IKolsGroup> = new Map();
@@ -96,6 +98,7 @@ export class KolsTelegramService extends Service {
   constructor() {
     super();
     this.proactiveService = new KolsProactiveService();
+    this.knowledgeProvider = new VibeCodingKnowledgeProvider();
     KolsLogger.timer('KolsTelegramService создан с проактивным обучением');
   }
 
@@ -175,6 +178,11 @@ export class KolsTelegramService extends Service {
       // Инициализируем проактивное обучение с knowledge base
       KolsLogger.activity('Инициализация проактивного обучения...');
 
+      // Загружаем knowledge base для RAG
+      await this.knowledgeProvider.loadKnowledgeBase();
+      const kbStats = this.knowledgeProvider.getStats();
+      KolsLogger.success(`Knowledge Base загружен: ${kbStats.sections} секций, ${kbStats.chunks} чанков`);
+
       // Целевые чаты из централизованной конфигурации
       const targetChats = getTargetChats();
 
@@ -238,9 +246,8 @@ export class KolsTelegramService extends Service {
       const chatClassName = chat.className || '';
       const isPrivate = chatClassName === 'User' || (!chat.title && !chatClassName.includes('Channel') && !chatClassName.includes('Chat'));
 
-      // ВАЖНО: Отвечаем ТОЛЬКО в целевые группы!
-      // Личные чаты - только логируем, не отвечаем
-      const canReply = isTargetChat(chatId);
+      // ВАЖНО: Отвечаем в целевые группы И в личные сообщения!
+      const canReply = shouldProcessChat(chatId);
 
       if (!canReply) {
         // Логируем пропущенные сообщения компактно
@@ -407,7 +414,7 @@ export class KolsTelegramService extends Service {
   }
 
   /**
-   * Генерирует и отправляет обучающий ответ через LLM
+   * Генерирует и отправляет обучающий ответ через LLM с RAG
    */
   private async generateAndSendLearningReply(message: IKolsMessage): Promise<void> {
     try {
@@ -419,25 +426,45 @@ export class KolsTelegramService extends Service {
         prompt: message.messageText
       });
 
-      // Промпт в стиле character файла - неформальный бро-наставник
-      const systemPrompt = `Ты KOLS - бро-наставник по VibeCoding.
+      // RAG: Ищем релевантный контент из книги
+      let knowledgeContext = '';
+      const relevantChunks = this.knowledgeProvider.searchContent(message.messageText, 3);
+      if (relevantChunks.length > 0) {
+        knowledgeContext = '\n\nКОНТЕКСТ ИЗ КНИГИ "AGENTIC VIBECODING":\n' +
+          relevantChunks.map(c => `[${c.chapter}] ${c.content}`).join('\n\n');
+        KolsLogger.debug(`RAG: найдено ${relevantChunks.length} релевантных чанков`);
+      }
+
+      // Промпт в стиле character файла - неформальный бро-наставник с юмором
+      const systemPrompt = `Ты ВАЙБИ (VIBEE) - бро-наставник по вайбкодингу с отличным чувством юмора! Цифровой клон Дмитрия Васильева (@neuro_sage).
 
 Пользователь написал: "${message.messageText}"
+${knowledgeContext}
+
+КТО ТЫ:
+- Имя: ВАЙБИ
+- Создатель: Дмитрий Васильев (@neuro_sage, @koshasuperstar)
+- Проекты: НейроБлогер, НейроКоллс, ВАЙБИ
 
 ТВОЙ СТИЛЬ:
-- Общайся неформально, как с другом
+- Общайся неформально, как с другом - весёлый, но полезный
+- Добавляй 1-2 шутки или весёлых сравнения
 - Давай КОНКРЕТНЫЕ команды которые можно скопировать
 - Если человек спрашивает КАК сделать - дай команду в формате: "Скажи агенту: '...'"
+- Подбадривай: "Ты справишься!", "Красава!", "Огонь!"
 - Объясняй просто, без заумных терминов
+- ВСЕ технические термины на русском!
+- ИСПОЛЬЗУЙ ЗНАНИЯ ИЗ КОНТЕКСТА КНИГИ если они релевантны!
 
 ПРАВИЛА:
 - Короткий ответ: 50-150 слов
-- НЕ грузи теорией - сразу к делу
-- Можешь использовать сленг: бро, йо, го, чекни
+- НЕ грузи теорией - сразу к делу, но с улыбкой
+- Используй сленг: бро, йо, го, чекни, красава, огонь
 - Разбивай сложное на шаги с командами
-- ОТВЕЧАЙ НА РУССКОМ
+- НИКОГДА НЕ ИСПОЛЬЗУЙ ЭМОДЗИ! Запрещены смайлики!
+- ОТВЕЧАЙ ТОЛЬКО НА РУССКОМ! Никаких английских слов!
 
-Твоя экспертиза: Claude Code команды, ElizaOS плагины, Telegram боты, TypeScript, настройка окружения.`;
+Твоя экспертиза: Клод Код команды, ЭлизаОС плагины, Телеграм боты, ТайпСкрипт, вайбкодинг.`;
 
       // Генерируем ТОЛЬКО через LLM - БЕЗ FALLBACK!
       if (!this.runtimeRef) {

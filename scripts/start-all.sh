@@ -17,13 +17,23 @@ echo "✅ Все предыдущие процессы остановлены"
 echo ""
 echo "🚀 Запуск всех компонентов VIBEE..."
 
-# Экспортируем PostgreSQL конфигурацию - ВСЕГДА ИСПОЛЬЗУЕМ POSTGRESQL!
-# ВАЖНО: SQL плагин ищет именно POSTGRES_URL, не DATABASE_URL!
-export POSTGRES_URL="postgresql://neondb_owner:npg_A9z2dErbkfhw@ep-bitter-frog-a1bewei7-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-export DATABASE_URL="$POSTGRES_URL"
-export DATABASE_ADAPTER=postgres
+# 🔐 Загружаем .env файл если существует
+if [ -f /Users/playra/vibee-agent/.env ]; then
+    echo "🔐 Загружаем переменные из .env..."
+    set -a
+    source /Users/playra/vibee-agent/.env
+    set +a
+    echo "✅ Переменные окружения загружены"
+fi
 
-echo "✅ PostgreSQL настроена: $POSTGRES_URL"
+# 🔧 ПРИНУДИТЕЛЬНОЕ переключение на SQLite для разработки
+echo "🔧 Принудительно используем SQLite для разработки"
+export DATABASE_URL="sqlite:./data/dev.sqlite"
+export DATABASE_ADAPTER=sqlite
+export ELIZA_ALLOW_DESTRUCTIVE_MIGRATIONS=true
+
+echo "✅ Database configured: $DATABASE_ADAPTER"
+echo "   URL: $DATABASE_URL"
 
 # 🔧 КРИТИЧЕСКИ ВАЖНО: Запускаем миграции ОДИН РАЗ перед запуском агентов
 # Это предотвращает ошибки интроспекции Drizzle при параллельном старте
@@ -61,7 +71,13 @@ echo "📋 Запускаем агентов (каждый на своем по�
 # 3. VIBEE Agent (порт 3000)
 if ! lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
     echo "  1. VIBEE (главный) → порт 3000"
-    env PORT=3000 POSTGRES_URL="$POSTGRES_URL" DATABASE_URL="$POSTGRES_URL" DATABASE_ADAPTER=postgres npx elizaos start --character /Users/playra/vibee-agent/characters/vibeeAgent.json > logs/vibee.log 2>&1 &
+    env PORT=3000 \
+        DATABASE_URL="$DATABASE_URL" \
+        DATABASE_ADAPTER="$DATABASE_ADAPTER" \
+        TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN" \
+        OPENROUTER_API_KEY="$OPENROUTER_API_KEY" \
+        SECRET_SALT="$SECRET_SALT" \
+        npx elizaos start --character /Users/playra/vibee-agent/characters/vibeeAgent.json > logs/vibee.log 2>&1 &
     sleep 3
 else
     echo "  1. VIBEE уже работает на порту 3000"
@@ -70,7 +86,13 @@ fi
 # 4. Instagram Expert (порт 3001)
 if ! lsof -Pi :3001 -sTCP:LISTEN -t >/dev/null 2>&1; then
     echo "  2. Instagram Expert → порт 3001"
-    env PORT=3001 POSTGRES_URL="$POSTGRES_URL" DATABASE_URL="$POSTGRES_URL" DATABASE_ADAPTER=postgres AGENT_TYPE=instagram bun dev > logs/instagram.log 2>&1 &
+    env PORT=3001 \
+        DATABASE_URL="$DATABASE_URL" \
+        DATABASE_ADAPTER="$DATABASE_ADAPTER" \
+        TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN" \
+        OPENROUTER_API_KEY="$OPENROUTER_API_KEY" \
+        SECRET_SALT="$SECRET_SALT" \
+        npx elizaos start --character /Users/playra/vibee-agent/characters/instagramExpert.json > logs/instagram.log 2>&1 &
     sleep 3
 else
     echo "  2. Instagram Expert уже работает на порту 3001"
@@ -79,20 +101,23 @@ fi
 # 5. KOLS Agent (порт 3002)
 if ! lsof -Pi :3002 -sTCP:LISTEN -t >/dev/null 2>&1; then
     echo "  3. KOLS Agent → порт 3002"
-    env PORT=3002 POSTGRES_URL="$POSTGRES_URL" DATABASE_URL="$POSTGRES_URL" DATABASE_ADAPTER=postgres npx elizaos start --character /Users/playra/vibee-agent/characters/kolsAgent.json > logs/kols.log 2>&1 &
+    env PORT=3002 \
+        DATABASE_URL="$DATABASE_URL" \
+        DATABASE_ADAPTER="$DATABASE_ADAPTER" \
+        TELEGRAM_API_ID="$TELEGRAM_API_ID" \
+        TELEGRAM_API_HASH="$TELEGRAM_API_HASH" \
+        TELEGRAM_SESSION_STRING="$TELEGRAM_SESSION_STRING" \
+        TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN" \
+        OPENROUTER_API_KEY="$OPENROUTER_API_KEY" \
+        SECRET_SALT="$SECRET_SALT" \
+        npx elizaos start --character /Users/playra/vibee-agent/characters/kolsAgent.json > logs/kols.log 2>&1 &
     sleep 3
 else
     echo "  3. KOLS Agent уже работает на порту 3002"
 fi
 
-# 6. NeuroPhoto Agent (порт 3003)
-if ! lsof -Pi :3003 -sTCP:LISTEN -t >/dev/null 2>&1; then
-    echo "  4. NeuroPhoto Agent → порт 3003"
-    env PORT=3003 POSTGRES_URL="$POSTGRES_URL" DATABASE_URL="$POSTGRES_URL" DATABASE_ADAPTER=postgres npx elizaos start --character /Users/playra/vibee-agent/characters/neuroPhoto.json > logs/neurophoto.log 2>&1 &
-    sleep 3
-else
-    echo "  4. NeuroPhoto Agent уже работает на порту 3003"
-fi
+# NeuroPhoto Agent отключён - файл neuroPhoto.json не существует
+# Если нужен, создайте characters/neuroPhoto.json
 
 echo ""
 echo "🎉 ВСЕ ЗАПУЩЕНО!"
@@ -101,13 +126,29 @@ echo "📊 Статус компонентов:"
 echo "  🔵 Агент VIBEE:        http://localhost:3000"
 echo "  🟢 Агент Instagram:    http://localhost:3001"
 echo "  🟡 Агент KOLS:         http://localhost:3002"
-echo "  🟣 Агент NeuroPhoto:   http://localhost:3003"
 echo "  🎨 Кастомный клиент:   http://localhost:5173"
 echo ""
-echo "📁 Логи агентов:"
-echo "  tail -f logs/vibee.log"
-echo "  tail -f logs/instagram.log"
-echo "  tail -f logs/kols.log"
-echo "  tail -f logs/neurophoto.log"
+echo "⏹️  Для остановки: Ctrl+C"
 echo ""
-echo "⏹️  Для остановки всех: pkill -f 'elizaos' && pkill -f 'vite'"
+echo "📺 ЛОГИ ВСЕХ АГЕНТОВ (в реальном времени):"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Функция для очистки при выходе
+cleanup() {
+    echo ""
+    echo "🛑 Останавливаем всех агентов..."
+    pkill -f 'elizaos' 2>/dev/null
+    pkill -f 'vite' 2>/dev/null
+    exit 0
+}
+
+# Ловим Ctrl+C
+trap cleanup SIGINT SIGTERM
+
+# Показываем логи всех агентов в реальном времени
+tail -f logs/vibee.log logs/instagram.log logs/kols.log 2>/dev/null &
+TAIL_PID=$!
+
+# Ждём завершения (Ctrl+C)
+wait $TAIL_PID

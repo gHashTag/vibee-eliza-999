@@ -16,42 +16,36 @@ import { proactiveLearningAction } from './actions/ProactiveLearningAction';
 import { startGroupMonitoringAction } from './actions/StartGroupMonitoringAction';
 import { addGroupToMonitorAction } from './actions/AddGroupToMonitorAction';
 import { kolsLearningProvider } from './providers/KolsLearningProvider';
+import { KolsLogger } from './utils/logger';
 
 // Webhook handler для обработки событий Telegram
 async function telegramWebhookHandler(req: any, res: any, runtime: any): Promise<void> {
   try {
-    console.log('📱 KOLS WEBHOOK: Получен запрос от Telegram');
+    KolsLogger.info('WEBHOOK: Получен запрос от Telegram');
     const update = req.body || {};
-    console.log('📱 KOLS WEBHOOK: Данные получены', JSON.stringify(update, null, 2));
 
     // Обрабатываем только групповые сообщения
     if (update.message && update.message.chat) {
       const chatId = update.message.chat.id;
-      const messageId = update.message.message_id;
       const text = update.message.text || '';
       const sender = update.message.from;
 
-      console.log(`📱 KOLS WEBHOOK: Сообщение в чате ${chatId}, от ${sender?.first_name || 'Unknown'}`);
-      console.log(`📱 KOLS WEBHOOK: Текст: ${text.substring(0, 100)}...`);
+      KolsLogger.debug(`WEBHOOK: Сообщение в чате ${chatId}, от ${sender?.first_name || 'Unknown'}`);
 
       // Проверяем, что это одна из целевых групп
       const targetGroups = [2643951085, 2298297094, -1002643951085];
       const normalizedChatId = chatId < -1000000000 ? Math.abs(chatId) - 100000000000 : chatId;
 
       if (targetGroups.includes(Math.abs(chatId)) || targetGroups.includes(normalizedChatId)) {
-        console.log(`✅ KOLS WEBHOOK: Целевая группа ${chatId} - обрабатываем сообщение`);
-
-        // Здесь можно добавить логику обработки входящих сообщений
-        // Например, отправка в MTProto для анализа
-
+        KolsLogger.success(`WEBHOOK: Целевая группа ${chatId} - обрабатываем`);
       } else {
-        console.log(`⏭️  KOLS WEBHOOK: Группа ${chatId} не в целевом списке - пропускаем`);
+        KolsLogger.debug(`WEBHOOK: Группа ${chatId} не в целевом списке - пропускаем`);
       }
     }
 
     res.status(200).json({ status: 'ok' });
   } catch (error) {
-    console.error('❌ KOLS WEBHOOK: Ошибка обработки:', error);
+    KolsLogger.error('WEBHOOK: Ошибка обработки', error);
     res.status(500).json({
       status: 'error',
       message: error instanceof Error ? error.message : String(error)

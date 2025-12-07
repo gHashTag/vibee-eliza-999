@@ -13,9 +13,7 @@
   "plugins": [
     "@elizaos/plugin-sql",
     "@elizaos/plugin-openrouter",
-    "@elizaos/plugin-bootstrap",
-    "file:///Users/playra/vibee-agent/plugin-telegram-craft/dist/index.js",
-    "file:///Users/playra/vibee-agent/plugin-vibe-face-avatar/dist/index.js"
+    "@elizaos/plugin-bootstrap"
   ],
   "settings": {
     "secrets": {},

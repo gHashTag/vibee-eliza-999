@@ -12,7 +12,6 @@
   "plugins": [
     "@elizaos/plugin-sql",
     "@elizaos/plugin-openrouter",
-    "@elizaos/plugin-telegram",
     "@elizaos/plugin-bootstrap"
   ],
   "settings": {

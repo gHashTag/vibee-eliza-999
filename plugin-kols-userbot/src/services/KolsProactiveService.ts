@@ -30,7 +30,7 @@ export class KolsProactiveService {
   private config: ProactiveConfig = {
     intervalMinMinutes: 60,
     intervalMaxMinutes: 90,
-    maxTokens: 300,
+    maxTokens: 1000,  // Достаточно для полных ответов
     temperature: 0.8
   };
 

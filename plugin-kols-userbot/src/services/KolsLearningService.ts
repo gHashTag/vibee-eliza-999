@@ -1,22 +1,36 @@
 /**
  * KOLS Learning Service
- * Единый сервис для обучения студентов VibeCoding
+ *
+ * Сервис обучения студентов VibeCoding.
+ * Использует встроенную базу знаний (embeddedKnowledge.json).
+ * Никаких зависимостей на файловую систему!
  */
 import { Service, IAgentRuntime } from '@elizaos/core';
-import fs from 'fs';
-import path from 'path';
 import { IKolsLearningTip } from '../types';
+import { KolsLogger } from '../utils/logger';
+import { knowledgeLoader, KnowledgeChunk } from '../knowledge';
 
 export class KolsLearningService extends Service {
   static serviceType = 'kols-learning';
   serviceType = 'kols-learning';
 
+  // Singleton паттерн для идемпотентности
+  private static instance: KolsLearningService | null = null;
+  private isInitialized = false;
+
   /**
    * Статический метод start() - требуется ElizaOS
+   * Идемпотентный - повторные вызовы безопасны
    */
   static async start(runtime: IAgentRuntime): Promise<Service> {
+    if (KolsLearningService.instance?.isInitialized) {
+      KolsLogger.debug('KolsLearningService: Уже инициализирован, переиспользуем');
+      return KolsLearningService.instance;
+    }
+
     const service = new KolsLearningService();
     await service.initialize(runtime);
+    KolsLearningService.instance = service;
     return service;
   }
 
@@ -24,172 +38,145 @@ export class KolsLearningService extends Service {
    * Статический метод stop() - требуется ElizaOS
    */
   static async stop(runtime: IAgentRuntime): Promise<void> {
-    console.log('🛑 [KolsLearningService] static stop() called');
+    KolsLogger.info('KolsLearningService: static stop() called');
+    if (KolsLearningService.instance) {
+      await KolsLearningService.instance.stop();
+      KolsLearningService.instance = null;
+    }
   }
 
-  private knowledgePath = '/Users/playra/vibee-agent/docs';
-  private learningTips: IKolsLearningTip[] = [];
-
+  /**
+   * Инициализация сервиса
+   * Загружает встроенную базу знаний
+   */
   async initialize(runtime: IAgentRuntime): Promise<void> {
-    console.log('🎓 [KolsLearningService] Инициализация обучения...');
-    await this.loadLearningTips();
-    console.log(`✅ [KolsLearningService] Загружено ${this.learningTips.length} обучающих советов`);
-  }
-
-  /**
-   * Загружает обучающие советы
-   */
-  private async loadLearningTips(): Promise<void> {
-    try {
-      // Основные советы по VibeCoding
-      this.learningTips = [
-        {
-          title: 'Что такое VibeCoding?',
-          content: 'VibeCoding - это новый подход к программированию, где AI-агенты становятся вашими напарниками в создании кода. Вместо того чтобы писать код вручную, вы общаетесь с AI на естественном языке, а он помогает вам создавать, отлаживать и улучшать программы.',
-          why: 'Это позволяет сосредоточиться на решении проблем, а не на синтаксисе и рутинных задачах.',
-          practicalTip: 'Начните с простых проектов: попросите AI создать функцию, затем улучшить её, добавить тесты.',
-          topic: 'basics'
-        },
-        {
-          title: 'Claude Code - ваш главный инструмент',
-          content: 'Claude Code - это CLI инструмент от Anthropic для работы с AI-агентами прямо в терминале. Он понимает контекст вашего проекта и может редактировать файлы, запускать команды, создавать новые компоненты.',
-          why: 'Повышает продуктивность в 3-5 раз за счет автоматизации рутинных задач программирования.',
-          practicalTip: 'Установите Claude Code и попробуйте команду: "Создай React компонент кнопки" - увидите магию!',
-          topic: 'tools'
-        },
-        {
-          title: 'Что такое AI-агенты?',
-          content: 'AI-агенты - это автономные программы, которые могут воспринимать окружающую среду, принимать решения и действовать для достижения целей. В контексте VibeCoding, это AI-помощники, которые понимают ваш код и могут его улучшать.',
-          why: 'Позволяют делегировать рутинные задачи программирования и сосредоточиться на архитектуре и решениях.',
-          practicalTip: 'Начните с простого агента: попросите его анализировать ваш код и предлагать улучшения.',
-          topic: 'agents'
-        },
-        {
-          title: 'Принцип "7 раз отмерь, один раз отрежь"',
-          content: 'Перед написанием кода тщательно спланируйте архитектуру. AI-агенты помогают не только писать код, но и проектировать систему. Обсудите с AI план, получите обратную связь, и только потом приступайте к реализации.',
-          why: 'Хорошая архитектура экономит часы отладки и переписывания кода.',
-          practicalTip: 'Перед началом проекта создайте диаграмму архитектуры вместе с AI и проверьте все сценарии использования.',
-          topic: 'workflow'
-        },
-        {
-          title: 'ElizaOS - платформа для создания агентов',
-          content: 'ElizaOS - это фреймворк для создания AI-агентов. Он предоставляет инструменты для создания, управления и оркестрации множества агентов, каждый из которых решает свою задачу.',
-          why: 'Позволяет создавать сложные системы из простых, переиспользуемых компонентов.',
-          practicalTip: 'Изучите структуру агента: Character, Actions, Services, Providers - это 4 основных блока.',
-          topic: 'platform'
-        }
-      ];
-
-      // Пытаемся загрузить из Библии вайб-кодера если папка существует
-      if (fs.existsSync(this.knowledgePath)) {
-        await this.loadFromBibleFiles();
-      }
-    } catch (error) {
-      console.error('❌ [KolsLearningService] Ошибка загрузки советов:', error);
-    }
-  }
-
-  /**
-   * Загружает дополнительные советы из файлов Библии
-   */
-  private async loadFromBibleFiles(): Promise<void> {
-    try {
-      console.log(`📂 [KolsLearningService] Сканирую папку: ${this.knowledgePath}`);
-
-      const allFiles = this.getAllMarkdownFiles(this.knowledgePath);
-      console.log(`📄 [KolsLearningService] Найдено файлов: ${allFiles.length}`);
-
-      for (const filePath of allFiles) {
-        const relativePath = path.relative(this.knowledgePath, filePath);
-        const content = fs.readFileSync(filePath, 'utf-8');
-        const chunks = this.extractUsefulChunks(content, relativePath);
-        this.learningTips.push(...chunks);
-      }
-
-      console.log(`📚 [KolsLearningService] ✅ Загружено ВСЕГО ${this.learningTips.length} фрагментов из Библии`);
-    } catch (error) {
-      console.error('❌ [KolsLearningService] Ошибка загрузки из файлов:', error);
-    }
-  }
-
-  /**
-   * Рекурсивно находит все markdown файлы в папке
-   */
-  private getAllMarkdownFiles(dir: string): string[] {
-    const results: string[] = [];
-    const items = fs.readdirSync(dir);
-
-    for (const item of items) {
-      const fullPath = path.join(dir, item);
-      const stat = fs.statSync(fullPath);
-
-      if (stat.isDirectory()) {
-        // Рекурсивно сканируем подпапки
-        results.push(...this.getAllMarkdownFiles(fullPath));
-      } else if (stat.isFile() && item.endsWith('.md')) {
-        results.push(fullPath);
-      }
+    if (this.isInitialized) {
+      KolsLogger.debug('KolsLearningService: Уже инициализирован');
+      return;
     }
 
-    return results;
-  }
+    KolsLogger.info('KolsLearningService: Инициализация обучения...');
 
-  /**
-   * Извлекает полезные фрагменты из markdown
-   */
-  private extractUsefulChunks(content: string, filename: string): IKolsLearningTip[] {
-    const chunks: IKolsLearningTip[] = [];
-    const sections = content.split(/^##\s+/m);
+    // Загружаем встроенную базу знаний
+    knowledgeLoader.load();
 
-    for (const section of sections) {
-      if (section.length < 50) continue;
-
-      const lines = section.split('\n');
-      const title = lines[0].replace(/^#+\s*/, '').trim();
-      const body = lines.slice(1).join('\n').trim();
-
-      if (body.length > 50) {
-        chunks.push({
-          title: `${title} (${filename})`,
-          content: body, // Полный контент без обрезки
-          why: 'Полезная информация из Библии вайб-кодера',
-          practicalTip: 'Попробуйте применить это на практике',
-          topic: 'bible'
-        });
-      }
+    const metadata = knowledgeLoader.getMetadata();
+    if (metadata) {
+      KolsLogger.success(
+        `KolsLearningService: Загружено ${metadata.totalChunks} обучающих фрагментов ` +
+        `(v${metadata.version}, ${metadata.totalFiles} файлов)`
+      );
     }
 
-    return chunks; // Все фрагменты из файла (убран лимит)
+    this.isInitialized = true;
   }
 
   /**
-   * Получает случайный совет
+   * Получает случайный обучающий совет
+   * @param type - опциональный тип контента (concept, tip, example, question, exercise)
    */
-  getRandomLearningTip(): IKolsLearningTip {
-    const randomIndex = Math.floor(Math.random() * this.learningTips.length);
-    return this.learningTips[randomIndex];
+  getRandomLearningTip(type?: string): IKolsLearningTip {
+    const chunk = knowledgeLoader.getRandomChunk(type as any);
+
+    if (!chunk) {
+      // Возвращаем дефолтный совет если база пуста
+      return {
+        title: 'Что такое VibeCoding?',
+        content: 'VibeCoding - это новый подход к программированию с AI-агентами.',
+        why: 'AI помогает сосредоточиться на решении проблем.',
+        practicalTip: 'Начните с простых проектов и постепенно усложняйте.',
+        topic: 'basics'
+      };
+    }
+
+    return this.chunkToTip(chunk);
   }
 
   /**
    * Получает советы по теме
+   * @param topic - тема для поиска
    */
   getTipsByTopic(topic: string): IKolsLearningTip[] {
-    return this.learningTips.filter(tip => tip.topic === topic);
+    const chunks = knowledgeLoader.search(topic, 20);
+    return chunks.map(chunk => this.chunkToTip(chunk));
+  }
+
+  /**
+   * Получает советы по главе
+   * @param chapter - название главы
+   */
+  getTipsByChapter(chapter: string): IKolsLearningTip[] {
+    const chunks = knowledgeLoader.getByChapter(chapter);
+    return chunks.map(chunk => this.chunkToTip(chunk));
+  }
+
+  /**
+   * Поиск по тексту
+   * @param query - поисковый запрос
+   * @param limit - максимальное количество результатов
+   */
+  searchTips(query: string, limit = 10): IKolsLearningTip[] {
+    const chunks = knowledgeLoader.search(query, limit);
+    return chunks.map(chunk => this.chunkToTip(chunk));
+  }
+
+  /**
+   * Конвертирует KnowledgeChunk в IKolsLearningTip
+   */
+  private chunkToTip(chunk: KnowledgeChunk): IKolsLearningTip {
+    return {
+      title: chunk.title,
+      content: chunk.content,
+      why: `Полезная информация из раздела "${chunk.chapter}"`,
+      practicalTip: this.generatePracticalTip(chunk.type),
+      topic: chunk.type
+    };
+  }
+
+  /**
+   * Генерирует практический совет в зависимости от типа контента
+   */
+  private generatePracticalTip(type: string): string {
+    const tips: Record<string, string> = {
+      concept: 'Попробуйте объяснить эту концепцию своими словами',
+      tip: 'Примените этот совет в своём следующем проекте',
+      example: 'Попробуйте воспроизвести этот пример самостоятельно',
+      question: 'Обдумайте этот вопрос и поделитесь своим мнением',
+      exercise: 'Выполните это упражнение для закрепления навыков'
+    };
+    return tips[type] || 'Попробуйте применить это на практике';
   }
 
   /**
    * Форматирует совет для отправки в Telegram
    */
   formatLearningMessage(tip: IKolsLearningTip): string {
-    return `🎓 **Урок VibeCoding: ${tip.title}**
+    // Ограничиваем длину контента для Telegram
+    const maxContentLength = 800;
+    const content = tip.content.length > maxContentLength
+      ? tip.content.substring(0, maxContentLength) + '...'
+      : tip.content;
 
-${tip.content}
+    return `**${tip.title}**
 
-💡 **Почему это важно:** ${tip.why}
+${content}
 
-🚀 **Практический совет:** ${tip.practicalTip}
+**Почему это важно:** ${tip.why}
 
-📖 Хотите узнать больше? Задайте вопрос!`;
+**Практический совет:** ${tip.practicalTip}
+
+Хотите узнать больше? Задайте вопрос!`;
+  }
+
+  /**
+   * Получает статистику базы знаний
+   */
+  getStats(): { total: number; available: number; types: Record<string, number> } {
+    return {
+      total: knowledgeLoader.getTotalChunks(),
+      available: knowledgeLoader.getAvailableChunks(),
+      types: knowledgeLoader.getTypeStats()
+    };
   }
 
   get capabilityDescription(): string {
@@ -197,6 +184,7 @@ ${tip.content}
   }
 
   async stop(): Promise<void> {
-    console.log('🛑 [KolsLearningService] Остановка...');
+    KolsLogger.info('KolsLearningService: Остановка...');
+    this.isInitialized = false;
   }
 }

@@ -21,8 +21,8 @@
     "secrets": {
       "TELEGRAM_API_ID": "94892",
       "TELEGRAM_API_HASH": "cacf9ad137d228611b49b2ecc6d68d43",
-      "TELEGRAM_SESSION_STRING": "1ApWapzMBu7_l3Ag6iecyMij5-mFLMmQvi5axSimPVoH2QcUb9FBcWJ8Sq3aqEEri2kYJKts-fd2pUYKGWNYxQ10YrBmP7oN-Yoedb1HO1VFolcvKrqFciy63SowMnk80GRLmrqQ7ZHxVmGbd0uO1NhoDG2sBuvCC_B_9CxCpHo8WBL_83yjJND0OaAvXAfedTrPWgjFUn7h_Fn_5B5GnrWsj6g-u14J26NqEqg0bwa1o9TfHTzH0A5xhnUC5-WqdcU23jq_4lfWtwiCafzWf7g16Rm3R48io53Sho2dKL8nyQeAtNWSXmBvcrSmVnfrXQz0EC0qA0XzriuXoHzE-fukmXns725g=",
-      "OPENROUTER_API_KEY": "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",
+      "TELEGRAM_SESSION_STRING": "1BQANOTEuMTA4LjU2LjE3OQG7hxJ0uhPXNkb+k7PjC0wVAfXJbFCM+yuXeXBgfw7Lv8JhhhxTB3AD7+21spB4itvQZnVm1UE6acv0etfIwUvMIESEMpsi+5LPzDd+FEk0Np3dgU1o7Kzpf7uusaA1YqGC9y52lP7rf1nND9w35/XZ5UblwBqKPkoiT2Dcy2F9uSxmUF2L8hO8vm82ChxLcRbQWpnbLCuZMcSX2DPE3gsSMoqLeDmZXotZgUDEabszdJkYSgjMRRllOMT5rwd8ijvUtfJSi81qj2BjUainSHnKuAbeX/NdVB98xobX4+GNU2mM+mZAXAfyXPUb+XnMZGgkYwYJ6QXyUQvP+MFW9u8rZg==",
+      "OPENROUTER_API_KEY": "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",
       "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1"
     },
     "avatar": "/avatars/vibee-agent.svg",

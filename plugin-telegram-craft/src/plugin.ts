@@ -14,8 +14,8 @@ import {
   goalTrackingEvaluator,
 } from './evaluators'
 
-// Routes
-import { getTelegramRoutes } from './routes'
+// Routes (временно отключены - см. комментарий в routes секции)
+// import { getTelegramRoutes } from './routes'
 
 // Services
 import { TelegramService } from './services/telegram.service'
@@ -58,9 +58,11 @@ export const telegramCraftPlugin: Plugin = {
 
   /**
    * Routes - HTTP API endpoints
-   * Возвращает функцию которая получает runtime и возвращает routes
+   * NOTE: Routes временно отключены - getTelegramRoutes требует runtime,
+   * но ElizaOS 1.6.x ожидает статический массив routes.
+   * TODO: Переделать routes чтобы получать runtime из request или init()
    */
-  routes: getTelegramRoutes as unknown as Plugin['routes'],
+  // routes: getTelegramRoutes as unknown as Plugin['routes'],
 
   /**
    * Services - фоновые сервисы

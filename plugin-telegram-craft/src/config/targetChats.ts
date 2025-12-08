@@ -25,24 +25,59 @@ export type TargetChatId = typeof TARGET_CHATS[number];
  * Проверяет, является ли чат личным (не группа, не канал)
  *
  * Telegram ID форматы:
- * - Пользователи: положительные 6-10 цифр (до ~2 миллиардов)
- * - Группы (supergroup): 10+ цифр без -100 (например 2643951085)
- * - Каналы: начинаются с -100
+ * - Пользователи: положительные числа, обычно < 10 миллиардов
+ * - Supergroups через MTProto: channelId приходит как положительное число > 1 миллиарда
+ * - Supergroups через Bot API: -100XXXXXXXXXX
+ * - Каналы: аналогично supergroups
+ * - Обычные группы (legacy): отрицательные без -100
  *
- * ВАЖНО: ID > 2 миллиардов - это скорее всего группы
+ * Важно: через MTProto UpdateNewChannelMessage chatId приходит как
+ * положительное число (например 1504590018 = супергруппа, не пользователь!)
+ *
+ * Эвристика: ID пользователей Telegram обычно < 10 миллиардов,
+ * но channelId супергрупп тоже могут быть в этом диапазоне.
+ * Надёжнее определять по типу события (UpdateNewMessage vs UpdateNewChannelMessage)
  */
 export function isPrivateChat(chatId: string | number): boolean {
-  const chatIdNum = typeof chatId === 'number' ? chatId : parseInt(String(chatId), 10);
+  const chatIdStr = String(chatId);
+  const chatIdNum = typeof chatId === 'number' ? chatId : parseInt(chatIdStr, 10);
 
-  // Отрицательные ID - точно не личный чат
+  // Отрицательные ID - это группы или каналы
   if (chatIdNum < 0) {
     return false;
   }
 
-  // ID пользователей обычно до 2 миллиардов
-  // Supergroup ID начинаются примерно с 1 миллиарда и выше
-  // Безопасный порог: если ID меньше 1.5 миллиарда - это скорее пользователь
-  return chatIdNum > 0 && chatIdNum < 1500000000;
+  // Если ID в списке целевых чатов - это группа, не личный чат
+  if (TARGET_CHATS.includes(chatIdStr as TargetChatId)) {
+    return false;
+  }
+
+  // Супергруппы/каналы через MTProto имеют channelId > 1 миллиарда
+  // но < 10 миллиардов (формат: 1XXXXXXXXX)
+  // Пользователи начинаются с меньших чисел, хотя новые могут быть большими
+  // Безопасная эвристика: ID начинающиеся с 1 и имеющие 10 цифр - это каналы
+  if (chatIdNum >= 1000000000 && chatIdNum < 10000000000) {
+    // Проверяем первую цифру - каналы часто начинаются с 1
+    const firstDigit = chatIdStr.charAt(0);
+    if (firstDigit === '1' && chatIdStr.length === 10) {
+      // Скорее всего это канал/супергруппа, не личный чат
+      return false;
+    }
+  }
+
+  // Пользователи с большими ID (> 5 миллиардов) - это реальные юзеры
+  // Например 6579515876 - это точно пользователь
+  if (chatIdNum > 5000000000) {
+    return true;
+  }
+
+  // Маленькие положительные ID (< 1 миллиарда) - это пользователи
+  if (chatIdNum > 0 && chatIdNum < 1000000000) {
+    return true;
+  }
+
+  // По умолчанию не считаем личным (безопаснее)
+  return false;
 }
 
 /**
@@ -74,13 +109,28 @@ export function isTargetChat(chatId: string | number): boolean {
 
 /**
  * Проверяет, нужно ли обрабатывать сообщение из этого чата
- * Возвращает true ТОЛЬКО для целевых групп (TARGET_CHATS)
- * Личные чаты НЕ обрабатываются - агент работает только в группах!
+ *
+ * Обрабатываем:
+ * - Целевые группы из TARGET_CHATS
+ * - Личные сообщения (DM) - когда chatId = userId (не группа)
+ *
+ * НЕ обрабатываем:
+ * - Другие группы/каналы (чтобы не спамить)
  */
 export function shouldProcessChat(chatId: string | number): boolean {
-  // ТОЛЬКО целевые группы - обрабатываем
-  // Личные чаты НЕ обрабатываем!
-  return isTargetChat(chatId);
+  // Целевые группы - обрабатываем
+  if (isTargetChat(chatId)) {
+    return true;
+  }
+
+  // Личные сообщения (DM) - тоже обрабатываем
+  // В MTProto личный чат определяется как: chatId = userId (положительное число)
+  // и НЕ является известной группой (не в TARGET_CHATS)
+  if (isPrivateChat(chatId)) {
+    return true;
+  }
+
+  return false;
 }
 
 /**

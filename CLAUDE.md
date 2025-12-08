@@ -250,3 +250,4 @@ characters/kolsAgent.json       # KOLS мониторинг
 - https://docs.elizaos.ai/plugins/development
 - https://docs.elizaos.ai/agents/character-interface
 - runtime.character?.settings?.secrets Используй секреты исключительно из этого
+- ключ берётся только из character.settings.secrets

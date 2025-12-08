@@ -1,15 +1,45 @@
 // @ts-nocheck
 // TODO: Refactor to match ElizaOS 1.6 API types
-import { Service, IAgentRuntime, Memory, State, UUID, stringToUuid } from '@elizaos/core'
+import { Service, IAgentRuntime, Memory, State, UUID, stringToUuid, ModelType } from '@elizaos/core'
 import { ITelegramAdapter, ISendMessageResult, ITelegramMessage, ITelegramDialog, ITelegramUser } from '../types/telegram.types'
 import { MTProtoAdapter } from './adapters/mtproto.adapter'
 import { BotApiAdapter } from './adapters/botapi.adapter'
 import { McpAdapter } from './adapters/mcp.adapter'
+import * as fs from 'fs'
+import * as path from 'path'
 
 // Импорт централизованной конфигурации из kols-userbot
 import { shouldProcessChat, containsTrigger, findTriggers, getTargetChats } from '../config'
 import { VibeCodingKnowledgeProvider } from '../providers/VibeCodingKnowledgeProvider'
 import { KolsLogger } from '../utils/logger'
+
+// Загрузка ключа напрямую из .env файла (обход Infisical override)
+function loadOpenRouterKeyFromEnvFile(): string | null {
+  try {
+    const envPath = path.join(process.cwd(), '.env')
+    if (!fs.existsSync(envPath)) return null
+    const content = fs.readFileSync(envPath, 'utf-8')
+    const match = content.match(/^OPENROUTER_API_KEY=(.+)$/m)
+    if (match && match[1] && !match[1].startsWith('#')) {
+      return match[1].trim()
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+// Санитизация текста для JSON - удаление проблемных Unicode символов (surrogate pairs)
+function sanitizeForJson(text: string): string {
+  if (!text) return ''
+  // Удаляем lone surrogates (U+D800-U+DFFF) и другие проблемные символы
+  return text
+    .replace(/[\uD800-\uDFFF]/g, '') // Lone surrogates
+    .replace(/[\u0000-\u001F]/g, ' ') // Control characters (кроме \n \t)
+    .replace(/\\/g, '\\\\') // Escape backslashes
+    .replace(/"/g, '\\"') // Escape quotes
+    .trim()
+}
 
 // 🎨 ANSI Colors для красивого вывода
 const colors = {
@@ -179,19 +209,23 @@ export class TelegramService extends Service {
   
   /**
    * Запуск сервиса - подключение к Telegram
+   * Graceful - не падает если credentials не найдены
    */
   async start(): Promise<void> {
     console.log('🚀 [TelegramService] start() called')
 
-    // Если адаптер еще не инициализирован, инициализируем его
+    // Если адаптер еще не инициализирован, пытаемся из ENV
     if (!this.adapter) {
-      console.log('⚠️ [TelegramService] Adapter not initialized, initializing now...')
+      console.log('⚠️ [TelegramService] Adapter not initialized, trying ENV...')
       // Инициализация без runtime - используем process.env напрямую
       await this.initializeFromEnv()
     }
 
+    // Graceful skip - если adapter всё ещё null, значит credentials нет
     if (!this.adapter) {
-      throw new Error('Telegram adapter not initialized')
+      console.warn('⚠️ [TelegramService] No adapter available - Telegram features disabled')
+      console.warn('⚠️ [TelegramService] Add TELEGRAM_API_ID/HASH to ENV or character secrets')
+      return // Не throw - позволяем агенту работать без Telegram
     }
 
     try {
@@ -209,7 +243,8 @@ export class TelegramService extends Service {
       }
     } catch (error) {
       console.error('❌ [TelegramService] Failed to start:', error)
-      throw error
+      // Не throw - позволяем агенту работать без Telegram
+      console.warn('⚠️ [TelegramService] Continuing without Telegram connection')
     }
   }
 
@@ -246,6 +281,7 @@ export class TelegramService extends Service {
 
   /**
    * Инициализация MTProto из переменных окружения
+   * Если credentials отсутствуют - не падаем, а пропускаем (graceful skip)
    */
   private async initializeMTProtoFromEnv(): Promise<void> {
     const apiId = process.env.TELEGRAM_API_ID
@@ -257,7 +293,11 @@ export class TelegramService extends Service {
     console.log(`🔧 [MTProto] Session from ENV: ${session ? '✅ SET' : '⚠️ OPTIONAL'}`)
 
     if (!apiId || !apiHash) {
-      throw new Error('TELEGRAM_API_ID и TELEGRAM_API_HASH обязательны для MTProto')
+      // Graceful skip - не падаем если credentials не в process.env
+      // Они могут быть в character secrets и будут загружены позже через initialize(runtime)
+      console.warn('⚠️ [MTProto] TELEGRAM_API_ID/HASH не найдены в ENV - MTProto отключен')
+      console.warn('⚠️ [MTProto] Credentials будут загружены из character secrets при initialize()')
+      return // Не throw, просто выходим
     }
 
     console.log('🔧 [MTProto] Creating adapter instance from ENV...')
@@ -596,10 +636,14 @@ export class TelegramService extends Service {
   /**
    * Обработка входящего сообщения из MTProto (GramJS)
    * Это РЕАЛЬНЫЕ сообщения из Telegram!
+   *
+   * Формат message из адаптера:
+   * { id, chatId, text, date, fromId }
    */
-  async handleIncomingMessage(event: any): Promise<void> {
+  async handleIncomingMessage(message: any): Promise<void> {
     console.log('🎯 [TelegramService] handleIncomingMessage() called!')
     console.log(`🔍 [TelegramService] Monitoring active: ${this.isMonitoring}`)
+    console.log(`📦 [TelegramService] Message data:`, JSON.stringify(message, null, 2))
 
     if (!this.isMonitoring) {
       console.log('⏸️ [TelegramService] Monitoring is not active, ignoring message')
@@ -607,24 +651,22 @@ export class TelegramService extends Service {
     }
 
     try {
-      const message = event.message
-
-      // Используем уже извлечённую информацию из адаптера
-      const finalChatId = (event as any).chatId || this.extractChatId(message.peerId)
-      const chatTitle = (event as any).chatTitle || 'Unknown Chat'
+      // Адаптер передаёт плоский объект: { id, chatId, text, date, fromId }
+      const finalChatId = message.chatId || ''
+      const chatTitle = 'Unknown Chat' // TODO: получить название чата
 
       console.log(`📨 [TelegramService] Processing message from chat:`, {
         chatId: finalChatId,
         chatTitle,
-        sender: (event as any).senderId || message.senderId?.toString(),
+        sender: message.fromId,
         messageId: message.id
       })
 
       // Получаем информацию об отправителе
-      const fromUserId = (event as any).senderId || message.senderId?.toString() || 'unknown'
-      const fromUsername = (event as any).senderUsername || ''
-      const fromFirstName = (event as any).senderFirstName || 'Unknown'
-      const fromLastName = (event as any).senderLastName || ''
+      const fromUserId = message.fromId || 'unknown'
+      const fromUsername = '' // TODO: получить username
+      const fromFirstName = 'User' // TODO: получить имя
+      const fromLastName = ''
 
       // Формируем полное имя пользователя
       const fullName = fromLastName
@@ -644,15 +686,17 @@ export class TelegramService extends Service {
         fromUserId,
         fromUsername: usernameDisplay,
         fromFirstName: fullName,  // теперь это полное имя
-        text: message.text || message.message || '',
-        timestamp: new Date(message.date * 1000),
-        hasMedia: message.media ? true : false,
-        mediaType: this.detectMediaType(message.media),
+        text: message.text || '',
+        timestamp: message.date instanceof Date ? message.date : new Date(message.date * 1000),
+        hasMedia: false, // TODO: поддержка медиа
+        mediaType: undefined,
       }
 
       // 🛡️ КРИТИЧНО: Проверяем целевые чаты через централизованную конфигурацию
-      if (!shouldProcessChat(finalChatId)) {
-        KolsLogger.debug(`ПРОПУСК: Чат ${finalChatId} не в целевом списке`)
+      const isTarget = shouldProcessChat(finalChatId)
+      console.log(`🎯 [TelegramService] shouldProcessChat(${finalChatId}) = ${isTarget}`)
+      if (!isTarget) {
+        console.log(`⏭️ [TelegramService] ПРОПУСК: Чат ${finalChatId} (${chatTitle}) не в целевом списке`)
         return
       }
 
@@ -791,85 +835,192 @@ export class TelegramService extends Service {
         KolsLogger.success(`RAG: найдено ${relevantChunks.length} релевантных чанков`)
       }
 
-      // 🛡️ ПРОВЕРКА messageManager - если нет, используем упрощенный режим
-      if (!this.runtime.messageManager) {
-        KolsLogger.warn('messageManager недоступен, используем упрощенный режим')
-        const simpleReply = this.generateVibeeReply(messageText, processedMessage.fromFirstName, ragContext)
-        await this.sendMessage(
-          processedMessage.chatId,
-          simpleReply,
-          processedMessage.messageId
-        )
+      // 🧠 ПАМЯТЬ: Загружаем историю диалога через ElizaOS runtime API
+      const roomId = stringToUuid(`telegram-room-${processedMessage.chatId}`)
+      const entityId = stringToUuid(`telegram-user-${processedMessage.fromUserId}`)
+      const worldId = stringToUuid(`telegram-world`)
+      let conversationHistory: Array<{ role: 'user' | 'assistant', content: string }> = []
+
+      // Убедимся что room и entity существуют в БД (важно для PostgreSQL с foreign keys)
+      try {
+        await this.runtime.ensureConnection({
+          entityId: entityId as UUID,
+          roomId: roomId as UUID,
+          userName: processedMessage.fromFirstName || 'User',
+          name: `Telegram ${processedMessage.chatId}`,
+          source: 'telegram',
+          type: 'GROUP',
+          worldId: worldId as UUID,
+          channelId: processedMessage.chatId,
+        })
+      } catch (connError) {
+        KolsLogger.warn(`Не удалось создать connection: ${connError}`)
+      }
+
+      try {
+        // ElizaOS 1.6: методы памяти находятся прямо на runtime, не на databaseAdapter
+        const memories = await this.runtime.getMemories({
+          roomId: roomId as UUID,
+          count: 10,
+          tableName: 'messages',
+        })
+
+        // Преобразуем Memory[] в формат для LLM
+        conversationHistory = memories
+          .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)) // Сортируем по времени
+          .map(m => ({
+            role: (m.entityId === this.runtime!.agentId ? 'assistant' : 'user') as 'user' | 'assistant',
+            content: m.content?.text || ''
+          }))
+          .filter(m => m.content) // Убираем пустые
+
+        if (conversationHistory.length > 0) {
+          KolsLogger.info(`📜 История: загружено ${conversationHistory.length} сообщений`)
+        }
+      } catch (historyError) {
+        KolsLogger.warn(`История недоступна: ${historyError}`)
+      }
+
+      // 🧠 Сохраняем входящее сообщение в память
+      try {
+        const userMemory: Memory = {
+          id: stringToUuid(`telegram-${processedMessage.chatId}-${processedMessage.messageId}-${Date.now()}`),
+          entityId: entityId as UUID, // Используем entityId который мы уже создали через ensureConnection
+          agentId: this.runtime.agentId,
+          roomId: roomId as UUID,
+          content: {
+            text: messageText,
+            source: 'telegram',
+          },
+          createdAt: Date.now(),
+        }
+        // ElizaOS 1.6: createMemory прямо на runtime
+        await this.runtime.createMemory(userMemory, 'messages', false)
+        KolsLogger.info(`📜 Входящее сообщение сохранено в память`)
+      } catch (saveError) {
+        KolsLogger.warn(`Не удалось сохранить сообщение: ${saveError}`)
+      }
+
+      // 🧠 Генерируем ответ через LLM (OpenRouter - Grok)
+      const historyContext = conversationHistory.length > 0
+        ? '\n\nПРЕДЫДУЩИЕ СООБЩЕНИЯ:\n' + conversationHistory.map(m =>
+            `${m.role === 'user' ? 'Пользователь' : 'ВАЙБИ'}: ${m.content}`
+          ).join('\n')
+        : ''
+
+      const systemPrompt = `Ты ВАЙБИ - эксперт по вайбкодингу и AI-агентам.
+
+ВАЖНЫЕ ПРАВИЛА:
+- Пиши как живой человек, НЕ как бот
+- НИКОГДА не начинай с "Бро", "Йоу", "Хей" и подобных маркеров
+- НЕ используй эмодзи
+- Отвечай на русском, кратко (2-4 предложения)
+- Будь полезным и по делу
+- Учитывай контекст предыдущих сообщений${historyContext}
+
+КОНТЕКСТ ИЗ КНИГИ ВАЙБКОДИНГА:
+${ragContext || 'Контекст не найден - отвечай общими знаниями о вайбкодинге.'}`
+
+      const userPrompt = `Вопрос от ${processedMessage.fromFirstName}: "${messageText}"
+
+Ответь естественно, как опытный разработчик в чате.`
+
+      KolsLogger.activity(`🧠 Вызываю LLM через ElizaOS runtime.useModel()...`)
+
+      // 🎯 Используем встроенный ElizaOS API для генерации текста
+      // Это автоматически использует настроенный провайдер (OpenRouter) из character.json
+      const fullPrompt = `${systemPrompt}\n\n${userPrompt}`
+
+      let llmReply: string = ''
+      try {
+        // ElizaOS useModel автоматически использует модель из character settings
+        // (OPENROUTER_SMALL_MODEL / OPENROUTER_LARGE_MODEL)
+        llmReply = await this.runtime.useModel(ModelType.TEXT_SMALL, {
+          prompt: fullPrompt,
+          temperature: 0.7,
+          maxTokens: 500,
+        })
+
+        KolsLogger.success(`✅ ElizaOS useModel вернул ответ: ${llmReply?.substring(0, 50)}...`)
+      } catch (modelError) {
+        KolsLogger.warn(`useModel недоступен, пробуем fallback fetch...`)
+
+        // Fallback на прямой fetch если useModel не настроен
+        const envFileKey = loadOpenRouterKeyFromEnvFile()
+        const secretsKey = this.runtime.character?.settings?.secrets?.OPENROUTER_API_KEY
+        const envKey = process.env.OPENROUTER_API_KEY
+        const openrouterKey = envFileKey || secretsKey || envKey
+
+        if (!openrouterKey) {
+          KolsLogger.error('OPENROUTER_API_KEY не найден! Пропускаем ответ.')
+          return
+        }
+
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openrouterKey}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://vibee.ai',
+            'X-Title': 'VIBEE Agent'
+          },
+          body: JSON.stringify({
+            model: 'x-ai/grok-4.1-fast',
+            messages: [
+              { role: 'system', content: sanitizeForJson(systemPrompt) },
+              { role: 'user', content: sanitizeForJson(userPrompt) }
+            ],
+            max_tokens: 500,
+            temperature: 0.7
+          })
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          KolsLogger.error(`OpenRouter ошибка: ${response.status} - ${errorText}`)
+          return
+        }
+
+        const data = await response.json()
+        llmReply = data.choices?.[0]?.message?.content || ''
+      }
+
+      if (!llmReply) {
+        KolsLogger.error('Пустой ответ от LLM')
         return
       }
 
-      // Создаем Memory объект из сообщения с RAG контекстом
-      const userMemory: Memory = {
-        id: stringToUuid(`telegram-${processedMessage.chatId}-${processedMessage.messageId}-${Date.now()}`),
-        userId: stringToUuid(`telegram-user-${processedMessage.fromUserId}`) as UUID,
-        agentId: this.runtime.agentId,
-        roomId: stringToUuid(`telegram-room-${processedMessage.chatId}`) as UUID,
-        content: {
-          text: messageText + ragContext, // Добавляем RAG контекст
-          source: 'telegram',
-          metadata: {
-            chatId: processedMessage.chatId,
-            chatTitle: processedMessage.chatTitle,
-            messageId: processedMessage.messageId,
-            fromUsername: processedMessage.fromUsername,
-            fromFirstName: processedMessage.fromFirstName,
-            hasRagContext: relevantChunks.length > 0,
+      KolsLogger.success(`🎯 LLM ответ получен: "${llmReply.substring(0, 80)}..."`)
+      console.log(`📤 [TelegramService] Sending to chatId: ${processedMessage.chatId}, replyTo: ${processedMessage.messageId}`)
+      const result = await this.sendMessage(
+        processedMessage.chatId,
+        llmReply,
+        processedMessage.messageId
+      )
+      console.log(`📤 [TelegramService] Send result:`, JSON.stringify(result))
+
+      // 🧠 Сохраняем ответ агента в память для истории диалога
+      if (result.success) {
+        try {
+          const agentMemory: Memory = {
+            id: stringToUuid(`telegram-agent-${processedMessage.chatId}-${result.messageId || Date.now()}`),
+            entityId: this.runtime.agentId, // Это ответ агента
+            agentId: this.runtime.agentId,
+            roomId: roomId as UUID,
+            content: {
+              text: llmReply,
+              source: 'telegram',
+            },
+            createdAt: Date.now(),
           }
-        },
-        createdAt: processedMessage.timestamp.getTime(),
+          await this.runtime.createMemory(agentMemory, 'messages', false)
+          KolsLogger.info(`📜 Ответ сохранён в память`)
+        } catch (saveError) {
+          KolsLogger.warn(`Не удалось сохранить ответ: ${saveError}`)
+        }
       }
 
-      // Сохраняем сообщение пользователя в память
-      await this.runtime.messageManager.createMemory(userMemory)
-
-      // Получаем историю чата для контекста (последние 10 сообщений)
-      const roomId = stringToUuid(`telegram-room-${processedMessage.chatId}`) as UUID
-      const conversationHistory = await this.runtime.messageManager.getMemories({
-        roomId,
-        count: 10,
-        unique: true,
-      })
-
-      KolsLogger.info(`История: ${conversationHistory.length} сообщений`)
-
-      // Создаем начальное состояние
-      const state: State = await this.runtime.composeState(userMemory)
-
-      // Генерируем ответ через ElizaOS с полным контекстом
-      await this.runtime.processActions(
-        userMemory,
-        conversationHistory,
-        state,
-        async (response: Memory) => {
-          if (response.content?.text) {
-            KolsLogger.success(`Отправляю: ${response.content.text.substring(0, 80)}...`)
-
-            await this.sendMessage(
-              processedMessage.chatId,
-              response.content.text,
-              processedMessage.messageId
-            )
-
-            // Логируем отправленный ответ
-            const timestamp = new Date().toLocaleTimeString('ru-RU', {
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit'
-            })
-
-            console.log(
-              `${colorize.time(`[${timestamp}]`)} ${colorize.success('VIBEE')} » ${colorize.chat(processedMessage.chatTitle)}: ${colorize.message(response.content.text.substring(0, 100))}`
-            )
-          }
-        }
-      )
-
-      KolsLogger.success('Ответ отправлен!')
+      return
     } catch (error) {
       KolsLogger.error('Ошибка генерации ответа', error)
 

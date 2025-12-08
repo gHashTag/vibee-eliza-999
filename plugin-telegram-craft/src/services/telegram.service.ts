@@ -902,16 +902,30 @@ export class TelegramService extends Service {
       }
 
       // 🧠 Генерируем ответ через LLM (OpenRouter - Grok)
+      // История теперь НЕ показывает имена (они приходят из memory без userName)
+      // Имя текущего пользователя добавляется в userPrompt
       const historyContext = conversationHistory.length > 0
-        ? '\n\nПРЕДЫДУЩИЕ СООБЩЕНИЯ:\n' + conversationHistory.map(m =>
-            `${m.role === 'user' ? 'Пользователь' : 'ВАЙБИ'}: ${m.content}`
+        ? '\n\nПРЕДЫДУЩИЕ СООБЩЕНИЯ В ЧАТЕ:\n' + conversationHistory.map(m =>
+            `${m.role === 'assistant' ? 'ВАЙБИ' : 'Участник'}: ${m.content}`
           ).join('\n')
         : ''
 
-      const systemPrompt = `Ты ВАЙБИ - эксперт по вайбкодингу и AI-агентам. Общаешься в телеграм-чате.
+      // Текущий отправитель - важно для понимания кто пишет
+      const senderName = processedMessage.fromFirstName || 'Участник'
+      const senderUsername = processedMessage.fromUsername ? `@${processedMessage.fromUsername}` : ''
+      const senderInfo = senderUsername ? `${senderName} (${senderUsername})` : senderName
+
+      const systemPrompt = `Ты ВАЙБИ - эксперт по вайбкодингу и AI-агентам. Общаешься в телеграм-чате с несколькими участниками.
+
+КРИТИЧНО - РАСПОЗНАВАНИЕ СОБЕСЕДНИКОВ:
+- Это ГРУППОВОЙ чат, пишут РАЗНЫЕ люди
+- ТЕКУЩЕЕ сообщение от: ${senderInfo}
+- ВСЕГДА обращайся к человеку по имени если знаешь
+- НЕ путай участников между собой
+- Каждое сообщение начинается с "Имя: текст"
 
 СТИЛЬ ОБЩЕНИЯ:
-- Пиши как живой разработчик в чате, не как бот или консультант
+- Пиши как живой разработчик в чате, не как бот
 - Отвечай коротко (2-4 предложения), по существу
 - Используй разговорный русский, можно сленг IT
 - НЕ начинай с приветствий ("Привет!", "Бро", "Йоу")
@@ -923,13 +937,17 @@ export class TelegramService extends Service {
 - "Давай начнём с..."
 - "Отличный вопрос!"
 - "Могу помочь с..."
-- Любые дежурные фразы
+- "прудовый агент"
+- "heartbeat"
+- "рой/рое/роев"
+- Любые дежурные фразы и странный сленг
 
 ВМЕСТО ЭТОГО:
 - Сразу давай конкретный совет или ответ
 - Делись личным опытом ("я обычно делаю так...")
 - Задавай уточняющие вопросы если нужно
 - Можешь пошутить или быть ироничным
+- Говори нормальным русским без выдуманного сленга
 
 ПРОДАЖА КУРСА:
 Если человек спрашивает про обучение, курсы, менторство или как освоить вайбкодинг серьёзно:
@@ -945,7 +963,7 @@ ${historyContext ? `КОНТЕКСТ РАЗГОВОРА:${historyContext}` : ''}
 
 ${ragContext ? `МАТЕРИАЛ ИЗ КНИГИ ВАЙБКОДИНГА:\n${ragContext}` : ''}`
 
-      const userPrompt = `${processedMessage.fromFirstName}: "${messageText}"`
+      const userPrompt = `${senderName}: "${messageText}"`
 
       KolsLogger.activity(`🧠 Вызываю LLM через ElizaOS runtime.useModel()...`)
 

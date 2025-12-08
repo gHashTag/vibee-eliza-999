@@ -178,7 +178,7 @@ export class MTProtoAdapter implements ITelegramAdapter {
     if (this.client && this.connected) {
       console.log('[MTProtoAdapter] Registering message handler (client already connected)')
       this.client.addEventHandler(
-        (event: Api.TypeUpdate) => {
+        async (event: Api.TypeUpdate) => {
           // Логируем только важные события (сообщения), пропускаем шум
           const eventName = event.className || 'unknown'
           const skipEvents = ['UpdateUserStatus', 'UpdateUserTyping', 'UpdateReadHistoryInbox', 'UpdateReadHistoryOutbox', 'UpdateReadChannelInbox', 'UpdateWebPage', 'UpdateMessagePoll']
@@ -234,29 +234,54 @@ export class MTProtoAdapter implements ITelegramAdapter {
               // peerId может быть PeerChannel, PeerChat, PeerUser - извлекаем ID
               const peerId = msg.peerId
               let chatId = ''
+              let chatTitle = ''
               if (peerId instanceof Api.PeerChannel) {
                 chatId = peerId.channelId.toString()
+                // Получаем название чата
+                try {
+                  const chat = await this.client?.getEntity(peerId)
+                  if (chat && 'title' in chat) {
+                    chatTitle = (chat as any).title || ''
+                  }
+                } catch { /* ignore */ }
               } else if (peerId instanceof Api.PeerChat) {
                 chatId = peerId.chatId.toString()
               } else if (peerId instanceof Api.PeerUser) {
                 chatId = peerId.userId.toString()
               }
 
-              // fromId тоже может быть объектом
+              // fromId тоже может быть объектом - получаем информацию о пользователе
               let fromId = ''
+              let fromFirstName = ''
+              let fromLastName = ''
+              let fromUsername = ''
               if (msg.fromId instanceof Api.PeerUser) {
                 fromId = msg.fromId.userId.toString()
+                // Получаем информацию о пользователе
+                try {
+                  const user = await this.client?.getEntity(msg.fromId)
+                  if (user && user instanceof Api.User) {
+                    fromFirstName = user.firstName || ''
+                    fromLastName = user.lastName || ''
+                    fromUsername = user.username || ''
+                  }
+                } catch { /* ignore */ }
               } else if (msg.fromId instanceof Api.PeerChannel) {
                 fromId = msg.fromId.channelId.toString()
               }
 
-              console.log(`📩 [Канал/Супергруппа] chatId=${chatId} от ${fromId}: "${msg.message?.substring(0, 60) || '...'}"`)
+              const displayName = fromFirstName || fromUsername || fromId
+              console.log(`📩 [Канал/Супергруппа] chatId=${chatId} от ${displayName}: "${msg.message?.substring(0, 60) || '...'}"`)
               this.messageHandler?.({
                 id: msg.id,
                 chatId,
+                chatTitle,
                 text: msg.message || '',
                 date: new Date(msg.date * 1000),
                 fromId,
+                fromFirstName,
+                fromLastName,
+                fromUsername,
               })
             }
           }

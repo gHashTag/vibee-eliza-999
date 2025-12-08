@@ -651,22 +651,23 @@ export class TelegramService extends Service {
     }
 
     try {
-      // Адаптер передаёт плоский объект: { id, chatId, text, date, fromId }
+      // Адаптер передаёт объект: { id, chatId, chatTitle, text, date, fromId, fromFirstName, fromLastName, fromUsername }
       const finalChatId = message.chatId || ''
-      const chatTitle = 'Unknown Chat' // TODO: получить название чата
+      const chatTitle = message.chatTitle || `Chat ${finalChatId}`
 
       console.log(`📨 [TelegramService] Processing message from chat:`, {
         chatId: finalChatId,
         chatTitle,
         sender: message.fromId,
+        senderName: message.fromFirstName,
         messageId: message.id
       })
 
-      // Получаем информацию об отправителе
+      // Получаем информацию об отправителе из message (теперь приходит из адаптера)
       const fromUserId = message.fromId || 'unknown'
-      const fromUsername = '' // TODO: получить username
-      const fromFirstName = 'User' // TODO: получить имя
-      const fromLastName = ''
+      const fromUsername = message.fromUsername || ''
+      const fromFirstName = message.fromFirstName || 'User'
+      const fromLastName = message.fromLastName || ''
 
       // Формируем полное имя пользователя
       const fullName = fromLastName

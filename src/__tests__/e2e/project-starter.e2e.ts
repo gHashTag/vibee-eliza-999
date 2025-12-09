@@ -573,3 +573,5 @@ export const ProjectStarterTestSuite: TestSuite = {
     },
   ],
 };
+
+export default ProjectStarterTestSuite;

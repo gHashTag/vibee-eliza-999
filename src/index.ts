@@ -48,4 +48,8 @@ const project: Project = {
 export { character } from './character.ts';
 export { instagramAgent } from '../characters/instagram.ts';
 
+// E2E Tests export for elizaos test runner
+export { ProjectStarterTestSuite } from './__tests__/e2e/project-starter.e2e.ts';
+export { InstagramPluginTestSuite } from './instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts';
+
 export default project;

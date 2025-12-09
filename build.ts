@@ -84,6 +84,29 @@ async function build() {
       return false;
     }
 
+    // Task 3: Build E2E tests for elizaos test runner
+    console.log('🧪 Building E2E tests...');
+    try {
+      const { mkdir } = await import('node:fs/promises');
+      await mkdir('./dist/__tests__/e2e', { recursive: true });
+
+      const e2eResult = await Bun.build({
+        entrypoints: ['./src/__tests__/e2e/project-starter.e2e.ts'],
+        outdir: './dist/__tests__/e2e',
+        target: 'node',
+        format: 'esm',
+        external: ['@elizaos/*', 'uuid'],
+      });
+
+      if (e2eResult.success) {
+        console.log('✓ E2E tests compiled');
+      } else {
+        console.warn('⚠ E2E tests compilation failed');
+      }
+    } catch (e) {
+      console.warn('⚠ E2E tests compilation skipped');
+    }
+
     const elapsed = ((performance.now() - start) / 1000).toFixed(2);
     console.log(`✅ Build complete! (${elapsed}s)`);
     return true;

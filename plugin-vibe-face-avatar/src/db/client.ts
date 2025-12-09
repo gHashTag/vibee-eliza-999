@@ -1,7 +1,7 @@
 import { drizzle as drizzlePg } from 'drizzle-orm/postgres-js';
-import { drizzle as drizzleSqlite } from 'drizzle-orm/bun-sqlite';
+import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
 import postgres from 'postgres';
-import { Database } from 'bun:sqlite';
+import Database from 'better-sqlite3';
 import * as schemaPg from './schema';
 import * as schemaSqlite from './schema.sqlite';
 import * as fs from 'fs';
@@ -89,16 +89,19 @@ function initPostgres() {
   return _dbPg;
 }
 
+// Type alias for the database client (using SQLite type for consistency)
+type DbClient = ReturnType<typeof drizzleSqlite>;
+
 /**
  * Lazy-initialized Drizzle client
- * 
+ *
  * Usage:
  * ```typescript
  * import { db } from '@/db/client';
  * const models = await db.select().from(userModels);
  * ```
  */
-export const db = new Proxy({} as ReturnType<typeof drizzlePg> | ReturnType<typeof drizzleSqlite>, {
+export const db = new Proxy({} as DbClient, {
   get(target, prop) {
     try {
       if (USE_SQLITE) {
@@ -116,8 +119,9 @@ export const db = new Proxy({} as ReturnType<typeof drizzlePg> | ReturnType<type
 
 /**
  * Export schema for use in queries
+ * Note: Using type assertion to avoid union type issues with drizzle
  */
-export const userModels = USE_SQLITE ? schemaSqlite.userModels : schemaPg.userModels;
+export const userModels = (USE_SQLITE ? schemaSqlite.userModels : schemaPg.userModels) as typeof schemaSqlite.userModels;
 
 /**
  * Export database mode for debugging

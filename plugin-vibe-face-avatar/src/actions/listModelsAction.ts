@@ -17,7 +17,7 @@ export const listModelsAction: Action = {
 
     handler: async (runtime, message, state, options, callback): Promise<ActionResult> => {
         try {
-            const telegramId = uuidToTelegramId(message.userId);
+            const telegramId = uuidToTelegramId(message.entityId);
             if (!telegramId) {
                 await callback({
                     text: '❌ Ошибка определения пользователя. Попробуйте еще раз.',

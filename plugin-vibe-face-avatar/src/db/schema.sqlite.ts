@@ -51,7 +51,8 @@ export const userModels = sqliteTable('user_models', {
 }));
 
 // Zod schemas for validation
-export const insertUserModelSchema = createInsertSchema(userModels, {
+const insertSchema = createInsertSchema(userModels);
+export const insertUserModelSchema = insertSchema.extend({
   telegram_id: z.number().int().optional(),  // Optional - may not have Telegram ID in web interface
   entity_id: z.string().uuid().optional(),   // Optional - may not have entity ID in Telegram
   bot_name: z.string().min(1).max(100),
@@ -61,7 +62,7 @@ export const insertUserModelSchema = createInsertSchema(userModels, {
   gender: z.enum(['male', 'female', 'person']).optional(),
   status: z.enum(['training', 'completed', 'failed']),
   is_active: z.boolean().default(true),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.string().optional(),  // TEXT field in SQLite
 }).refine(
   (data) => data.telegram_id || data.entity_id,  // At least one ID must be present
   { message: 'Either telegram_id or entity_id must be provided' }

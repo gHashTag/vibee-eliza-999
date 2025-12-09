@@ -30,7 +30,7 @@ export const setActiveModelAction: Action = {
                 return { success: false, error: new Error('Model name not provided') };
             }
 
-            const telegramId = uuidToTelegramId(message.userId);
+            const telegramId = uuidToTelegramId(message.entityId);
             if (!telegramId) {
                 await callback({
                     text: '❌ Ошибка определения пользователя. Попробуйте еще раз.',

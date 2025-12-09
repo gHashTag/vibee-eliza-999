@@ -28,13 +28,28 @@ export interface UserModel {
   completed_at?: Date;
 }
 
-// Re-export from modelLoader for backward compatibility
-// This ensures all imports from this file work correctly
-export {
-  getUserModelsTask,
-  UserModelDB,
-} from "../services/modelLoader";
+/**
+ * User Model from Database (compatible with DB schema)
+ */
+export interface UserModelDB {
+  id: string;
+  telegram_id: number | null;
+  entity_id: string | null;
+  bot_name: string;
+  model_name: string;
+  model_url: string;
+  trigger_word: string;
+  gender?: string | null;
+  training_model?: string | null;
+  status: string;
+  is_active: boolean;
+  metadata?: Record<string, unknown> | null;
+  created_at: Date | string;
+  updated_at: Date | string;
+}
 
-// For cases where UserModel type is needed but UserModelDB is from modelLoader
-// We maintain both interfaces for compatibility
-export type { UserModelDB as UserModelDatabase };
+// Re-export getUserModelsTask from modelLoader for backward compatibility
+export { getUserModelsTask } from "../services/modelLoader";
+
+// Alias for backward compatibility
+export type UserModelDatabase = UserModelDB;

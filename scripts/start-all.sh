@@ -68,7 +68,7 @@ cd /Users/playra/vibee-agent
 echo ""
 echo "📋 Запускаем агентов (каждый на своем порту):"
 
-# 3. VIBEE Agent (порт 3000)
+# 3. VIBEE Agent (порт 3000) - ПЕРВЫЙ, ждём полной инициализации
 if ! lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
     echo "  1. VIBEE (главный) → порт 3000"
     env PORT=3000 \
@@ -78,12 +78,24 @@ if ! lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
         OPENROUTER_API_KEY="$OPENROUTER_API_KEY" \
         SECRET_SALT="$SECRET_SALT" \
         npx elizaos start --character /Users/playra/vibee-agent/characters/vibeeAgent.json > logs/vibee.log 2>&1 &
-    sleep 3
+
+    # Ждём пока VIBEE полностью запустится (миграции + сервисы)
+    echo "     ⏳ Ожидаем запуска VIBEE (миграции БД)..."
+    sleep 15
+
+    # Проверяем что порт открылся
+    for i in {1..20}; do
+        if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+            echo "     ✅ VIBEE запущен на порту 3000"
+            break
+        fi
+        sleep 2
+    done
 else
     echo "  1. VIBEE уже работает на порту 3000"
 fi
 
-# 4. Instagram Expert (порт 3001)
+# 4. Instagram Expert (порт 3001) - ВТОРОЙ
 if ! lsof -Pi :3001 -sTCP:LISTEN -t >/dev/null 2>&1; then
     echo "  2. Instagram Expert → порт 3001"
     env PORT=3001 \
@@ -93,12 +105,22 @@ if ! lsof -Pi :3001 -sTCP:LISTEN -t >/dev/null 2>&1; then
         OPENROUTER_API_KEY="$OPENROUTER_API_KEY" \
         SECRET_SALT="$SECRET_SALT" \
         npx elizaos start --character /Users/playra/vibee-agent/characters/instagramExpert.json > logs/instagram.log 2>&1 &
-    sleep 3
+
+    echo "     ⏳ Ожидаем запуска Instagram Expert..."
+    sleep 10
+
+    for i in {1..15}; do
+        if lsof -Pi :3001 -sTCP:LISTEN -t >/dev/null 2>&1; then
+            echo "     ✅ Instagram Expert запущен на порту 3001"
+            break
+        fi
+        sleep 2
+    done
 else
     echo "  2. Instagram Expert уже работает на порту 3001"
 fi
 
-# 5. KOLS Agent (порт 3002)
+# 5. KOLS Agent (порт 3002) - ТРЕТИЙ
 if ! lsof -Pi :3002 -sTCP:LISTEN -t >/dev/null 2>&1; then
     echo "  3. KOLS Agent → порт 3002"
     env PORT=3002 \
@@ -111,7 +133,17 @@ if ! lsof -Pi :3002 -sTCP:LISTEN -t >/dev/null 2>&1; then
         OPENROUTER_API_KEY="$OPENROUTER_API_KEY" \
         SECRET_SALT="$SECRET_SALT" \
         npx elizaos start --character /Users/playra/vibee-agent/characters/kolsAgent.json > logs/kols.log 2>&1 &
-    sleep 3
+
+    echo "     ⏳ Ожидаем запуска KOLS Agent..."
+    sleep 10
+
+    for i in {1..15}; do
+        if lsof -Pi :3002 -sTCP:LISTEN -t >/dev/null 2>&1; then
+            echo "     ✅ KOLS Agent запущен на порту 3002"
+            break
+        fi
+        sleep 2
+    done
 else
     echo "  3. KOLS Agent уже работает на порту 3002"
 fi

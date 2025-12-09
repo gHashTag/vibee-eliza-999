@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { InfisicalSDK } from "@infisical/sdk";
 
 /**

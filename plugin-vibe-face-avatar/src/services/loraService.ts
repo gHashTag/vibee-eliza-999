@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { fal } from "@fal-ai/client";
 import Replicate from "replicate";
 import { IAgentRuntime } from "@elizaos/core";

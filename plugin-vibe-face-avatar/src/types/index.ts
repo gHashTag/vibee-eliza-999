@@ -24,6 +24,10 @@ export interface GenerateImageOptions {
   steps?: number;
   guidanceScale?: number;
   seed?: number;
+  // LoRA support fields
+  triggerWord?: string;
+  gender?: string;
+  numInferenceSteps?: number;
 }
 
 /**
@@ -38,6 +42,13 @@ export interface ImageGenerationResult {
     generationTime: number;
     loraUsed?: boolean;
     triggerWord?: string;
+    // Extended metadata fields
+    enhanced_prompt?: string;
+    provider?: string;
+    version?: string;
+    lora_url?: string | null;
+    lora_scale?: number | null;
+    [key: string]: unknown;
   };
   error?: string;
 }

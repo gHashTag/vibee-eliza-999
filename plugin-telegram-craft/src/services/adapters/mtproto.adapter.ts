@@ -43,26 +43,7 @@ export class MTProtoAdapter implements ITelegramAdapter {
 
       await this.client.connect()
       this.connected = true
-
-      // Setup message handler
-      if (this.messageHandler) {
-        this.client.addEventHandler(
-          (event: Api.TypeUpdate) => {
-            if (event instanceof Api.UpdateNewMessage) {
-              const msg = event.message
-              if (msg instanceof Api.Message) {
-                this.messageHandler?.({
-                  id: msg.id,
-                  chatId: msg.peerId?.toString() || '',
-                  text: msg.message || '',
-                  date: new Date(msg.date * 1000),
-                  fromId: msg.fromId?.toString(),
-                })
-              }
-            }
-          }
-        )
-      }
+      // Handler регистрируется в onMessage(), не здесь (чтобы избежать двойной обработки)
 
       return true
     } catch (error) {

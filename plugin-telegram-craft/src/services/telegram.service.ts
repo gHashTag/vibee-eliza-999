@@ -675,7 +675,8 @@ export class TelegramService extends Service {
         : fromFirstName
 
       // Формируем username для отображения
-      const usernameDisplay = fromUsername ? `@${fromUsername}` : ''
+      // username уже может прийти с @ из адаптера, убираем дублирование
+      const usernameDisplay = fromUsername ? (fromUsername.startsWith('@') ? fromUsername : `@${fromUsername}`) : ''
 
       this.totalMessages++
 
@@ -742,10 +743,10 @@ export class TelegramService extends Service {
         // Проверяем триггерные слова
         this.checkTriggerWords(processedMessage)
 
-        // 🤖 Генерируем автоматический ответ через LLM
-        console.log(`🔥 [TelegramService] BEFORE generateAndSendReply - runtime: ${this.runtime ? 'SET' : 'NULL'}`)
-        await this.generateAndSendReply(processedMessage)
-        console.log(`✅ [TelegramService] AFTER generateAndSendReply`)
+        // 🤖 Обрабатываем сообщение через ElizaOS action system
+        console.log(`🔥 [TelegramService] BEFORE handleMessageThroughActions - runtime: ${this.runtime ? 'SET' : 'NULL'}`)
+        await this.handleMessageThroughActions(processedMessage)
+        console.log(`✅ [TelegramService] AFTER handleMessageThroughActions`)
       }
     } catch (error) {
       console.error('❌ [TelegramService] Ошибка обработки сообщения:', error)
@@ -807,8 +808,110 @@ export class TelegramService extends Service {
   }
 
   /**
-   * 🤖 Генерация и отправка ответа VIBEE через LLM с RAG
-   * Использует Knowledge Base для контекстных ответов
+   * 🤖 Обработка сообщения через ElizaOS Action System
+   * Сначала проверяем команды напрямую (без LLM), потом fallback на messageService
+   */
+  private async handleMessageThroughActions(processedMessage: any): Promise<void> {
+    if (!this.runtime) {
+      KolsLogger.warn('Runtime недоступен, пропускаем обработку')
+      return
+    }
+
+    if (!this.autoReplyEnabled) {
+      KolsLogger.debug('Авто-ответы отключены')
+      return
+    }
+
+    try {
+      const roomId = stringToUuid(`telegram-room-${processedMessage.chatId}`)
+      const entityId = stringToUuid(`telegram-user-${processedMessage.fromUserId}`)
+      const worldId = stringToUuid(`telegram-world`)
+
+      // Создаём Memory объект для ElizaOS
+      const memory: Memory = {
+        id: stringToUuid(`telegram-${processedMessage.chatId}-${processedMessage.messageId}-${Date.now()}`),
+        entityId: entityId as UUID,
+        agentId: this.runtime.agentId,
+        roomId: roomId as UUID,
+        content: {
+          text: processedMessage.text || '',
+          source: 'telegram',
+        },
+        createdAt: Date.now(),
+      }
+
+      // Ensure connection exists
+      try {
+        await this.runtime.ensureConnection({
+          entityId: entityId as UUID,
+          roomId: roomId as UUID,
+          userName: processedMessage.fromFirstName || 'User',
+          name: `Telegram ${processedMessage.chatId}`,
+          source: 'telegram',
+          type: 'GROUP',
+          worldId: worldId as UUID,
+          channelId: processedMessage.chatId,
+        })
+      } catch (connError) {
+        KolsLogger.warn(`Не удалось создать connection: ${connError}`)
+      }
+
+      // Callback для отправки ответа
+      const callback = async (response: { text: string }) => {
+        if (response.text) {
+          KolsLogger.success(`🎯 Action ответ: "${response.text.substring(0, 50)}..."`)
+          const result = await this.sendMessage(
+            processedMessage.chatId,
+            response.text,
+            processedMessage.messageId
+          )
+          KolsLogger.info(`📤 Отправлено: ${JSON.stringify(result)}`)
+        }
+      }
+
+      // 🔥 СНАЧАЛА: Прямая проверка НАШИХ команд (Character Configurator)
+      const text = (processedMessage.text || '').trim().toLowerCase()
+      const actions = this.runtime.actions || []
+
+      // Проверяем ТОЛЬКО actions из plugin-character-configurator
+      // Это гарантирует что /create_character обработается правильно
+      const characterConfigActions = [
+        'START_CHARACTER_CONFIG',
+        'RESTART_CHARACTER_CONFIG',
+        'CHARACTER_CONFIG_HELP',
+        'CHARACTER_CONFIG_STATUS',
+        'PROCESS_CHARACTER_CONFIG_INPUT'
+      ]
+
+      for (const action of actions) {
+        if (!characterConfigActions.includes(action.name)) continue
+        try {
+          const isValid = await action.validate(this.runtime, memory)
+          if (isValid) {
+            KolsLogger.success(`🎯 CharacterConfig Action "${action.name}" прошёл validate для "${text}"`)
+            await action.handler(this.runtime, memory, undefined, {}, callback)
+            KolsLogger.success(`✅ Action "${action.name}" выполнен успешно`)
+            return // Выходим - action обработал команду
+          }
+        } catch (actionError) {
+          KolsLogger.warn(`Action ${action.name} ошибка: ${actionError}`)
+        }
+      }
+
+      // Если не команда Character Configurator - используем LLM
+      KolsLogger.info(`📝 Не команда CharacterConfig, используем LLM для ответа`)
+      await this.generateAndSendReply(processedMessage)
+
+    } catch (error) {
+      KolsLogger.error(`Ошибка handleMessageThroughActions: ${error}`)
+      // Fallback
+      await this.generateAndSendReply(processedMessage)
+    }
+  }
+
+  /**
+   * 🤖 FALLBACK: Генерация и отправка ответа VIBEE через LLM с RAG
+   * Используется если messageService недоступен
    */
   private async generateAndSendReply(processedMessage: any): Promise<void> {
     // Проверяем наличие runtime и флага автоответов
@@ -913,56 +1016,44 @@ export class TelegramService extends Service {
 
       // Текущий отправитель - важно для понимания кто пишет
       const senderName = processedMessage.fromFirstName || 'Участник'
-      const senderUsername = processedMessage.fromUsername ? `@${processedMessage.fromUsername}` : ''
+      // fromUsername уже содержит @ если есть
+      const senderUsername = processedMessage.fromUsername || ''
       const senderInfo = senderUsername ? `${senderName} (${senderUsername})` : senderName
 
-      const systemPrompt = `Ты ВАЙБИ - эксперт по вайбкодингу и AI-агентам. Общаешься в телеграм-чате с несколькими участниками.
+      const systemPrompt = `Ты ВАЙБИ - чувак который шарит в вайбкодинге и AI агентах. Общаешься в телеге с пацанами.
 
-КРИТИЧНО - РАСПОЗНАВАНИЕ СОБЕСЕДНИКОВ:
-- Это ГРУППОВОЙ чат, пишут РАЗНЫЕ люди
-- ТЕКУЩЕЕ сообщение от: ${senderInfo}
-- ВСЕГДА обращайся к человеку по имени если знаешь
-- НЕ путай участников между собой
-- Каждое сообщение начинается с "Имя: текст"
+КТО ПИШЕТ: ${senderInfo}
+Если Дмитрий - можно: Дим, Диман, Дима П, Дима беларус (не каждый раз)
 
-СТИЛЬ ОБЩЕНИЯ:
-- Пиши как живой разработчик в чате, не как бот
-- Отвечай коротко (2-4 предложения), по существу
-- Используй разговорный русский, можно сленг IT
-- НЕ начинай с приветствий ("Привет!", "Бро", "Йоу")
-- НЕ используй эмодзи
-- НЕ повторяй одни и те же фразы-шаблоны
+ГЛАВНОЕ ПРАВИЛО - ОТВЕЧАЙ ПО СУЩЕСТВУ:
+- на стёб отвечай стёбом
+- на дело отвечай по делу
+- можно подъебнуть если к месту
+- мемы и шутки норм но не форсить
+- ничего не навязывай - не цыгане
 
-ЗАПРЕЩЁННЫЕ ШАБЛОНЫ (никогда не используй):
-- "Сначала сформулируй SMART-цель"
-- "Давай начнём с..."
+КАК ПИСАТЬ:
+- как живой человек в чате
+- скобочки ) только когда подьёбываешь
+- можно проебывать запятые
+- смех: ха, хах, хаха, ахах, лол, кек (чередуй)
+- смайлики редко и к месту
+- НЕ пиши "ВАЙБИ:" в начале
+
+ЗАПРЕЩЕНО:
 - "Отличный вопрос!"
-- "Могу помочь с..."
-- "прудовый агент"
-- "heartbeat"
-- "рой/рое/роев"
-- Любые дежурные фразы и странный сленг
+- "Давай разберёмся..."
+- структурированные ответы с пунктами
+- умные слова: имплементация, интеграция, оптимизация
+- странный сленг: прудовый агент, heartbeat, рой
 
-ВМЕСТО ЭТОГО:
-- Сразу давай конкретный совет или ответ
-- Делись личным опытом ("я обычно делаю так...")
-- Задавай уточняющие вопросы если нужно
-- Можешь пошутить или быть ироничным
-- Говори нормальным русским без выдуманного сленга
+ПРО КУРС - только если спросят:
+VIBECODER 3500$/год, 52 созвона, свой бот
+@neuro_sage
 
-ПРОДАЖА КУРСА:
-Если человек спрашивает про обучение, курсы, менторство или как освоить вайбкодинг серьёзно:
-- Упомяни курс VIBECODER с НейроКодером
-- $3,500/год (скидка с $10,000) для первых 5 студентов
-- 1 месяц интенсив + 11 месяцев менторства
-- 52 созвона в год, персональный ИИ-бот, все нейросети по себестоимости
-- Гарантия возврата если доход не вырастет
-- Контакт: @neuro_sage
-Не навязывай курс, упоминай только если спросят про обучение.
+${historyContext ? `ЧТО БЫЛО В ЧАТЕ:${historyContext}` : ''}
 
-${historyContext ? `КОНТЕКСТ РАЗГОВОРА:${historyContext}` : ''}
-
-${ragContext ? `МАТЕРИАЛ ИЗ КНИГИ ВАЙБКОДИНГА:\n${ragContext}` : ''}`
+${ragContext ? `ИНФА ИЗ КНИГИ:\n${ragContext}` : ''}`
 
       const userPrompt = `${senderName}: "${messageText}"`
 
@@ -1031,11 +1122,20 @@ ${ragContext ? `МАТЕРИАЛ ИЗ КНИГИ ВАЙБКОДИНГА:\n${ragC
         return
       }
 
-      KolsLogger.success(`🎯 LLM ответ получен: "${llmReply.substring(0, 80)}..."`)
+      // Пост-обработка: убираем "ВАЙБИ:" префикс если LLM его добавил
+      let cleanedReply = llmReply.trim()
+      if (cleanedReply.startsWith('ВАЙБИ:')) {
+        cleanedReply = cleanedReply.slice(6).trim()
+      } else if (cleanedReply.startsWith('Вайби:')) {
+        cleanedReply = cleanedReply.slice(6).trim()
+      }
+
+      KolsLogger.success(`🎯 LLM ответ получен: "${cleanedReply.substring(0, 80)}..."`)
       console.log(`📤 [TelegramService] Sending to chatId: ${processedMessage.chatId}, replyTo: ${processedMessage.messageId}`)
+
       const result = await this.sendMessage(
         processedMessage.chatId,
-        llmReply,
+        cleanedReply,
         processedMessage.messageId
       )
       console.log(`📤 [TelegramService] Send result:`, JSON.stringify(result))
@@ -1049,7 +1149,7 @@ ${ragContext ? `МАТЕРИАЛ ИЗ КНИГИ ВАЙБКОДИНГА:\n${ragC
             agentId: this.runtime.agentId,
             roomId: roomId as UUID,
             content: {
-              text: llmReply,
+              text: cleanedReply,
               source: 'telegram',
             },
             createdAt: Date.now(),

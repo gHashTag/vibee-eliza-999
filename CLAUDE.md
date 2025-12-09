@@ -142,6 +142,48 @@ pkill -f 'elizaos' && pkill -f 'vite'
 
 ---
 
+## 🔌 VIBEE MCP Server (Автономная разработка)
+
+**Расположение:** `/Users/playra/vibee-eliza-999/vibee/gleam/`
+
+**Запуск:**
+```bash
+cd /Users/playra/vibee-eliza-999/vibee/gleam && gleam run -m mcp_server
+# или
+/Users/playra/vibee-eliza-999/vibee/gleam/run_mcp.sh
+```
+
+**41 инструмент для автономной разработки:**
+
+| Категория | Инструменты |
+|-----------|-------------|
+| **Telegram (8)** | `telegram_get_dialogs`, `telegram_get_history`, `telegram_send_message`, `telegram_send_buttons`, `telegram_send_photo`, `telegram_download_media`, `telegram_get_me`, `telegram_subscribe_updates` |
+| **Knowledge (2)** | `knowledge_search`, `knowledge_embed` |
+| **File (3)** | `file_read`, `file_write`, `file_list` |
+| **Voice (1)** | `voice_transcribe` |
+| **System (2)** | `system_log`, `system_exec` |
+| **Events (2)** | `event_emit`, `event_list` |
+| **Debug (5)** | `debug_build`, `debug_test`, `debug_analyze`, `debug_trace`, `debug_log` |
+| **Code (5)** | `code_generate`, `code_refactor`, `code_explain`, `code_find_similar`, `code_diff` |
+| **Test (4)** | `test_run`, `test_create`, `test_coverage`, `test_validate` |
+| **Agent (4)** | `agent_spawn`, `agent_message`, `agent_status`, `agent_kill` |
+| **Bot Analysis (5)** | `bot_analyze`, `bot_compare`, `bot_monitor`, `bot_extract_commands`, `bot_test_interaction` |
+
+**Конфигурация Claude Code (`mcp-config.json`):**
+```json
+{
+  "mcpServers": {
+    "vibee": {
+      "command": "/Users/playra/vibee-eliza-999/vibee/gleam/run_mcp.sh"
+    }
+  }
+}
+```
+
+**Тесты:** 45 тестов в `/Users/playra/vibee-eliza-999/vibee/gleam/test/mcp_tools_test.gleam`
+
+---
+
 ## 🎨 Ключевые плагины
 
 ### plugin-vibe-face-avatar (LoRA + NeuroPhoto)

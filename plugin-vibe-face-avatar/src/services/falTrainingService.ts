@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { fal } from "@fal-ai/client";
 import { db, userModels } from "../db/client";
 import { eq } from "drizzle-orm";

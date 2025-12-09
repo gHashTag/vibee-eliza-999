@@ -14,7 +14,11 @@ export async function ensureDefaultServerViaAdapter(server) {
         // Получаем database adapter напрямую из сервера (AgentServer)
         const db = server.database;
         if (!db) {
-            throw new Error('Database adapter not available in server instance');
+            // База данных ещё не инициализирована - это нормально при первом запуске
+            // AgentServer инициализирует её позже при server.start()
+            console.log('[SERVER-CREATOR] ⚠️ Database not yet initialized, skipping default server creation');
+            console.log('[SERVER-CREATOR] Default server will be created when database is ready');
+            return;
         }
         // Проверяем существует ли сервер
         console.log('[SERVER-CREATOR] Querying for existing server...');

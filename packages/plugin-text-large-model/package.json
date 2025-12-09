@@ -1,0 +1,17 @@
+{
+  "name": "@elizaos/plugin-text-large-model",
+  "version": "1.0.0",
+  "description": "TEXT_LARGE model handler for NeuroPhoto agent",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@elizaos/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

@@ -27,12 +27,30 @@ export function createApiRouter(elizaOS: ElizaOS, server: any): Router {
 
   // Добавляем роут для версии системы
   router.get('/system/version', (_req: any, res: any) => {
-    res.json({ 
-      ok: true, 
+    res.json({
+      ok: true,
       version: process.env.APP_VERSION || '1.0.0',
       environment: process.env.NODE_ENV || 'production'
     });
   });
+
+  // 🔧 DEBUG LOG ROUTE - Регистрируем /api/debug-log для логирования с клиента
+  // Этот роут используется LoginPage.tsx для отправки логов на сервер
+  router.post('/debug-log', (req: any, res: any) => {
+    const { timestamp, message, data, userAgent, url } = req.body;
+    console.log('🐛 [CLIENT LOG]', timestamp, '-', message);
+    if (data) {
+      console.log('🐛 [CLIENT LOG] Data:', data);
+    }
+    if (userAgent) {
+      console.log('🐛 [CLIENT LOG] User Agent:', userAgent);
+    }
+    if (url) {
+      console.log('🐛 [CLIENT LOG] URL:', url);
+    }
+    res.status(200).json({ ok: true });
+  });
+  console.log('✅ [API] Registered: POST /api/debug-log');
 
   console.log('✅ API router created');
   return router;

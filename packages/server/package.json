@@ -13,6 +13,7 @@
     "@elizaos/core": "workspace:*",
     "@elizaos/plugin-sql": "workspace:*",
     "@elizaos/plugin-telegram-craft": "workspace:*",
+    "@elizaos/plugin-vibe-face-avatar": "workspace:*",
     "@infisical/sdk": "^4.0.6",
     "@sentry/node": "^10.16.0",
     "@types/express": "^5.0.2",

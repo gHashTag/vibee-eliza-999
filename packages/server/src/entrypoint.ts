@@ -18,7 +18,10 @@ import { dirname, join } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const envPath = join(__dirname, '../../../.env');
+// 🔧 FIX: Use absolute path for .env file
+// In production, .env is at /app/.env (copied by Dockerfile)
+// In development, it's at project root
+const envPath = process.env.ENV_PATH || join('/app', '.env');
 
 console.log(`[DOTENV] Loading .env from: ${envPath}`);
 config({ path: envPath });
@@ -90,26 +93,6 @@ const start = async () => {
     const { AgentServer } = await import('./index.js');
     const server = new AgentServer();
 
-    // 🔐 Добавляем роут для Telegram Login Widget ПОСЛЕ создания сервера
-    // Это нужно делать ДО await server.start(), но ПОСЛЕ new AgentServer()
-    try {
-      // Проверяем, что server.app существует (должен быть создан в конструкторе или initializeServer)
-      if (server.app) {
-        // Добавляем middleware для /api/auth/telegram
-        server.app.post('/api/auth/telegram', (req, res) => {
-          console.log('🔐 Telegram auth request:', req.body);
-          res.status(200).json({
-            ok: true,
-            user: req.body
-          });
-          console.log('✅ Telegram auth response sent');
-        });
-        console.log('✅ Registered: POST /api/auth/telegram');
-      }
-    } catch (middlewareError) {
-      console.error('❌ Failed to register Telegram auth route:', middlewareError);
-    }
-
     // 🔧 CRITICAL: Ensure default server exists before starting agents
     // This works with both PostgreSQL and PGLite
     console.log('[ENTRYPOINT] Ensuring default server exists in database...');
@@ -127,6 +110,26 @@ const start = async () => {
     await server.start({
       agents: vibeeAgents.agents
     });
+
+    // 🔐 Регистрируем дополнительные роуты ПОСЛЕ запуска сервера
+    // Когда сервер запущен, server.app уже существует
+    console.log('[ENTRYPOINT] Registering additional routes after server start...');
+    console.log('[ENTRYPOINT] DIAGNOSTIC: server object type:', typeof server);
+    console.log('[ENTRYPOINT] DIAGNOSTIC: server.app type:', typeof server.app);
+    console.log('[ENTRYPOINT] DIAGNOSTIC: server.app exists:', server.app !== null && server.app !== undefined);
+    console.log('[ENTRYPOINT] DIAGNOSTIC: server.app constructor:', server.app?.constructor?.name);
+    try {
+      if (server.app) {
+        // 🔧 Роуты теперь регистрируются в API роутере (api/index.ts)
+        // /api/debug-log - для логирования с клиента
+        // /api/auth/telegram - для авторизации через Telegram
+        console.log('✅ [ENTRYPOINT] All API routes are registered in the API router');
+      } else {
+        console.error('❌ [ENTRYPOINT] server.app still not available after start!');
+      }
+    } catch (middlewareError) {
+      console.error('❌ Failed to register additional routes:', middlewareError);
+    }
   } catch (error) {
     console.error('❌ Fatal error starting server:', error);
     process.exit(1);

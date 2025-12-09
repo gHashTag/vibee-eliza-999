@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "@elizaos/core": "workspace:*",
-    "@electric-sql/pglite": "^0.3.14"
+    "@electric-sql/pglite": "^0.3.14",
+    "pg": "^8.16.3"
   }
 }

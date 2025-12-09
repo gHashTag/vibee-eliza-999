@@ -8,6 +8,35 @@
     <!-- Telegram Login Widget - для авторизации через Telegram -->
     <script src="https://telegram.org/js/telegram-widget.js"></script>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Слушаем сообщения от iframe (если клиент загружен в iframe)
+      window.addEventListener('message', function(event) {
+        // Проверяем origin для безопасности
+        if (event.origin !== window.location.origin) return;
+
+        // Если получили данные авторизации от iframe
+        if (event.data && event.data.type === 'TELEGRAM_AUTH_SUCCESS') {
+          console.log('[PARENT] Получены данные авторизации из iframe:', event.data.user);
+
+          // Сохраняем токен в localStorage родительского окна
+          if (event.data.user && event.data.user.hash) {
+            localStorage.setItem('authToken', JSON.stringify(event.data.user));
+            console.log('[PARENT] Токен сохранен в localStorage');
+
+            // Перезагружаем страницу для применения авторизации
+            window.location.reload();
+          }
+        }
+      });
+
+      // Если токен уже есть в localStorage, можно сразу показать Dashboard
+      document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          console.log('[PARENT] Токен найден в localStorage, пользователь авторизован');
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

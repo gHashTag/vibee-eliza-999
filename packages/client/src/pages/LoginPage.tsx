@@ -14,20 +14,59 @@ declare global {
   if (typeof window === 'undefined') return;
 
   console.log('🔔 [INIT] Инициализация Telegram callback...');
+  console.log('🔍 [INIT] Текущий URL:', window.location.href);
+  console.log('🔍 [INIT] Родительское окно:', window.parent === window ? 'НЕТ (мы в iframe)' : 'ДА (мы в обычном окне)');
+  console.log('🔍 [INIT] Origin:', window.location.origin);
+  console.log('🔍 [INIT] User Agent:', navigator.userAgent);
 
   // Принудительно создаем/перезаписываем callback
   window.onTelegramAuth = function(user: any) {
-    console.log('🔔 [CALLBACK] === ПОЛУЧЕНЫ ДАННЫЕ ОТ TELEGRAM ===');
-    console.log('🔔 [CALLBACK] Данные пользователя:', JSON.stringify(user, null, 2));
+    const callbackStart = '🔔 [CALLBACK] === ПОЛУЧЕНЫ ДАННЫЕ ОТ TELEGRAM ===';
+    console.log(callbackStart);
+    sendLogToServer(callbackStart);
+
+    const timeMsg = `🔔 [CALLBACK] Время получения: ${new Date().toISOString()}`;
+    console.log(timeMsg);
+    sendLogToServer(timeMsg);
+
+    const dataMsg = `🔔 [CALLBACK] Данные пользователя: ${JSON.stringify(user, null, 2)}`;
+    console.log(dataMsg);
+    sendLogToServer('Callback received user data', { user });
+
+    const typeMsg = `🔔 [CALLBACK] Тип данных user: ${typeof user}`;
+    console.log(typeMsg);
+    sendLogToServer(typeMsg, { userType: typeof user });
+
+    const idMsg = `🔔 [CALLBACK] Есть ли поле id: ${user && user.id ? 'ДА' : 'НЕТ'}`;
+    console.log(idMsg);
+    sendLogToServer(idMsg, { hasId: !!(user && user.id) });
 
     // Создаем событие для React компонента
     const event = new CustomEvent('telegramAuthSuccess', { detail: user });
     window.dispatchEvent(event);
 
-    console.log('🔔 [CALLBACK] Событие telegramAuthSuccess отправлено');
+    const eventMsg = '🔔 [CALLBACK] ✅ Событие telegramAuthSuccess отправлено';
+    console.log(eventMsg);
+    sendLogToServer(eventMsg);
+
+    const finishMsg = '🔔 [CALLBACK] 🔚 Завершение обработки callback';
+    console.log(finishMsg);
+    sendLogToServer(finishMsg);
+  };
+
+  // Также добавляем глобальный обработчик для отладки
+  window.onTelegramAuthProxy = function(user: any) {
+    console.log('🔍 [PROXY] Прокси-обработчик вызван');
+    if (typeof window.onTelegramAuth === 'function') {
+      console.log('🔍 [PROXY] Вызываем основной обработчик...');
+      window.onTelegramAuth(user);
+    } else {
+      console.error('❌ [PROXY] Основной обработчик не найден!');
+    }
   };
 
   console.log('✅ [INIT] window.onTelegramAuth создан:', typeof window.onTelegramAuth);
+  console.log('✅ [INIT] window.onTelegramAuthProxy создан:', typeof window.onTelegramAuthProxy);
 })();
 
 export default function LoginPage() {
@@ -85,45 +124,142 @@ export default function LoginPage() {
   // Слушаем событие от глобального callback
   useEffect(() => {
     const handleAuthSuccess = async (event: any) => {
-      console.log('🔔 [LOGINPAGE] Получено событие telegramAuthSuccess');
+      const eventStart = '🔔 [HANDLER] ================== СОБЫТИЕ telegramAuthSuccess ПОЛУЧЕНО ==================';
+      console.log(eventStart);
+      sendLogToServer(eventStart);
+
+      const timeMsg = `🔔 [HANDLER] Время получения события: ${new Date().toISOString()}`;
+      console.log(timeMsg);
+      sendLogToServer(timeMsg);
+
+      const typeMsg = `🔔 [HANDLER] Тип события: ${event.type}`;
+      console.log(typeMsg);
+      sendLogToServer(typeMsg, { eventType: event.type });
+
+      const detailMsg = `🔔 [HANDLER] Детали события: ${JSON.stringify(event.detail, null, 2)}`;
+      console.log(detailMsg);
+      sendLogToServer('Event detail received', { detail: event.detail });
+
+      const isCustomMsg = `🔔 [HANDLER] Is CustomEvent: ${event instanceof CustomEvent}`;
+      console.log(isCustomMsg);
+      sendLogToServer(isCustomMsg, { isCustomEvent: event instanceof CustomEvent });
+
       const user = event.detail;
+      console.log('🔔 [HANDLER] Переменная user:', user);
+      console.log('🔔 [HANDLER] Тип user:', typeof user);
+      console.log('🔔 [HANDLER] User keys:', user ? Object.keys(user) : 'N/A');
+      sendLogToServer('User data in handler', {
+        user,
+        userType: typeof user,
+        userKeys: user ? Object.keys(user) : 'N/A'
+      });
 
       setIsLoading(true);
       setError('');
 
+      console.log('🔔 [HANDLER] Устанавливаем isLoading = true');
+
       try {
-        console.log('🔔 [LOGINPAGE] Вызываем login()...');
-        console.log('🔔 [LOGINPAGE] Данные пользователя:', JSON.stringify(user, null, 2));
-        await login(user);
-        console.log('🎉 [LOGINPAGE] login() завершён успешно!');
+        console.log('🔔 [HANDLER] >>> Вызываем login(user)...');
+        console.log('🔔 [HANDLER] >>> Аргументы login():', user);
+        console.log('🔔 [HANDLER] >>> Функция login:', login);
+
+        // Таймаут для обнаружения зависания
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout: login() не завершился за 30 секунд')), 30000);
+        });
+
+        await Promise.race([login(user), timeoutPromise]);
+        console.log('🎉 [HANDLER] >>> login() завершён успешно!');
+
+        // 🔄 IFRAME FIX: Отправляем данные авторизации в родительское окно
+        console.log('🔔 [HANDLER] Проверяем iframe...');
+        console.log('🔔 [HANDLER] window.parent:', window.parent);
+        console.log('🔔 [HANDLER] window.parent === window:', window.parent === window);
+
+        if (window.parent && window.parent !== window) {
+          console.log('🟡 [IFRAME] Мы в iframe! Отправляем данные в родительское окно...');
+          console.log('🟡 [IFRAME] Origin:', window.location.origin);
+          console.log('🟡 [IFRAME] Parent origin:', window.parent.origin);
+          console.log('🟡 [IFRAME] Отправляемые данные:', user);
+
+          try {
+            window.parent.postMessage({
+              type: 'TELEGRAM_AUTH_SUCCESS',
+              user: user
+            }, window.location.origin);
+
+            console.log('🟢 [IFRAME] ✅ postMessage отправлен успешно!');
+            console.log('🔄 [IFRAME] Принудительно перезагружаем parent window...');
+            window.parent.location.reload();
+          } catch (postError) {
+            console.error('🔴 [IFRAME] ❌ Ошибка при отправке postMessage:', postError);
+          }
+        } else {
+          console.log('🟢 [NO IFRAME] Мы в обычном окне, не iframe');
+          console.log('🔄 [NO IFRAME] Принудительно перезагружаем страницу...');
+          window.location.reload();
+        }
       } catch (err: any) {
-        console.error('💥 [LOGINPAGE] Ошибка в login():', err);
-        console.error('💥 [LOGINPAGE] Error message:', err.message);
-        console.error('💥 [LOGINPAGE] Stack:', err.stack);
+        console.error('💥 [HANDLER] ================== ОШИБКА ==================');
+        console.error('💥 [HANDLER] Error name:', err.name);
+        console.error('💥 [HANDLER] Error message:', err.message);
+        console.error('💥 [HANDLER] Error stack:', err.stack);
+        console.error('💥 [HANDLER] Полный объект ошибки:', err);
+
         setError(err.message || 'Ошибка входа');
       } finally {
+        console.log('🔔 [HANDLER] Устанавливаем isLoading = false');
         setIsLoading(false);
-        console.log('✅ [LOGINPAGE] Устанавливаем isLoading = false');
+        console.log('🔔 [HANDLER] ✅ Обработчик события завершён');
       }
     };
 
+    console.log('🔔 [HANDLER] Регистрируем обработчик события telegramAuthSuccess');
     window.addEventListener('telegramAuthSuccess', handleAuthSuccess);
     return () => {
+      console.log('🔔 [HANDLER] Удаляем обработчик события telegramAuthSuccess');
       window.removeEventListener('telegramAuthSuccess', handleAuthSuccess);
     };
   }, [login]);
+
+  // Функция отправки логов на сервер (для отладки через fly logs)
+  const sendLogToServer = async (message: string, data?: any) => {
+    try {
+      await fetch('/api/debug-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timestamp: new Date().toISOString(),
+          message,
+          data: data ? JSON.stringify(data) : undefined,
+          userAgent: navigator.userAgent,
+          url: window.location.href
+        })
+      });
+    } catch (error) {
+      console.error('❌ Не удалось отправить лог на сервер:', error);
+    }
+  };
 
   // Функция загрузки виджета
   const loadTelegramWidget = () => {
     const container = document.getElementById('telegram-login-container');
     if (!container) {
-      console.error('❌ [LOGINPAGE] Контейнер для виджета не найден!');
+      const errorMsg = '❌ [LOGINPAGE] Контейнер для виджета не найден!';
+      console.error(errorMsg);
+      sendLogToServer(errorMsg);
       return;
     }
 
-    console.log('📦 [LOGINPAGE] Загружаем Telegram Login Widget...');
-    console.log('🔍 [LOGINPAGE] Проверяем глобальный callback:', typeof window.onTelegramAuth);
+    const initMsg = '📦 [LOGINPAGE] Загружаем Telegram Login Widget...';
+    console.log(initMsg);
+    sendLogToServer(initMsg);
+
+    const callbackMsg = `🔍 [LOGINPAGE] Проверяем глобальный callback: ${typeof window.onTelegramAuth}`;
+    console.log(callbackMsg);
     console.log('🔍 [LOGINPAGE] window.onTelegramAuth:', window.onTelegramAuth);
+    sendLogToServer(callbackMsg, { callbackType: typeof window.onTelegramAuth });
 
     // Удаляем ВСЕ существующие скрипты виджета
     const existingScripts = document.querySelectorAll('script[src*="telegram-widget"]');

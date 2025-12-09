@@ -1,0 +1,42 @@
+{"id":"agent_test_agent_20251209014115","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 01:41:15","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 01:41:15"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 01:41:15"}
+{"id":"agent_test_agent_20251209014128","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 01:41:28","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 01:41:28"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 01:41:28"}
+{"id":"agent_test_agent_20251209014550","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 01:45:50","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 01:45:50"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 01:45:50"}
+{"id":"agent_test_agent_20251209014556","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 01:45:56","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 01:45:56"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 01:45:56"}
+{"id":"agent_test_agent_20251209015101","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 01:51:01","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 01:51:01"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 01:51:01"}
+{"id":"agent_test_agent_20251209015407","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 01:54:07","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 01:54:07"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 01:54:07"}
+{"id":"agent_test_agent_20251209015457","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 01:54:57","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 01:54:57"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 01:54:57"}
+{"id":"agent_test_agent_20251209015503","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 01:55:03","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 01:55:03"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 01:55:03"}
+{"id":"agent_test_agent_20251209015508","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 01:55:08","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 01:55:08"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 01:55:08"}
+{"id":"agent_test_agent_20251209020658","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 02:06:58","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 02:06:58"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 02:06:58"}
+{"id":"agent_test_agent_20251209030416","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 03:04:16","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 03:04:16"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 03:04:16"}
+{"id":"agent_test_agent_20251209191025","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 19:10:25","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 19:10:25"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 19:10:25"}
+{"id":"agent_test_agent_20251209193625","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 19:36:25","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 19:36:25"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 19:36:25"}
+{"id":"agent_test_agent_20251209193717","name":"test_agent","task":"Test task description","type":"debug","status":"running","spawned_at":"2025-12-09 19:37:17","timeout":300}
+{"type":"agent_message","agent_id":"agent_test_123","message":"Hello agent!","timestamp":"2025-12-09 19:37:17"}
+{"type":"agent_killed","agent_id":"agent_to_kill_123","timestamp":"2025-12-09 19:37:17"}

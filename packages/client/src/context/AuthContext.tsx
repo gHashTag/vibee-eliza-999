@@ -43,6 +43,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     // Check for existing session on mount
     checkAuth();
+
+    // 🎯 IFRAME FIX: Listen for postMessage from Telegram Login Widget iframe
+    const handleMessage = async (event: MessageEvent) => {
+      // Verify origin for security
+      if (event.origin !== window.location.origin) {
+        console.log('🔒 [IFRAME] Ignoring message from different origin:', event.origin);
+        return;
+      }
+
+      // Check for Telegram auth data
+      if (event.data && event.data.type === 'TELEGRAM_AUTH_SUCCESS') {
+        console.log('📨 [IFRAME] Received TELEGRAM_AUTH_SUCCESS from iframe:', event.data.user);
+        try {
+          await login(event.data.user);
+          console.log('🎉 [IFRAME] Login successful from iframe data!');
+        } catch (error) {
+          console.error('💥 [IFRAME] Login failed from iframe:', error);
+        }
+      }
+    };
+
+    console.log('🔌 [IFRAME] Setting up postMessage listener...');
+    window.addEventListener('message', handleMessage);
+    console.log('✅ [IFRAME] postMessage listener registered');
+
+    // Cleanup
+    return () => {
+      console.log('🧹 [IFRAME] Removing postMessage listener...');
+      window.removeEventListener('message', handleMessage);
+    };
   }, []);
 
   const checkAuth = async () => {
@@ -50,6 +80,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('🔍 [CHECKAUTH] Проверяем авторизацию...');
       const token = localStorage.getItem('authToken');
       console.log('🔍 [CHECKAUTH] Токен в localStorage:', token ? `${token.substring(0, 20)}...` : 'ОТСУТСТВУЕТ');
+
+      // 🔥 DEV MODE BYPASS: Автоматическая авторизация в development
+      if (process.env.NODE_ENV === 'development' && !token) {
+        console.log('🚀 [CHECKAUTH] DEV MODE: Автоматическая авторизация для development');
+        const devUser: User = {
+          id: 1,
+          telegram_id: 123456789,
+          username: 'dev_user',
+          first_name: 'Developer',
+          last_name: 'Mode',
+          photo_url: null,
+          is_premium: true,
+          created_at: new Date(),
+          last_login_at: new Date(),
+          settings: {},
+          usage_stats: {},
+        };
+        setUser(devUser);
+        localStorage.setItem('authToken', 'dev-bypass-token');
+        setIsLoading(false);
+        return;
+      }
 
       if (token) {
         console.log('✅ [CHECKAUTH] Токен найден, проверяем на сервере...');

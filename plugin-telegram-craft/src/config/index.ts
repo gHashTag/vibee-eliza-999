@@ -5,6 +5,33 @@
  * Импортируйте конфигурацию отсюда: import { ... } from '../config';
  */
 
+// ============================================
+// ЦЕНТРАЛИЗОВАННАЯ КОНФИГУРАЦИЯ АГЕНТОВ
+// ============================================
+export {
+  AGENTS_CONFIG,
+  getAgentConfig,
+  getAllTargetChats,
+  getAllTargetChatIds,
+  getTargetChatsForAgent,
+  isChatTargetForAgent,
+  shouldRespondInChat,
+  getKnowledgeSources,
+  getStyleConfig,
+  getSalesConfig,
+  getAllAgents,
+  getAllAgentIds,
+  type AgentConfig,
+  type ChatTarget,
+  type TriggerConfig,
+  type StyleConfig,
+  type ResponseExample,
+  type KnowledgeConfig,
+  type KnowledgeSourceConfig,
+  type AgentSalesConfig,
+  type BehaviorConfig,
+} from './agents.config';
+
 // Telegram Credentials
 export {
   getCredentials,
@@ -12,7 +39,7 @@ export {
   type KolsCredentials
 } from './credentials';
 
-// Целевые чаты
+// Целевые чаты (обратная совместимость)
 export {
   TARGET_CHATS,
   isTargetChat,

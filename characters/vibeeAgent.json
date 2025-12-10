@@ -16,13 +16,11 @@
     "@elizaos/plugin-bootstrap",
     "@elizaos/plugin-telegram",
     "plugin-character-configurator",
-    "plugin-vibe-face-avatar"
+    "plugin-vibe-face-avatar",
+    "plugin-telegram-craft"
   ],
   "settings": {
-    "secrets": {
-      "TELEGRAM_BOT_TOKEN": "8309813696:AAG2QWKlmUSQ3BBDupoEv1RQ0m63KcKS-IQ",
-      "OPENROUTER_API_KEY": "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"
-    },
+    "secrets": {},
     "avatar": "/avatars/13929ac6-683f-0361-89a4-dd4831f95e2d.svg"
   },
   "style": {

@@ -4,6 +4,20 @@
  * Интерфейсы для работы с Telegram адаптерами
  */
 
+/**
+ * Медиа вложение в сообщении
+ */
+export interface ITelegramMedia {
+  type: 'photo' | 'document' | 'video' | 'audio' | 'sticker'
+  url?: string           // data:image/jpeg;base64,... или HTTP URL
+  fileId?: string        // Telegram file ID
+  mimeType?: string      // image/jpeg, video/mp4, etc.
+  fileName?: string      // Имя файла (для документов)
+  fileSize?: number      // Размер в байтах
+  width?: number         // Для фото/видео
+  height?: number        // Для фото/видео
+}
+
 export interface ITelegramMessage {
   id: number
   chatId: string | number
@@ -12,6 +26,10 @@ export interface ITelegramMessage {
   fromId?: string | number
   fromName?: string
   replyToMsgId?: number
+  /** Медиа вложения (фото, документы, видео) */
+  media?: ITelegramMedia[]
+  /** ID сообщения на которое это reply (для извлечения фото из reply) */
+  replyToMedia?: ITelegramMedia[]
 }
 
 export interface ITelegramDialog {

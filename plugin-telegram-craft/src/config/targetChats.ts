@@ -1,25 +1,36 @@
 /**
  * KOLS Plugin - Целевые чаты для мониторинга и обучения
  *
- * Все целевые чаты определены в одном месте.
- * Изменения здесь автоматически применяются во всём плагине.
+ * Все целевые чаты определены в централизованной конфигурации agents.config.ts
+ * Этот файл предоставляет обратную совместимость и хелпер-функции.
  */
+
+import {
+  getAllTargetChatIds,
+  isChatTargetForAgent,
+  shouldRespondInChat,
+} from './agents.config';
+
+// Re-export types
+export type { ChatTarget } from './agents.config';
 
 /**
  * Идентификаторы целевых чатов для мониторинга сообщений
- * и отправки проактивных обучающих материалов
+ * Генерируется из централизованной конфигурации agents.config.ts
  */
-export const TARGET_CHATS = [
-  '2643951085',     // Основной чат обучения (супергруппа)
-  '2298297094'      // Дополнительный чат
-] as const;
+export const TARGET_CHATS = getAllTargetChatIds() as readonly string[];
 // Примечание: -1002643951085 это тот же чат что 2643951085 (Bot API формат)
 // Функция isTargetChat() автоматически нормализует ID с/без префикса -100
 
 /**
- * Тип для целевого чата
+ * Тип для целевого чата (строка ID)
  */
-export type TargetChatId = typeof TARGET_CHATS[number];
+export type TargetChatId = string;
+
+/**
+ * Re-export функций для удобства
+ */
+export { shouldRespondInChat, isChatTargetForAgent };
 
 /**
  * Проверяет, является ли чат личным (не группа, не канал)
@@ -48,7 +59,8 @@ export function isPrivateChat(chatId: string | number): boolean {
   }
 
   // Если ID в списке целевых чатов - это группа, не личный чат
-  if (TARGET_CHATS.includes(chatIdStr as TargetChatId)) {
+  const targetChats = getAllTargetChatIds();
+  if (targetChats.includes(chatIdStr)) {
     return false;
   }
 
@@ -86,21 +98,22 @@ export function isPrivateChat(chatId: string | number): boolean {
  */
 export function isTargetChat(chatId: string | number): boolean {
   const chatIdStr = String(chatId);
+  const targetChats = getAllTargetChatIds();
 
   // Прямое совпадение
-  if (TARGET_CHATS.includes(chatIdStr as TargetChatId)) {
+  if (targetChats.includes(chatIdStr)) {
     return true;
   }
 
   // Проверка с нормализацией (убираем -100 префикс)
   const normalizedId = chatIdStr.replace(/^-100/, '');
-  if (TARGET_CHATS.includes(normalizedId as TargetChatId)) {
+  if (targetChats.includes(normalizedId)) {
     return true;
   }
 
   // Проверка обратная (добавляем -100 префикс)
   const withPrefix = `-100${chatIdStr}`;
-  if (TARGET_CHATS.includes(withPrefix as TargetChatId)) {
+  if (targetChats.includes(withPrefix)) {
     return true;
   }
 

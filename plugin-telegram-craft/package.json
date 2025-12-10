@@ -18,7 +18,8 @@
     "lint": "eslint src --ext .ts",
     "test": "bun test",
     "test:component": "bun test src/__tests__/plugin-config.test.ts",
-    "test:e2e": "elizaos test --type e2e"
+    "test:e2e": "elizaos test --type e2e",
+    "postinstall": "node -e \"const fs=require('fs');const path=require('path');const zodPath=path.join('node_modules','zod');if(fs.existsSync(zodPath)){fs.writeFileSync(path.join(zodPath,'v3.js'),'module.exports=require(\\\"./lib/index.js\\\");');fs.writeFileSync(path.join(zodPath,'v3.d.ts'),'export * from \\\"./lib/index\\\");');}\" || true"
   },
   "keywords": [
     "elizaos",
@@ -30,6 +31,9 @@
   ],
   "dependencies": {
     "@elizaos/core": "^1.6.4",
+    "drizzle-orm": "^0.44.7",
+    "drizzle-zod": "^0.8.3",
+    "replicate": "^1.4.0",
     "telegram": "^2.26.22",
     "zod": "^4.1.11"
   },

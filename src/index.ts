@@ -52,4 +52,9 @@ export { instagramAgent } from '../characters/instagram.ts';
 export { ProjectStarterTestSuite } from './__tests__/e2e/project-starter.e2e.ts';
 export { InstagramPluginTestSuite } from './instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts';
 
+// Plugin E2E Tests - тесты для плагинов (elizaos test не может тестировать плагины напрямую)
+export { NeuroPhotoTestSuite } from '../plugin-vibe-face-avatar/src/__tests__/e2e/plugin-starter.e2e.ts';
+export { TelegramCraftTestSuite } from '../plugin-telegram-craft/src/__tests__/e2e/telegram-craft.e2e.ts';
+export { CaruselPluginTestSuite } from '../plugin-carusel/src/__tests__/e2e/plugin-starter.e2e.ts';
+
 export default project;

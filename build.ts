@@ -90,8 +90,17 @@ async function build() {
       const { mkdir } = await import('node:fs/promises');
       await mkdir('./dist/__tests__/e2e', { recursive: true });
 
+      // Собираем все e2e тесты (главный проект + плагины)
+      const e2eEntrypoints = [
+        './src/__tests__/e2e/project-starter.e2e.ts',
+        './src/instagram-plugin/__tests__/e2e/instagramPlugin.e2e.ts',
+        './plugin-vibe-face-avatar/src/__tests__/e2e/plugin-starter.e2e.ts',
+        './plugin-telegram-craft/src/__tests__/e2e/telegram-craft.e2e.ts',
+        './plugin-carusel/src/__tests__/e2e/plugin-starter.e2e.ts',
+      ].filter((file) => existsSync(file));
+
       const e2eResult = await Bun.build({
-        entrypoints: ['./src/__tests__/e2e/project-starter.e2e.ts'],
+        entrypoints: e2eEntrypoints,
         outdir: './dist/__tests__/e2e',
         target: 'node',
         format: 'esm',
@@ -99,7 +108,7 @@ async function build() {
       });
 
       if (e2eResult.success) {
-        console.log('✓ E2E tests compiled');
+        console.log(`✓ E2E tests compiled (${e2eEntrypoints.length} files)`);
       } else {
         console.warn('⚠ E2E tests compilation failed');
       }

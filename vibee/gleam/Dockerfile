@@ -1,22 +1,30 @@
 # Build stage - using Gleam with OTP 27
 FROM ghcr.io/gleam-lang/gleam:v1.13.0-erlang-alpine AS builder
 
-# IMPORTANT: Touch src file to invalidate gleam cache
-# Cache bust argument with unique timestamp
-ARG CACHE_BUST=2025-12-10-v20-rebuild
+# Use unique timestamp to bust all caching layers
+ARG BUILD_TIMESTAMP="2025-12-10T15:30:00"
+RUN echo "Build timestamp: ${BUILD_TIMESTAMP}"
 
 WORKDIR /app
 
-# Copy all project files together
+# Copy manifest first for dependency caching
 COPY gleam.toml manifest.toml ./
+
+# Download dependencies
+RUN gleam deps download
+
+# Copy source code
 COPY src/ ./src/
 
-# Force full rebuild: remove all build artifacts, touch source file with unique marker
-RUN rm -rf build && \
-    echo "// Build marker: ${CACHE_BUST}" >> src/vibee.gleam && \
+# Clean build and export with verification
+RUN set -ex && \
+    rm -rf build && \
+    gleam build && \
     gleam export erlang-shipment && \
-    echo "Exported. Checking vibee@@main.beam exports:" && \
-    ls -la build/erlang-shipment/vibee/ebin/vibee*.beam
+    echo "=== Verifying vibee@@main.beam ===" && \
+    ls -la build/erlang-shipment/vibee/ebin/vibee@@main.beam && \
+    echo "=== Checking exports ===" && \
+    erl -noshell -eval "io:format(\"~p~n\", [beam_lib:chunks(\"build/erlang-shipment/vibee/ebin/vibee@@main.beam\", [exports])]), halt()."
 
 # Runtime stage - OTP 27 to match Gleam v1.13.0-erlang-alpine
 FROM erlang:27-alpine

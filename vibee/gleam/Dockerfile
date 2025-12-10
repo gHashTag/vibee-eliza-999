@@ -2,7 +2,7 @@
 FROM ghcr.io/gleam-lang/gleam:v1.13.0-erlang-alpine AS builder
 
 # Cache bust argument must come early to invalidate subsequent layers
-ARG CACHE_BUST=2025-12-10-v17-force-rebuild
+ARG CACHE_BUST=2025-12-10-v19-force-fresh
 
 WORKDIR /app
 

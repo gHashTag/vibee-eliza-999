@@ -3,6 +3,18 @@ import { Plugin, IAgentRuntime } from '@elizaos/core'
 
 // Actions
 import { getDialogsAction } from './actions/getDialogs.action'
+import { telegramAuthActions } from './actions/telegramAuth.action'
+import { configStatusAction } from './actions/configStatus.action'
+import { configListAction } from './actions/configList.action'
+import { configAddAction } from './actions/configAdd.action'
+import { configRemoveAction } from './actions/configRemove.action'
+import {
+  strategyShowAction,
+  strategyToneAction,
+  strategySalesAction,
+  strategyTriggersAction,
+} from './actions/strategyUpdate.action'
+import { nanoBananaAction } from './actions/nanoBanana.action'
 
 // Providers
 import { vibeCodingKnowledgeProvider } from './providers/VibeCodingKnowledgeProvider'
@@ -19,6 +31,14 @@ import {
 
 // Services
 import { TelegramService } from './services/telegram.service'
+import { ChatConfigService } from './services/chatConfig.service'
+import { PromptBuilderService } from './services/promptBuilder.service'
+import { KnowledgeService } from './services/knowledge.service'
+import { NanoBananaService } from './services/nanoBanana.service'
+import { ProactiveAvatarService } from './services/proactiveAvatar.service'
+import { PaymentService } from './services/payment.service'
+import { CryptoPaymentService } from './services/cryptoPayment.service'
+import { PhotoSessionService } from './services/photoSession.service'
 
 /**
  * Telegram Craft Plugin
@@ -40,7 +60,22 @@ export const telegramCraftPlugin: Plugin = {
   /**
    * Actions - что агент может делать
    */
-  actions: [getDialogsAction],
+  actions: [
+    getDialogsAction,
+    ...telegramAuthActions,
+    // Config Management Actions
+    configStatusAction,
+    configListAction,
+    configAddAction,
+    configRemoveAction,
+    // Strategy Update Actions
+    strategyShowAction,
+    strategyToneAction,
+    strategySalesAction,
+    strategyTriggersAction,
+    // Nano Banana Pro - генерация изображений и лидмагнитов
+    nanoBananaAction,
+  ],
 
   /**
    * Providers - контекст для LLM
@@ -65,18 +100,34 @@ export const telegramCraftPlugin: Plugin = {
   // routes: getTelegramRoutes as unknown as Plugin['routes'],
 
   /**
-   * Services - фоновые сервисы
+   * Services - фоновые сервисы (передаём классы, не экземпляры!)
+   * ElizaOS автоматически создаст экземпляры и зарегистрирует их
+   * - TelegramService: MTProto через GramJS
+   * - ChatConfigService: Управление конфигурациями чатов
+   * - PromptBuilderService: Динамическая генерация промптов
+   * - KnowledgeService: RAG и embeddings через Ollama
    */
-  services: [new TelegramService()],
+  services: [
+    TelegramService,
+    ChatConfigService,
+    PromptBuilderService,
+    KnowledgeService,
+    NanoBananaService,
+    ProactiveAvatarService,
+    PaymentService,
+    CryptoPaymentService,
+    PhotoSessionService,
+  ],
 
   /**
    * Инициализация плагина
+   * NOTE: Сервисы автоматически инициализируются ElizaOS из массива services[]
    */
   init: async (config, runtime) => {
     console.log('[telegram-craft] Initializing plugin...')
 
     try {
-      // Получаем credentials из character secrets
+      // Получаем credentials из character secrets и устанавливаем в env
       const apiId = config.TELEGRAM_API_ID || process.env.TELEGRAM_API_ID
       const apiHash = config.TELEGRAM_API_HASH || process.env.TELEGRAM_API_HASH
       const sessionString =
@@ -86,24 +137,13 @@ export const telegramCraftPlugin: Plugin = {
         console.warn(
           '[telegram-craft] Missing TELEGRAM_API_ID or TELEGRAM_API_HASH - MTProto disabled'
         )
-        return
       }
 
-      // Установка env переменных для runtime
+      // Установка env переменных для использования сервисами
       if (apiId) process.env.TELEGRAM_API_ID = String(apiId)
       if (apiHash) process.env.TELEGRAM_API_HASH = String(apiHash)
       if (sessionString)
         process.env.TELEGRAM_SESSION_STRING = String(sessionString)
-
-      // Инициализируем TelegramService с runtime
-      const telegramService = telegramCraftPlugin.services?.[0] as TelegramService
-      if (telegramService && runtime) {
-        console.log('[telegram-craft] Initializing TelegramService...')
-        await telegramService.initialize(runtime)
-        console.log('[telegram-craft] TelegramService initialized!')
-      } else {
-        console.warn('[telegram-craft] TelegramService or runtime not available')
-      }
 
       // Логируем статистику компонентов
       console.log(`[telegram-craft] Plugin initialized successfully`)
@@ -111,10 +151,8 @@ export const telegramCraftPlugin: Plugin = {
       console.log(`  Providers: ${telegramCraftPlugin.providers?.length || 0}`)
       console.log(`  Evaluators: ${telegramCraftPlugin.evaluators?.length || 0}`)
       console.log(`  Services: ${telegramCraftPlugin.services?.length || 0}`)
-      console.log(`  Routes: enabled`)
     } catch (error) {
       console.error('[telegram-craft] Failed to initialize:', error)
-      // Не throw - позволяем агенту работать без Telegram
     }
   },
 }

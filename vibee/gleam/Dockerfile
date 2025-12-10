@@ -2,7 +2,7 @@
 FROM ghcr.io/gleam-lang/gleam:v1.13.0-erlang-alpine AS builder
 
 # Cache bust argument must come early to invalidate subsequent layers
-ARG CACHE_BUST=2025-12-09-v12
+ARG CACHE_BUST=2025-12-10-v17-force-rebuild
 
 WORKDIR /app
 
@@ -15,6 +15,10 @@ RUN rm -rf build && gleam export erlang-shipment
 
 # Runtime stage - OTP 27 to match Gleam v1.13.0-erlang-alpine
 FROM erlang:27-alpine
+
+# Cache bust for runtime stage - this RUN forces rebuild
+ARG CACHE_BUST_RUNTIME=2025-12-10-v16
+RUN echo "Build version: ${CACHE_BUST_RUNTIME}"
 
 WORKDIR /app
 
@@ -45,4 +49,4 @@ EXPOSE 8080
 # Run the main application - using full path for beam files
 # The entrypoint.sh expects to be in /app and uses relative paths
 WORKDIR /app
-CMD ["sh", "-c", "./entrypoint.sh run"]
+CMD ["./entrypoint.sh", "run"]

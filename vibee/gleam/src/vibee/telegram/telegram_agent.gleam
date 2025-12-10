@@ -13,6 +13,7 @@ import gleam/string
 import vibee/config/target_chats
 import vibee/config/telegram_config
 import vibee/logging
+import vibee/mcp/session_manager
 
 /// Конфигурация Telegram агента
 pub type TelegramAgentConfig {
@@ -55,9 +56,14 @@ pub type SendResult {
 
 /// Создать конфигурацию по умолчанию (используем централизованный конфиг)
 pub fn default_config() -> TelegramAgentConfig {
+  // Get active session from session manager, fall back to empty string if none
+  let session_id = case session_manager.get_active() {
+    Some(sid) -> sid
+    None -> ""
+  }
   TelegramAgentConfig(
     bridge_url: telegram_config.bridge_url,
-    session_id: telegram_config.session_id,
+    session_id: session_id,
     llm_api_key: None,
     llm_model: "x-ai/grok-4.1-fast",
     auto_reply_enabled: True,

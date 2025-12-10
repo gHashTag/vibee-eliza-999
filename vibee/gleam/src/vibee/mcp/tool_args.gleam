@@ -10,7 +10,7 @@ import gleam/json
 
 pub type TelegramGetDialogsArgs {
   TelegramGetDialogsArgs(
-    session_id: String,
+    session_id: Option(String),
     limit: Option(Int),
     type_filter: Option(String),
   )
@@ -18,7 +18,7 @@ pub type TelegramGetDialogsArgs {
 
 pub type TelegramGetHistoryArgs {
   TelegramGetHistoryArgs(
-    session_id: String,
+    session_id: Option(String),
     chat_id: String,
     limit: Option(Int),
     offset_id: Option(Int),
@@ -27,7 +27,7 @@ pub type TelegramGetHistoryArgs {
 
 pub type TelegramSendMessageArgs {
   TelegramSendMessageArgs(
-    session_id: String,
+    session_id: Option(String),
     chat_id: String,
     text: String,
     reply_to: Option(Int),
@@ -44,7 +44,7 @@ pub type ButtonDef {
 
 pub type TelegramSendButtonsArgs {
   TelegramSendButtonsArgs(
-    session_id: String,
+    session_id: Option(String),
     chat_id: String,
     text: String,
     buttons: List(List(ButtonDef)),
@@ -53,7 +53,7 @@ pub type TelegramSendButtonsArgs {
 
 pub type TelegramSendPhotoArgs {
   TelegramSendPhotoArgs(
-    session_id: String,
+    session_id: Option(String),
     chat_id: String,
     file_path: String,
     caption: Option(String),
@@ -62,7 +62,7 @@ pub type TelegramSendPhotoArgs {
 
 pub type TelegramDownloadMediaArgs {
   TelegramDownloadMediaArgs(
-    session_id: String,
+    session_id: Option(String),
     chat_id: String,
     message_id: Int,
     output_path: Option(String),
@@ -70,12 +70,12 @@ pub type TelegramDownloadMediaArgs {
 }
 
 pub type TelegramGetMeArgs {
-  TelegramGetMeArgs(session_id: String)
+  TelegramGetMeArgs(session_id: Option(String))
 }
 
 pub type TelegramSubscribeUpdatesArgs {
   TelegramSubscribeUpdatesArgs(
-    session_id: String,
+    session_id: Option(String),
     event_types: Option(List(String)),
   )
 }

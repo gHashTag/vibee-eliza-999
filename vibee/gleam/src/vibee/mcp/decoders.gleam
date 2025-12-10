@@ -89,7 +89,7 @@ pub fn error_to_string(err: DecodeError) -> String {
 // ============================================================
 
 fn telegram_get_dialogs_decoder() -> Decoder(TelegramGetDialogsArgs) {
-  use session_id <- decode.field("session_id", decode.string)
+  use session_id <- decode.optional_field("session_id", None, decode.optional(decode.string))
   use limit <- decode.optional_field("limit", None, decode.optional(decode.int))
   use type_filter <- decode.optional_field("type_filter", None, decode.optional(decode.string))
   decode.success(TelegramGetDialogsArgs(
@@ -104,7 +104,7 @@ pub fn decode_telegram_get_dialogs(args: json.Json) -> Result(TelegramGetDialogs
 }
 
 fn telegram_get_history_decoder() -> Decoder(TelegramGetHistoryArgs) {
-  use session_id <- decode.field("session_id", decode.string)
+  use session_id <- decode.optional_field("session_id", None, decode.optional(decode.string))
   use chat_id <- decode.field("chat_id", decode.string)
   use limit <- decode.optional_field("limit", None, decode.optional(decode.int))
   use offset_id <- decode.optional_field("offset_id", None, decode.optional(decode.int))
@@ -121,7 +121,7 @@ pub fn decode_telegram_get_history(args: json.Json) -> Result(TelegramGetHistory
 }
 
 fn telegram_send_message_decoder() -> Decoder(TelegramSendMessageArgs) {
-  use session_id <- decode.field("session_id", decode.string)
+  use session_id <- decode.optional_field("session_id", None, decode.optional(decode.string))
   use chat_id <- decode.field("chat_id", decode.string)
   use text <- decode.field("text", decode.string)
   use reply_to <- decode.optional_field("reply_to", None, decode.optional(decode.int))
@@ -149,7 +149,7 @@ fn button_decoder() -> Decoder(ButtonDef) {
 }
 
 fn telegram_send_buttons_decoder() -> Decoder(TelegramSendButtonsArgs) {
-  use session_id <- decode.field("session_id", decode.string)
+  use session_id <- decode.optional_field("session_id", None, decode.optional(decode.string))
   use chat_id <- decode.field("chat_id", decode.string)
   use text <- decode.field("text", decode.string)
   use buttons <- decode.field("buttons", decode.list(decode.list(button_decoder())))
@@ -166,7 +166,7 @@ pub fn decode_telegram_send_buttons(args: json.Json) -> Result(TelegramSendButto
 }
 
 fn telegram_send_photo_decoder() -> Decoder(TelegramSendPhotoArgs) {
-  use session_id <- decode.field("session_id", decode.string)
+  use session_id <- decode.optional_field("session_id", None, decode.optional(decode.string))
   use chat_id <- decode.field("chat_id", decode.string)
   use file_path <- decode.field("file_path", decode.string)
   use caption <- decode.optional_field("caption", None, decode.optional(decode.string))
@@ -183,7 +183,7 @@ pub fn decode_telegram_send_photo(args: json.Json) -> Result(TelegramSendPhotoAr
 }
 
 fn telegram_download_media_decoder() -> Decoder(TelegramDownloadMediaArgs) {
-  use session_id <- decode.field("session_id", decode.string)
+  use session_id <- decode.optional_field("session_id", None, decode.optional(decode.string))
   use chat_id <- decode.field("chat_id", decode.string)
   use message_id <- decode.field("message_id", decode.int)
   use output_path <- decode.optional_field("output_path", None, decode.optional(decode.string))
@@ -200,7 +200,7 @@ pub fn decode_telegram_download_media(args: json.Json) -> Result(TelegramDownloa
 }
 
 fn telegram_get_me_decoder() -> Decoder(TelegramGetMeArgs) {
-  use session_id <- decode.field("session_id", decode.string)
+  use session_id <- decode.optional_field("session_id", None, decode.optional(decode.string))
   decode.success(TelegramGetMeArgs(session_id: session_id))
 }
 
@@ -209,7 +209,7 @@ pub fn decode_telegram_get_me(args: json.Json) -> Result(TelegramGetMeArgs, Deco
 }
 
 fn telegram_subscribe_updates_decoder() -> Decoder(TelegramSubscribeUpdatesArgs) {
-  use session_id <- decode.field("session_id", decode.string)
+  use session_id <- decode.optional_field("session_id", None, decode.optional(decode.string))
   use event_types <- decode.optional_field("event_types", None, decode.optional(decode.list(decode.string)))
   decode.success(TelegramSubscribeUpdatesArgs(
     session_id: session_id,

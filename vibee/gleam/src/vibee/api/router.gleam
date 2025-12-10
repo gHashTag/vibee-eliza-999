@@ -22,6 +22,7 @@ import vibee/logging
 import vibee/web/html
 import vibee/mcp/websocket as mcp_ws
 import vibee/mcp/tools.{type ToolRegistry}
+import vibee/mcp/session_manager
 
 /// WebSocket message types
 pub type WsMessage {
@@ -319,7 +320,12 @@ fn not_found_handler() -> Response(ResponseData) {
 // Telegram handlers
 
 fn get_telegram_bridge() -> tg_client.TelegramBridge {
-  tg_client.with_session(telegram_config.bridge_url, telegram_config.session_id)
+  // Get active session from session manager, fall back to empty string if none
+  let session_id = case session_manager.get_active() {
+    Some(sid) -> sid
+    None -> ""
+  }
+  tg_client.with_session(telegram_config.bridge_url, session_id)
 }
 
 fn telegram_dialogs_handler() -> Response(ResponseData) {

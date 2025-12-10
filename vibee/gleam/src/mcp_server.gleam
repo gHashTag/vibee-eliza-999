@@ -5,6 +5,7 @@ import gleam/erlang/process
 import gleam/list
 import vibee/logging
 import vibee/mcp/server
+import vibee/mcp/session_manager
 import vibee/mcp/tools
 
 pub fn main() {
@@ -13,6 +14,10 @@ pub fn main() {
   logging.info("Model Context Protocol for AI Agents")
   logging.info("============================================================")
   logging.info("")
+
+  // Initialize session manager (ETS table for multi-account support)
+  session_manager.init()
+  logging.info("Session manager initialized (multi-account support enabled)")
 
   // Инициализируем инструменты
   let tool_registry = tools.init_registry()

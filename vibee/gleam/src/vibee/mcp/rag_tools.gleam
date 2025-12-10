@@ -13,7 +13,9 @@ import vibee/db/postgres
 import vibee/embedding/worker
 import vibee/mcp/config
 import vibee/mcp/protocol
+import vibee/mcp/session_manager
 import vibee/mcp/types.{type Tool, type ToolResult, TextContent, Tool}
+import vibee/mcp/validation
 import vibee/search/hybrid
 import vibee/telegram/parser
 
@@ -35,7 +37,7 @@ pub fn telegram_parse_all_dialogs_tool() -> Tool {
             "session_id",
             json.object([
               #("type", json.string("string")),
-              #("description", json.string("Telegram session ID")),
+              #("description", json.string("Telegram session ID. Если не указан, используется активная сессия.")),
             ]),
           ),
           #(
@@ -64,7 +66,7 @@ pub fn telegram_parse_all_dialogs_tool() -> Tool {
           ),
         ]),
       ),
-      #("required", json.array(["session_id"], json.string)),
+      #("required", json.array([], json.string)),
     ]),
   )
 }
@@ -83,7 +85,7 @@ pub fn telegram_parse_chat_tool() -> Tool {
             "session_id",
             json.object([
               #("type", json.string("string")),
-              #("description", json.string("Telegram session ID")),
+              #("description", json.string("Telegram session ID. Если не указан, используется активная сессия.")),
             ]),
           ),
           #(
@@ -118,7 +120,7 @@ pub fn telegram_parse_chat_tool() -> Tool {
           ),
         ]),
       ),
-      #("required", json.array(["session_id", "chat_id"], json.string)),
+      #("required", json.array(["chat_id"], json.string)),
     ]),
   )
 }
@@ -449,9 +451,9 @@ pub fn get_all_rag_tools() -> List(Tool) {
 /// Handle telegram_parse_all_dialogs
 pub fn handle_telegram_parse_all_dialogs(args: json.Json) -> ToolResult {
   // Parse arguments
-  let session_id =
+  let session_id_opt =
     json_get_string(args, "session_id")
-    |> result.unwrap("")
+    |> option.from_result()
   let batch_size =
     json_get_int(args, "batch_size")
     |> result.unwrap(100)
@@ -459,9 +461,10 @@ pub fn handle_telegram_parse_all_dialogs(args: json.Json) -> ToolResult {
     json_get_int(args, "delay_ms")
     |> result.unwrap(250)
 
-  case session_id {
-    "" -> protocol.error_result("session_id is required")
-    sid -> {
+  // Resolve session_id using session_manager
+  case validation.validate_session_id(session_id_opt) {
+    Error(err) -> protocol.error_result(validation.error_to_string(err))
+    Ok(sid) -> {
       // Get database URL from environment
       let db_url = config.get_env_or("DATABASE_URL", "")
       case db_url {
@@ -532,9 +535,9 @@ pub fn handle_telegram_parse_all_dialogs(args: json.Json) -> ToolResult {
 
 /// Handle telegram_parse_chat
 pub fn handle_telegram_parse_chat(args: json.Json) -> ToolResult {
-  let session_id =
+  let session_id_opt =
     json_get_string(args, "session_id")
-    |> result.unwrap("")
+    |> option.from_result()
   let chat_id_str =
     json_get_string(args, "chat_id")
     |> result.unwrap("")
@@ -542,10 +545,11 @@ pub fn handle_telegram_parse_chat(args: json.Json) -> ToolResult {
     json_get_int(args, "max_messages")
     |> result.unwrap(0)
 
-  case session_id, chat_id_str {
-    "", _ -> protocol.error_result("session_id is required")
+  // Resolve session_id using session_manager
+  case validation.validate_session_id(session_id_opt), chat_id_str {
+    Error(err), _ -> protocol.error_result(validation.error_to_string(err))
     _, "" -> protocol.error_result("chat_id is required")
-    sid, cid -> {
+    Ok(sid), cid -> {
       case int.parse(cid) {
         Error(_) -> protocol.error_result("chat_id must be a valid integer")
         Ok(chat_id) -> {

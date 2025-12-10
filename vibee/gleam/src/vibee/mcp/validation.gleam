@@ -5,6 +5,7 @@ import gleam/string
 import gleam/list
 import gleam/int
 import gleam/option.{type Option, None, Some}
+import vibee/mcp/session_manager
 
 /// Validation error types
 pub type ValidationError {
@@ -198,8 +199,8 @@ fn is_digits_only(s: String) -> Bool {
 // Session ID Validation
 // ============================================================
 
-/// Validate session ID format
-pub fn validate_session_id(sid: String) -> Result(String, ValidationError) {
+/// Validate session ID format (for raw string)
+pub fn validate_session_id_string(sid: String) -> Result(String, ValidationError) {
   let trimmed = string.trim(sid)
   let len = string.length(trimmed)
 
@@ -212,6 +213,16 @@ pub fn validate_session_id(sid: String) -> Result(String, ValidationError) {
       }
     }
     False -> Error(InvalidFormat("session_id", "non-empty string, max 128 chars"))
+  }
+}
+
+/// Resolve and validate session ID
+/// If session_id is None, tries to get active session from session_manager
+/// Then validates the resolved session ID
+pub fn validate_session_id(sid: Option(String)) -> Result(String, ValidationError) {
+  case session_manager.resolve_session(sid) {
+    Error(err) -> Error(InvalidFormat("session_id", err))
+    Ok(resolved_sid) -> validate_session_id_string(resolved_sid)
   }
 }
 

@@ -1,10 +1,11 @@
 // VIBEE - Agent Framework on Gleam/BEAM
 // Entry point for the application
 // Checks VIBEE_MODE env var: "mcp" for MCP WebSocket Server, otherwise Telegram agent
+// Build version: 2025-12-10-v14
 
 import gleam/io
 import gleam/erlang/process
-import gleam/option.{Some}
+import gleam/option.{None, Some}
 import vibee/api/router
 import vibee/agent/polling_actor
 import vibee/config/telegram_config
@@ -15,6 +16,7 @@ import vibee/mcp/tools.{init_registry}
 import vibee/mcp/events
 import vibee/mcp/cache
 import vibee/mcp/telemetry
+import vibee/mcp/session_manager
 import gleam/int
 
 pub fn main() {
@@ -42,9 +44,14 @@ fn run_telegram_agent() {
       io.println("[EVENTS] ✓ Event bus started")
 
       // Конфигурация агента с OpenRouter API (используем централизованный конфиг)
+      // Get active session from session manager, fall back to empty string if none
+      let session_id = case session_manager.get_active() {
+        Some(sid) -> sid
+        None -> ""
+      }
       let agent_config = TelegramAgentConfig(
         bridge_url: telegram_config.bridge_url,
-        session_id: telegram_config.session_id,
+        session_id: session_id,
         llm_api_key: Some("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"),
         llm_model: "x-ai/grok-4.1-fast",
         auto_reply_enabled: True,

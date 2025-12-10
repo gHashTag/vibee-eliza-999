@@ -25,11 +25,13 @@ import vibee/mcp/healing
 import vibee/mcp/protocol
 import vibee/mcp/rag_tools
 import vibee/mcp/rainbow_types
+import vibee/mcp/session_manager
 import vibee/mcp/shell
 import vibee/mcp/super_agent
 import vibee/mcp/task_store
 import vibee/mcp/types.{type Tool, type ToolResult, TextContent, Tool}
 import vibee/mcp/validation
+import vibee/config/telegram_config
 
 /// Tool handler function type
 pub type ToolHandler =
@@ -53,6 +55,7 @@ pub type ToolCategory {
   CategoryA2A
   CategorySuperAgent
   CategoryMemory
+  CategorySession
 }
 
 /// Tool registry
@@ -155,8 +158,18 @@ pub fn get_tool_category(name: String) -> ToolCategory {
                                                                 True ->
                                                                   CategoryMemory
                                                                 False ->
-                                                                  CategorySystem
-                                                                // Default
+                                                                  case
+                                                                    string.starts_with(
+                                                                      name,
+                                                                      "session_",
+                                                                    )
+                                                                  {
+                                                                    True ->
+                                                                      CategorySession
+                                                                    False ->
+                                                                      CategorySystem
+                                                                    // Default
+                                                                  }
                                                               }
                                                           }
                                                       }
@@ -210,6 +223,7 @@ pub fn category_to_string(cat: ToolCategory) -> String {
     CategoryA2A -> "a2a"
     CategorySuperAgent -> "super_agent"
     CategoryMemory -> "memory"
+    CategorySession -> "session"
   }
 }
 
@@ -232,6 +246,7 @@ pub fn parse_category(s: String) -> Result(ToolCategory, Nil) {
     "a2a" -> Ok(CategoryA2A)
     "super_agent" -> Ok(CategorySuperAgent)
     "memory" -> Ok(CategoryMemory)
+    "session" -> Ok(CategorySession)
     _ -> Error(Nil)
   }
 }
@@ -308,6 +323,11 @@ pub fn init_registry() -> ToolRegistry {
       auth_send_code_tool(),
       auth_verify_code_tool(),
       auth_logout_tool(),
+
+      // Session tools (multi-account support)
+      session_list_tool(),
+      session_set_active_tool(),
+      session_create_tool(),
 
       // Rainbow Bridge tools (P6 - Autonomous Self-Healing)
       rainbow_autonomous_debug_cycle_tool(),
@@ -403,6 +423,10 @@ pub fn init_registry() -> ToolRegistry {
     |> dict.insert("auth_send_code", handle_auth_send_code)
     |> dict.insert("auth_verify_code", handle_auth_verify_code)
     |> dict.insert("auth_logout", handle_auth_logout)
+    // Session handlers (multi-account support)
+    |> dict.insert("session_list", handle_session_list)
+    |> dict.insert("session_set_active", handle_session_set_active)
+    |> dict.insert("session_create", handle_session_create)
     // Rainbow Bridge handlers
     |> dict.insert(
       "rainbow_autonomous_debug_cycle",
@@ -4654,7 +4678,7 @@ fn handle_bot_test_interaction(args: json.Json) -> ToolResult {
             "session_id is required for testing interactions",
           )
         Some(sid) -> {
-          case validation.validate_session_id(sid) {
+          case validation.validate_session_id_string(sid) {
             Error(err) -> protocol.error_result(validation.error_to_string(err))
             Ok(valid_sid) -> {
               logging.info("[BOT_TEST] Testing interactions with: " <> bot)
@@ -5642,5 +5666,367 @@ fn handle_decide_apply(args: json.Json) -> ToolResult {
         Error(err) -> protocol.error_result(err)
       }
     }
+  }
+}
+
+// ============================================================
+// Session Tools (Multi-Account Support)
+// ============================================================
+
+fn session_list_tool() -> Tool {
+  Tool(
+    name: "session_list",
+    description: "List all Telegram sessions with their authorization status. Shows which session is currently active.",
+    input_schema: json.object([
+      #("type", json.string("object")),
+      #("properties", json.object([])),
+      #("required", json.array([], json.string)),
+    ]),
+  )
+}
+
+fn session_set_active_tool() -> Tool {
+  Tool(
+    name: "session_set_active",
+    description: "Set the active Telegram session. This session will be used by default when session_id is not explicitly provided.",
+    input_schema: json.object([
+      #("type", json.string("object")),
+      #(
+        "properties",
+        json.object([
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string("Session ID to set as active"),
+              ),
+            ]),
+          ),
+        ]),
+      ),
+      #("required", json.array(["session_id"], json.string)),
+    ]),
+  )
+}
+
+fn session_create_tool() -> Tool {
+  Tool(
+    name: "session_create",
+    description: "Create a new Telegram session. After creation, use auth_send_code to authorize with phone number.",
+    input_schema: json.object([
+      #("type", json.string("object")),
+      #(
+        "properties",
+        json.object([
+          #(
+            "phone",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string(
+                  "Phone number in international format (+79001234567). Optional, for convenience.",
+                ),
+              ),
+            ]),
+          ),
+          #(
+            "set_active",
+            json.object([
+              #("type", json.string("boolean")),
+              #(
+                "description",
+                json.string("Set this session as active after creation (default: true)"),
+              ),
+              #("default", json.bool(True)),
+            ]),
+          ),
+        ]),
+      ),
+      #("required", json.array([], json.string)),
+    ]),
+  )
+}
+
+// ============================================================
+// Session Handlers
+// ============================================================
+
+fn handle_session_list(_args: json.Json) -> ToolResult {
+  logging.info("[SESSION] Listing all sessions...")
+
+  // Get sessions from local ETS store
+  let local_sessions = session_manager.list_all()
+  let active_session = session_manager.get_active()
+
+  // Merge local info
+  let sessions_json =
+    local_sessions
+    |> list.map(fn(s) {
+      let is_active = case active_session {
+        Some(active_id) -> active_id == s.session_id
+        None -> False
+      }
+      json.object([
+        #("session_id", json.string(s.session_id)),
+        #(
+          "phone",
+          case s.phone {
+            Some(p) -> json.string(p)
+            None -> json.null()
+          },
+        ),
+        #(
+          "username",
+          case s.username {
+            Some(u) -> json.string(u)
+            None -> json.null()
+          },
+        ),
+        #("authorized", json.bool(s.authorized)),
+        #("is_active", json.bool(is_active)),
+      ])
+    })
+
+  protocol.text_result(
+    json.to_string(
+      json.object([
+        #("sessions", json.array(sessions_json, fn(x) { x })),
+        #(
+          "active_session",
+          case active_session {
+            Some(sid) -> json.string(sid)
+            None -> json.null()
+          },
+        ),
+        #("total", json.int(list.length(sessions_json))),
+        #(
+          "hint",
+          case list.length(sessions_json) {
+            0 ->
+              json.string(
+                "No sessions found. Use session_create to create a new session, "
+                <> "or session_set_active with an existing session_id.",
+              )
+            _ -> json.null()
+          },
+        ),
+      ]),
+    ),
+  )
+}
+
+fn handle_session_set_active(args: json.Json) -> ToolResult {
+  logging.info("[SESSION] Setting active session...")
+
+  // Parse session_id from args using json.parse pattern
+  let session_id_decoder = {
+    use v <- decode.field("session_id", decode.string)
+    decode.success(v)
+  }
+  let args_str = json.to_string(args)
+
+  case json.parse(args_str, session_id_decoder) {
+    Error(_) ->
+      protocol.error_result("Missing required parameter: session_id")
+    Ok(session_id) -> {
+      // Validate session exists by checking with bridge
+      let path = "/api/v1/me"
+      let req =
+        request.new()
+        |> request.set_scheme(http.Http)
+        |> request.set_method(http.Get)
+        |> request.set_host("localhost")
+        |> request.set_port(8081)
+        |> request.set_path(path)
+        |> request.set_header("x-session-id", session_id)
+
+      case httpc.send(req) {
+        Ok(response) -> {
+          case response.status {
+            200 -> {
+              // Session is valid, set as active
+              session_manager.set_active(session_id)
+
+              // Try to extract user info and update local store
+              let username = json_get_optional_string(response.body, "username")
+              let phone = json_get_optional_string(response.body, "phone")
+
+              session_manager.upsert(session_manager.SessionInfo(
+                session_id: session_id,
+                phone: phone,
+                username: username,
+                authorized: True,
+                created_at: 0,
+              ))
+
+              protocol.text_result(
+                json.to_string(
+                  json.object([
+                    #("status", json.string("ok")),
+                    #("active_session", json.string(session_id)),
+                    #(
+                      "message",
+                      json.string(
+                        "Session " <> session_id <> " is now active",
+                      ),
+                    ),
+                  ]),
+                ),
+              )
+            }
+            401 ->
+              protocol.error_result(
+                "Session " <> session_id <> " is not authorized. Use auth_send_code first.",
+              )
+            _ ->
+              protocol.error_result(
+                "Session " <> session_id <> " not found or invalid",
+              )
+          }
+        }
+        Error(_) ->
+          protocol.error_result(
+            "Failed to connect to Telegram Bridge. Make sure it's running on port 8081.",
+          )
+      }
+    }
+  }
+}
+
+fn handle_session_create(args: json.Json) -> ToolResult {
+  logging.info("[SESSION] Creating new session...")
+
+  let args_str = json.to_string(args)
+
+  // Parse optional phone from args
+  let phone = json_get_optional_string(args_str, "phone")
+
+  // Parse optional set_active (default: true)
+  let set_active = case json_get_optional_bool(args_str, "set_active") {
+    Some(v) -> v
+    None -> True
+  }
+
+  // Call Bridge to create new session
+  let path = "/api/v1/connect"
+  let body =
+    json.to_string(
+      json.object([
+        #("app_id", json.int(telegram_config.api_id)),
+        #("app_hash", json.string(telegram_config.api_hash)),
+        #(
+          "phone",
+          case phone {
+            Some(p) -> json.string(p)
+            None -> json.string("")
+          },
+        ),
+      ]),
+    )
+
+  let req =
+    request.new()
+    |> request.set_scheme(http.Http)
+    |> request.set_method(http.Post)
+    |> request.set_host("localhost")
+    |> request.set_port(8081)
+    |> request.set_path(path)
+    |> request.set_header("content-type", "application/json")
+    |> request.set_body(body)
+
+  case httpc.send(req) {
+    Ok(response) -> {
+      case response.status {
+        200 | 201 -> {
+          // Parse session_id from response
+          let session_id_decoder = {
+            use v <- decode.field("session_id", decode.string)
+            decode.success(v)
+          }
+
+          case json.parse(response.body, session_id_decoder) {
+            Ok(new_session_id) -> {
+              // Store in local ETS
+              session_manager.upsert(session_manager.SessionInfo(
+                session_id: new_session_id,
+                phone: phone,
+                username: None,
+                authorized: False,
+                created_at: 0,
+              ))
+
+              // Set as active if requested
+              case set_active {
+                True -> session_manager.set_active(new_session_id)
+                False -> Nil
+              }
+
+              protocol.text_result(
+                json.to_string(
+                  json.object([
+                    #("status", json.string("created")),
+                    #("session_id", json.string(new_session_id)),
+                    #("is_active", json.bool(set_active)),
+                    #("authorized", json.bool(False)),
+                    #(
+                      "next_step",
+                      json.string(
+                        "Use auth_send_code with phone number to authorize this session",
+                      ),
+                    ),
+                  ]),
+                ),
+              )
+            }
+            Error(_) ->
+              protocol.error_result(
+                "Failed to parse session_id from response: " <> response.body,
+              )
+          }
+        }
+        _ ->
+          protocol.error_result(
+            "Failed to create session. Status: "
+            <> int.to_string(response.status)
+            <> ", Body: "
+            <> response.body,
+          )
+      }
+    }
+    Error(_) ->
+      protocol.error_result(
+        "Failed to connect to Telegram Bridge. Make sure it's running on port 8081.",
+      )
+  }
+}
+
+// =============================================================================
+// Helper Functions for JSON parsing
+// =============================================================================
+
+/// Get optional string from JSON string
+fn json_get_optional_string(json_str: String, key: String) -> Option(String) {
+  let decoder = {
+    use v <- decode.field(key, decode.string)
+    decode.success(v)
+  }
+  case json.parse(json_str, decoder) {
+    Ok(v) -> Some(v)
+    Error(_) -> None
+  }
+}
+
+/// Get optional bool from JSON string
+fn json_get_optional_bool(json_str: String, key: String) -> Option(Bool) {
+  let decoder = {
+    use v <- decode.field(key, decode.bool)
+    decode.success(v)
+  }
+  case json.parse(json_str, decoder) {
+    Ok(v) -> Some(v)
+    Error(_) -> None
   }
 }

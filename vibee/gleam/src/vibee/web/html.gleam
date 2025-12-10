@@ -669,7 +669,8 @@ fn lustre_app_js() -> String {
 
 const GO_BRIDGE_URL = '" <> telegram_config.bridge_url <> "';
 const GLEAM_API_URL = '';  // Same origin
-const SESSION_ID = '" <> telegram_config.session_id <> "';
+// Session ID will be fetched from session manager or localStorage
+let SESSION_ID = localStorage.getItem('vibee_session_id') || '';
 
 // State
 let state = {

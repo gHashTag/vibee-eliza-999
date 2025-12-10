@@ -1,17 +1,22 @@
 # Build stage - using Gleam with OTP 27
 FROM ghcr.io/gleam-lang/gleam:v1.13.0-erlang-alpine AS builder
 
-# Cache bust argument must come early to invalidate subsequent layers
-ARG CACHE_BUST=2025-12-10-v19-force-fresh
+# IMPORTANT: Touch src file to invalidate gleam cache
+# Cache bust argument with unique timestamp
+ARG CACHE_BUST=2025-12-10-v20-rebuild
 
 WORKDIR /app
 
-# Copy all project files together to ensure fresh build
+# Copy all project files together
 COPY gleam.toml manifest.toml ./
 COPY src/ ./src/
 
-# Clean and build fresh
-RUN rm -rf build && gleam export erlang-shipment
+# Force full rebuild: remove all build artifacts, touch source file with unique marker
+RUN rm -rf build && \
+    echo "// Build marker: ${CACHE_BUST}" >> src/vibee.gleam && \
+    gleam export erlang-shipment && \
+    echo "Exported. Checking vibee@@main.beam exports:" && \
+    ls -la build/erlang-shipment/vibee/ebin/vibee*.beam
 
 # Runtime stage - OTP 27 to match Gleam v1.13.0-erlang-alpine
 FROM erlang:27-alpine

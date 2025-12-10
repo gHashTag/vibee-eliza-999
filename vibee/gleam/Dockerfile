@@ -30,7 +30,7 @@ RUN set -ex && \
 FROM erlang:27-alpine
 
 # Cache bust for runtime stage - this RUN forces rebuild
-ARG CACHE_BUST_RUNTIME=2025-12-10-v16
+ARG CACHE_BUST_RUNTIME=2025-12-10-v17
 RUN echo "Build version: ${CACHE_BUST_RUNTIME}"
 
 WORKDIR /app
@@ -40,6 +40,12 @@ RUN apk add --no-cache curl bash
 
 # Copy built application from builder
 COPY --from=builder /app/build/erlang-shipment /app
+
+# Verify the copy was successful - CRITICAL
+RUN set -ex && \
+    echo "=== Runtime stage: Verifying copied files ===" && \
+    ls -la /app/vibee/ebin/vibee@@main.beam && \
+    erl -noshell -eval "io:format(\"~p~n\", [beam_lib:chunks(\"/app/vibee/ebin/vibee@@main.beam\", [exports])]), halt()."
 
 # Create logs directory
 RUN mkdir -p /app/logs

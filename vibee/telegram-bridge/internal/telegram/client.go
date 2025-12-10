@@ -389,16 +389,22 @@ func (c *Client) parseDialogs(dialogList []tg.DialogClass, chats []tg.ChatClass,
 	return result
 }
 
-// GetHistory returns chat history
+// GetHistory returns chat history with optional offset_id for pagination
 func (c *Client) GetHistory(ctx context.Context, chatID int64, limit int) ([]Message, error) {
+	return c.GetHistoryWithOffset(ctx, chatID, limit, 0)
+}
+
+// GetHistoryWithOffset returns chat history starting from offset_id (for pagination)
+func (c *Client) GetHistoryWithOffset(ctx context.Context, chatID int64, limit int, offsetID int) ([]Message, error) {
 	peer, err := c.resolvePeer(ctx, chatID)
 	if err != nil {
 		return nil, err
 	}
 
 	result, err := c.api.API().MessagesGetHistory(ctx, &tg.MessagesGetHistoryRequest{
-		Peer:  peer,
-		Limit: limit,
+		Peer:     peer,
+		Limit:    limit,
+		OffsetID: offsetID,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("get history: %w", err)

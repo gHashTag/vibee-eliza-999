@@ -449,8 +449,15 @@ func (r *Router) handleGetHistory(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	offsetID := 0
+	if o := req.URL.Query().Get("offset_id"); o != "" {
+		if parsed, err := strconv.Atoi(o); err == nil && parsed > 0 {
+			offsetID = parsed
+		}
+	}
+
 	ctx := context.Background()
-	messages, err := client.GetHistory(ctx, chatID, limit)
+	messages, err := client.GetHistoryWithOffset(ctx, chatID, limit, offsetID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to get history: "+err.Error())
 		return

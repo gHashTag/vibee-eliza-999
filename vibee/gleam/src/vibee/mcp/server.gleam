@@ -629,9 +629,16 @@ fn extract_prompt_name(params: json.Json) -> String {
   }
 }
 
-fn extract_prompt_arguments(_params: json.Json) -> json.Json {
-  // Return empty object as default - actual parsing would need full JSON decoder
-  json.object([])
+fn extract_prompt_arguments(params: json.Json) -> json.Json {
+  // Extract arguments object from params
+  let s = json.to_string(params)
+  case string.contains(s, "\"arguments\":") {
+    True -> {
+      // Return the params itself since get_arg_string will parse from it
+      params
+    }
+    False -> json.object([])
+  }
 }
 
 fn extract_log_level(params: json.Json) -> String {
@@ -654,6 +661,8 @@ fn extract_log_level(params: json.Json) -> String {
 
 fn get_arg_string(args: json.Json, key: String, default: String) -> String {
   let s = json.to_string(args)
+  // Try to find the key in arguments object or directly in params
+  // Pattern: "arguments":{"chat_id":"123"} or just {"chat_id":"123"}
   let pattern = "\"" <> key <> "\":\""
   case string.contains(s, pattern) {
     True -> {
@@ -667,7 +676,41 @@ fn get_arg_string(args: json.Json, key: String, default: String) -> String {
         Error(_) -> default
       }
     }
-    False -> default
+    False -> {
+      // Also check for numeric values: "chat_id":123
+      let num_pattern = "\"" <> key <> "\":"
+      case string.contains(s, num_pattern) {
+        True -> {
+          case string.split_once(s, num_pattern) {
+            Ok(#(_, rest)) -> {
+              // Extract until comma, brace or end
+              extract_number_value(rest)
+            }
+            Error(_) -> default
+          }
+        }
+        False -> default
+      }
+    }
+  }
+}
+
+fn extract_number_value(s: String) -> String {
+  // Extract numeric value until delimiter
+  do_extract_number(s, "")
+}
+
+fn do_extract_number(s: String, acc: String) -> String {
+  case string.pop_grapheme(s) {
+    Ok(#(c, rest)) -> {
+      case c {
+        "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "-" -> {
+          do_extract_number(rest, acc <> c)
+        }
+        _ -> acc
+      }
+    }
+    Error(_) -> acc
   }
 }
 

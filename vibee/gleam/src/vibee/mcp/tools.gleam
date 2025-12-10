@@ -14,24 +14,26 @@ import gleam/result
 import gleam/string
 import simplifile
 import vibee/logging
-import vibee/mcp/protocol
-import vibee/mcp/types.{type Tool, type ToolResult, TextContent, Tool}
-import vibee/mcp/decoders
-import vibee/mcp/validation
-import vibee/mcp/shell
-import vibee/mcp/config
-import vibee/mcp/events
-import vibee/mcp/rainbow_types
-import vibee/mcp/task_store
-import vibee/mcp/autonomous
-import vibee/mcp/decision
-import vibee/mcp/healing
 import vibee/mcp/a2a_protocol
-import vibee/mcp/super_agent
 import vibee/mcp/agent_memory
+import vibee/mcp/autonomous
+import vibee/mcp/config
+import vibee/mcp/decision
+import vibee/mcp/decoders
+import vibee/mcp/events
+import vibee/mcp/healing
+import vibee/mcp/protocol
+import vibee/mcp/rag_tools
+import vibee/mcp/rainbow_types
+import vibee/mcp/shell
+import vibee/mcp/super_agent
+import vibee/mcp/task_store
+import vibee/mcp/types.{type Tool, type ToolResult, TextContent, Tool}
+import vibee/mcp/validation
 
 /// Tool handler function type
-pub type ToolHandler = fn(json.Json) -> ToolResult
+pub type ToolHandler =
+  fn(json.Json) -> ToolResult
 
 /// Tool category for filtering
 pub type ToolCategory {
@@ -66,57 +68,118 @@ pub type ToolRegistry {
 pub fn get_tool_category(name: String) -> ToolCategory {
   case string.starts_with(name, "telegram_") {
     True -> CategoryTelegram
-    False -> case string.starts_with(name, "knowledge_") {
-      True -> CategoryKnowledge
-      False -> case string.starts_with(name, "file_") {
-        True -> CategoryFile
-        False -> case string.starts_with(name, "voice_") {
-          True -> CategoryVoice
-          False -> case string.starts_with(name, "system_") {
-            True -> CategorySystem
-            False -> case string.starts_with(name, "event_") {
-              True -> CategoryEvent
-              False -> case string.starts_with(name, "debug_") {
-                True -> CategoryDebug
-                False -> case string.starts_with(name, "code_") {
-                  True -> CategoryCode
-                  False -> case string.starts_with(name, "test_") {
-                    True -> CategoryTest
-                    False -> case string.starts_with(name, "agent_") {
-                      True -> CategoryAgent
-                      False -> case string.starts_with(name, "bot_") {
-                        True -> CategoryBot
-                        False -> case string.starts_with(name, "auth_") {
-                          True -> CategoryAuth
-                          False -> case string.starts_with(name, "rainbow_") || string.starts_with(name, "task_") || string.starts_with(name, "heal_") || string.starts_with(name, "decide_") {
-                            True -> CategoryRainbow
-                            False -> case string.starts_with(name, "a2a_") {
-                              True -> CategoryA2A
-                              False -> case string.starts_with(name, "super_") {
-                                True -> CategorySuperAgent
-                                False -> case string.starts_with(name, "memory_") {
-                                  True -> CategoryMemory
-                                  False -> CategorySystem  // Default
-                                }
+    False ->
+      case string.starts_with(name, "knowledge_") {
+        True -> CategoryKnowledge
+        False ->
+          case string.starts_with(name, "file_") {
+            True -> CategoryFile
+            False ->
+              case string.starts_with(name, "voice_") {
+                True -> CategoryVoice
+                False ->
+                  case string.starts_with(name, "system_") {
+                    True -> CategorySystem
+                    False ->
+                      case string.starts_with(name, "event_") {
+                        True -> CategoryEvent
+                        False ->
+                          case string.starts_with(name, "debug_") {
+                            True -> CategoryDebug
+                            False ->
+                              case string.starts_with(name, "code_") {
+                                True -> CategoryCode
+                                False ->
+                                  case string.starts_with(name, "test_") {
+                                    True -> CategoryTest
+                                    False ->
+                                      case string.starts_with(name, "agent_") {
+                                        True -> CategoryAgent
+                                        False ->
+                                          case
+                                            string.starts_with(name, "bot_")
+                                          {
+                                            True -> CategoryBot
+                                            False ->
+                                              case
+                                                string.starts_with(
+                                                  name,
+                                                  "auth_",
+                                                )
+                                              {
+                                                True -> CategoryAuth
+                                                False ->
+                                                  case
+                                                    string.starts_with(
+                                                      name,
+                                                      "rainbow_",
+                                                    )
+                                                    || string.starts_with(
+                                                      name,
+                                                      "task_",
+                                                    )
+                                                    || string.starts_with(
+                                                      name,
+                                                      "heal_",
+                                                    )
+                                                    || string.starts_with(
+                                                      name,
+                                                      "decide_",
+                                                    )
+                                                  {
+                                                    True -> CategoryRainbow
+                                                    False ->
+                                                      case
+                                                        string.starts_with(
+                                                          name,
+                                                          "a2a_",
+                                                        )
+                                                      {
+                                                        True -> CategoryA2A
+                                                        False ->
+                                                          case
+                                                            string.starts_with(
+                                                              name,
+                                                              "super_",
+                                                            )
+                                                          {
+                                                            True ->
+                                                              CategorySuperAgent
+                                                            False ->
+                                                              case
+                                                                string.starts_with(
+                                                                  name,
+                                                                  "memory_",
+                                                                )
+                                                              {
+                                                                True ->
+                                                                  CategoryMemory
+                                                                False ->
+                                                                  CategorySystem
+                                                                // Default
+                                                              }
+                                                          }
+                                                      }
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  }
                               }
-                            }
                           }
-                        }
                       }
-                    }
                   }
-                }
               }
-            }
           }
-        }
       }
-    }
   }
 }
 
 /// Get tools by category
-pub fn get_tools_by_category(registry: ToolRegistry, category: ToolCategory) -> List(Tool) {
+pub fn get_tools_by_category(
+  registry: ToolRegistry,
+  category: ToolCategory,
+) -> List(Tool) {
   dict.to_list(registry.tools)
   |> list.filter(fn(pair) {
     let #(name, _) = pair
@@ -175,90 +238,90 @@ pub fn parse_category(s: String) -> Result(ToolCategory, Nil) {
 
 /// Initialize tool registry with all available tools
 pub fn init_registry() -> ToolRegistry {
-  let tools = [
-    // Telegram tools
-    telegram_get_dialogs_tool(),
-    telegram_get_history_tool(),
-    telegram_send_message_tool(),
-    telegram_send_buttons_tool(),
-    telegram_send_photo_tool(),
-    telegram_download_media_tool(),
-    telegram_get_me_tool(),
-    telegram_subscribe_updates_tool(),
+  let tools =
+    [
+      // Telegram tools
+      telegram_get_dialogs_tool(),
+      telegram_get_history_tool(),
+      telegram_send_message_tool(),
+      telegram_send_buttons_tool(),
+      telegram_send_photo_tool(),
+      telegram_download_media_tool(),
+      telegram_get_me_tool(),
+      telegram_subscribe_updates_tool(),
 
-    // Knowledge tools
-    knowledge_search_tool(),
-    knowledge_embed_tool(),
+      // Knowledge tools
+      knowledge_search_tool(),
+      knowledge_embed_tool(),
 
-    // File tools
-    file_read_tool(),
-    file_write_tool(),
-    file_list_tool(),
+      // File tools
+      file_read_tool(),
+      file_write_tool(),
+      file_list_tool(),
 
-    // Voice tools
-    voice_transcribe_tool(),
+      // Voice tools
+      voice_transcribe_tool(),
 
-    // System tools
-    system_log_tool(),
-    system_exec_tool(),
+      // System tools
+      system_log_tool(),
+      system_exec_tool(),
 
-    // Event tools
-    event_emit_tool(),
-    event_list_tool(),
+      // Event tools
+      event_emit_tool(),
+      event_list_tool(),
 
-    // Debug tools
-    debug_build_tool(),
-    debug_test_tool(),
-    debug_analyze_tool(),
-    debug_trace_tool(),
-    debug_log_tool(),
+      // Debug tools
+      debug_build_tool(),
+      debug_test_tool(),
+      debug_analyze_tool(),
+      debug_trace_tool(),
+      debug_log_tool(),
 
-    // Code tools
-    code_generate_tool(),
-    code_refactor_tool(),
-    code_explain_tool(),
-    code_find_similar_tool(),
-    code_diff_tool(),
+      // Code tools
+      code_generate_tool(),
+      code_refactor_tool(),
+      code_explain_tool(),
+      code_find_similar_tool(),
+      code_diff_tool(),
 
-    // Test tools
-    test_run_tool(),
-    test_create_tool(),
-    test_coverage_tool(),
-    test_validate_tool(),
+      // Test tools
+      test_run_tool(),
+      test_create_tool(),
+      test_coverage_tool(),
+      test_validate_tool(),
 
-    // Agent tools
-    agent_spawn_tool(),
-    agent_message_tool(),
-    agent_status_tool(),
-    agent_kill_tool(),
+      // Agent tools
+      agent_spawn_tool(),
+      agent_message_tool(),
+      agent_status_tool(),
+      agent_kill_tool(),
 
-    // Bot Analysis tools
-    bot_analyze_tool(),
-    bot_compare_tool(),
-    bot_monitor_tool(),
-    bot_extract_commands_tool(),
-    bot_test_interaction_tool(),
+      // Bot Analysis tools
+      bot_analyze_tool(),
+      bot_compare_tool(),
+      bot_monitor_tool(),
+      bot_extract_commands_tool(),
+      bot_test_interaction_tool(),
 
-    // Auth tools
-    auth_status_tool(),
-    auth_send_code_tool(),
-    auth_verify_code_tool(),
-    auth_logout_tool(),
+      // Auth tools
+      auth_status_tool(),
+      auth_send_code_tool(),
+      auth_verify_code_tool(),
+      auth_logout_tool(),
 
-    // Rainbow Bridge tools (P6 - Autonomous Self-Healing)
-    rainbow_autonomous_debug_cycle_tool(),
-    task_create_tool(),
-    task_get_tool(),
-    task_list_tool(),
-    task_update_tool(),
-    heal_start_tool(),
-    heal_apply_fix_tool(),
-    heal_verify_tool(),
-    heal_rollback_tool(),
-    decide_next_step_tool(),
-    decide_apply_tool(),
-
-    // A2A Protocol tools (TODO: implement)
+      // Rainbow Bridge tools (P6 - Autonomous Self-Healing)
+      rainbow_autonomous_debug_cycle_tool(),
+      task_create_tool(),
+      task_get_tool(),
+      task_list_tool(),
+      task_update_tool(),
+      heal_start_tool(),
+      heal_apply_fix_tool(),
+      heal_verify_tool(),
+      heal_rollback_tool(),
+      decide_next_step_tool(),
+      decide_apply_tool(),
+      // A2A Protocol tools (TODO: implement)
     // a2a_register_agent_tool(),
     // a2a_discover_agents_tool(),
     // a2a_submit_task_tool(),
@@ -275,13 +338,17 @@ pub fn init_registry() -> ToolRegistry {
     // memory_add_reflection_tool(),
     // memory_search_tool(),
     // memory_stats_tool(),
-  ]
+    ]
+    // Add RAG tools (Telegram parsing, media processing, embeddings, search)
+    |> list.append(rag_tools.get_all_rag_tools())
 
-  let tool_dict = list.fold(tools, dict.new(), fn(acc, tool) {
-    dict.insert(acc, tool.name, tool)
-  })
+  let tool_dict =
+    list.fold(tools, dict.new(), fn(acc, tool) {
+      dict.insert(acc, tool.name, tool)
+    })
 
-  let handler_dict = dict.new()
+  let handler_dict =
+    dict.new()
     |> dict.insert("telegram_get_dialogs", handle_telegram_get_dialogs)
     |> dict.insert("telegram_get_history", handle_telegram_get_history)
     |> dict.insert("telegram_send_message", handle_telegram_send_message)
@@ -289,7 +356,10 @@ pub fn init_registry() -> ToolRegistry {
     |> dict.insert("telegram_send_photo", handle_telegram_send_photo)
     |> dict.insert("telegram_download_media", handle_telegram_download_media)
     |> dict.insert("telegram_get_me", handle_telegram_get_me)
-    |> dict.insert("telegram_subscribe_updates", handle_telegram_subscribe_updates)
+    |> dict.insert(
+      "telegram_subscribe_updates",
+      handle_telegram_subscribe_updates,
+    )
     |> dict.insert("knowledge_search", handle_knowledge_search)
     |> dict.insert("knowledge_embed", handle_knowledge_embed)
     |> dict.insert("file_read", handle_file_read)
@@ -334,7 +404,10 @@ pub fn init_registry() -> ToolRegistry {
     |> dict.insert("auth_verify_code", handle_auth_verify_code)
     |> dict.insert("auth_logout", handle_auth_logout)
     // Rainbow Bridge handlers
-    |> dict.insert("rainbow_autonomous_debug_cycle", handle_rainbow_autonomous_debug_cycle)
+    |> dict.insert(
+      "rainbow_autonomous_debug_cycle",
+      handle_rainbow_autonomous_debug_cycle,
+    )
     |> dict.insert("task_create", handle_task_create)
     |> dict.insert("task_get", handle_task_get)
     |> dict.insert("task_list", handle_task_list)
@@ -345,29 +418,42 @@ pub fn init_registry() -> ToolRegistry {
     |> dict.insert("heal_rollback", handle_heal_rollback)
     |> dict.insert("decide_next_step", handle_decide_next_step)
     |> dict.insert("decide_apply", handle_decide_apply)
-    // A2A Protocol handlers (TODO: implement)
-    // |> dict.insert("a2a_register_agent", handle_a2a_register_agent)
-    // |> dict.insert("a2a_discover_agents", handle_a2a_discover_agents)
-    // |> dict.insert("a2a_submit_task", handle_a2a_submit_task)
-    // |> dict.insert("a2a_list_agents", handle_a2a_list_agents)
-    // Super Agent handlers (TODO: implement)
-    // |> dict.insert("super_start", handle_super_start)
-    // |> dict.insert("super_stop", handle_super_stop)
-    // |> dict.insert("super_status", handle_super_status)
-    // |> dict.insert("super_send_event", handle_super_send_event)
-    // Memory handlers (TODO: implement)
-    // |> dict.insert("memory_record_episode", handle_memory_record_episode)
-    // |> dict.insert("memory_add_reflection", handle_memory_add_reflection)
-    // |> dict.insert("memory_search", handle_memory_search)
-    // |> dict.insert("memory_stats", handle_memory_stats)
+  // A2A Protocol handlers (TODO: implement)
+  // |> dict.insert("a2a_register_agent", handle_a2a_register_agent)
+  // |> dict.insert("a2a_discover_agents", handle_a2a_discover_agents)
+  // |> dict.insert("a2a_submit_task", handle_a2a_submit_task)
+  // |> dict.insert("a2a_list_agents", handle_a2a_list_agents)
+  // Super Agent handlers (TODO: implement)
+  // |> dict.insert("super_start", handle_super_start)
+  // |> dict.insert("super_stop", handle_super_stop)
+  // |> dict.insert("super_status", handle_super_status)
+  // |> dict.insert("super_send_event", handle_super_send_event)
+  // Memory handlers (TODO: implement)
+  // |> dict.insert("memory_record_episode", handle_memory_record_episode)
+  // |> dict.insert("memory_add_reflection", handle_memory_add_reflection)
+  // |> dict.insert("memory_search", handle_memory_search)
+  // |> dict.insert("memory_stats", handle_memory_stats)
+
+  // Add RAG handlers (Telegram parsing, media processing, embeddings, search)
+  let handler_dict =
+    rag_tools.get_rag_handlers()
+    |> list.fold(handler_dict, fn(acc, pair) {
+      let #(name, handler) = pair
+      dict.insert(acc, name, handler)
+    })
 
   // Build categories dict
-  let category_dict = dict.keys(tool_dict)
+  let category_dict =
+    dict.keys(tool_dict)
     |> list.fold(dict.new(), fn(acc, name) {
       dict.insert(acc, name, get_tool_category(name))
     })
 
-  ToolRegistry(tools: tool_dict, handlers: handler_dict, categories: category_dict)
+  ToolRegistry(
+    tools: tool_dict,
+    handlers: handler_dict,
+    categories: category_dict,
+  )
 }
 
 /// List all tool names
@@ -381,7 +467,9 @@ pub fn get_all_tools(registry: ToolRegistry) -> List(Tool) {
 }
 
 /// Get all tools with annotations for MCP 2024-11-05
-pub fn get_all_tools_with_annotations(registry: ToolRegistry) -> List(#(Tool, protocol.ToolAnnotations)) {
+pub fn get_all_tools_with_annotations(
+  registry: ToolRegistry,
+) -> List(#(Tool, protocol.ToolAnnotations)) {
   dict.values(registry.tools)
   |> list.map(fn(tool) {
     let annotations = get_tool_annotations(tool.name)
@@ -405,8 +493,8 @@ pub fn get_tools_by_category_with_annotations(
 pub fn get_category_summary(registry: ToolRegistry) -> List(#(String, Int)) {
   [
     CategoryTelegram, CategoryKnowledge, CategoryFile, CategoryVoice,
-    CategorySystem, CategoryEvent, CategoryDebug, CategoryCode,
-    CategoryTest, CategoryAgent, CategoryBot, CategoryAuth,
+    CategorySystem, CategoryEvent, CategoryDebug, CategoryCode, CategoryTest,
+    CategoryAgent, CategoryBot, CategoryAuth,
   ]
   |> list.map(fn(cat) {
     let count = get_tools_by_category(registry, cat) |> list.length
@@ -423,15 +511,11 @@ fn get_tool_annotations(name: String) -> protocol.ToolAnnotations {
   // Read-only tools (safe, no side effects)
   let read_only_tools = [
     "telegram_get_dialogs", "telegram_get_history", "telegram_get_me",
-    "file_read", "file_list",
-    "knowledge_search",
-    "event_list",
-    "debug_build", "debug_test", "debug_analyze", "debug_trace",
-    "code_explain", "code_find_similar", "code_diff",
-    "test_run", "test_coverage", "test_validate",
-    "agent_status",
-    "bot_analyze", "bot_compare", "bot_extract_commands",
-    "auth_status",
+    "file_read", "file_list", "knowledge_search", "event_list", "debug_build",
+    "debug_test", "debug_analyze", "debug_trace", "code_explain",
+    "code_find_similar", "code_diff", "test_run", "test_coverage",
+    "test_validate", "agent_status", "bot_analyze", "bot_compare",
+    "bot_extract_commands", "auth_status",
   ]
 
   // Destructive tools (can cause significant changes)
@@ -451,7 +535,11 @@ fn get_tool_annotations(name: String) -> protocol.ToolAnnotations {
 }
 
 /// Execute a tool
-pub fn execute_tool(registry: ToolRegistry, name: String, args: json.Json) -> ToolResult {
+pub fn execute_tool(
+  registry: ToolRegistry,
+  name: String,
+  args: json.Json,
+) -> ToolResult {
   logging.info("[TOOL] Executing: " <> name)
 
   case dict.get(registry.handlers, name) {
@@ -477,22 +565,37 @@ fn telegram_get_dialogs_tool() -> Tool {
     description: "Get list of Telegram dialogs (chats, groups, channels)",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-        #("limit", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Max dialogs to return")),
-          #("default", json.int(100)),
-        ])),
-        #("type_filter", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["all", "user", "group", "channel"], json.string)),
-          #("description", json.string("Filter by dialog type")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+          #(
+            "limit",
+            json.object([
+              #("type", json.string("integer")),
+              #("description", json.string("Max dialogs to return")),
+              #("default", json.int(100)),
+            ]),
+          ),
+          #(
+            "type_filter",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(["all", "user", "group", "channel"], json.string),
+              ),
+              #("description", json.string("Filter by dialog type")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["session_id"], json.string)),
     ]),
   )
@@ -504,25 +607,40 @@ fn telegram_get_history_tool() -> Tool {
     description: "Get message history from a Telegram chat",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-        #("chat_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Chat ID to get history from")),
-        ])),
-        #("limit", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Max messages to return")),
-          #("default", json.int(100)),
-        ])),
-        #("offset_id", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Message ID to start from")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+          #(
+            "chat_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Chat ID to get history from")),
+            ]),
+          ),
+          #(
+            "limit",
+            json.object([
+              #("type", json.string("integer")),
+              #("description", json.string("Max messages to return")),
+              #("default", json.int(100)),
+            ]),
+          ),
+          #(
+            "offset_id",
+            json.object([
+              #("type", json.string("integer")),
+              #("description", json.string("Message ID to start from")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["session_id", "chat_id"], json.string)),
     ]),
   )
@@ -534,24 +652,39 @@ fn telegram_send_message_tool() -> Tool {
     description: "Send a message to a Telegram chat",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-        #("chat_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Chat ID to send message to")),
-        ])),
-        #("text", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Message text to send")),
-        ])),
-        #("reply_to", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Message ID to reply to")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+          #(
+            "chat_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Chat ID to send message to")),
+            ]),
+          ),
+          #(
+            "text",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Message text to send")),
+            ]),
+          ),
+          #(
+            "reply_to",
+            json.object([
+              #("type", json.string("integer")),
+              #("description", json.string("Message ID to reply to")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["session_id", "chat_id", "text"], json.string)),
     ]),
   )
@@ -563,36 +696,77 @@ fn telegram_send_buttons_tool() -> Tool {
     description: "Send a message with inline keyboard buttons",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-        #("chat_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Chat ID to send message to")),
-        ])),
-        #("text", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Message text")),
-        ])),
-        #("buttons", json.object([
-          #("type", json.string("array")),
-          #("description", json.string("Array of button rows. Each row is array of {text, callback_data} or {text, url}")),
-          #("items", json.object([
-            #("type", json.string("array")),
-            #("items", json.object([
-              #("type", json.string("object")),
-              #("properties", json.object([
-                #("text", json.object([#("type", json.string("string"))])),
-                #("callback_data", json.object([#("type", json.string("string"))])),
-                #("url", json.object([#("type", json.string("string"))])),
-              ])),
-            ])),
-          ])),
-        ])),
-      ])),
-      #("required", json.array(["session_id", "chat_id", "text", "buttons"], json.string)),
+      #(
+        "properties",
+        json.object([
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+          #(
+            "chat_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Chat ID to send message to")),
+            ]),
+          ),
+          #(
+            "text",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Message text")),
+            ]),
+          ),
+          #(
+            "buttons",
+            json.object([
+              #("type", json.string("array")),
+              #(
+                "description",
+                json.string(
+                  "Array of button rows. Each row is array of {text, callback_data} or {text, url}",
+                ),
+              ),
+              #(
+                "items",
+                json.object([
+                  #("type", json.string("array")),
+                  #(
+                    "items",
+                    json.object([
+                      #("type", json.string("object")),
+                      #(
+                        "properties",
+                        json.object([
+                          #(
+                            "text",
+                            json.object([#("type", json.string("string"))]),
+                          ),
+                          #(
+                            "callback_data",
+                            json.object([#("type", json.string("string"))]),
+                          ),
+                          #(
+                            "url",
+                            json.object([#("type", json.string("string"))]),
+                          ),
+                        ]),
+                      ),
+                    ]),
+                  ),
+                ]),
+              ),
+            ]),
+          ),
+        ]),
+      ),
+      #(
+        "required",
+        json.array(["session_id", "chat_id", "text", "buttons"], json.string),
+      ),
     ]),
   )
 }
@@ -603,25 +777,43 @@ fn telegram_send_photo_tool() -> Tool {
     description: "Send a photo to a Telegram chat",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-        #("chat_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Chat ID to send photo to")),
-        ])),
-        #("file_path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Local file path to photo")),
-        ])),
-        #("caption", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Photo caption")),
-        ])),
-      ])),
-      #("required", json.array(["session_id", "chat_id", "file_path"], json.string)),
+      #(
+        "properties",
+        json.object([
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+          #(
+            "chat_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Chat ID to send photo to")),
+            ]),
+          ),
+          #(
+            "file_path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Local file path to photo")),
+            ]),
+          ),
+          #(
+            "caption",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Photo caption")),
+            ]),
+          ),
+        ]),
+      ),
+      #(
+        "required",
+        json.array(["session_id", "chat_id", "file_path"], json.string),
+      ),
     ]),
   )
 }
@@ -632,25 +824,43 @@ fn telegram_download_media_tool() -> Tool {
     description: "Download media file from a Telegram message",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-        #("chat_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Chat ID")),
-        ])),
-        #("message_id", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Message ID with media")),
-        ])),
-        #("output_path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Path to save downloaded file")),
-        ])),
-      ])),
-      #("required", json.array(["session_id", "chat_id", "message_id"], json.string)),
+      #(
+        "properties",
+        json.object([
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+          #(
+            "chat_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Chat ID")),
+            ]),
+          ),
+          #(
+            "message_id",
+            json.object([
+              #("type", json.string("integer")),
+              #("description", json.string("Message ID with media")),
+            ]),
+          ),
+          #(
+            "output_path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Path to save downloaded file")),
+            ]),
+          ),
+        ]),
+      ),
+      #(
+        "required",
+        json.array(["session_id", "chat_id", "message_id"], json.string),
+      ),
     ]),
   )
 }
@@ -661,12 +871,18 @@ fn telegram_get_me_tool() -> Tool {
     description: "Get current Telegram user info",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["session_id"], json.string)),
     ]),
   )
@@ -678,18 +894,35 @@ fn telegram_subscribe_updates_tool() -> Tool {
     description: "Subscribe to Telegram updates (new messages, button clicks, etc)",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-        #("event_types", json.object([
-          #("type", json.string("array")),
-          #("description", json.string("Event types to subscribe: message, callback_query, edited_message")),
-          #("items", json.object([#("type", json.string("string"))])),
-          #("default", json.array(["message", "callback_query"], json.string)),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+          #(
+            "event_types",
+            json.object([
+              #("type", json.string("array")),
+              #(
+                "description",
+                json.string(
+                  "Event types to subscribe: message, callback_query, edited_message",
+                ),
+              ),
+              #("items", json.object([#("type", json.string("string"))])),
+              #(
+                "default",
+                json.array(["message", "callback_query"], json.string),
+              ),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["session_id"], json.string)),
     ]),
   )
@@ -701,21 +934,33 @@ fn knowledge_search_tool() -> Tool {
     description: "Search through knowledge base using semantic similarity",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("query", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Search query")),
-        ])),
-        #("limit", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Max results to return")),
-          #("default", json.int(10)),
-        ])),
-        #("chat_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Filter by chat ID")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "query",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Search query")),
+            ]),
+          ),
+          #(
+            "limit",
+            json.object([
+              #("type", json.string("integer")),
+              #("description", json.string("Max results to return")),
+              #("default", json.int(10)),
+            ]),
+          ),
+          #(
+            "chat_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Filter by chat ID")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["query"], json.string)),
     ]),
   )
@@ -727,17 +972,26 @@ fn knowledge_embed_tool() -> Tool {
     description: "Create embedding vector for text using Ollama",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("text", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Text to embed")),
-        ])),
-        #("model", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Embedding model")),
-          #("default", json.string("nomic-embed-text")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "text",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Text to embed")),
+            ]),
+          ),
+          #(
+            "model",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Embedding model")),
+              #("default", json.string("nomic-embed-text")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["text"], json.string)),
     ]),
   )
@@ -749,12 +1003,18 @@ fn file_read_tool() -> Tool {
     description: "Read contents of a file",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("File path to read")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("File path to read")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["path"], json.string)),
     ]),
   )
@@ -766,16 +1026,25 @@ fn file_write_tool() -> Tool {
     description: "Write contents to a file",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("File path to write")),
-        ])),
-        #("content", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Content to write")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("File path to write")),
+            ]),
+          ),
+          #(
+            "content",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Content to write")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["path", "content"], json.string)),
     ]),
   )
@@ -787,16 +1056,25 @@ fn file_list_tool() -> Tool {
     description: "List files in a directory",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Directory path")),
-        ])),
-        #("pattern", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Glob pattern filter")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Directory path")),
+            ]),
+          ),
+          #(
+            "pattern",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Glob pattern filter")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["path"], json.string)),
     ]),
   )
@@ -808,17 +1086,26 @@ fn voice_transcribe_tool() -> Tool {
     description: "Transcribe voice message to text using Whisper",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("file_path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Path to audio file")),
-        ])),
-        #("language", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Language code (ru, en, etc)")),
-          #("default", json.string("ru")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "file_path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Path to audio file")),
+            ]),
+          ),
+          #(
+            "language",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Language code (ru, en, etc)")),
+              #("default", json.string("ru")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["file_path"], json.string)),
     ]),
   )
@@ -830,21 +1117,36 @@ fn system_log_tool() -> Tool {
     description: "Write to system log",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("level", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["debug", "info", "warn", "error"], json.string)),
-          #("description", json.string("Log level")),
-        ])),
-        #("message", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Log message")),
-        ])),
-        #("context", json.object([
-          #("type", json.string("object")),
-          #("description", json.string("Additional context")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "level",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(["debug", "info", "warn", "error"], json.string),
+              ),
+              #("description", json.string("Log level")),
+            ]),
+          ),
+          #(
+            "message",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Log message")),
+            ]),
+          ),
+          #(
+            "context",
+            json.object([
+              #("type", json.string("object")),
+              #("description", json.string("Additional context")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["level", "message"], json.string)),
     ]),
   )
@@ -856,22 +1158,34 @@ fn system_exec_tool() -> Tool {
     description: "Execute a shell command (restricted)",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("command", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Command to execute")),
-        ])),
-        #("args", json.object([
-          #("type", json.string("array")),
-          #("items", json.object([#("type", json.string("string"))])),
-          #("description", json.string("Command arguments")),
-        ])),
-        #("timeout", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Timeout in seconds")),
-          #("default", json.int(30)),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "command",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Command to execute")),
+            ]),
+          ),
+          #(
+            "args",
+            json.object([
+              #("type", json.string("array")),
+              #("items", json.object([#("type", json.string("string"))])),
+              #("description", json.string("Command arguments")),
+            ]),
+          ),
+          #(
+            "timeout",
+            json.object([
+              #("type", json.string("integer")),
+              #("description", json.string("Timeout in seconds")),
+              #("default", json.int(30)),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["command"], json.string)),
     ]),
   )
@@ -883,20 +1197,42 @@ fn event_emit_tool() -> Tool {
     description: "Emit an event to the event bus for other agents/tools",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("event_type", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Event type: message_received, button_clicked, task_completed, agent_response")),
-        ])),
-        #("payload", json.object([
-          #("type", json.string("object")),
-          #("description", json.string("Event payload data")),
-        ])),
-        #("target", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Target agent/tool to receive event (optional, broadcast if empty)")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "event_type",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string(
+                  "Event type: message_received, button_clicked, task_completed, agent_response",
+                ),
+              ),
+            ]),
+          ),
+          #(
+            "payload",
+            json.object([
+              #("type", json.string("object")),
+              #("description", json.string("Event payload data")),
+            ]),
+          ),
+          #(
+            "target",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string(
+                  "Target agent/tool to receive event (optional, broadcast if empty)",
+                ),
+              ),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["event_type", "payload"], json.string)),
     ]),
   )
@@ -908,17 +1244,26 @@ fn event_list_tool() -> Tool {
     description: "List available event types and recent events",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("limit", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Max recent events to return")),
-          #("default", json.int(20)),
-        ])),
-        #("event_type", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Filter by event type")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "limit",
+            json.object([
+              #("type", json.string("integer")),
+              #("description", json.string("Max recent events to return")),
+              #("default", json.int(20)),
+            ]),
+          ),
+          #(
+            "event_type",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Filter by event type")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array([], json.string)),
     ]),
   )
@@ -940,7 +1285,9 @@ fn check_telegram_auth() -> Result(Nil, ToolResult) {
   case http_get(url) {
     Error(_) -> {
       // Bridge not running - return auth prompt
-      Error(auth_required_result("Telegram bridge не запущен. Запустите его и авторизуйтесь."))
+      Error(auth_required_result(
+        "Telegram bridge не запущен. Запустите его и авторизуйтесь.",
+      ))
     }
     Ok(body) -> {
       // Parse response to check if authorized
@@ -959,23 +1306,30 @@ fn session_count_decoder() -> decode.Decoder(Int) {
 
 /// Create auth required result with instructions
 fn auth_required_result(message: String) -> ToolResult {
-  let response = json.object([
-    #("error", json.bool(False)),
-    #("auth_required", json.bool(True)),
-    #("status", json.string("authorization_needed")),
-    #("message", json.string(message)),
-    #("prompt", json.string("Введите номер телефона в формате +79001234567:")),
-    #("next_action", json.object([
-      #("tool", json.string("auth_send_code")),
-      #("await_user_input", json.string("phone")),
-    ])),
-    #("instructions", json.string(
-      "Для авторизации в Telegram:\n" <>
-      "1. Вызовите auth_send_code с вашим номером телефона\n" <>
-      "2. Получите код в Telegram\n" <>
-      "3. Вызовите auth_verify_code с кодом и phone_code_hash"
-    )),
-  ])
+  let response =
+    json.object([
+      #("error", json.bool(False)),
+      #("auth_required", json.bool(True)),
+      #("status", json.string("authorization_needed")),
+      #("message", json.string(message)),
+      #("prompt", json.string("Введите номер телефона в формате +79001234567:")),
+      #(
+        "next_action",
+        json.object([
+          #("tool", json.string("auth_send_code")),
+          #("await_user_input", json.string("phone")),
+        ]),
+      ),
+      #(
+        "instructions",
+        json.string(
+          "Для авторизации в Telegram:\n"
+          <> "1. Вызовите auth_send_code с вашим номером телефона\n"
+          <> "2. Получите код в Telegram\n"
+          <> "3. Вызовите auth_verify_code с кодом и phone_code_hash",
+        ),
+      ),
+    ])
   protocol.text_result(json.to_string(response))
 }
 
@@ -1011,12 +1365,18 @@ fn handle_telegram_get_history(args: json.Json) -> ToolResult {
       case decoders.decode_telegram_get_history(args) {
         Error(err) -> protocol.error_result(decoders.error_to_string(err))
         Ok(parsed) -> {
-          case validation.validate_session_id(parsed.session_id), validation.validate_chat_id(parsed.chat_id) {
-            Error(err), _ -> protocol.error_result(validation.error_to_string(err))
-            _, Error(err) -> protocol.error_result(validation.error_to_string(err))
+          case
+            validation.validate_session_id(parsed.session_id),
+            validation.validate_chat_id(parsed.chat_id)
+          {
+            Error(err), _ ->
+              protocol.error_result(validation.error_to_string(err))
+            _, Error(err) ->
+              protocol.error_result(validation.error_to_string(err))
             Ok(sid), Ok(cid) -> {
               let limit = option.unwrap(parsed.limit, 100)
-              let path = "/api/v1/history/" <> cid <> "?limit=" <> int.to_string(limit)
+              let path =
+                "/api/v1/history/" <> cid <> "?limit=" <> int.to_string(limit)
               case http_get_with_session(path, sid) {
                 Ok(body) -> protocol.text_result(body)
                 Error(err) -> protocol.error_result(err)
@@ -1036,20 +1396,27 @@ fn handle_telegram_send_message(args: json.Json) -> ToolResult {
       case decoders.decode_telegram_send_message(args) {
         Error(err) -> protocol.error_result(decoders.error_to_string(err))
         Ok(parsed) -> {
-          case validation.validate_session_id(parsed.session_id), validation.validate_chat_id(parsed.chat_id) {
-            Error(err), _ -> protocol.error_result(validation.error_to_string(err))
-            _, Error(err) -> protocol.error_result(validation.error_to_string(err))
+          case
+            validation.validate_session_id(parsed.session_id),
+            validation.validate_chat_id(parsed.chat_id)
+          {
+            Error(err), _ ->
+              protocol.error_result(validation.error_to_string(err))
+            _, Error(err) ->
+              protocol.error_result(validation.error_to_string(err))
             Ok(sid), Ok(cid) -> {
               // Convert chat_id to int for Telegram Bridge API
               let chat_id_json = case int.parse(cid) {
                 Ok(num) -> json.int(num)
-                Error(_) -> json.string(cid)  // Fallback for @username
+                Error(_) -> json.string(cid)
+                // Fallback for @username
               }
-              let body = json.object([
-                #("chat_id", chat_id_json),
-                #("text", json.string(parsed.text)),
-              ])
-              |> json.to_string()
+              let body =
+                json.object([
+                  #("chat_id", chat_id_json),
+                  #("text", json.string(parsed.text)),
+                ])
+                |> json.to_string()
 
               case http_post_with_session("/api/v1/send", sid, body) {
                 Ok(resp) -> protocol.text_result(resp)
@@ -1093,7 +1460,8 @@ fn handle_knowledge_search(args: json.Json) -> ToolResult {
 
       // Get embedding for query
       case get_query_embedding(parsed.query) {
-        Error(err) -> protocol.error_result("Failed to get query embedding: " <> err)
+        Error(err) ->
+          protocol.error_result("Failed to get query embedding: " <> err)
         Ok(query_embedding) -> {
           // Load stored embeddings and search
           let config = config.get_config()
@@ -1102,20 +1470,31 @@ fn handle_knowledge_search(args: json.Json) -> ToolResult {
             Ok(content) -> {
               // Parse JSONL and compute similarities
               let results = search_embeddings(content, query_embedding, limit)
-              protocol.text_result(json.object([
-                #("query", json.string(parsed.query)),
-                #("results", json.array(results, fn(r) { r })),
-                #("count", json.int(list.length(results))),
-              ]) |> json.to_string())
+              protocol.text_result(
+                json.object([
+                  #("query", json.string(parsed.query)),
+                  #("results", json.array(results, fn(r) { r })),
+                  #("count", json.int(list.length(results))),
+                ])
+                |> json.to_string(),
+              )
             }
             Error(_) -> {
               // Return empty results if no embeddings file
-              protocol.text_result(json.object([
-                #("query", json.string(parsed.query)),
-                #("results", json.array([], fn(r) { r })),
-                #("count", json.int(0)),
-                #("note", json.string("No embeddings file found at " <> embeddings_path)),
-              ]) |> json.to_string())
+              protocol.text_result(
+                json.object([
+                  #("query", json.string(parsed.query)),
+                  #("results", json.array([], fn(r) { r })),
+                  #("count", json.int(0)),
+                  #(
+                    "note",
+                    json.string(
+                      "No embeddings file found at " <> embeddings_path,
+                    ),
+                  ),
+                ])
+                |> json.to_string(),
+              )
             }
           }
         }
@@ -1126,10 +1505,12 @@ fn handle_knowledge_search(args: json.Json) -> ToolResult {
 
 /// Get embedding vector for query text via Ollama
 fn get_query_embedding(text: String) -> Result(List(Float), String) {
-  let body = json.object([
-    #("model", json.string("nomic-embed-text")),
-    #("prompt", json.string(text)),
-  ]) |> json.to_string()
+  let body =
+    json.object([
+      #("model", json.string("nomic-embed-text")),
+      #("prompt", json.string(text)),
+    ])
+    |> json.to_string()
 
   case http_post("http://localhost:11434/api/embeddings", body) {
     Error(err) -> Error(err)
@@ -1152,7 +1533,8 @@ fn extract_embedding(resp: String) -> Result(List(Float), Nil) {
       case string.split_once(rest, "]") {
         Error(_) -> Error(Nil)
         Ok(#(nums_str, _)) -> {
-          let nums = string.split(nums_str, ",")
+          let nums =
+            string.split(nums_str, ",")
             |> list.filter_map(fn(s) {
               case float.parse(string.trim(s)) {
                 Ok(f) -> Ok(f)
@@ -1167,7 +1549,11 @@ fn extract_embedding(resp: String) -> Result(List(Float), Nil) {
 }
 
 /// Search embeddings and return top matches
-fn search_embeddings(content: String, query_emb: List(Float), limit: Int) -> List(json.Json) {
+fn search_embeddings(
+  content: String,
+  query_emb: List(Float),
+  limit: Int,
+) -> List(json.Json) {
   // Parse JSONL: each line is {"text": "...", "embedding": [...], "source": "..."}
   string.split(content, "\n")
   |> list.filter(fn(line) { string.length(string.trim(line)) > 0 })
@@ -1233,7 +1619,8 @@ fn parse_embedding_entry(line: String) -> Result(EmbeddingEntry, Nil) {
       case string.split_once(rest, "]") {
         Error(_) -> Error(Nil)
         Ok(#(nums_str, _)) -> {
-          let embedding = string.split(nums_str, ",")
+          let embedding =
+            string.split(nums_str, ",")
             |> list.filter_map(fn(s) {
               case float.parse(string.trim(s)) {
                 Ok(f) -> Ok(f)
@@ -1250,10 +1637,11 @@ fn parse_embedding_entry(line: String) -> Result(EmbeddingEntry, Nil) {
 /// Cosine similarity between two vectors
 fn cosine_similarity(a: List(Float), b: List(Float)) -> Float {
   let pairs = list.zip(a, b)
-  let dot = list.fold(pairs, 0.0, fn(acc, pair) {
-    let #(x, y) = pair
-    acc +. x *. y
-  })
+  let dot =
+    list.fold(pairs, 0.0, fn(acc, pair) {
+      let #(x, y) = pair
+      acc +. x *. y
+    })
   let sum_a = list.fold(a, 0.0, fn(acc, x) { acc +. x *. x })
   let sum_b = list.fold(b, 0.0, fn(acc, x) { acc +. x *. x })
   let mag_a = result.unwrap(float.square_root(sum_a), 0.0)
@@ -1269,11 +1657,12 @@ fn handle_knowledge_embed(args: json.Json) -> ToolResult {
     Error(err) -> protocol.error_result(decoders.error_to_string(err))
     Ok(parsed) -> {
       let model = option.unwrap(parsed.model, "nomic-embed-text")
-      let body = json.object([
-        #("model", json.string(model)),
-        #("prompt", json.string(parsed.text)),
-      ])
-      |> json.to_string()
+      let body =
+        json.object([
+          #("model", json.string(model)),
+          #("prompt", json.string(parsed.text)),
+        ])
+        |> json.to_string()
 
       case http_post("http://localhost:11434/api/embeddings", body) {
         Ok(resp) -> protocol.text_result(resp)
@@ -1329,7 +1718,8 @@ fn handle_file_list(args: json.Json) -> ToolResult {
               let content = string.join(files, "\n")
               protocol.text_result(content)
             }
-            Error(_) -> protocol.error_result("Failed to list directory: " <> path)
+            Error(_) ->
+              protocol.error_result("Failed to list directory: " <> path)
           }
         }
       }
@@ -1350,7 +1740,8 @@ fn handle_voice_transcribe(args: json.Json) -> ToolResult {
               // Use safe whisper transcription
               case shell.whisper_transcribe(file_path, parsed.language) {
                 Ok(output) -> protocol.text_result(output)
-                Error(err) -> protocol.error_result("Transcription failed: " <> err)
+                Error(err) ->
+                  protocol.error_result("Transcription failed: " <> err)
               }
             }
             _ -> protocol.error_result("File not found: " <> file_path)
@@ -1404,34 +1795,48 @@ fn handle_telegram_send_buttons(args: json.Json) -> ToolResult {
       case decoders.decode_telegram_send_buttons(args) {
         Error(err) -> protocol.error_result(decoders.error_to_string(err))
         Ok(parsed) -> {
-          case validation.validate_session_id(parsed.session_id), validation.validate_chat_id(parsed.chat_id) {
-            Error(err), _ -> protocol.error_result(validation.error_to_string(err))
-            _, Error(err) -> protocol.error_result(validation.error_to_string(err))
+          case
+            validation.validate_session_id(parsed.session_id),
+            validation.validate_chat_id(parsed.chat_id)
+          {
+            Error(err), _ ->
+              protocol.error_result(validation.error_to_string(err))
+            _, Error(err) ->
+              protocol.error_result(validation.error_to_string(err))
             Ok(sid), Ok(cid) -> {
               // Build proper inline keyboard JSON - avoid double-escaping
-              let keyboard = json.array(parsed.buttons, fn(row) {
-                json.array(row, fn(btn) {
-                  let fields = [#("text", json.string(btn.text))]
-                  let fields = case btn.callback_data {
-                    Some(data) -> list.append(fields, [#("callback_data", json.string(data))])
-                    None -> fields
-                  }
-                  let fields = case btn.url {
-                    Some(url) -> list.append(fields, [#("url", json.string(url))])
-                    None -> fields
-                  }
-                  json.object(fields)
+              let keyboard =
+                json.array(parsed.buttons, fn(row) {
+                  json.array(row, fn(btn) {
+                    let fields = [#("text", json.string(btn.text))]
+                    let fields = case btn.callback_data {
+                      Some(data) ->
+                        list.append(fields, [
+                          #("callback_data", json.string(data)),
+                        ])
+                      None -> fields
+                    }
+                    let fields = case btn.url {
+                      Some(url) ->
+                        list.append(fields, [#("url", json.string(url))])
+                      None -> fields
+                    }
+                    json.object(fields)
+                  })
                 })
-              })
 
-              let body = json.object([
-                #("chat_id", json.string(cid)),
-                #("text", json.string(parsed.text)),
-                #("reply_markup", json.object([
-                  #("inline_keyboard", keyboard),
-                ])),
-              ])
-              |> json.to_string()
+              let body =
+                json.object([
+                  #("chat_id", json.string(cid)),
+                  #("text", json.string(parsed.text)),
+                  #(
+                    "reply_markup",
+                    json.object([
+                      #("inline_keyboard", keyboard),
+                    ]),
+                  ),
+                ])
+                |> json.to_string()
 
               case http_post_with_session("/api/v1/send", sid, body) {
                 Ok(resp) -> protocol.text_result(resp)
@@ -1452,21 +1857,29 @@ fn handle_telegram_send_photo(args: json.Json) -> ToolResult {
       case decoders.decode_telegram_send_photo(args) {
         Error(err) -> protocol.error_result(decoders.error_to_string(err))
         Ok(parsed) -> {
-          case validation.validate_session_id(parsed.session_id), validation.validate_chat_id(parsed.chat_id), validation.validate_path(parsed.file_path) {
-            Error(err), _, _ -> protocol.error_result(validation.error_to_string(err))
-            _, Error(err), _ -> protocol.error_result(validation.error_to_string(err))
-            _, _, Error(err) -> protocol.error_result(validation.error_to_string(err))
+          case
+            validation.validate_session_id(parsed.session_id),
+            validation.validate_chat_id(parsed.chat_id),
+            validation.validate_path(parsed.file_path)
+          {
+            Error(err), _, _ ->
+              protocol.error_result(validation.error_to_string(err))
+            _, Error(err), _ ->
+              protocol.error_result(validation.error_to_string(err))
+            _, _, Error(err) ->
+              protocol.error_result(validation.error_to_string(err))
             Ok(sid), Ok(cid), Ok(fp) -> {
               // Check file exists
               case simplifile.is_file(fp) {
                 Ok(True) -> {
                   let caption = option.unwrap(parsed.caption, "")
-                  let body = json.object([
-                    #("chat_id", json.string(cid)),
-                    #("file_path", json.string(fp)),
-                    #("caption", json.string(caption)),
-                  ])
-                  |> json.to_string()
+                  let body =
+                    json.object([
+                      #("chat_id", json.string(cid)),
+                      #("file_path", json.string(fp)),
+                      #("caption", json.string(caption)),
+                    ])
+                    |> json.to_string()
 
                   case http_post_with_session("/api/v1/send_photo", sid, body) {
                     Ok(resp) -> protocol.text_result(resp)
@@ -1490,11 +1903,20 @@ fn handle_telegram_download_media(args: json.Json) -> ToolResult {
       case decoders.decode_telegram_download_media(args) {
         Error(err) -> protocol.error_result(decoders.error_to_string(err))
         Ok(parsed) -> {
-          case validation.validate_session_id(parsed.session_id), validation.validate_chat_id(parsed.chat_id) {
-            Error(err), _ -> protocol.error_result(validation.error_to_string(err))
-            _, Error(err) -> protocol.error_result(validation.error_to_string(err))
+          case
+            validation.validate_session_id(parsed.session_id),
+            validation.validate_chat_id(parsed.chat_id)
+          {
+            Error(err), _ ->
+              protocol.error_result(validation.error_to_string(err))
+            _, Error(err) ->
+              protocol.error_result(validation.error_to_string(err))
             Ok(sid), Ok(cid) -> {
-              let path = "/api/v1/download/" <> cid <> "/" <> int.to_string(parsed.message_id)
+              let path =
+                "/api/v1/download/"
+                <> cid
+                <> "/"
+                <> int.to_string(parsed.message_id)
               case parsed.output_path {
                 None -> {
                   case http_get_with_session(path, sid) {
@@ -1504,13 +1926,18 @@ fn handle_telegram_download_media(args: json.Json) -> ToolResult {
                 }
                 Some(output) -> {
                   case validation.validate_path(output) {
-                    Error(err) -> protocol.error_result(validation.error_to_string(err))
+                    Error(err) ->
+                      protocol.error_result(validation.error_to_string(err))
                     Ok(safe_path) -> {
                       case http_get_with_session(path, sid) {
                         Ok(body) -> {
                           case simplifile.write(safe_path, body) {
-                            Ok(_) -> protocol.text_result("Downloaded to: " <> safe_path)
-                            Error(_) -> protocol.error_result("Failed to save file")
+                            Ok(_) ->
+                              protocol.text_result(
+                                "Downloaded to: " <> safe_path,
+                              )
+                            Error(_) ->
+                              protocol.error_result("Failed to save file")
                           }
                         }
                         Error(err) -> protocol.error_result(err)
@@ -1538,17 +1965,32 @@ fn handle_telegram_subscribe_updates(args: json.Json) -> ToolResult {
             Error(err) -> protocol.error_result(validation.error_to_string(err))
             Ok(sid) -> {
               // Return WebSocket URL for updates
-              let ws_url = "ws://localhost:8081/api/v1/updates?session_id=" <> sid
-              protocol.text_result(json.object([
-                #("websocket_url", json.string(ws_url)),
-                #("event_types", json.array([
-                  "message",
-                  "callback_query",
-                  "edited_message",
-                  "channel_post",
-                ], json.string)),
-                #("status", json.string("Subscribe using WebSocket to receive real-time updates")),
-              ]) |> json.to_string())
+              let ws_url =
+                "ws://localhost:8081/api/v1/updates?session_id=" <> sid
+              protocol.text_result(
+                json.object([
+                  #("websocket_url", json.string(ws_url)),
+                  #(
+                    "event_types",
+                    json.array(
+                      [
+                        "message",
+                        "callback_query",
+                        "edited_message",
+                        "channel_post",
+                      ],
+                      json.string,
+                    ),
+                  ),
+                  #(
+                    "status",
+                    json.string(
+                      "Subscribe using WebSocket to receive real-time updates",
+                    ),
+                  ),
+                ])
+                |> json.to_string(),
+              )
             }
           }
         }
@@ -1572,12 +2014,21 @@ fn handle_event_emit(args: json.Json) -> ToolResult {
       // Emit to Event Bus
       case events.emit(event_type, payload, parsed.target, "mcp_tool") {
         Ok(event_id) -> {
-          logging.info("[EVENT BUS] Emitted: " <> parsed.event_type <> " (id: " <> event_id <> ")")
-          protocol.text_result(json.object([
-            #("success", json.bool(True)),
-            #("event_id", json.string(event_id)),
-            #("event_type", json.string(parsed.event_type)),
-          ]) |> json.to_string())
+          logging.info(
+            "[EVENT BUS] Emitted: "
+            <> parsed.event_type
+            <> " (id: "
+            <> event_id
+            <> ")",
+          )
+          protocol.text_result(
+            json.object([
+              #("success", json.bool(True)),
+              #("event_id", json.string(event_id)),
+              #("event_type", json.string(parsed.event_type)),
+            ])
+            |> json.to_string(),
+          )
         }
         Error(err) -> {
           logging.error("[EVENT BUS] Failed to emit: " <> err)
@@ -1617,12 +2068,13 @@ fn handle_event_list(args: json.Json) -> ToolResult {
         ft -> Some(events.parse_event_type(ft))
       }
 
-      let query = events.EventQuery(
-        event_type: event_type_filter,
-        target: None,
-        since_timestamp: None,
-        limit: limit,
-      )
+      let query =
+        events.EventQuery(
+          event_type: event_type_filter,
+          target: None,
+          since_timestamp: None,
+          limit: limit,
+        )
 
       // Query events from Event Bus
       let event_list = events.query(query)
@@ -1630,13 +2082,18 @@ fn handle_event_list(args: json.Json) -> ToolResult {
       // Get stats for additional info
       let stats = events.stats()
 
-      let result = json.object([
-        #("available_types", json.array(events.available_types(), json.string)),
-        #("recent_events", json.array(event_list, events.encode_event)),
-        #("count", json.int(list.length(event_list))),
-        #("total_in_bus", json.int(stats.total_events)),
-        #("active_subscriptions", json.int(stats.active_subscriptions)),
-      ]) |> json.to_string()
+      let result =
+        json.object([
+          #(
+            "available_types",
+            json.array(events.available_types(), json.string),
+          ),
+          #("recent_events", json.array(event_list, events.encode_event)),
+          #("count", json.int(list.length(event_list))),
+          #("total_in_bus", json.int(stats.total_events)),
+          #("active_subscriptions", json.int(stats.active_subscriptions)),
+        ])
+        |> json.to_string()
 
       protocol.text_result(result)
     }
@@ -1648,8 +2105,17 @@ fn erlang_local_time() -> #(#(Int, Int, Int), #(Int, Int, Int))
 
 fn get_timestamp() -> String {
   let #(#(y, mo, d), #(h, mi, s)) = erlang_local_time()
-  int.to_string(y) <> "-" <> pad2(mo) <> "-" <> pad2(d) <> " " <>
-  pad2(h) <> ":" <> pad2(mi) <> ":" <> pad2(s)
+  int.to_string(y)
+  <> "-"
+  <> pad2(mo)
+  <> "-"
+  <> pad2(d)
+  <> " "
+  <> pad2(h)
+  <> ":"
+  <> pad2(mi)
+  <> ":"
+  <> pad2(s)
 }
 
 fn pad2(n: Int) -> String {
@@ -1667,16 +2133,23 @@ fn extract_until_bracket(s: String, open: String, close: String) -> String {
   extract_bracket_loop(s, open, close, 0, "")
 }
 
-fn extract_bracket_loop(s: String, open: String, close: String, depth: Int, acc: String) -> String {
+fn extract_bracket_loop(
+  s: String,
+  open: String,
+  close: String,
+  depth: Int,
+  acc: String,
+) -> String {
   case string.pop_grapheme(s) {
     Error(_) -> acc
     Ok(#(c, rest)) -> {
       let new_depth = case c == open {
         True -> depth + 1
-        False -> case c == close {
-          True -> depth - 1
-          False -> depth
-        }
+        False ->
+          case c == close {
+            True -> depth - 1
+            False -> depth
+          }
       }
       case new_depth == 0 && depth > 0 {
         True -> acc <> c
@@ -1687,7 +2160,8 @@ fn extract_bracket_loop(s: String, open: String, close: String, depth: Int, acc:
 }
 
 fn http_get(url: String) -> Result(String, String) {
-  let req = request.new()
+  let req =
+    request.new()
     |> request.set_scheme(http.Http)
     |> request.set_method(http.Get)
     |> request.set_host("localhost")
@@ -1701,8 +2175,12 @@ fn http_get(url: String) -> Result(String, String) {
 }
 
 /// HTTP GET with session_id in X-Session-ID header
-fn http_get_with_session(path: String, session_id: String) -> Result(String, String) {
-  let req = request.new()
+fn http_get_with_session(
+  path: String,
+  session_id: String,
+) -> Result(String, String) {
+  let req =
+    request.new()
     |> request.set_scheme(http.Http)
     |> request.set_method(http.Get)
     |> request.set_host("localhost")
@@ -1717,8 +2195,13 @@ fn http_get_with_session(path: String, session_id: String) -> Result(String, Str
 }
 
 /// HTTP POST with session_id in X-Session-ID header
-fn http_post_with_session(path: String, session_id: String, body: String) -> Result(String, String) {
-  let req = request.new()
+fn http_post_with_session(
+  path: String,
+  session_id: String,
+  body: String,
+) -> Result(String, String) {
+  let req =
+    request.new()
     |> request.set_scheme(http.Http)
     |> request.set_method(http.Post)
     |> request.set_host("localhost")
@@ -1737,7 +2220,8 @@ fn http_post_with_session(path: String, session_id: String, body: String) -> Res
 fn http_post(url: String, body: String) -> Result(String, String) {
   let #(host, port, path) = parse_url(url)
 
-  let req = request.new()
+  let req =
+    request.new()
     |> request.set_scheme(http.Http)
     |> request.set_method(http.Post)
     |> request.set_host(host)
@@ -1794,18 +2278,27 @@ fn debug_build_tool() -> Tool {
     description: "Build Gleam project and return compilation errors/warnings",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Project path to build")),
-        ])),
-        #("target", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["erlang", "javascript"], json.string)),
-          #("description", json.string("Build target")),
-          #("default", json.string("erlang")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Project path to build")),
+            ]),
+          ),
+          #(
+            "target",
+            json.object([
+              #("type", json.string("string")),
+              #("enum", json.array(["erlang", "javascript"], json.string)),
+              #("description", json.string("Build target")),
+              #("default", json.string("erlang")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["path"], json.string)),
     ]),
   )
@@ -1817,16 +2310,25 @@ fn debug_test_tool() -> Tool {
     description: "Run Gleam tests and return results",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Project path")),
-        ])),
-        #("filter", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Filter tests by name pattern")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Project path")),
+            ]),
+          ),
+          #(
+            "filter",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Filter tests by name pattern")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["path"], json.string)),
     ]),
   )
@@ -1838,20 +2340,32 @@ fn debug_analyze_tool() -> Tool {
     description: "Analyze a compilation error and suggest fixes",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("error_text", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("The error message to analyze")),
-        ])),
-        #("file_path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Path to the file with error")),
-        ])),
-        #("context", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Additional context about the code")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "error_text",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("The error message to analyze")),
+            ]),
+          ),
+          #(
+            "file_path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Path to the file with error")),
+            ]),
+          ),
+          #(
+            "context",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Additional context about the code")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["error_text"], json.string)),
     ]),
   )
@@ -1863,21 +2377,33 @@ fn debug_trace_tool() -> Tool {
     description: "Add trace logging to a module/function for debugging",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("module", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Module name to trace")),
-        ])),
-        #("function", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Function name to trace")),
-        ])),
-        #("level", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["entry", "exit", "all"], json.string)),
-          #("description", json.string("Trace level")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "module",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Module name to trace")),
+            ]),
+          ),
+          #(
+            "function",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Function name to trace")),
+            ]),
+          ),
+          #(
+            "level",
+            json.object([
+              #("type", json.string("string")),
+              #("enum", json.array(["entry", "exit", "all"], json.string)),
+              #("description", json.string("Trace level")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["module"], json.string)),
     ]),
   )
@@ -1889,21 +2415,39 @@ fn debug_log_tool() -> Tool {
     description: "Write structured debug log entry",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("operation", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Operation being debugged")),
-        ])),
-        #("status", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["start", "progress", "success", "error"], json.string)),
-          #("description", json.string("Debug status")),
-        ])),
-        #("data", json.object([
-          #("type", json.string("object")),
-          #("description", json.string("Debug data/context")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "operation",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Operation being debugged")),
+            ]),
+          ),
+          #(
+            "status",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(
+                  ["start", "progress", "success", "error"],
+                  json.string,
+                ),
+              ),
+              #("description", json.string("Debug status")),
+            ]),
+          ),
+          #(
+            "data",
+            json.object([
+              #("type", json.string("object")),
+              #("description", json.string("Debug data/context")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["operation", "status"], json.string)),
     ]),
   )
@@ -1919,23 +2463,44 @@ fn code_generate_tool() -> Tool {
     description: "Generate code based on description (returns template/scaffold)",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("description", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("What code to generate")),
-        ])),
-        #("language", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["gleam", "erlang", "typescript"], json.string)),
-          #("description", json.string("Target language")),
-          #("default", json.string("gleam")),
-        ])),
-        #("template", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["function", "module", "test", "handler", "tool"], json.string)),
-          #("description", json.string("Code template type")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "description",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("What code to generate")),
+            ]),
+          ),
+          #(
+            "language",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(["gleam", "erlang", "typescript"], json.string),
+              ),
+              #("description", json.string("Target language")),
+              #("default", json.string("gleam")),
+            ]),
+          ),
+          #(
+            "template",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(
+                  ["function", "module", "test", "handler", "tool"],
+                  json.string,
+                ),
+              ),
+              #("description", json.string("Code template type")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["description"], json.string)),
     ]),
   )
@@ -1947,26 +2512,53 @@ fn code_refactor_tool() -> Tool {
     description: "Apply refactoring to code (rename, extract, inline)",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("file_path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("File to refactor")),
-        ])),
-        #("refactoring", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["rename", "extract_function", "inline", "move", "simplify"], json.string)),
-          #("description", json.string("Type of refactoring")),
-        ])),
-        #("target", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("What to refactor (function name, variable, etc)")),
-        ])),
-        #("new_name", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("New name (for rename refactoring)")),
-        ])),
-      ])),
-      #("required", json.array(["file_path", "refactoring", "target"], json.string)),
+      #(
+        "properties",
+        json.object([
+          #(
+            "file_path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("File to refactor")),
+            ]),
+          ),
+          #(
+            "refactoring",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(
+                  ["rename", "extract_function", "inline", "move", "simplify"],
+                  json.string,
+                ),
+              ),
+              #("description", json.string("Type of refactoring")),
+            ]),
+          ),
+          #(
+            "target",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string("What to refactor (function name, variable, etc)"),
+              ),
+            ]),
+          ),
+          #(
+            "new_name",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("New name (for rename refactoring)")),
+            ]),
+          ),
+        ]),
+      ),
+      #(
+        "required",
+        json.array(["file_path", "refactoring", "target"], json.string),
+      ),
     ]),
   )
 }
@@ -1977,21 +2569,36 @@ fn code_explain_tool() -> Tool {
     description: "Explain what a piece of code does",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("code", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Code to explain")),
-        ])),
-        #("file_path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Or file path to read and explain")),
-        ])),
-        #("detail_level", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["brief", "detailed", "step_by_step"], json.string)),
-          #("description", json.string("Level of explanation detail")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "code",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Code to explain")),
+            ]),
+          ),
+          #(
+            "file_path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Or file path to read and explain")),
+            ]),
+          ),
+          #(
+            "detail_level",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(["brief", "detailed", "step_by_step"], json.string),
+              ),
+              #("description", json.string("Level of explanation detail")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array([], json.string)),
     ]),
   )
@@ -2003,20 +2610,35 @@ fn code_find_similar_tool() -> Tool {
     description: "Find similar code patterns in the project",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("pattern", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Code pattern to search for")),
-        ])),
-        #("path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Directory to search in")),
-        ])),
-        #("file_type", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("File extension filter (gleam, ts, etc)")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "pattern",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Code pattern to search for")),
+            ]),
+          ),
+          #(
+            "path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Directory to search in")),
+            ]),
+          ),
+          #(
+            "file_type",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string("File extension filter (gleam, ts, etc)"),
+              ),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["pattern"], json.string)),
     ]),
   )
@@ -2028,21 +2650,39 @@ fn code_diff_tool() -> Tool {
     description: "Show diff between file versions or generate patch",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("file_path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("File to diff")),
-        ])),
-        #("compare_with", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["git_head", "git_staged", "backup", "custom"], json.string)),
-          #("description", json.string("What to compare with")),
-        ])),
-        #("other_file", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Other file for custom comparison")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "file_path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("File to diff")),
+            ]),
+          ),
+          #(
+            "compare_with",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(
+                  ["git_head", "git_staged", "backup", "custom"],
+                  json.string,
+                ),
+              ),
+              #("description", json.string("What to compare with")),
+            ]),
+          ),
+          #(
+            "other_file",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Other file for custom comparison")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["file_path"], json.string)),
     ]),
   )
@@ -2058,20 +2698,32 @@ fn test_run_tool() -> Tool {
     description: "Run tests and return detailed results",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Project/test path")),
-        ])),
-        #("filter", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Test name filter")),
-        ])),
-        #("verbose", json.object([
-          #("type", json.string("boolean")),
-          #("description", json.string("Show verbose output")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Project/test path")),
+            ]),
+          ),
+          #(
+            "filter",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Test name filter")),
+            ]),
+          ),
+          #(
+            "verbose",
+            json.object([
+              #("type", json.string("boolean")),
+              #("description", json.string("Show verbose output")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["path"], json.string)),
     ]),
   )
@@ -2083,20 +2735,32 @@ fn test_create_tool() -> Tool {
     description: "Generate test code for a function",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("function_code", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Function code to create tests for")),
-        ])),
-        #("function_name", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Function name")),
-        ])),
-        #("test_cases", json.object([
-          #("type", json.string("array")),
-          #("description", json.string("Specific test cases to generate")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "function_code",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Function code to create tests for")),
+            ]),
+          ),
+          #(
+            "function_name",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Function name")),
+            ]),
+          ),
+          #(
+            "test_cases",
+            json.object([
+              #("type", json.string("array")),
+              #("description", json.string("Specific test cases to generate")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["function_code"], json.string)),
     ]),
   )
@@ -2108,17 +2772,29 @@ fn test_coverage_tool() -> Tool {
     description: "Analyze test coverage for a project/file",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Project or file path")),
-        ])),
-        #("format", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["summary", "detailed", "json"], json.string)),
-          #("description", json.string("Output format")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Project or file path")),
+            ]),
+          ),
+          #(
+            "format",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(["summary", "detailed", "json"], json.string),
+              ),
+              #("description", json.string("Output format")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["path"], json.string)),
     ]),
   )
@@ -2130,21 +2806,39 @@ fn test_validate_tool() -> Tool {
     description: "Validate expected vs actual result",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("expected", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Expected result")),
-        ])),
-        #("actual", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Actual result")),
-        ])),
-        #("comparison", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["exact", "contains", "regex", "json_equal"], json.string)),
-          #("description", json.string("Comparison type")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "expected",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Expected result")),
+            ]),
+          ),
+          #(
+            "actual",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Actual result")),
+            ]),
+          ),
+          #(
+            "comparison",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(
+                  ["exact", "contains", "regex", "json_equal"],
+                  json.string,
+                ),
+              ),
+              #("description", json.string("Comparison type")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["expected", "actual"], json.string)),
     ]),
   )
@@ -2160,26 +2854,47 @@ fn agent_spawn_tool() -> Tool {
     description: "Spawn a new sub-agent for parallel task execution",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("name", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Agent name/identifier")),
-        ])),
-        #("task", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Task description for the agent")),
-        ])),
-        #("type", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["debug", "code", "test", "search", "general"], json.string)),
-          #("description", json.string("Agent type/specialization")),
-        ])),
-        #("timeout", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Timeout in seconds")),
-          #("default", json.int(300)),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "name",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Agent name/identifier")),
+            ]),
+          ),
+          #(
+            "task",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Task description for the agent")),
+            ]),
+          ),
+          #(
+            "type",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(
+                  ["debug", "code", "test", "search", "general"],
+                  json.string,
+                ),
+              ),
+              #("description", json.string("Agent type/specialization")),
+            ]),
+          ),
+          #(
+            "timeout",
+            json.object([
+              #("type", json.string("integer")),
+              #("description", json.string("Timeout in seconds")),
+              #("default", json.int(300)),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["name", "task"], json.string)),
     ]),
   )
@@ -2191,21 +2906,33 @@ fn agent_message_tool() -> Tool {
     description: "Send a message to a running agent",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("agent_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Agent ID to message")),
-        ])),
-        #("message", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Message content")),
-        ])),
-        #("wait_response", json.object([
-          #("type", json.string("boolean")),
-          #("description", json.string("Wait for agent response")),
-          #("default", json.bool(True)),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "agent_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Agent ID to message")),
+            ]),
+          ),
+          #(
+            "message",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Message content")),
+            ]),
+          ),
+          #(
+            "wait_response",
+            json.object([
+              #("type", json.string("boolean")),
+              #("description", json.string("Wait for agent response")),
+              #("default", json.bool(True)),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["agent_id", "message"], json.string)),
     ]),
   )
@@ -2217,12 +2944,23 @@ fn agent_status_tool() -> Tool {
     description: "Get status of all agents or specific agent",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("agent_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Specific agent ID (optional, returns all if empty)")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "agent_id",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string(
+                  "Specific agent ID (optional, returns all if empty)",
+                ),
+              ),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array([], json.string)),
     ]),
   )
@@ -2234,17 +2972,26 @@ fn agent_kill_tool() -> Tool {
     description: "Terminate a running agent",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("agent_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Agent ID to kill")),
-        ])),
-        #("force", json.object([
-          #("type", json.string("boolean")),
-          #("description", json.string("Force kill without cleanup")),
-          #("default", json.bool(False)),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "agent_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Agent ID to kill")),
+            ]),
+          ),
+          #(
+            "force",
+            json.object([
+              #("type", json.string("boolean")),
+              #("description", json.string("Force kill without cleanup")),
+              #("default", json.bool(False)),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["agent_id"], json.string)),
     ]),
   )
@@ -2268,17 +3015,22 @@ fn handle_debug_build(args: json.Json) -> ToolResult {
           // Use safe shell execution
           case shell.gleam_build(path, target) {
             Ok(output) -> {
-              let has_error = string.contains(output, "error:") || string.contains(output, "Error:")
+              let has_error =
+                string.contains(output, "error:")
+                || string.contains(output, "Error:")
               let status = case has_error {
                 True -> "error"
                 False -> "success"
               }
-              protocol.text_result(json.object([
-                #("status", json.string(status)),
-                #("output", json.string(output)),
-                #("path", json.string(path)),
-                #("target", json.string(target)),
-              ]) |> json.to_string())
+              protocol.text_result(
+                json.object([
+                  #("status", json.string(status)),
+                  #("output", json.string(output)),
+                  #("path", json.string(path)),
+                  #("target", json.string(target)),
+                ])
+                |> json.to_string(),
+              )
             }
             Error(err) -> protocol.error_result(err)
           }
@@ -2307,11 +3059,14 @@ fn handle_debug_test(args: json.Json) -> ToolResult {
                 _, _ -> "unknown"
               }
               let filter_str = option.unwrap(parsed.filter, "")
-              protocol.text_result(json.object([
-                #("status", json.string(status)),
-                #("output", json.string(output)),
-                #("filter", json.string(filter_str)),
-              ]) |> json.to_string())
+              protocol.text_result(
+                json.object([
+                  #("status", json.string(status)),
+                  #("output", json.string(output)),
+                  #("filter", json.string(filter_str)),
+                ])
+                |> json.to_string(),
+              )
             }
             Error(err) -> protocol.error_result(err)
           }
@@ -2332,57 +3087,81 @@ fn handle_debug_analyze(args: json.Json) -> ToolResult {
         Some(fp) -> {
           case validation.validate_path(fp) {
             Error(_) -> ""
-            Ok(safe_fp) -> case simplifile.read(safe_fp) {
-              Ok(content) -> "\n\nFile context:\n" <> string.slice(content, 0, 500)
-              Error(_) -> ""
-            }
+            Ok(safe_fp) ->
+              case simplifile.read(safe_fp) {
+                Ok(content) ->
+                  "\n\nFile context:\n" <> string.slice(content, 0, 500)
+                Error(_) -> ""
+              }
           }
         }
       }
 
-      protocol.text_result(json.object([
-        #("error_type", json.string(analysis.0)),
-        #("suggestion", json.string(analysis.1)),
-        #("fix_template", json.string(analysis.2)),
-        #("file_context", json.string(file_context)),
-      ]) |> json.to_string())
+      protocol.text_result(
+        json.object([
+          #("error_type", json.string(analysis.0)),
+          #("suggestion", json.string(analysis.1)),
+          #("fix_template", json.string(analysis.2)),
+          #("file_context", json.string(file_context)),
+        ])
+        |> json.to_string(),
+      )
     }
   }
 }
 
 fn analyze_gleam_error(error: String) -> #(String, String, String) {
   case string.contains(error, "Unknown variable") {
-    True -> #("unknown_variable",
+    True -> #(
+      "unknown_variable",
       "Variable not defined. Check spelling or import the module.",
-      "import module_name\n// or define: let variable_name = value")
-    False -> case string.contains(error, "Unknown type") {
-      True -> #("unknown_type",
-        "Type not imported or defined. Add import statement.",
-        "import module/type.{TypeName}")
-      False -> case string.contains(error, "Expected type") {
-        True -> #("type_mismatch",
-          "Type mismatch. Check function signature and argument types.",
-          "// Ensure argument type matches parameter type")
-        False -> case string.contains(error, "Not exhaustive") {
-          True -> #("incomplete_pattern",
-            "Pattern match not exhaustive. Add missing cases.",
-            "case value {\n  Pattern1 -> ...\n  Pattern2 -> ...\n  _ -> ... // catch-all\n}")
-          False -> case string.contains(error, "Duplicate") {
-            True -> #("duplicate",
-              "Duplicate definition. Rename or remove one instance.",
-              "// Remove duplicate or use unique names")
-            False -> case string.contains(error, "Could not find") {
-              True -> #("missing_module",
-                "Module not found. Check gleam.toml dependencies.",
-                "# In gleam.toml:\n[dependencies]\npackage_name = \"~> version\"")
-              False -> #("unknown",
-                "Unable to determine error type. Check the error message.",
-                "// Review error message and check documentation")
-            }
+      "import module_name\n// or define: let variable_name = value",
+    )
+    False ->
+      case string.contains(error, "Unknown type") {
+        True -> #(
+          "unknown_type",
+          "Type not imported or defined. Add import statement.",
+          "import module/type.{TypeName}",
+        )
+        False ->
+          case string.contains(error, "Expected type") {
+            True -> #(
+              "type_mismatch",
+              "Type mismatch. Check function signature and argument types.",
+              "// Ensure argument type matches parameter type",
+            )
+            False ->
+              case string.contains(error, "Not exhaustive") {
+                True -> #(
+                  "incomplete_pattern",
+                  "Pattern match not exhaustive. Add missing cases.",
+                  "case value {\n  Pattern1 -> ...\n  Pattern2 -> ...\n  _ -> ... // catch-all\n}",
+                )
+                False ->
+                  case string.contains(error, "Duplicate") {
+                    True -> #(
+                      "duplicate",
+                      "Duplicate definition. Rename or remove one instance.",
+                      "// Remove duplicate or use unique names",
+                    )
+                    False ->
+                      case string.contains(error, "Could not find") {
+                        True -> #(
+                          "missing_module",
+                          "Module not found. Check gleam.toml dependencies.",
+                          "# In gleam.toml:\n[dependencies]\npackage_name = \"~> version\"",
+                        )
+                        False -> #(
+                          "unknown",
+                          "Unable to determine error type. Check the error message.",
+                          "// Review error message and check documentation",
+                        )
+                      }
+                  }
+              }
           }
-        }
       }
-    }
   }
 }
 
@@ -2395,24 +3174,44 @@ fn handle_debug_trace(args: json.Json) -> ToolResult {
 
       // Generate trace code
       let trace_code = generate_trace_code(parsed.module, function, level)
-      logging.info("[DEBUG_TRACE] Adding trace to " <> parsed.module <> ":" <> function)
-      protocol.text_result(json.object([
-        #("module", json.string(parsed.module)),
-        #("function", json.string(function)),
-        #("level", json.string(level)),
-        #("trace_code", json.string(trace_code)),
-        #("instructions", json.string("Add this code at function entry/exit points")),
-      ]) |> json.to_string())
+      logging.info(
+        "[DEBUG_TRACE] Adding trace to " <> parsed.module <> ":" <> function,
+      )
+      protocol.text_result(
+        json.object([
+          #("module", json.string(parsed.module)),
+          #("function", json.string(function)),
+          #("level", json.string(level)),
+          #("trace_code", json.string(trace_code)),
+          #(
+            "instructions",
+            json.string("Add this code at function entry/exit points"),
+          ),
+        ])
+        |> json.to_string(),
+      )
     }
   }
 }
 
-fn generate_trace_code(module: String, function: String, level: String) -> String {
+fn generate_trace_code(
+  module: String,
+  function: String,
+  level: String,
+) -> String {
   let prefix = "io.debug(\"[TRACE " <> module
   case level {
     "entry" -> prefix <> ":" <> function <> "] ENTRY args=\")\nio.debug(args)"
     "exit" -> prefix <> ":" <> function <> "] EXIT result=\")\nio.debug(result)"
-    _ -> prefix <> ":" <> function <> "] ENTRY\")\n// ... function body ...\n" <> prefix <> ":" <> function <> "] EXIT\")"
+    _ ->
+      prefix
+      <> ":"
+      <> function
+      <> "] ENTRY\")\n// ... function body ...\n"
+      <> prefix
+      <> ":"
+      <> function
+      <> "] EXIT\")"
   }
 }
 
@@ -2428,12 +3227,22 @@ fn handle_debug_log(args: json.Json) -> ToolResult {
 
           let timestamp = get_timestamp()
           // Build with raw JSON data
-          let log_entry = "{\"timestamp\":\"" <> timestamp <> "\",\"operation\":\"" <> parsed.operation <> "\",\"status\":\"" <> status <> "\",\"data\":" <> data_json <> "}"
+          let log_entry =
+            "{\"timestamp\":\""
+            <> timestamp
+            <> "\",\"operation\":\""
+            <> parsed.operation
+            <> "\",\"status\":\""
+            <> status
+            <> "\",\"data\":"
+            <> data_json
+            <> "}"
 
           // Append to debug log
           let debug_log = "/tmp/vibee_debug.log"
           let _ = case simplifile.read(debug_log) {
-            Ok(content) -> simplifile.write(debug_log, content <> "\n" <> log_entry)
+            Ok(content) ->
+              simplifile.write(debug_log, content <> "\n" <> log_entry)
             Error(_) -> simplifile.write(debug_log, log_entry)
           }
 
@@ -2457,27 +3266,65 @@ fn handle_code_generate(args: json.Json) -> ToolResult {
       let template = option.unwrap(parsed.template, "")
 
       let code = generate_code_template(parsed.description, language, template)
-      protocol.text_result(json.object([
-        #("language", json.string(language)),
-        #("template", json.string(template)),
-        #("code", json.string(code)),
-        #("note", json.string("Generated template - review and customize")),
-      ]) |> json.to_string())
+      protocol.text_result(
+        json.object([
+          #("language", json.string(language)),
+          #("template", json.string(template)),
+          #("code", json.string(code)),
+          #("note", json.string("Generated template - review and customize")),
+        ])
+        |> json.to_string(),
+      )
     }
   }
 }
 
-fn generate_code_template(desc: String, lang: String, template: String) -> String {
+fn generate_code_template(
+  desc: String,
+  lang: String,
+  template: String,
+) -> String {
   case lang {
-    "gleam" -> case template {
-      "function" -> "pub fn " <> snake_case(desc) <> "(arg: Type) -> Result(Output, Error) {\n  // TODO: " <> desc <> "\n  Ok(value)\n}"
-      "module" -> "// Module: " <> desc <> "\n\nimport gleam/io\nimport gleam/result\n\npub type Error {\n  NotImplemented\n}\n\npub fn main() {\n  io.println(\"" <> desc <> "\")\n}"
-      "test" -> "import gleeunit\nimport gleeunit/should\n\npub fn main() {\n  gleeunit.main()\n}\n\npub fn " <> snake_case(desc) <> "_test() {\n  // TODO: " <> desc <> "\n  True |> should.be_true()\n}"
-      "handler" -> "fn handle_" <> snake_case(desc) <> "(args: json.Json) -> ToolResult {\n  // TODO: " <> desc <> "\n  protocol.text_result(\"Not implemented\")\n}"
-      "tool" -> "fn " <> snake_case(desc) <> "_tool() -> Tool {\n  Tool(\n    name: \"" <> snake_case(desc) <> "\",\n    description: \"" <> desc <> "\",\n    input_schema: json.object([\n      #(\"type\", json.string(\"object\")),\n      #(\"properties\", json.object([])),\n      #(\"required\", json.array([], json.string)),\n    ]),\n  )\n}"
-      _ -> "// " <> desc <> "\npub fn example() {\n  todo\n}"
-    }
-    "typescript" -> "// " <> desc <> "\nexport function example(): void {\n  // TODO: implement\n}"
+    "gleam" ->
+      case template {
+        "function" ->
+          "pub fn "
+          <> snake_case(desc)
+          <> "(arg: Type) -> Result(Output, Error) {\n  // TODO: "
+          <> desc
+          <> "\n  Ok(value)\n}"
+        "module" ->
+          "// Module: "
+          <> desc
+          <> "\n\nimport gleam/io\nimport gleam/result\n\npub type Error {\n  NotImplemented\n}\n\npub fn main() {\n  io.println(\""
+          <> desc
+          <> "\")\n}"
+        "test" ->
+          "import gleeunit\nimport gleeunit/should\n\npub fn main() {\n  gleeunit.main()\n}\n\npub fn "
+          <> snake_case(desc)
+          <> "_test() {\n  // TODO: "
+          <> desc
+          <> "\n  True |> should.be_true()\n}"
+        "handler" ->
+          "fn handle_"
+          <> snake_case(desc)
+          <> "(args: json.Json) -> ToolResult {\n  // TODO: "
+          <> desc
+          <> "\n  protocol.text_result(\"Not implemented\")\n}"
+        "tool" ->
+          "fn "
+          <> snake_case(desc)
+          <> "_tool() -> Tool {\n  Tool(\n    name: \""
+          <> snake_case(desc)
+          <> "\",\n    description: \""
+          <> desc
+          <> "\",\n    input_schema: json.object([\n      #(\"type\", json.string(\"object\")),\n      #(\"properties\", json.object([])),\n      #(\"required\", json.array([], json.string)),\n    ]),\n  )\n}"
+        _ -> "// " <> desc <> "\npub fn example() {\n  todo\n}"
+      }
+    "typescript" ->
+      "// "
+      <> desc
+      <> "\nexport function example(): void {\n  // TODO: implement\n}"
     _ -> "// " <> desc <> "\n// TODO: implement"
   }
 }
@@ -2494,7 +3341,10 @@ fn handle_code_refactor(args: json.Json) -> ToolResult {
   case decoders.decode_code_refactor(args) {
     Error(err) -> protocol.error_result(decoders.error_to_string(err))
     Ok(parsed) -> {
-      case validation.validate_path(parsed.file_path), validation.validate_refactoring_type(parsed.refactoring) {
+      case
+        validation.validate_path(parsed.file_path),
+        validation.validate_refactoring_type(parsed.refactoring)
+      {
         Error(err), _ -> protocol.error_result(validation.error_to_string(err))
         _, Error(err) -> protocol.error_result(validation.error_to_string(err))
         Ok(fp), Ok(ref) -> {
@@ -2506,12 +3356,16 @@ fn handle_code_refactor(args: json.Json) -> ToolResult {
                   case new_name {
                     "" -> #(False, "new_name is required for rename")
                     nn -> {
-                      let new_content = string.replace(content, parsed.target, nn)
+                      let new_content =
+                        string.replace(content, parsed.target, nn)
                       let changed = new_content != content
                       case changed {
                         True -> {
                           case simplifile.write(fp, new_content) {
-                            Ok(_) -> #(True, "Renamed " <> parsed.target <> " to " <> nn)
+                            Ok(_) -> #(
+                              True,
+                              "Renamed " <> parsed.target <> " to " <> nn,
+                            )
                             Error(_) -> #(False, "Failed to write file")
                           }
                         }
@@ -2522,17 +3376,31 @@ fn handle_code_refactor(args: json.Json) -> ToolResult {
                 }
                 "simplify" -> {
                   // Just report suggestions
-                  #(True, "Simplification suggestions for " <> parsed.target <> ":\n1. Remove unused imports\n2. Combine nested case statements\n3. Use pipeline operators")
+                  #(
+                    True,
+                    "Simplification suggestions for "
+                      <> parsed.target
+                      <> ":\n1. Remove unused imports\n2. Combine nested case statements\n3. Use pipeline operators",
+                  )
                 }
-                _ -> #(True, "Refactoring '" <> ref <> "' would be applied to " <> parsed.target)
+                _ -> #(
+                  True,
+                  "Refactoring '"
+                    <> ref
+                    <> "' would be applied to "
+                    <> parsed.target,
+                )
               }
 
-              protocol.text_result(json.object([
-                #("success", json.bool(result.0)),
-                #("message", json.string(result.1)),
-                #("file", json.string(fp)),
-                #("refactoring", json.string(ref)),
-              ]) |> json.to_string())
+              protocol.text_result(
+                json.object([
+                  #("success", json.bool(result.0)),
+                  #("message", json.string(result.1)),
+                  #("file", json.string(fp)),
+                  #("refactoring", json.string(ref)),
+                ])
+                |> json.to_string(),
+              )
             }
             Error(_) -> protocol.error_result("Failed to read file: " <> fp)
           }
@@ -2554,10 +3422,11 @@ fn handle_code_explain(args: json.Json) -> ToolResult {
         None, Some(fp) -> {
           case validation.validate_path(fp) {
             Error(_) -> ""
-            Ok(safe_fp) -> case simplifile.read(safe_fp) {
-              Ok(content) -> content
-              Error(_) -> ""
-            }
+            Ok(safe_fp) ->
+              case simplifile.read(safe_fp) {
+                Ok(content) -> content
+                Error(_) -> ""
+              }
           }
         }
         Some(c), _ -> c
@@ -2567,11 +3436,14 @@ fn handle_code_explain(args: json.Json) -> ToolResult {
         "" -> protocol.error_result("Provide either 'code' or 'file_path'")
         c -> {
           let analysis = analyze_code_structure(c)
-          protocol.text_result(json.object([
-            #("detail_level", json.string(detail_level)),
-            #("analysis", json.string(analysis)),
-            #("line_count", json.int(list.length(string.split(c, "\n")))),
-          ]) |> json.to_string())
+          protocol.text_result(
+            json.object([
+              #("detail_level", json.string(detail_level)),
+              #("analysis", json.string(analysis)),
+              #("line_count", json.int(list.length(string.split(c, "\n")))),
+            ])
+            |> json.to_string(),
+          )
         }
       }
     }
@@ -2580,33 +3452,55 @@ fn handle_code_explain(args: json.Json) -> ToolResult {
 
 fn analyze_code_structure(code: String) -> String {
   let lines = string.split(code, "\n")
-  let imports = list.filter(lines, fn(l) { string.starts_with(string.trim(l), "import") })
-  let functions = list.filter(lines, fn(l) { string.contains(l, "pub fn") || string.contains(l, "fn ") })
-  let types = list.filter(lines, fn(l) { string.contains(l, "pub type") || string.contains(l, "type ") })
+  let imports =
+    list.filter(lines, fn(l) { string.starts_with(string.trim(l), "import") })
+  let functions =
+    list.filter(lines, fn(l) {
+      string.contains(l, "pub fn") || string.contains(l, "fn ")
+    })
+  let types =
+    list.filter(lines, fn(l) {
+      string.contains(l, "pub type") || string.contains(l, "type ")
+    })
 
-  "Structure:\n" <>
-  "- Imports: " <> int.to_string(list.length(imports)) <> "\n" <>
-  "- Functions: " <> int.to_string(list.length(functions)) <> "\n" <>
-  "- Types: " <> int.to_string(list.length(types)) <> "\n" <>
-  "- Total lines: " <> int.to_string(list.length(lines))
+  "Structure:\n"
+  <> "- Imports: "
+  <> int.to_string(list.length(imports))
+  <> "\n"
+  <> "- Functions: "
+  <> int.to_string(list.length(functions))
+  <> "\n"
+  <> "- Types: "
+  <> int.to_string(list.length(types))
+  <> "\n"
+  <> "- Total lines: "
+  <> int.to_string(list.length(lines))
 }
 
 fn handle_code_find_similar(args: json.Json) -> ToolResult {
   case decoders.decode_code_find_similar(args) {
     Error(err) -> protocol.error_result(decoders.error_to_string(err))
     Ok(parsed) -> {
-      let path = option.unwrap(parsed.path, "/Users/playra/vibee-eliza-999/vibee/gleam/src")
+      let path =
+        option.unwrap(
+          parsed.path,
+          "/Users/playra/vibee-eliza-999/vibee/gleam/src",
+        )
       let file_type = option.unwrap(parsed.file_type, "gleam")
 
       // Use safe grep
       case shell.grep_files(parsed.pattern, path, Some(file_type)) {
         Ok(output) -> {
-          let files = string.split(output, "\n") |> list.filter(fn(f) { f != "" })
-          protocol.text_result(json.object([
-            #("pattern", json.string(parsed.pattern)),
-            #("matches", json.array(files, json.string)),
-            #("count", json.int(list.length(files))),
-          ]) |> json.to_string())
+          let files =
+            string.split(output, "\n") |> list.filter(fn(f) { f != "" })
+          protocol.text_result(
+            json.object([
+              #("pattern", json.string(parsed.pattern)),
+              #("matches", json.array(files, json.string)),
+              #("count", json.int(list.length(files))),
+            ])
+            |> json.to_string(),
+          )
         }
         Error(err) -> protocol.error_result(err)
       }
@@ -2622,15 +3516,20 @@ fn handle_code_diff(args: json.Json) -> ToolResult {
         Error(err) -> protocol.error_result(validation.error_to_string(err))
         Ok(file_path) -> {
           // Use safe git diff
-          case shell.git_diff(file_path, parsed.compare_with, parsed.other_file) {
+          case
+            shell.git_diff(file_path, parsed.compare_with, parsed.other_file)
+          {
             Ok(output) -> {
               let compare_with = option.unwrap(parsed.compare_with, "git_head")
-              protocol.text_result(json.object([
-                #("file", json.string(file_path)),
-                #("compare_with", json.string(compare_with)),
-                #("diff", json.string(output)),
-                #("has_changes", json.bool(output != "")),
-              ]) |> json.to_string())
+              protocol.text_result(
+                json.object([
+                  #("file", json.string(file_path)),
+                  #("compare_with", json.string(compare_with)),
+                  #("diff", json.string(output)),
+                  #("has_changes", json.bool(output != "")),
+                ])
+                |> json.to_string(),
+              )
             }
             Error(err) -> protocol.error_result(err)
           }
@@ -2656,15 +3555,21 @@ fn handle_test_run(args: json.Json) -> ToolResult {
               let passed = string.contains(output, "Passed")
               let failed = string.contains(output, "Failed")
               let filter_str = option.unwrap(parsed.filter, "")
-              protocol.text_result(json.object([
-                #("status", json.string(case passed, failed {
-                  True, False -> "passed"
-                  _, True -> "failed"
-                  _, _ -> "unknown"
-                })),
-                #("output", json.string(output)),
-                #("filter", json.string(filter_str)),
-              ]) |> json.to_string())
+              protocol.text_result(
+                json.object([
+                  #(
+                    "status",
+                    json.string(case passed, failed {
+                      True, False -> "passed"
+                      _, True -> "failed"
+                      _, _ -> "unknown"
+                    }),
+                  ),
+                  #("output", json.string(output)),
+                  #("filter", json.string(filter_str)),
+                ])
+                |> json.to_string(),
+              )
             }
             Error(err) -> protocol.error_result(err)
           }
@@ -2680,13 +3585,29 @@ fn handle_test_create(args: json.Json) -> ToolResult {
     Ok(parsed) -> {
       let name = option.unwrap(parsed.function_name, "test_function")
 
-      let test_code = "import gleeunit/should\n\npub fn " <> name <> "_test() {\n  // Test basic case\n  " <> name <> "(input) |> should.equal(expected)\n}\n\npub fn " <> name <> "_edge_case_test() {\n  // Test edge case\n  " <> name <> "(edge_input) |> should.equal(edge_expected)\n}\n\npub fn " <> name <> "_error_test() {\n  // Test error case\n  " <> name <> "(invalid_input) |> should.be_error()\n}"
+      let test_code =
+        "import gleeunit/should\n\npub fn "
+        <> name
+        <> "_test() {\n  // Test basic case\n  "
+        <> name
+        <> "(input) |> should.equal(expected)\n}\n\npub fn "
+        <> name
+        <> "_edge_case_test() {\n  // Test edge case\n  "
+        <> name
+        <> "(edge_input) |> should.equal(edge_expected)\n}\n\npub fn "
+        <> name
+        <> "_error_test() {\n  // Test error case\n  "
+        <> name
+        <> "(invalid_input) |> should.be_error()\n}"
 
-      protocol.text_result(json.object([
-        #("function_name", json.string(name)),
-        #("test_code", json.string(test_code)),
-        #("test_count", json.int(3)),
-      ]) |> json.to_string())
+      protocol.text_result(
+        json.object([
+          #("function_name", json.string(name)),
+          #("test_code", json.string(test_code)),
+          #("test_count", json.int(3)),
+        ])
+        |> json.to_string(),
+      )
     }
   }
 }
@@ -2702,18 +3623,20 @@ fn handle_test_coverage(args: json.Json) -> ToolResult {
 
           // Use safe shell commands
           let src_count = case shell.count_source_files(path) {
-            Ok(out) -> case int.parse(string.trim(out)) {
-              Ok(n) -> n
-              Error(_) -> 0
-            }
+            Ok(out) ->
+              case int.parse(string.trim(out)) {
+                Ok(n) -> n
+                Error(_) -> 0
+              }
             Error(_) -> 0
           }
 
           let test_count = case shell.count_test_files(path) {
-            Ok(out) -> case int.parse(string.trim(out)) {
-              Ok(n) -> n
-              Error(_) -> 0
-            }
+            Ok(out) ->
+              case int.parse(string.trim(out)) {
+                Ok(n) -> n
+                Error(_) -> 0
+              }
             Error(_) -> 0
           }
 
@@ -2722,13 +3645,16 @@ fn handle_test_coverage(args: json.Json) -> ToolResult {
             _ -> int.to_float(test_count) /. int.to_float(src_count) *. 100.0
           }
 
-          protocol.text_result(json.object([
-            #("path", json.string(path)),
-            #("source_files", json.int(src_count)),
-            #("test_files", json.int(test_count)),
-            #("coverage_ratio", json.string(float_to_string(ratio) <> "%")),
-            #("format", json.string(format)),
-          ]) |> json.to_string())
+          protocol.text_result(
+            json.object([
+              #("path", json.string(path)),
+              #("source_files", json.int(src_count)),
+              #("test_files", json.int(test_count)),
+              #("coverage_ratio", json.string(float_to_string(ratio) <> "%")),
+              #("format", json.string(format)),
+            ])
+            |> json.to_string(),
+          )
         }
       }
     }
@@ -2755,16 +3681,23 @@ fn handle_test_validate(args: json.Json) -> ToolResult {
         _ -> parsed.expected == parsed.actual
       }
 
-      protocol.text_result(json.object([
-        #("passed", json.bool(passed)),
-        #("comparison", json.string(comparison)),
-        #("expected", json.string(parsed.expected)),
-        #("actual", json.string(parsed.actual)),
-        #("diff", json.string(case passed {
-          True -> ""
-          False -> "Expected: " <> parsed.expected <> "\nActual: " <> parsed.actual
-        })),
-      ]) |> json.to_string())
+      protocol.text_result(
+        json.object([
+          #("passed", json.bool(passed)),
+          #("comparison", json.string(comparison)),
+          #("expected", json.string(parsed.expected)),
+          #("actual", json.string(parsed.actual)),
+          #(
+            "diff",
+            json.string(case passed {
+              True -> ""
+              False ->
+                "Expected: " <> parsed.expected <> "\nActual: " <> parsed.actual
+            }),
+          ),
+        ])
+        |> json.to_string(),
+      )
     }
   }
 }
@@ -2791,20 +3724,24 @@ fn handle_agent_spawn(args: json.Json) -> ToolResult {
       let timestamp = get_timestamp()
 
       // Log agent spawn
-      let agent_info = json.object([
-        #("id", json.string(agent_id)),
-        #("name", json.string(parsed.name)),
-        #("task", json.string(parsed.task)),
-        #("type", json.string(agent_type)),
-        #("status", json.string("running")),
-        #("spawned_at", json.string(timestamp)),
-        #("timeout", json.int(timeout)),
-      ]) |> json.to_string()
+      let agent_info =
+        json.object([
+          #("id", json.string(agent_id)),
+          #("name", json.string(parsed.name)),
+          #("task", json.string(parsed.task)),
+          #("type", json.string(agent_type)),
+          #("status", json.string("running")),
+          #("spawned_at", json.string(timestamp)),
+          #("timeout", json.int(timeout)),
+        ])
+        |> json.to_string()
 
       // Store in events
-      let event_file = "/Users/playra/vibee-eliza-999/vibee/gleam/data/agents.jsonl"
+      let event_file =
+        "/Users/playra/vibee-eliza-999/vibee/gleam/data/agents.jsonl"
       let _ = case simplifile.read(event_file) {
-        Ok(content) -> simplifile.write(event_file, content <> "\n" <> agent_info)
+        Ok(content) ->
+          simplifile.write(event_file, content <> "\n" <> agent_info)
         Error(_) -> simplifile.write(event_file, agent_info)
       }
 
@@ -2824,26 +3761,35 @@ fn handle_agent_message(args: json.Json) -> ToolResult {
     Error(err) -> protocol.error_result(decoders.error_to_string(err))
     Ok(parsed) -> {
       let timestamp = get_timestamp()
-      let msg_entry = json.object([
-        #("type", json.string("agent_message")),
-        #("agent_id", json.string(parsed.agent_id)),
-        #("message", json.string(parsed.message)),
-        #("timestamp", json.string(timestamp)),
-      ]) |> json.to_string()
+      let msg_entry =
+        json.object([
+          #("type", json.string("agent_message")),
+          #("agent_id", json.string(parsed.agent_id)),
+          #("message", json.string(parsed.message)),
+          #("timestamp", json.string(timestamp)),
+        ])
+        |> json.to_string()
 
       // Log message
-      let event_file = "/Users/playra/vibee-eliza-999/vibee/gleam/data/agents.jsonl"
+      let event_file =
+        "/Users/playra/vibee-eliza-999/vibee/gleam/data/agents.jsonl"
       let _ = case simplifile.read(event_file) {
-        Ok(content) -> simplifile.write(event_file, content <> "\n" <> msg_entry)
+        Ok(content) ->
+          simplifile.write(event_file, content <> "\n" <> msg_entry)
         Error(_) -> simplifile.write(event_file, msg_entry)
       }
 
-      logging.info("[AGENT_MSG] " <> parsed.agent_id <> " <- " <> parsed.message)
-      protocol.text_result(json.object([
-        #("sent", json.bool(True)),
-        #("agent_id", json.string(parsed.agent_id)),
-        #("message", json.string(parsed.message)),
-      ]) |> json.to_string())
+      logging.info(
+        "[AGENT_MSG] " <> parsed.agent_id <> " <- " <> parsed.message,
+      )
+      protocol.text_result(
+        json.object([
+          #("sent", json.bool(True)),
+          #("agent_id", json.string(parsed.agent_id)),
+          #("message", json.string(parsed.message)),
+        ])
+        |> json.to_string(),
+      )
     }
   }
 }
@@ -2852,12 +3798,14 @@ fn handle_agent_status(args: json.Json) -> ToolResult {
   case decoders.decode_agent_status(args) {
     Error(err) -> protocol.error_result(decoders.error_to_string(err))
     Ok(parsed) -> {
-      let event_file = "/Users/playra/vibee-eliza-999/vibee/gleam/data/agents.jsonl"
+      let event_file =
+        "/Users/playra/vibee-eliza-999/vibee/gleam/data/agents.jsonl"
       let agent_id = option.unwrap(parsed.agent_id, "")
 
       case simplifile.read(event_file) {
         Ok(content) -> {
-          let lines = string.split(content, "\n")
+          let lines =
+            string.split(content, "\n")
             |> list.filter(fn(l) { l != "" })
 
           let filtered = case agent_id {
@@ -2865,18 +3813,24 @@ fn handle_agent_status(args: json.Json) -> ToolResult {
             aid -> list.filter(lines, fn(l) { string.contains(l, aid) })
           }
 
-          protocol.text_result(json.object([
-            #("agent_id_filter", json.string(agent_id)),
-            #("agents", json.array(filtered, json.string)),
-            #("count", json.int(list.length(filtered))),
-          ]) |> json.to_string())
+          protocol.text_result(
+            json.object([
+              #("agent_id_filter", json.string(agent_id)),
+              #("agents", json.array(filtered, json.string)),
+              #("count", json.int(list.length(filtered))),
+            ])
+            |> json.to_string(),
+          )
         }
         Error(_) -> {
-          protocol.text_result(json.object([
-            #("agents", json.array([], json.string)),
-            #("count", json.int(0)),
-            #("message", json.string("No agents found")),
-          ]) |> json.to_string())
+          protocol.text_result(
+            json.object([
+              #("agents", json.array([], json.string)),
+              #("count", json.int(0)),
+              #("message", json.string("No agents found")),
+            ])
+            |> json.to_string(),
+          )
         }
       }
     }
@@ -2888,23 +3842,30 @@ fn handle_agent_kill(args: json.Json) -> ToolResult {
     Error(err) -> protocol.error_result(decoders.error_to_string(err))
     Ok(parsed) -> {
       let timestamp = get_timestamp()
-      let kill_entry = json.object([
-        #("type", json.string("agent_killed")),
-        #("agent_id", json.string(parsed.agent_id)),
-        #("timestamp", json.string(timestamp)),
-      ]) |> json.to_string()
+      let kill_entry =
+        json.object([
+          #("type", json.string("agent_killed")),
+          #("agent_id", json.string(parsed.agent_id)),
+          #("timestamp", json.string(timestamp)),
+        ])
+        |> json.to_string()
 
-      let event_file = "/Users/playra/vibee-eliza-999/vibee/gleam/data/agents.jsonl"
+      let event_file =
+        "/Users/playra/vibee-eliza-999/vibee/gleam/data/agents.jsonl"
       let _ = case simplifile.read(event_file) {
-        Ok(content) -> simplifile.write(event_file, content <> "\n" <> kill_entry)
+        Ok(content) ->
+          simplifile.write(event_file, content <> "\n" <> kill_entry)
         Error(_) -> simplifile.write(event_file, kill_entry)
       }
 
       logging.info("[AGENT_KILL] " <> parsed.agent_id)
-      protocol.text_result(json.object([
-        #("killed", json.bool(True)),
-        #("agent_id", json.string(parsed.agent_id)),
-      ]) |> json.to_string())
+      protocol.text_result(
+        json.object([
+          #("killed", json.bool(True)),
+          #("agent_id", json.string(parsed.agent_id)),
+        ])
+        |> json.to_string(),
+      )
     }
   }
 }
@@ -2919,27 +3880,53 @@ fn bot_analyze_tool() -> Tool {
     description: "Analyze a Telegram bot: extract commands, response patterns, capabilities, and behavior",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("bot_username", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Bot username (with or without @)")),
-        ])),
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID for interaction")),
-        ])),
-        #("depth", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["quick", "standard", "deep"], json.string)),
-          #("description", json.string("Analysis depth: quick (commands only), standard (+ responses), deep (+ patterns)")),
-          #("default", json.string("standard")),
-        ])),
-        #("message_history", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Number of messages to analyze from history")),
-          #("default", json.int(100)),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "bot_username",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Bot username (with or without @)")),
+            ]),
+          ),
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string("Telegram session ID for interaction"),
+              ),
+            ]),
+          ),
+          #(
+            "depth",
+            json.object([
+              #("type", json.string("string")),
+              #("enum", json.array(["quick", "standard", "deep"], json.string)),
+              #(
+                "description",
+                json.string(
+                  "Analysis depth: quick (commands only), standard (+ responses), deep (+ patterns)",
+                ),
+              ),
+              #("default", json.string("standard")),
+            ]),
+          ),
+          #(
+            "message_history",
+            json.object([
+              #("type", json.string("integer")),
+              #(
+                "description",
+                json.string("Number of messages to analyze from history"),
+              ),
+              #("default", json.int(100)),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["bot_username"], json.string)),
     ]),
   )
@@ -2951,23 +3938,46 @@ fn bot_compare_tool() -> Tool {
     description: "Compare two or more bots: features, response times, command coverage",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("bots", json.object([
-          #("type", json.string("array")),
-          #("items", json.object([#("type", json.string("string"))])),
-          #("description", json.string("List of bot usernames to compare")),
-        ])),
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-        #("aspects", json.object([
-          #("type", json.string("array")),
-          #("items", json.object([#("type", json.string("string"))])),
-          #("description", json.string("Aspects to compare: commands, response_time, features, ui, language")),
-          #("default", json.array(["commands", "features", "response_time"], json.string)),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "bots",
+            json.object([
+              #("type", json.string("array")),
+              #("items", json.object([#("type", json.string("string"))])),
+              #("description", json.string("List of bot usernames to compare")),
+            ]),
+          ),
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+          #(
+            "aspects",
+            json.object([
+              #("type", json.string("array")),
+              #("items", json.object([#("type", json.string("string"))])),
+              #(
+                "description",
+                json.string(
+                  "Aspects to compare: commands, response_time, features, ui, language",
+                ),
+              ),
+              #(
+                "default",
+                json.array(
+                  ["commands", "features", "response_time"],
+                  json.string,
+                ),
+              ),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["bots"], json.string)),
     ]),
   )
@@ -2979,31 +3989,57 @@ fn bot_monitor_tool() -> Tool {
     description: "Monitor bot activity and changes over time",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("bot_username", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Bot username to monitor")),
-        ])),
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-        #("action", json.object([
-          #("type", json.string("string")),
-          #("enum", json.array(["start", "stop", "status", "report"], json.string)),
-          #("description", json.string("Monitoring action")),
-        ])),
-        #("interval_seconds", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Check interval in seconds")),
-          #("default", json.int(300)),
-        ])),
-        #("metrics", json.object([
-          #("type", json.string("array")),
-          #("items", json.object([#("type", json.string("string"))])),
-          #("description", json.string("Metrics to track: availability, response_time, command_changes")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "bot_username",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Bot username to monitor")),
+            ]),
+          ),
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+          #(
+            "action",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "enum",
+                json.array(["start", "stop", "status", "report"], json.string),
+              ),
+              #("description", json.string("Monitoring action")),
+            ]),
+          ),
+          #(
+            "interval_seconds",
+            json.object([
+              #("type", json.string("integer")),
+              #("description", json.string("Check interval in seconds")),
+              #("default", json.int(300)),
+            ]),
+          ),
+          #(
+            "metrics",
+            json.object([
+              #("type", json.string("array")),
+              #("items", json.object([#("type", json.string("string"))])),
+              #(
+                "description",
+                json.string(
+                  "Metrics to track: availability, response_time, command_changes",
+                ),
+              ),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["bot_username", "action"], json.string)),
     ]),
   )
@@ -3015,27 +4051,53 @@ fn bot_extract_commands_tool() -> Tool {
     description: "Extract and categorize all commands from a bot (via /help, BotFather, or message analysis)",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("bot_username", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Bot username")),
-        ])),
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-        #("methods", json.object([
-          #("type", json.string("array")),
-          #("items", json.object([#("type", json.string("string"))])),
-          #("description", json.string("Extraction methods: help_command, start_command, botfather, message_scan, inline_buttons")),
-          #("default", json.array(["help_command", "start_command", "inline_buttons"], json.string)),
-        ])),
-        #("test_commands", json.object([
-          #("type", json.string("boolean")),
-          #("description", json.string("Test each found command")),
-          #("default", json.bool(False)),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "bot_username",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Bot username")),
+            ]),
+          ),
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+          #(
+            "methods",
+            json.object([
+              #("type", json.string("array")),
+              #("items", json.object([#("type", json.string("string"))])),
+              #(
+                "description",
+                json.string(
+                  "Extraction methods: help_command, start_command, botfather, message_scan, inline_buttons",
+                ),
+              ),
+              #(
+                "default",
+                json.array(
+                  ["help_command", "start_command", "inline_buttons"],
+                  json.string,
+                ),
+              ),
+            ]),
+          ),
+          #(
+            "test_commands",
+            json.object([
+              #("type", json.string("boolean")),
+              #("description", json.string("Test each found command")),
+              #("default", json.bool(False)),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["bot_username"], json.string)),
     ]),
   )
@@ -3047,37 +4109,81 @@ fn bot_test_interaction_tool() -> Tool {
     description: "Test bot interaction: send messages, commands, and analyze responses",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("bot_username", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Bot username")),
-        ])),
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Telegram session ID")),
-        ])),
-        #("interactions", json.object([
-          #("type", json.string("array")),
-          #("items", json.object([
-            #("type", json.string("object")),
-            #("properties", json.object([
-              #("type", json.object([
-                #("type", json.string("string")),
-                #("enum", json.array(["command", "text", "button_click", "inline_query"], json.string)),
-              ])),
-              #("value", json.object([#("type", json.string("string"))])),
-              #("expected_pattern", json.object([#("type", json.string("string"))])),
-              #("timeout_ms", json.object([#("type", json.string("integer"))])),
-            ])),
-          ])),
-          #("description", json.string("List of interactions to test")),
-        ])),
-        #("wait_between_ms", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Wait time between interactions")),
-          #("default", json.int(1000)),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "bot_username",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Bot username")),
+            ]),
+          ),
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Telegram session ID")),
+            ]),
+          ),
+          #(
+            "interactions",
+            json.object([
+              #("type", json.string("array")),
+              #(
+                "items",
+                json.object([
+                  #("type", json.string("object")),
+                  #(
+                    "properties",
+                    json.object([
+                      #(
+                        "type",
+                        json.object([
+                          #("type", json.string("string")),
+                          #(
+                            "enum",
+                            json.array(
+                              [
+                                "command",
+                                "text",
+                                "button_click",
+                                "inline_query",
+                              ],
+                              json.string,
+                            ),
+                          ),
+                        ]),
+                      ),
+                      #(
+                        "value",
+                        json.object([#("type", json.string("string"))]),
+                      ),
+                      #(
+                        "expected_pattern",
+                        json.object([#("type", json.string("string"))]),
+                      ),
+                      #(
+                        "timeout_ms",
+                        json.object([#("type", json.string("integer"))]),
+                      ),
+                    ]),
+                  ),
+                ]),
+              ),
+              #("description", json.string("List of interactions to test")),
+            ]),
+          ),
+          #(
+            "wait_between_ms",
+            json.object([
+              #("type", json.string("integer")),
+              #("description", json.string("Wait time between interactions")),
+              #("default", json.int(1000)),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["bot_username", "interactions"], json.string)),
     ]),
   )
@@ -3096,61 +4202,115 @@ fn handle_bot_analyze(args: json.Json) -> ToolResult {
       let depth = validation.validate_analysis_depth(parsed.depth)
       let history_limit = option.unwrap(parsed.message_history, 100)
 
-      logging.info("[BOT_ANALYZE] Analyzing bot: " <> bot <> " (depth: " <> depth <> ")")
+      logging.info(
+        "[BOT_ANALYZE] Analyzing bot: " <> bot <> " (depth: " <> depth <> ")",
+      )
 
       // Collect analysis data
-      let analysis = json.object([
-        #("bot_username", json.string(bot)),
-        #("analysis_depth", json.string(depth)),
-        #("timestamp", json.string(get_timestamp())),
-        #("status", json.string("analysis_started")),
-      ])
+      let analysis =
+        json.object([
+          #("bot_username", json.string(bot)),
+          #("analysis_depth", json.string(depth)),
+          #("timestamp", json.string(get_timestamp())),
+          #("status", json.string("analysis_started")),
+        ])
 
       // If session provided, try to get actual data
       case session_id {
         "" -> {
           // Return template for manual analysis
-          protocol.text_result(json.object([
-            #("bot", json.string(bot)),
-            #("depth", json.string(depth)),
-            #("status", json.string("no_session")),
-            #("suggestion", json.string("Provide session_id to interact with bot")),
-            #("manual_analysis_template", json.object([
-              #("commands_to_try", json.array([
-                "/start", "/help", "/settings", "/menu", "/info", "/about"
-              ], json.string)),
-              #("interaction_patterns", json.array([
-                "greeting", "question", "command", "inline_query"
-              ], json.string)),
-              #("metrics_to_collect", json.array([
-                "response_time", "message_format", "button_usage", "media_support"
-              ], json.string)),
-            ])),
-          ]) |> json.to_string())
+          protocol.text_result(
+            json.object([
+              #("bot", json.string(bot)),
+              #("depth", json.string(depth)),
+              #("status", json.string("no_session")),
+              #(
+                "suggestion",
+                json.string("Provide session_id to interact with bot"),
+              ),
+              #(
+                "manual_analysis_template",
+                json.object([
+                  #(
+                    "commands_to_try",
+                    json.array(
+                      [
+                        "/start",
+                        "/help",
+                        "/settings",
+                        "/menu",
+                        "/info",
+                        "/about",
+                      ],
+                      json.string,
+                    ),
+                  ),
+                  #(
+                    "interaction_patterns",
+                    json.array(
+                      ["greeting", "question", "command", "inline_query"],
+                      json.string,
+                    ),
+                  ),
+                  #(
+                    "metrics_to_collect",
+                    json.array(
+                      [
+                        "response_time",
+                        "message_format",
+                        "button_usage",
+                        "media_support",
+                      ],
+                      json.string,
+                    ),
+                  ),
+                ]),
+              ),
+            ])
+            |> json.to_string(),
+          )
         }
         sid -> {
           // Try to get bot info and history
-          let bot_history_url = bridge_url <> "/api/v1/history/" <> bot <> "?session_id=" <> sid <> "&limit=" <> int.to_string(history_limit)
+          let bot_history_url =
+            bridge_url
+            <> "/api/v1/history/"
+            <> bot
+            <> "?session_id="
+            <> sid
+            <> "&limit="
+            <> int.to_string(history_limit)
 
           case http_get(bot_history_url) {
             Ok(history_json) -> {
               // Analyze the history
               let analysis_result = analyze_bot_messages(history_json, depth)
-              protocol.text_result(json.object([
-                #("bot", json.string(bot)),
-                #("depth", json.string(depth)),
-                #("status", json.string("completed")),
-                #("analysis", json.string(analysis_result)),
-                #("history_analyzed", json.int(history_limit)),
-              ]) |> json.to_string())
+              protocol.text_result(
+                json.object([
+                  #("bot", json.string(bot)),
+                  #("depth", json.string(depth)),
+                  #("status", json.string("completed")),
+                  #("analysis", json.string(analysis_result)),
+                  #("history_analyzed", json.int(history_limit)),
+                ])
+                |> json.to_string(),
+              )
             }
             Error(err) -> {
-              protocol.text_result(json.object([
-                #("bot", json.string(bot)),
-                #("status", json.string("error")),
-                #("error", json.string(err)),
-                #("suggestion", json.string("Start a conversation with the bot first via /start")),
-              ]) |> json.to_string())
+              protocol.text_result(
+                json.object([
+                  #("bot", json.string(bot)),
+                  #("status", json.string("error")),
+                  #("error", json.string(err)),
+                  #(
+                    "suggestion",
+                    json.string(
+                      "Start a conversation with the bot first via /start",
+                    ),
+                  ),
+                ])
+                |> json.to_string(),
+              )
             }
           }
         }
@@ -3169,21 +4329,44 @@ fn normalize_username(username: String) -> String {
 fn analyze_bot_messages(history_json: String, depth: String) -> String {
   // Extract patterns from message history
   let commands_found = extract_commands_from_history(history_json)
-  let has_buttons = string.contains(history_json, "reply_markup") || string.contains(history_json, "inline_keyboard")
-  let has_media = string.contains(history_json, "photo") || string.contains(history_json, "document") || string.contains(history_json, "video")
+  let has_buttons =
+    string.contains(history_json, "reply_markup")
+    || string.contains(history_json, "inline_keyboard")
+  let has_media =
+    string.contains(history_json, "photo")
+    || string.contains(history_json, "document")
+    || string.contains(history_json, "video")
 
-  let base_analysis = "Commands found: " <> commands_found <> "\n" <>
-    "Has buttons: " <> bool_to_string(has_buttons) <> "\n" <>
-    "Has media: " <> bool_to_string(has_media)
+  let base_analysis =
+    "Commands found: "
+    <> commands_found
+    <> "\n"
+    <> "Has buttons: "
+    <> bool_to_string(has_buttons)
+    <> "\n"
+    <> "Has media: "
+    <> bool_to_string(has_media)
 
   case depth {
     "quick" -> base_analysis
-    "standard" -> base_analysis <> "\n" <>
-      "Response patterns: text, " <> case has_buttons { True -> "buttons, " False -> "" } <> case has_media { True -> "media" False -> "" }
-    "deep" -> base_analysis <> "\n" <>
-      "Response patterns: analyzed\n" <>
-      "Conversation flow: extracted\n" <>
-      "Language detection: auto"
+    "standard" ->
+      base_analysis
+      <> "\n"
+      <> "Response patterns: text, "
+      <> case has_buttons {
+        True -> "buttons, "
+        False -> ""
+      }
+      <> case has_media {
+        True -> "media"
+        False -> ""
+      }
+    "deep" ->
+      base_analysis
+      <> "\n"
+      <> "Response patterns: analyzed\n"
+      <> "Conversation flow: extracted\n"
+      <> "Language detection: auto"
     _ -> base_analysis
   }
 }
@@ -3191,20 +4374,23 @@ fn analyze_bot_messages(history_json: String, depth: String) -> String {
 fn extract_commands_from_history(json_str: String) -> String {
   // Find /command patterns in the JSON
   let parts = string.split(json_str, "/")
-  let commands = list.filter_map(parts, fn(p) {
-    let word = string.slice(p, 0, 20)
-      |> string.split(" ")
-      |> list.first()
-    case word {
-      Ok(w) -> case string.length(w) > 0 && string.length(w) < 20 {
-        True -> Ok("/" <> w)
-        False -> Error(Nil)
+  let commands =
+    list.filter_map(parts, fn(p) {
+      let word =
+        string.slice(p, 0, 20)
+        |> string.split(" ")
+        |> list.first()
+      case word {
+        Ok(w) ->
+          case string.length(w) > 0 && string.length(w) < 20 {
+            True -> Ok("/" <> w)
+            False -> Error(Nil)
+          }
+        Error(_) -> Error(Nil)
       }
-      Error(_) -> Error(Nil)
-    }
-  })
-  |> list.unique()
-  |> list.take(10)
+    })
+    |> list.unique()
+    |> list.take(10)
 
   case list.length(commands) {
     0 -> "none detected"
@@ -3228,17 +4414,27 @@ fn handle_bot_compare(args: json.Json) -> ToolResult {
 
       logging.info("[BOT_COMPARE] Comparing bots: " <> string.join(bots, ", "))
 
-      let comparison = json.object([
-        #("bots_compared", json.array(bots, json.string)),
-        #("timestamp", json.string(get_timestamp())),
-        #("comparison_template", json.object([
-          #("features", json.string("To be filled after analysis")),
-          #("commands", json.string("To be filled after analysis")),
-          #("response_time", json.string("To be filled after analysis")),
-          #("ui_quality", json.string("To be filled after analysis")),
-        ])),
-        #("recommendation", json.string("Run bot_analyze on each bot first, then compare results")),
-      ]) |> json.to_string()
+      let comparison =
+        json.object([
+          #("bots_compared", json.array(bots, json.string)),
+          #("timestamp", json.string(get_timestamp())),
+          #(
+            "comparison_template",
+            json.object([
+              #("features", json.string("To be filled after analysis")),
+              #("commands", json.string("To be filled after analysis")),
+              #("response_time", json.string("To be filled after analysis")),
+              #("ui_quality", json.string("To be filled after analysis")),
+            ]),
+          ),
+          #(
+            "recommendation",
+            json.string(
+              "Run bot_analyze on each bot first, then compare results",
+            ),
+          ),
+        ])
+        |> json.to_string()
 
       protocol.text_result(comparison)
     }
@@ -3255,83 +4451,116 @@ fn handle_bot_monitor(args: json.Json) -> ToolResult {
           let bot = normalize_username(parsed.bot_username)
           let interval = option.unwrap(parsed.interval_seconds, 300)
           {
-      let monitor_file = "/Users/playra/vibee-eliza-999/vibee/gleam/data/bot_monitors.jsonl"
-      let timestamp = get_timestamp()
+            let monitor_file =
+              "/Users/playra/vibee-eliza-999/vibee/gleam/data/bot_monitors.jsonl"
+            let timestamp = get_timestamp()
 
-      case act {
-        "start" -> {
-          let entry = json.object([
-            #("bot", json.string(bot)),
-            #("action", json.string("monitor_started")),
-            #("interval_seconds", json.int(interval)),
-            #("timestamp", json.string(timestamp)),
-          ]) |> json.to_string()
+            case act {
+              "start" -> {
+                let entry =
+                  json.object([
+                    #("bot", json.string(bot)),
+                    #("action", json.string("monitor_started")),
+                    #("interval_seconds", json.int(interval)),
+                    #("timestamp", json.string(timestamp)),
+                  ])
+                  |> json.to_string()
 
-          let _ = case simplifile.read(monitor_file) {
-            Ok(content) -> simplifile.write(monitor_file, content <> "\n" <> entry)
-            Error(_) -> simplifile.write(monitor_file, entry)
-          }
+                let _ = case simplifile.read(monitor_file) {
+                  Ok(content) ->
+                    simplifile.write(monitor_file, content <> "\n" <> entry)
+                  Error(_) -> simplifile.write(monitor_file, entry)
+                }
 
-          protocol.text_result(json.object([
-            #("status", json.string("monitoring_started")),
-            #("bot", json.string(bot)),
-            #("interval_seconds", json.int(interval)),
-            #("note", json.string("Monitor will check bot availability and response time")),
-          ]) |> json.to_string())
-        }
-        "stop" -> {
-          let entry = json.object([
-            #("bot", json.string(bot)),
-            #("action", json.string("monitor_stopped")),
-            #("timestamp", json.string(timestamp)),
-          ]) |> json.to_string()
+                protocol.text_result(
+                  json.object([
+                    #("status", json.string("monitoring_started")),
+                    #("bot", json.string(bot)),
+                    #("interval_seconds", json.int(interval)),
+                    #(
+                      "note",
+                      json.string(
+                        "Monitor will check bot availability and response time",
+                      ),
+                    ),
+                  ])
+                  |> json.to_string(),
+                )
+              }
+              "stop" -> {
+                let entry =
+                  json.object([
+                    #("bot", json.string(bot)),
+                    #("action", json.string("monitor_stopped")),
+                    #("timestamp", json.string(timestamp)),
+                  ])
+                  |> json.to_string()
 
-          let _ = case simplifile.read(monitor_file) {
-            Ok(content) -> simplifile.write(monitor_file, content <> "\n" <> entry)
-            Error(_) -> simplifile.write(monitor_file, entry)
-          }
+                let _ = case simplifile.read(monitor_file) {
+                  Ok(content) ->
+                    simplifile.write(monitor_file, content <> "\n" <> entry)
+                  Error(_) -> simplifile.write(monitor_file, entry)
+                }
 
-          protocol.text_result(json.object([
-            #("status", json.string("monitoring_stopped")),
-            #("bot", json.string(bot)),
-          ]) |> json.to_string())
-        }
-        "status" -> {
-          case simplifile.read(monitor_file) {
-            Ok(content) -> {
-              let bot_entries = string.split(content, "\n")
-                |> list.filter(fn(l) { string.contains(l, bot) })
-                |> list.reverse()
-                |> list.take(5)
+                protocol.text_result(
+                  json.object([
+                    #("status", json.string("monitoring_stopped")),
+                    #("bot", json.string(bot)),
+                  ])
+                  |> json.to_string(),
+                )
+              }
+              "status" -> {
+                case simplifile.read(monitor_file) {
+                  Ok(content) -> {
+                    let bot_entries =
+                      string.split(content, "\n")
+                      |> list.filter(fn(l) { string.contains(l, bot) })
+                      |> list.reverse()
+                      |> list.take(5)
 
-              protocol.text_result(json.object([
-                #("bot", json.string(bot)),
-                #("recent_entries", json.array(bot_entries, json.string)),
-              ]) |> json.to_string())
+                    protocol.text_result(
+                      json.object([
+                        #("bot", json.string(bot)),
+                        #(
+                          "recent_entries",
+                          json.array(bot_entries, json.string),
+                        ),
+                      ])
+                      |> json.to_string(),
+                    )
+                  }
+                  Error(_) ->
+                    protocol.text_result(
+                      json.object([
+                        #("bot", json.string(bot)),
+                        #("status", json.string("no_monitoring_data")),
+                      ])
+                      |> json.to_string(),
+                    )
+                }
+              }
+              "report" -> {
+                case simplifile.read(monitor_file) {
+                  Ok(content) -> {
+                    let bot_entries =
+                      string.split(content, "\n")
+                      |> list.filter(fn(l) { string.contains(l, bot) })
+
+                    protocol.text_result(
+                      json.object([
+                        #("bot", json.string(bot)),
+                        #("total_entries", json.int(list.length(bot_entries))),
+                        #("entries", json.array(bot_entries, json.string)),
+                      ])
+                      |> json.to_string(),
+                    )
+                  }
+                  Error(_) -> protocol.error_result("No monitoring data found")
+                }
+              }
+              _ -> protocol.error_result("Invalid action: " <> act)
             }
-            Error(_) -> protocol.text_result(json.object([
-              #("bot", json.string(bot)),
-              #("status", json.string("no_monitoring_data")),
-            ]) |> json.to_string())
-          }
-        }
-        "report" -> {
-          case simplifile.read(monitor_file) {
-            Ok(content) -> {
-              let bot_entries = string.split(content, "\n")
-                |> list.filter(fn(l) { string.contains(l, bot) })
-
-              protocol.text_result(json.object([
-                #("bot", json.string(bot)),
-                #("total_entries", json.int(list.length(bot_entries))),
-                #("entries", json.array(bot_entries, json.string)),
-              ]) |> json.to_string())
-            }
-            Error(_) -> protocol.error_result("No monitoring data found")
-          }
-        }
-        _ -> protocol.error_result("Invalid action: " <> act)
-      }
           }
         }
       }
@@ -3363,32 +4592,49 @@ fn handle_bot_extract_commands(args: json.Json) -> ToolResult {
         #("/support", "Get support"),
       ]
 
-      let extraction_result = json.object([
-        #("bot", json.string(bot)),
-        #("extraction_methods", json.array([
-          "help_command",
-          "start_command",
-          "inline_buttons",
-          "message_scan"
-        ], json.string)),
-        #("common_commands_to_try", json.array(
-          list.map(common_commands, fn(cmd) {
-            json.object([
-              #("command", json.string(cmd.0)),
-              #("description", json.string(cmd.1)),
-            ])
-          }),
-          fn(x) { x }
-        )),
-        #("session_provided", json.bool(session_id != "")),
-        #("test_commands", json.bool(test_commands)),
-        #("next_steps", json.array([
-          "Send /start to bot",
-          "Send /help to get command list",
-          "Analyze inline buttons in responses",
-          "Parse command descriptions from messages"
-        ], json.string)),
-      ]) |> json.to_string()
+      let extraction_result =
+        json.object([
+          #("bot", json.string(bot)),
+          #(
+            "extraction_methods",
+            json.array(
+              [
+                "help_command",
+                "start_command",
+                "inline_buttons",
+                "message_scan",
+              ],
+              json.string,
+            ),
+          ),
+          #(
+            "common_commands_to_try",
+            json.array(
+              list.map(common_commands, fn(cmd) {
+                json.object([
+                  #("command", json.string(cmd.0)),
+                  #("description", json.string(cmd.1)),
+                ])
+              }),
+              fn(x) { x },
+            ),
+          ),
+          #("session_provided", json.bool(session_id != "")),
+          #("test_commands", json.bool(test_commands)),
+          #(
+            "next_steps",
+            json.array(
+              [
+                "Send /start to bot",
+                "Send /help to get command list",
+                "Analyze inline buttons in responses",
+                "Parse command descriptions from messages",
+              ],
+              json.string,
+            ),
+          ),
+        ])
+        |> json.to_string()
 
       protocol.text_result(extraction_result)
     }
@@ -3403,7 +4649,10 @@ fn handle_bot_test_interaction(args: json.Json) -> ToolResult {
       let wait_between = option.unwrap(parsed.wait_between_ms, 1000)
 
       case parsed.session_id {
-        None -> protocol.error_result("session_id is required for testing interactions")
+        None ->
+          protocol.error_result(
+            "session_id is required for testing interactions",
+          )
         Some(sid) -> {
           case validation.validate_session_id(sid) {
             Error(err) -> protocol.error_result(validation.error_to_string(err))
@@ -3411,37 +4660,51 @@ fn handle_bot_test_interaction(args: json.Json) -> ToolResult {
               logging.info("[BOT_TEST] Testing interactions with: " <> bot)
 
               // Build interactions JSON array
-              let interactions_json = json.array(parsed.interactions, fn(inter) {
-                json.object([
-                  #("type", json.string(inter.interaction_type)),
-                  #("value", json.string(inter.value)),
-                  #("expected_pattern", case inter.expected_pattern {
-                    Some(p) -> json.string(p)
-                    None -> json.null()
-                  }),
-                  #("timeout_ms", case inter.timeout_ms {
-                    Some(t) -> json.int(t)
-                    None -> json.null()
-                  }),
-                ])
-              })
+              let interactions_json =
+                json.array(parsed.interactions, fn(inter) {
+                  json.object([
+                    #("type", json.string(inter.interaction_type)),
+                    #("value", json.string(inter.value)),
+                    #("expected_pattern", case inter.expected_pattern {
+                      Some(p) -> json.string(p)
+                      None -> json.null()
+                    }),
+                    #("timeout_ms", case inter.timeout_ms {
+                      Some(t) -> json.int(t)
+                      None -> json.null()
+                    }),
+                  ])
+                })
 
-              let test_plan = json.object([
-                #("bot", json.string(bot)),
-                #("session_id", json.string(valid_sid)),
-                #("status", json.string("test_plan_created")),
-                #("interactions_to_test", interactions_json),
-                #("wait_between_ms", json.int(wait_between)),
-                #("execution_steps", json.array([
-                  "1. Resolve bot chat_id",
-                  "2. Send /start command",
-                  "3. Execute each interaction",
-                  "4. Record response time",
-                  "5. Match response against expected pattern",
-                  "6. Generate report"
-                ], json.string)),
-                #("note", json.string("Use telegram_send_message to execute individual interactions")),
-              ]) |> json.to_string()
+              let test_plan =
+                json.object([
+                  #("bot", json.string(bot)),
+                  #("session_id", json.string(valid_sid)),
+                  #("status", json.string("test_plan_created")),
+                  #("interactions_to_test", interactions_json),
+                  #("wait_between_ms", json.int(wait_between)),
+                  #(
+                    "execution_steps",
+                    json.array(
+                      [
+                        "1. Resolve bot chat_id",
+                        "2. Send /start command",
+                        "3. Execute each interaction",
+                        "4. Record response time",
+                        "5. Match response against expected pattern",
+                        "6. Generate report",
+                      ],
+                      json.string,
+                    ),
+                  ),
+                  #(
+                    "note",
+                    json.string(
+                      "Use telegram_send_message to execute individual interactions",
+                    ),
+                  ),
+                ])
+                |> json.to_string()
 
               protocol.text_result(test_plan)
             }
@@ -3462,12 +4725,21 @@ fn auth_status_tool() -> Tool {
     description: "Check Telegram authorization status for current session",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Session ID (optional, uses default)")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string("Session ID (optional, uses default)"),
+              ),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array([], json.string)),
     ]),
   )
@@ -3479,16 +4751,30 @@ fn auth_send_code_tool() -> Tool {
     description: "Send authorization code to phone number via Telegram",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("phone", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Phone number in international format (+79001234567)")),
-        ])),
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Session ID (optional)")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "phone",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string(
+                  "Phone number in international format (+79001234567)",
+                ),
+              ),
+            ]),
+          ),
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Session ID (optional)")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array(["phone"], json.string)),
     ]),
   )
@@ -3500,25 +4786,46 @@ fn auth_verify_code_tool() -> Tool {
     description: "Verify authorization code received via Telegram",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("phone", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Phone number used for send_code")),
-        ])),
-        #("code", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Authorization code from Telegram")),
-        ])),
-        #("phone_code_hash", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Phone code hash from send_code response")),
-        ])),
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Session ID (optional)")),
-        ])),
-      ])),
-      #("required", json.array(["phone", "code", "phone_code_hash"], json.string)),
+      #(
+        "properties",
+        json.object([
+          #(
+            "phone",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Phone number used for send_code")),
+            ]),
+          ),
+          #(
+            "code",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Authorization code from Telegram")),
+            ]),
+          ),
+          #(
+            "phone_code_hash",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string("Phone code hash from send_code response"),
+              ),
+            ]),
+          ),
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Session ID (optional)")),
+            ]),
+          ),
+        ]),
+      ),
+      #(
+        "required",
+        json.array(["phone", "code", "phone_code_hash"], json.string),
+      ),
     ]),
   )
 }
@@ -3529,12 +4836,18 @@ fn auth_logout_tool() -> Tool {
     description: "Logout from Telegram session",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("session_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Session ID to logout")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "session_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Session ID to logout")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array([], json.string)),
     ]),
   )
@@ -3549,7 +4862,8 @@ fn handle_auth_status(_args: json.Json) -> ToolResult {
 
   let path = "/api/v1/auth/status"
 
-  let req = request.new()
+  let req =
+    request.new()
     |> request.set_scheme(http.Http)
     |> request.set_method(http.Get)
     |> request.set_host("localhost")
@@ -3567,39 +4881,66 @@ fn handle_auth_status(_args: json.Json) -> ToolResult {
         }
         _ -> {
           // Not authorized - add helpful instructions
-          let response = json.object([
-            #("status", json.string("not_authorized")),
-            #("sessions", json.array([], fn(x) { x })),
-            #("total_sessions", json.int(0)),
-            #("message", json.string("Telegram не авторизован. Для использования Telegram tools необходима авторизация.")),
-            #("action_required", json.string("authorization")),
-            #("prompt", json.string("Введите номер телефона в формате +79001234567:")),
-            #("quick_start", json.object([
-              #("step", json.int(1)),
-              #("action", json.string("Укажите номер телефона для отправки кода")),
-              #("tool", json.string("auth_send_code")),
-              #("example", json.object([
-                #("phone", json.string("+79001234567")),
-              ])),
-            ])),
-            #("instructions", json.string(
-              "Для авторизации в Telegram выполните следующие шаги:\n" <>
-              "1. Вызовите auth_send_code с вашим номером телефона (+79001234567)\n" <>
-              "2. Получите код авторизации в Telegram\n" <>
-              "3. Вызовите auth_verify_code с полученным кодом и phone_code_hash"
-            )),
-          ])
+          let response =
+            json.object([
+              #("status", json.string("not_authorized")),
+              #("sessions", json.array([], fn(x) { x })),
+              #("total_sessions", json.int(0)),
+              #(
+                "message",
+                json.string(
+                  "Telegram не авторизован. Для использования Telegram tools необходима авторизация.",
+                ),
+              ),
+              #("action_required", json.string("authorization")),
+              #(
+                "prompt",
+                json.string("Введите номер телефона в формате +79001234567:"),
+              ),
+              #(
+                "quick_start",
+                json.object([
+                  #("step", json.int(1)),
+                  #(
+                    "action",
+                    json.string("Укажите номер телефона для отправки кода"),
+                  ),
+                  #("tool", json.string("auth_send_code")),
+                  #(
+                    "example",
+                    json.object([
+                      #("phone", json.string("+79001234567")),
+                    ]),
+                  ),
+                ]),
+              ),
+              #(
+                "instructions",
+                json.string(
+                  "Для авторизации в Telegram выполните следующие шаги:\n"
+                  <> "1. Вызовите auth_send_code с вашим номером телефона (+79001234567)\n"
+                  <> "2. Получите код авторизации в Telegram\n"
+                  <> "3. Вызовите auth_verify_code с полученным кодом и phone_code_hash",
+                ),
+              ),
+            ])
           protocol.text_result(json.to_string(response))
         }
       }
     }
     Error(_) -> {
       logging.error("[AUTH] Status check failed - bridge not running")
-      let response = json.object([
-        #("status", json.string("bridge_not_running")),
-        #("message", json.string("Telegram bridge не запущен. Запустите telegram-bridge на порту 8081.")),
-        #("error", json.bool(True)),
-      ])
+      let response =
+        json.object([
+          #("status", json.string("bridge_not_running")),
+          #(
+            "message",
+            json.string(
+              "Telegram bridge не запущен. Запустите telegram-bridge на порту 8081.",
+            ),
+          ),
+          #("error", json.bool(True)),
+        ])
       protocol.text_result(json.to_string(response))
     }
   }
@@ -3615,9 +4956,11 @@ fn handle_auth_send_code(args: json.Json) -> ToolResult {
           logging.info("[AUTH] Sending code to: " <> phone)
 
           let url = bridge_url <> "/api/v1/auth/send-code"
-          let body = json.object([
-            #("phone", json.string(phone)),
-          ]) |> json.to_string()
+          let body =
+            json.object([
+              #("phone", json.string(phone)),
+            ])
+            |> json.to_string()
 
           case make_telegram_post_request(url, body) {
             Ok(response) -> {
@@ -3645,11 +4988,13 @@ fn handle_auth_verify_code(args: json.Json) -> ToolResult {
           logging.info("[AUTH] Verifying code for: " <> phone)
 
           let url = bridge_url <> "/api/v1/auth/verify-code"
-          let body = json.object([
-            #("phone", json.string(phone)),
-            #("code", json.string(parsed.code)),
-            #("phone_code_hash", json.string(parsed.phone_code_hash)),
-          ]) |> json.to_string()
+          let body =
+            json.object([
+              #("phone", json.string(phone)),
+              #("code", json.string(parsed.code)),
+              #("phone_code_hash", json.string(parsed.phone_code_hash)),
+            ])
+            |> json.to_string()
 
           case make_telegram_post_request(url, body) {
             Ok(response) -> {
@@ -3669,9 +5014,9 @@ fn handle_auth_verify_code(args: json.Json) -> ToolResult {
 
 fn handle_auth_logout(_args: json.Json) -> ToolResult {
   logging.info("[AUTH] Logging out...")
-  
+
   let url = bridge_url <> "/api/v1/auth/logout"
-  
+
   case make_telegram_post_request(url, "{}") {
     Ok(response) -> {
       logging.info("[AUTH] Logout successful")
@@ -3684,8 +5029,12 @@ fn handle_auth_logout(_args: json.Json) -> ToolResult {
   }
 }
 
-fn make_telegram_post_request(url: String, body: String) -> Result(String, String) {
-  let req = request.new()
+fn make_telegram_post_request(
+  url: String,
+  body: String,
+) -> Result(String, String) {
+  let req =
+    request.new()
     |> request.set_method(http.Post)
     |> request.set_host("localhost")
     |> request.set_port(8081)
@@ -3710,17 +5059,29 @@ fn rainbow_autonomous_debug_cycle_tool() -> Tool {
     description: "Run autonomous debug cycle: build → analyze → fix → verify. Automatically iterates until no errors or max iterations reached.",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("path", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Project path to build and fix")),
-        ])),
-        #("max_iterations", json.object([
-          #("type", json.string("integer")),
-          #("description", json.string("Maximum number of fix iterations (default: 5)")),
-          #("default", json.int(5)),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "path",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Project path to build and fix")),
+            ]),
+          ),
+          #(
+            "max_iterations",
+            json.object([
+              #("type", json.string("integer")),
+              #(
+                "description",
+                json.string("Maximum number of fix iterations (default: 5)"),
+              ),
+              #("default", json.int(5)),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array([json.string("path")], fn(x) { x })),
     ]),
   )
@@ -3733,17 +5094,26 @@ fn task_create_tool() -> Tool {
     description: "Create a new task for tracking autonomous operations",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("description", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Task description")),
-        ])),
-        #("files", json.object([
-          #("type", json.string("array")),
-          #("items", json.object([#("type", json.string("string"))])),
-          #("description", json.string("Files involved in this task")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "description",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Task description")),
+            ]),
+          ),
+          #(
+            "files",
+            json.object([
+              #("type", json.string("array")),
+              #("items", json.object([#("type", json.string("string"))])),
+              #("description", json.string("Files involved in this task")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array([json.string("description")], fn(x) { x })),
     ]),
   )
@@ -3756,12 +5126,18 @@ fn task_get_tool() -> Tool {
     description: "Get task by ID with full context and history",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("task_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Task ID")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "task_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Task ID")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array([json.string("task_id")], fn(x) { x })),
     ]),
   )
@@ -3774,19 +5150,36 @@ fn task_list_tool() -> Tool {
     description: "List tasks, optionally filtered by state",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("state", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Filter by state: pending, in_progress, healing, completed, failed")),
-          #("enum", json.array([
-            json.string("pending"),
-            json.string("in_progress"),
-            json.string("healing"),
-            json.string("completed"),
-            json.string("failed"),
-          ], fn(x) { x })),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "state",
+            json.object([
+              #("type", json.string("string")),
+              #(
+                "description",
+                json.string(
+                  "Filter by state: pending, in_progress, healing, completed, failed",
+                ),
+              ),
+              #(
+                "enum",
+                json.array(
+                  [
+                    json.string("pending"),
+                    json.string("in_progress"),
+                    json.string("healing"),
+                    json.string("completed"),
+                    json.string("failed"),
+                  ],
+                  fn(x) { x },
+                ),
+              ),
+            ]),
+          ),
+        ]),
+      ),
     ]),
   )
 }
@@ -3798,17 +5191,29 @@ fn task_update_tool() -> Tool {
     description: "Update task state",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("task_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Task ID")),
-        ])),
-        #("state", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("New state")),
-        ])),
-      ])),
-      #("required", json.array([json.string("task_id"), json.string("state")], fn(x) { x })),
+      #(
+        "properties",
+        json.object([
+          #(
+            "task_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Task ID")),
+            ]),
+          ),
+          #(
+            "state",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("New state")),
+            ]),
+          ),
+        ]),
+      ),
+      #(
+        "required",
+        json.array([json.string("task_id"), json.string("state")], fn(x) { x }),
+      ),
     ]),
   )
 }
@@ -3820,12 +5225,18 @@ fn heal_start_tool() -> Tool {
     description: "Start self-healing process for a task, taking snapshots of files for rollback",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("task_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Task ID to start healing")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "task_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Task ID to start healing")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array([json.string("task_id")], fn(x) { x })),
     ]),
   )
@@ -3838,17 +5249,29 @@ fn heal_apply_fix_tool() -> Tool {
     description: "Apply a suggested fix to the code",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("task_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Task ID")),
-        ])),
-        #("fix_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Fix ID to apply")),
-        ])),
-      ])),
-      #("required", json.array([json.string("task_id"), json.string("fix_id")], fn(x) { x })),
+      #(
+        "properties",
+        json.object([
+          #(
+            "task_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Task ID")),
+            ]),
+          ),
+          #(
+            "fix_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Fix ID to apply")),
+            ]),
+          ),
+        ]),
+      ),
+      #(
+        "required",
+        json.array([json.string("task_id"), json.string("fix_id")], fn(x) { x }),
+      ),
     ]),
   )
 }
@@ -3860,17 +5283,29 @@ fn heal_verify_tool() -> Tool {
     description: "Verify if an applied fix was successful by running build",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("task_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Task ID")),
-        ])),
-        #("fix_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Fix ID to verify")),
-        ])),
-      ])),
-      #("required", json.array([json.string("task_id"), json.string("fix_id")], fn(x) { x })),
+      #(
+        "properties",
+        json.object([
+          #(
+            "task_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Task ID")),
+            ]),
+          ),
+          #(
+            "fix_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Fix ID to verify")),
+            ]),
+          ),
+        ]),
+      ),
+      #(
+        "required",
+        json.array([json.string("task_id"), json.string("fix_id")], fn(x) { x }),
+      ),
     ]),
   )
 }
@@ -3882,17 +5317,29 @@ fn heal_rollback_tool() -> Tool {
     description: "Rollback a fix that didn't work, restoring original file content",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("task_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Task ID")),
-        ])),
-        #("fix_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Fix ID to rollback")),
-        ])),
-      ])),
-      #("required", json.array([json.string("task_id"), json.string("fix_id")], fn(x) { x })),
+      #(
+        "properties",
+        json.object([
+          #(
+            "task_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Task ID")),
+            ]),
+          ),
+          #(
+            "fix_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Fix ID to rollback")),
+            ]),
+          ),
+        ]),
+      ),
+      #(
+        "required",
+        json.array([json.string("task_id"), json.string("fix_id")], fn(x) { x }),
+      ),
     ]),
   )
 }
@@ -3904,12 +5351,18 @@ fn decide_next_step_tool() -> Tool {
     description: "Get decision engine recommendation for next action based on task state",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("task_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Task ID to analyze")),
-        ])),
-      ])),
+      #(
+        "properties",
+        json.object([
+          #(
+            "task_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Task ID to analyze")),
+            ]),
+          ),
+        ]),
+      ),
       #("required", json.array([json.string("task_id")], fn(x) { x })),
     ]),
   )
@@ -3922,17 +5375,31 @@ fn decide_apply_tool() -> Tool {
     description: "Apply a decision from the decision engine",
     input_schema: json.object([
       #("type", json.string("object")),
-      #("properties", json.object([
-        #("task_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Task ID")),
-        ])),
-        #("decision_id", json.object([
-          #("type", json.string("string")),
-          #("description", json.string("Decision ID to apply")),
-        ])),
-      ])),
-      #("required", json.array([json.string("task_id"), json.string("decision_id")], fn(x) { x })),
+      #(
+        "properties",
+        json.object([
+          #(
+            "task_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Task ID")),
+            ]),
+          ),
+          #(
+            "decision_id",
+            json.object([
+              #("type", json.string("string")),
+              #("description", json.string("Decision ID to apply")),
+            ]),
+          ),
+        ]),
+      ),
+      #(
+        "required",
+        json.array([json.string("task_id"), json.string("decision_id")], fn(x) {
+          x
+        }),
+      ),
     ]),
   )
 }
@@ -4009,11 +5476,12 @@ fn handle_task_list(args: json.Json) -> ToolResult {
         }
       }
 
-      let result = json.object([
-        #("tasks", json.array(tasks, rainbow_types.encode_task)),
-        #("count", json.int(list.length(tasks))),
-        #("stats", task_store.get_stats()),
-      ])
+      let result =
+        json.object([
+          #("tasks", json.array(tasks, rainbow_types.encode_task)),
+          #("count", json.int(list.length(tasks))),
+          #("stats", task_store.get_stats()),
+        ])
       protocol.text_result(json.to_string(result))
     }
   }
@@ -4066,11 +5534,15 @@ fn handle_heal_apply_fix(args: json.Json) -> ToolResult {
         Some(_task) -> {
           // For now, return success message
           // In full implementation, would find fix by ID and apply
-          protocol.text_result(json.to_string(json.object([
-            #("status", json.string("fix_application_requested")),
-            #("task_id", json.string(parsed.task_id)),
-            #("fix_id", json.string(parsed.fix_id)),
-          ])))
+          protocol.text_result(
+            json.to_string(
+              json.object([
+                #("status", json.string("fix_application_requested")),
+                #("task_id", json.string(parsed.task_id)),
+                #("fix_id", json.string(parsed.fix_id)),
+              ]),
+            ),
+          )
         }
         None -> protocol.error_result("Task not found: " <> parsed.task_id)
       }
@@ -4086,11 +5558,15 @@ fn handle_heal_verify(args: json.Json) -> ToolResult {
 
       case healing.verify_fix(parsed.task_id, parsed.fix_id) {
         Ok(success) -> {
-          protocol.text_result(json.to_string(json.object([
-            #("verified", json.bool(success)),
-            #("task_id", json.string(parsed.task_id)),
-            #("fix_id", json.string(parsed.fix_id)),
-          ])))
+          protocol.text_result(
+            json.to_string(
+              json.object([
+                #("verified", json.bool(success)),
+                #("task_id", json.string(parsed.task_id)),
+                #("fix_id", json.string(parsed.fix_id)),
+              ]),
+            ),
+          )
         }
         Error(err) -> protocol.error_result(err)
       }
@@ -4106,11 +5582,15 @@ fn handle_heal_rollback(args: json.Json) -> ToolResult {
 
       case healing.rollback(parsed.task_id, parsed.fix_id) {
         Ok(_) -> {
-          protocol.text_result(json.to_string(json.object([
-            #("status", json.string("rolled_back")),
-            #("task_id", json.string(parsed.task_id)),
-            #("fix_id", json.string(parsed.fix_id)),
-          ])))
+          protocol.text_result(
+            json.to_string(
+              json.object([
+                #("status", json.string("rolled_back")),
+                #("task_id", json.string(parsed.task_id)),
+                #("fix_id", json.string(parsed.fix_id)),
+              ]),
+            ),
+          )
         }
         Error(err) -> protocol.error_result(err)
       }
@@ -4146,11 +5626,15 @@ fn handle_decide_apply(args: json.Json) -> ToolResult {
         Ok(d) -> {
           case decision.apply_decision(parsed.task_id, d) {
             Ok(result) -> {
-              protocol.text_result(json.to_string(json.object([
-                #("status", json.string("applied")),
-                #("decision_id", json.string(parsed.decision_id)),
-                #("result", json.string(result)),
-              ])))
+              protocol.text_result(
+                json.to_string(
+                  json.object([
+                    #("status", json.string("applied")),
+                    #("decision_id", json.string(parsed.decision_id)),
+                    #("result", json.string(result)),
+                  ]),
+                ),
+              )
             }
             Error(err) -> protocol.error_result(err)
           }

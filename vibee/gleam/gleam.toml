@@ -18,6 +18,7 @@ wisp = ">= 1.4.0"
 simplifile = ">= 2.2.0"
 lustre = ">= 4.6.0"
 nakai = ">= 1.0.0"
+shellout = ">= 1.6.0"
 
 [dev-dependencies]
 gleeunit = "~> 1.2"

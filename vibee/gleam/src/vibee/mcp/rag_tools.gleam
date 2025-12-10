@@ -769,135 +769,29 @@ pub fn handle_telegram_search_history(args: json.Json) -> ToolResult {
 }
 
 /// Handle telegram_transcribe_voice
+/// TODO: Implement media processor module
 pub fn handle_telegram_transcribe_voice(args: json.Json) -> ToolResult {
-  let media_id = json_get_int(args, "media_id")
-  let file_path = json_get_string(args, "file_path")
-  let language =
+  let _media_id = json_get_int(args, "media_id")
+  let _file_path = json_get_string(args, "file_path")
+  let _language =
     json_get_string(args, "language")
     |> result.unwrap("ru")
 
-  case media_id, file_path {
-    Error(_), Error(_) ->
-      protocol.error_result("Either media_id or file_path is required")
-    Ok(mid), _ -> {
-      let db_url = config.get_env_or("DATABASE_URL", "")
-      case db_url {
-        "" -> protocol.error_result("DATABASE_URL not set")
-        url -> {
-          case postgres.connect(url) {
-            Error(e) ->
-              protocol.error_result("DB error: " <> db_error_to_string(e))
-            Ok(pool) -> {
-              // TODO: Get file path from media record
-              let cfg =
-                processor.MediaConfig(
-                  ..processor.default_config(),
-                  whisper_language: language,
-                )
-              // For now, return error since we need the file path
-              postgres.disconnect(pool)
-              protocol.error_result(
-                "media_id lookup not implemented yet. Please provide file_path.",
-              )
-            }
-          }
-        }
-      }
-    }
-    _, Ok(path) -> {
-      let db_url = config.get_env_or("DATABASE_URL", "")
-      case db_url {
-        "" -> {
-          // Can still transcribe without DB
-          let cfg =
-            processor.MediaConfig(
-              ..processor.default_config(),
-              whisper_language: language,
-            )
-          // Direct transcription would go here
-          protocol.error_result(
-            "Direct transcription without DB not implemented",
-          )
-        }
-        url -> {
-          case postgres.connect(url) {
-            Error(e) ->
-              protocol.error_result("DB error: " <> db_error_to_string(e))
-            Ok(pool) -> {
-              let cfg =
-                processor.MediaConfig(
-                  ..processor.default_config(),
-                  whisper_language: language,
-                )
-              case processor.transcribe_voice(pool, 0, path, cfg) {
-                Error(e) -> {
-                  postgres.disconnect(pool)
-                  protocol.error_result(
-                    "Transcription failed: " <> media_error_to_string(e),
-                  )
-                }
-                Ok(result) -> {
-                  postgres.disconnect(pool)
-                  protocol.text_result(processor.media_result_to_json(result))
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  protocol.error_result(
+    "Voice transcription not implemented yet. Media processor module pending.",
+  )
 }
 
 /// Handle telegram_analyze_image
+/// TODO: Implement media processor module with Claude Vision
 pub fn handle_telegram_analyze_image(args: json.Json) -> ToolResult {
-  let media_id = json_get_int(args, "media_id")
-  let file_path = json_get_string(args, "file_path")
-  let custom_prompt = json_get_string(args, "prompt")
+  let _media_id = json_get_int(args, "media_id")
+  let _file_path = json_get_string(args, "file_path")
+  let _custom_prompt = json_get_string(args, "prompt")
 
-  case media_id, file_path {
-    Error(_), Error(_) ->
-      protocol.error_result("Either media_id or file_path is required")
-    _, Ok(path) -> {
-      let db_url = config.get_env_or("DATABASE_URL", "")
-      case db_url {
-        "" -> protocol.error_result("DATABASE_URL not set")
-        url -> {
-          case postgres.connect(url) {
-            Error(e) ->
-              protocol.error_result("DB error: " <> db_error_to_string(e))
-            Ok(pool) -> {
-              let cfg = case custom_prompt {
-                Ok(p) ->
-                  processor.MediaConfig(
-                    ..processor.default_config(),
-                    vision_prompt: p,
-                  )
-                Error(_) -> processor.default_config()
-              }
-
-              case processor.analyze_image(pool, 0, path, cfg) {
-                Error(e) -> {
-                  postgres.disconnect(pool)
-                  protocol.error_result(
-                    "Analysis failed: " <> media_error_to_string(e),
-                  )
-                }
-                Ok(result) -> {
-                  postgres.disconnect(pool)
-                  protocol.text_result(processor.media_result_to_json(result))
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    Ok(_mid), _ ->
-      protocol.error_result(
-        "media_id lookup not implemented. Please provide file_path.",
-      )
-  }
+  protocol.error_result(
+    "Image analysis not implemented yet. Media processor module pending.",
+  )
 }
 
 // =============================================================================
@@ -1052,16 +946,6 @@ fn parser_error_to_string(e: parser.ParserError) -> String {
     parser.ParserDbError(msg) -> "DB error: " <> msg
     parser.ParserRateLimited -> "Rate limited"
     parser.ParserCancelled -> "Cancelled"
-  }
-}
-
-fn media_error_to_string(e: processor.MediaError) -> String {
-  case e {
-    processor.MediaDownloadError(msg) -> "Download error: " <> msg
-    processor.MediaTranscriptionError(msg) -> "Transcription error: " <> msg
-    processor.MediaVisionError(msg) -> "Vision error: " <> msg
-    processor.MediaDbError(msg) -> "DB error: " <> msg
-    processor.MediaFileError(msg) -> "File error: " <> msg
   }
 }
 

@@ -14,7 +14,6 @@ import vibee/embedding/worker
 import vibee/mcp/config
 import vibee/mcp/protocol
 import vibee/mcp/types.{type Tool, type ToolResult, TextContent, Tool}
-import vibee/media/processor
 import vibee/search/hybrid
 import vibee/telegram/parser
 
@@ -628,48 +627,18 @@ pub fn handle_telegram_get_parse_status(_args: json.Json) -> ToolResult {
 }
 
 /// Handle telegram_process_media
+/// TODO: Implement media processor module
 pub fn handle_telegram_process_media(args: json.Json) -> ToolResult {
-  let media_type =
+  let _media_type =
     json_get_string(args, "media_type")
     |> result.unwrap("all")
-  let batch_size =
+  let _batch_size =
     json_get_int(args, "batch_size")
     |> result.unwrap(10)
 
-  let db_url = config.get_env_or("DATABASE_URL", "")
-  case db_url {
-    "" -> protocol.error_result("DATABASE_URL not set")
-    url -> {
-      case postgres.connect(url) {
-        Error(e) -> protocol.error_result("DB error: " <> db_error_to_string(e))
-        Ok(pool) -> {
-          let type_filter = case media_type {
-            "all" -> None
-            t -> Some(t)
-          }
-
-          let cfg =
-            processor.MediaConfig(
-              ..processor.default_config(),
-              batch_size: batch_size,
-            )
-
-          case processor.process_pending_media(pool, type_filter, cfg) {
-            Error(e) -> {
-              postgres.disconnect(pool)
-              protocol.error_result(
-                "Processing failed: " <> media_error_to_string(e),
-              )
-            }
-            Ok(result) -> {
-              postgres.disconnect(pool)
-              protocol.text_result(processor.batch_result_to_json(result))
-            }
-          }
-        }
-      }
-    }
-  }
+  protocol.error_result(
+    "Media processing not implemented yet. Media processor module pending.",
+  )
 }
 
 /// Handle telegram_generate_embeddings

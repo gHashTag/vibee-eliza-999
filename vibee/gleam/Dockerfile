@@ -1,11 +1,12 @@
-# Build stage - using Gleam with OTP 27
-FROM ghcr.io/gleam-lang/gleam:v1.13.0-erlang-alpine AS builder
+# Single stage build - use Gleam image for both build and runtime
+# This avoids potential COPY corruption issues between stages
+FROM ghcr.io/gleam-lang/gleam:v1.13.0-erlang-alpine
 
-# Use unique timestamp to bust all caching layers
-ARG BUILD_TIMESTAMP="2025-12-10T15:30:00"
+# Cache bust
+ARG BUILD_TIMESTAMP="2025-12-11T03:50:00"
 RUN echo "Build timestamp: ${BUILD_TIMESTAMP}"
 
-WORKDIR /app
+WORKDIR /build
 
 # Copy manifest first for dependency caching
 COPY gleam.toml manifest.toml ./
@@ -16,7 +17,7 @@ RUN gleam deps download
 # Copy source code
 COPY src/ ./src/
 
-# Clean build and export with verification
+# Build and export
 RUN set -ex && \
     rm -rf build && \
     gleam build && \
@@ -26,24 +27,15 @@ RUN set -ex && \
     echo "=== Checking exports ===" && \
     erl -noshell -eval "io:format(\"~p~n\", [beam_lib:chunks(\"build/erlang-shipment/vibee/ebin/vibee@@main.beam\", [exports])]), halt()."
 
-# Runtime stage - OTP 27 to match Gleam v1.13.0-erlang-alpine
-FROM erlang:27-alpine
-
-# Cache bust for runtime stage - this RUN forces rebuild
-ARG CACHE_BUST_RUNTIME=2025-12-10-v17
-RUN echo "Build version: ${CACHE_BUST_RUNTIME}"
-
-WORKDIR /app
-
 # Install runtime dependencies
 RUN apk add --no-cache curl bash
 
-# Copy built application from builder
-COPY --from=builder /app/build/erlang-shipment /app
+# Move shipment to /app
+RUN mv build/erlang-shipment /app
 
-# Verify the copy was successful - CRITICAL
+# Verify after move
 RUN set -ex && \
-    echo "=== Runtime stage: Verifying copied files ===" && \
+    echo "=== After move: Verifying files ===" && \
     ls -la /app/vibee/ebin/vibee@@main.beam && \
     erl -noshell -eval "io:format(\"~p~n\", [beam_lib:chunks(\"/app/vibee/ebin/vibee@@main.beam\", [exports])]), halt()."
 
@@ -65,7 +57,6 @@ ENV VIBEE_LOG_LEVEL=info
 
 EXPOSE 8080
 
-# Run the main application - using full path for beam files
-# The entrypoint.sh expects to be in /app and uses relative paths
+# Run the application
 WORKDIR /app
 CMD ["./entrypoint.sh", "run"]

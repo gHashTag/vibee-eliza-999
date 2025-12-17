@@ -52,6 +52,9 @@ const SESSION_TTL_MS = 30 * 60 * 1000
 /** Максимум фото в сессии */
 const MAX_PHOTOS = 14
 
+// 🔒 ГЛОБАЛЬНЫЙ SINGLETON: Один PhotoSessionService на весь процесс
+let globalPhotoSessionServiceInstance: PhotoSessionService | null = null
+
 /**
  * PhotoSessionService - накопление фото для генерации
  */
@@ -64,6 +67,12 @@ export class PhotoSessionService extends Service {
   /** Карта сессий: ключ = `${chatId}:${userId}` */
   private sessions: Map<string, PhotoSession> = new Map()
 
+  /** Последние использованные фото для повторной генерации: ключ = `${chatId}:${userId}` */
+  private lastUsedPhotos: Map<string, string[]> = new Map()
+
+  /** Последний использованный промпт для повторной генерации: ключ = `${chatId}:${userId}` */
+  private lastUsedPrompt: Map<string, string> = new Map()
+
   /** Интервал очистки истёкших сессий */
   private cleanupInterval: NodeJS.Timeout | null = null
 
@@ -71,8 +80,15 @@ export class PhotoSessionService extends Service {
    * Static start method required by ElizaOS 1.6+
    */
   static async start(runtime: IAgentRuntime): Promise<Service> {
-    log.info('STATIC start() called')
+    // 🔒 SINGLETON CHECK
+    if (globalPhotoSessionServiceInstance) {
+      log.info('🔒 Returning existing singleton instance')
+      return globalPhotoSessionServiceInstance
+    }
+
+    log.info('🆕 Creating new singleton instance')
     const instance = new PhotoSessionService()
+    globalPhotoSessionServiceInstance = instance
     await instance.initialize(runtime)
     await instance.start()
     return instance
@@ -242,11 +258,59 @@ export class PhotoSessionService extends Service {
 
   /**
    * Очистить сессию (после использования фото)
+   * Сохраняет фото в lastUsedPhotos для повторной генерации
    */
   clearSession(chatId: string, userId: string): void {
     const key = this.getSessionKey(chatId, userId)
+    const session = this.sessions.get(key)
+
+    // Сохраняем фото для повторной генерации
+    if (session && session.photos.length > 0) {
+      this.lastUsedPhotos.set(key, session.photos.map(p => p.url))
+      log.info(`Сохранено ${session.photos.length} фото для повторной генерации`)
+    }
+
     this.sessions.delete(key)
     log.info(`Сессия ${key} очищена`)
+  }
+
+  /**
+   * Получить последние использованные фото для повторной генерации
+   */
+  getLastUsedPhotos(chatId: string, userId: string): string[] {
+    const key = this.getSessionKey(chatId, userId)
+    return this.lastUsedPhotos.get(key) || []
+  }
+
+  /**
+   * Проверить есть ли последние фото для повторной генерации
+   */
+  hasLastUsedPhotos(chatId: string, userId: string): boolean {
+    return this.getLastUsedPhotos(chatId, userId).length > 0
+  }
+
+  /**
+   * Сохранить последний использованный промпт
+   */
+  saveLastUsedPrompt(chatId: string, userId: string, prompt: string): void {
+    const key = this.getSessionKey(chatId, userId)
+    this.lastUsedPrompt.set(key, prompt)
+    log.info(`Сохранён промпт для повторной генерации: "${prompt.substring(0, 50)}..."`)
+  }
+
+  /**
+   * Получить последний использованный промпт
+   */
+  getLastUsedPrompt(chatId: string, userId: string): string | null {
+    const key = this.getSessionKey(chatId, userId)
+    return this.lastUsedPrompt.get(key) || null
+  }
+
+  /**
+   * Проверить есть ли последний промпт
+   */
+  hasLastUsedPrompt(chatId: string, userId: string): boolean {
+    return this.getLastUsedPrompt(chatId, userId) !== null
   }
 
   /**

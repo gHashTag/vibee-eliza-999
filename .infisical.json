@@ -1,0 +1,9 @@
+{
+  "workspaceId": "fd763fa3-35d5-4045-93bd-1795c5f00fc3",
+  "environment": "dev",
+  "infisical": {
+    "workspaceId": "fd763fa3-35d5-4045-93bd-1795c5f00fc3",
+    "environment": "dev",
+    "domain": "app.infisical.com"
+  }
+}

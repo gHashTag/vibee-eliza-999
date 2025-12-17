@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "description": "Rainbow Bridge Multi-Account Configuration",
+  "version": "1.0.0",
+  "updated_at": "2025-12-10",
+
+  "accounts": {
+    "tester": {
+      "session_id": "sess_deubhyi0p828",
+      "phone": "+79933420465",
+      "username": "neuro_sage",
+      "first_name": "Dmitrii NeuroCoder",
+      "user_id": 144022504,
+      "role": "tester",
+      "description": "Тестовый аккаунт - отправляет команды боту и проверяет ответы"
+    },
+    "bot": {
+      "session_id": "sess_deukljn4q4mo",
+      "phone": "+66624014170",
+      "username": "vibee_agent",
+      "first_name": "VIBEE",
+      "user_id": 6579515876,
+      "role": "userbot",
+      "description": "Юзербот с нейрофункциями - обрабатывает команды и генерирует контент"
+    }
+  },
+
+  "test_targets": {
+    "vibee_bot": {
+      "bot_token_name": "TELEGRAM_BOT_TOKEN",
+      "username": "vibee_test_bot",
+      "description": "Основной VIBEE бот для тестирования"
+    }
+  },
+
+  "test_groups": {
+    "vibee_agent": {
+      "chat_id": -1002737186844,
+      "title": "VIBEE AGENT",
+      "description": "Группа где оба аккаунта могут общаться"
+    }
+  },
+
+  "mcp_tools": {
+    "session_management": [
+      "session_list",
+      "session_create",
+      "session_set_active"
+    ],
+    "bot_testing": [
+      "bot_analyze",
+      "bot_compare",
+      "bot_monitor",
+      "bot_extract_commands",
+      "bot_test_interaction"
+    ],
+    "telegram_operations": [
+      "telegram_send_message",
+      "telegram_get_history",
+      "telegram_get_dialogs",
+      "telegram_get_me"
+    ]
+  },
+
+  "workflows": {
+    "basic_test": {
+      "description": "Базовый тест команды",
+      "steps": [
+        {
+          "tool": "telegram_send_message",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "text": "/start"
+          }
+        },
+        {
+          "tool": "wait",
+          "params": { "ms": 3000 }
+        },
+        {
+          "tool": "telegram_get_history",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "limit": 5
+          }
+        }
+      ]
+    },
+    "full_analysis": {
+      "description": "Полный анализ бота",
+      "steps": [
+        {
+          "tool": "bot_analyze",
+          "params": {
+            "bot_username": "vibee_agent",
+            "session_id": "sess_deubhyi0p828",
+            "depth": "deep",
+            "message_history": 100
+          }
+        }
+      ]
+    }
+  }
+}

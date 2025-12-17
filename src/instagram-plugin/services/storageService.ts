@@ -1,21 +1,22 @@
-import { Service } from '@elizaos/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { IAgentRuntime } from '@elizaos/core';
+import { Service } from "@elizaos/core";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import type { IAgentRuntime } from "@elizaos/core";
 
 /**
  * Сервис для работы с облачным хранилищем файлов (Supabase Storage)
  */
 export class StorageService extends Service {
-  static serviceType = 'storage';
+  static serviceType = "storage";
 
-  capabilityDescription = 'Supabase Storage Service - для загрузки файлов в облако';
+  capabilityDescription =
+    "Supabase Storage Service - для загрузки файлов в облако";
 
   private supabase: SupabaseClient | null = null;
-  private bucketName = 'instagram-uploads';
+  private bucketName = "instagram-uploads";
   private isConfigured = false;
 
   async stop(): Promise<void> {
-    console.log('💾 [StorageService] Сервис остановлен');
+    console.log("💾 [StorageService] Сервис остановлен");
   }
 
   constructor() {
@@ -28,23 +29,29 @@ export class StorageService extends Service {
         this.supabase = createClient(url, key);
         this.isConfigured = true;
       } catch (error) {
-        console.warn(`⚠️ [StorageService] Ошибка создания Supabase клиента: ${error instanceof Error ? error.message : String(error)}`);
+        console.warn(
+          `⚠️ [StorageService] Ошибка создания Supabase клиента: ${error instanceof Error ? error.message : String(error)}`,
+        );
         this.isConfigured = false;
       }
     } else {
-      console.log('ℹ️ [StorageService] Supabase не настроен - работаем в fallback режиме');
+      console.log(
+        "ℹ️ [StorageService] Supabase не настроен - работаем в fallback режиме",
+      );
       this.isConfigured = false;
     }
   }
 
   static async start(runtime: IAgentRuntime): Promise<StorageService> {
-    console.log('💾 [StorageService] Инициализация Supabase Storage...');
+    console.log("💾 [StorageService] Инициализация Supabase Storage...");
 
     const service = new StorageService();
 
     // Если Supabase не настроен, возвращаем сервис в fallback режиме
     if (!service.isConfigured || !service.supabase) {
-      console.log('ℹ️ [StorageService] Сервис работает в fallback режиме (файлы не будут загружаться в облако)');
+      console.log(
+        "ℹ️ [StorageService] Сервис работает в fallback режиме (файлы не будут загружаться в облако)",
+      );
       return service;
     }
 
@@ -54,51 +61,67 @@ export class StorageService extends Service {
 
       if (error) {
         // Если URL пустой или неверный, просто работаем в fallback режиме
-        console.log('ℹ️ [StorageService] Подключение к Supabase недоступно');
-        console.log('ℹ️ [StorageService] Сервис будет работать в fallback режиме (файлы не будут загружаться в облако)');
+        console.log("ℹ️ [StorageService] Подключение к Supabase недоступно");
+        console.log(
+          "ℹ️ [StorageService] Сервис будет работать в fallback режиме (файлы не будут загружаться в облако)",
+        );
         service.isConfigured = false;
         return service;
       }
 
       console.log(`✅ [StorageService] Подключение к Supabase установлено`);
-      console.log(`✅ [StorageService] Найдено bucket'ов: ${data?.length || 0}`);
+      console.log(
+        `✅ [StorageService] Найдено bucket'ов: ${data?.length || 0}`,
+      );
 
       // Создаем bucket если не существует
-      const bucketExists = data?.find(bucket => bucket.name === service.bucketName);
+      const bucketExists = data?.find(
+        (bucket) => bucket.name === service.bucketName,
+      );
 
       if (!bucketExists) {
-        console.log(`🔄 [StorageService] Создание bucket '${service.bucketName}'...`);
-        const { error: createError } = await service.supabase.storage.createBucket(
-          service.bucketName,
-          {
+        console.log(
+          `🔄 [StorageService] Создание bucket '${service.bucketName}'...`,
+        );
+        const { error: createError } =
+          await service.supabase.storage.createBucket(service.bucketName, {
             public: true,
             fileSizeLimit: 10485760, // 10MB
             allowedMimeTypes: [
-              'image/jpeg',
-              'image/png',
-              'image/webp',
-              'image/gif',
-              'video/mp4',
-              'video/quicktime'
-            ]
-          }
-        );
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+              "image/gif",
+              "video/mp4",
+              "video/quicktime",
+            ],
+          });
 
         if (createError) {
-          console.warn(`⚠️ [StorageService] Bucket не создан: ${createError.message}`);
-          console.log('⚠️ [StorageService] Сервис будет работать в fallback режиме (без загрузки в облако)');
+          console.warn(
+            `⚠️ [StorageService] Bucket не создан: ${createError.message}`,
+          );
+          console.log(
+            "⚠️ [StorageService] Сервис будет работать в fallback режиме (без загрузки в облако)",
+          );
         } else {
-          console.log(`✅ [StorageService] Bucket '${service.bucketName}' создан`);
+          console.log(
+            `✅ [StorageService] Bucket '${service.bucketName}' создан`,
+          );
         }
       } else {
-        console.log(`✅ [StorageService] Bucket '${service.bucketName}' уже существует`);
+        console.log(
+          `✅ [StorageService] Bucket '${service.bucketName}' уже существует`,
+        );
       }
 
       // Запускаем автоочистку старых файлов
       service.scheduleCleanup();
     } catch (error) {
       console.warn(`⚠️ [StorageService] Ошибка инициализации: ${error}`);
-      console.log('⚠️ [StorageService] Сервис будет работать в fallback режиме (без загрузки в облако)');
+      console.log(
+        "⚠️ [StorageService] Сервис будет работать в fallback режиме (без загрузки в облако)",
+      );
       service.isConfigured = false;
     }
 
@@ -106,19 +129,24 @@ export class StorageService extends Service {
   }
 
   static async stop(runtime: IAgentRuntime): Promise<void> {
-    console.log('💾 [StorageService] Остановка сервиса...');
+    console.log("💾 [StorageService] Остановка сервиса...");
   }
 
   /**
    * Загружает файл в Supabase Storage
    */
-  async uploadFile(fileUrl: string, fileName?: string): Promise<{ url: string; path: string }> {
+  async uploadFile(
+    fileUrl: string,
+    fileName?: string,
+  ): Promise<{ url: string; path: string }> {
     try {
       console.log(`📤 [StorageService] Загрузка файла: ${fileUrl}`);
 
       // Проверяем, что Supabase доступен
       if (!this.isConfigured || !this.supabase) {
-        console.log('ℹ️ [StorageService] Supabase недоступен, работаем в fallback режиме');
+        console.log(
+          "ℹ️ [StorageService] Supabase недоступен, работаем в fallback режиме",
+        );
         // В fallback режиме возвращаем исходный URL
         return { url: fileUrl, path: fileUrl };
       }
@@ -126,7 +154,7 @@ export class StorageService extends Service {
       // Генерируем уникальное имя файла
       const timestamp = Date.now();
       const random = Math.random().toString(36).substring(2, 8);
-      const extension = fileName?.split('.').pop() || 'jpg';
+      const extension = fileName?.split(".").pop() || "jpg";
       const uniqueFileName = `${timestamp}-${random}.${extension}`;
 
       // Скачиваем файл по URL
@@ -139,15 +167,15 @@ export class StorageService extends Service {
       const fileUint8Array = new Uint8Array(fileBuffer);
 
       // Определяем MIME тип
-      const contentType = response.headers.get('content-type') || 'image/jpeg';
+      const contentType = response.headers.get("content-type") || "image/jpeg";
 
       // Загружаем в Supabase
       const { data, error } = await this.supabase.storage
         .from(this.bucketName)
         .upload(uniqueFileName, fileUint8Array, {
           contentType,
-          cacheControl: '3600',
-          upsert: false
+          cacheControl: "3600",
+          upsert: false,
         });
 
       if (error) {
@@ -163,7 +191,7 @@ export class StorageService extends Service {
 
       return {
         url: urlData.publicUrl,
-        path: data.path
+        path: data.path,
       };
     } catch (error) {
       console.error(`❌ [StorageService] Ошибка загрузки:`, error);
@@ -179,7 +207,7 @@ export class StorageService extends Service {
       console.log(`📥 [StorageService] Скачивание файла: ${filePath}`);
 
       if (!this.isConfigured || !this.supabase) {
-        throw new Error('Supabase не настроен для скачивания файлов');
+        throw new Error("Supabase не настроен для скачивания файлов");
       }
 
       const { data, error } = await this.supabase.storage
@@ -206,7 +234,9 @@ export class StorageService extends Service {
       console.log(`🗑️ [StorageService] Удаление файла: ${filePath}`);
 
       if (!this.isConfigured || !this.supabase) {
-        console.log('ℹ️ [StorageService] Supabase не настроен, пропускаем удаление');
+        console.log(
+          "ℹ️ [StorageService] Supabase не настроен, пропускаем удаление",
+        );
         return;
       }
 
@@ -230,50 +260,58 @@ export class StorageService extends Service {
    */
   private scheduleCleanup(): void {
     if (!this.isConfigured || !this.supabase) {
-      console.log('ℹ️ [StorageService] Автоочистка отключена - Supabase не настроен');
+      console.log(
+        "ℹ️ [StorageService] Автоочистка отключена - Supabase не настроен",
+      );
       return;
     }
 
     const CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 час
     const MAX_AGE = 24 * 60 * 60 * 1000; // 24 часа
 
-    console.log(`⏰ [StorageService] Запуск автоочистки каждые ${CLEANUP_INTERVAL / 1000 / 60} минут`);
+    console.log(
+      `⏰ [StorageService] Запуск автоочистки каждые ${CLEANUP_INTERVAL / 1000 / 60} минут`,
+    );
 
     const supabase = this.supabase; // Capture for closure
 
     setInterval(async () => {
       try {
-        console.log('🧹 [StorageService] Проверка старых файлов...');
+        console.log("🧹 [StorageService] Проверка старых файлов...");
 
         const { data: files, error } = await supabase.storage
           .from(this.bucketName)
           .list();
 
         if (error) {
-          console.error(`❌ [StorageService] Ошибка получения списка файлов:`, error);
+          console.error(
+            `❌ [StorageService] Ошибка получения списка файлов:`,
+            error,
+          );
           return;
         }
 
         if (!files || files.length === 0) {
-          console.log('ℹ️ [StorageService] Файлов для очистки не найдено');
+          console.log("ℹ️ [StorageService] Файлов для очистки не найдено");
           return;
         }
 
         const now = Date.now();
-        const oldFiles = files.filter(file => {
-          const fileAge = now - (file.updated_at ? new Date(file.updated_at).getTime() : 0);
+        const oldFiles = files.filter((file) => {
+          const fileAge =
+            now - (file.updated_at ? new Date(file.updated_at).getTime() : 0);
           return fileAge > MAX_AGE;
         });
 
         if (oldFiles.length > 0) {
-          const pathsToDelete = oldFiles.map(file => file.name);
-          await supabase.storage
-            .from(this.bucketName)
-            .remove(pathsToDelete);
+          const pathsToDelete = oldFiles.map((file) => file.name);
+          await supabase.storage.from(this.bucketName).remove(pathsToDelete);
 
-          console.log(`✅ [StorageService] Удалено ${oldFiles.length} старых файлов`);
+          console.log(
+            `✅ [StorageService] Удалено ${oldFiles.length} старых файлов`,
+          );
         } else {
-          console.log('ℹ️ [StorageService] Старых файлов не найдено');
+          console.log("ℹ️ [StorageService] Старых файлов не найдено");
         }
       } catch (error) {
         console.error(`❌ [StorageService] Ошибка автоочистки:`, error);
@@ -284,20 +322,26 @@ export class StorageService extends Service {
   /**
    * Получает информацию о файле
    */
-  async getFileInfo(filePath: string): Promise<{ size: number; created: string; publicUrl: string }> {
+  async getFileInfo(
+    filePath: string,
+  ): Promise<{ size: number; created: string; publicUrl: string }> {
     try {
       if (!this.isConfigured || !this.supabase) {
-        throw new Error('Supabase не настроен для получения информации о файлах');
+        throw new Error(
+          "Supabase не настроен для получения информации о файлах",
+        );
       }
 
       const { data, error } = await this.supabase.storage
         .from(this.bucketName)
-        .list('', {
-          search: filePath
+        .list("", {
+          search: filePath,
         });
 
       if (error) {
-        throw new Error(`Ошибка получения информации о файле: ${error.message}`);
+        throw new Error(
+          `Ошибка получения информации о файле: ${error.message}`,
+        );
       }
 
       if (!data || data.length === 0) {
@@ -311,8 +355,8 @@ export class StorageService extends Service {
 
       return {
         size: file.metadata?.size || 0,
-        created: file.created_at || '',
-        publicUrl: urlData.publicUrl
+        created: file.created_at || "",
+        publicUrl: urlData.publicUrl,
       };
     } catch (error) {
       console.error(`❌ [StorageService] Ошибка получения информации:`, error);

@@ -196,7 +196,7 @@ ${config.systemPrompt}`;
       lines.push(`- Username: @${context.senderUsername}`);
     }
 
-    lines.push(`- Чат: ${context.chatTitle}`);
+    lines.push(`- Чат: ${context.tgChatTitle}`);
 
     // Персонализация для известных пользователей
     const knownUsers: Record<string, string> = {
@@ -315,7 +315,7 @@ ${ragContext}
   createMessageContext(
     senderName: string,
     senderUsername: string | undefined,
-    chatTitle: string,
+    tgChatTitle: string,
     options?: {
       conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
       ragContext?: string;
@@ -324,7 +324,7 @@ ${ragContext}
     return {
       senderName,
       senderUsername,
-      chatTitle,
+      tgChatTitle,
       conversationHistory: options?.conversationHistory,
       ragContext: options?.ragContext,
     };
@@ -342,7 +342,7 @@ ${ragContext}
       throw new Error('Sales mode не включен для этого чата');
     }
 
-    const context = this.createMessageContext(senderName, undefined, config.chatTitle);
+    const context = this.createMessageContext(senderName, undefined, config.tgChatTitle);
 
     const systemPrompt = this.buildSystemPrompt(config, context);
     const userPrompt = this.buildUserPrompt(senderName, userMessage);

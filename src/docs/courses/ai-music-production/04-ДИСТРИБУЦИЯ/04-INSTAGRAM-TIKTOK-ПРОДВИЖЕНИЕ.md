@@ -5,6 +5,7 @@
 ### Почему AI Reels идеальны
 
 **Преимущества AI Reels для музыки:**
+
 - ✅ Уже в формате 9:16 (вертикальный)
 - ✅ Оптимальная длительность (15-60 сек)
 - ✅ Визуально привлекательные (AI-генерация)
@@ -12,6 +13,7 @@
 - ✅ Создаются за секунды через бот
 
 **Что делает AI Reels эффективными:**
+
 - Яркие визуалы = останавливают скролл
 - Динамичные переходы = удерживают внимание
 - Профессиональный вид без навыков монтажа
@@ -20,6 +22,7 @@
 ### Генерация AI Reels через бот
 
 **Процесс:**
+
 1. Загрузите трек в бот
 2. Выберите стиль визуализации:
    - Abstract (абстракция)
@@ -35,16 +38,19 @@
 ### Адаптация для разных платформ
 
 **TikTok:**
+
 - Оптимально: 15-30 сек (короткие версии лучше)
 - Добавьте текстовый hook в первые 3 секунды
 - Используйте trending звуки (ваш трек может стать одним из них!)
 
 **Instagram Reels:**
+
 - Оптимально: 30-60 сек (можно дольше)
 - Добавьте стикеры, GIF (но не перегружайте)
 - Используйте Instagram музыку (если трек уже на платформе через дистрибьютора)
 
 **YouTube Shorts:**
+
 - Оптимально: 30-60 сек (можно до 60)
 - Добавьте #Shorts в описание
 - Более "cinematic" подход (качество важнее скорости)
@@ -56,11 +62,13 @@
 ### Почему вертикальный формат критичен
 
 **Статистика:**
+
 - 94% мобильного потребления контента = вертикальный экран
 - Горизонтальное видео на мобильном = занимает 40% экрана
 - Вертикальное = 100% экрана = больше внимания
 
 **Психология:**
+
 - Вертикальное видео = иммерсивный опыт
 - Сложнее "проскроллить" (занимает весь экран)
 - Создаёт ощущение "личного" контента
@@ -68,15 +76,18 @@
 ### Технические параметры
 
 **Разрешение:**
+
 - **Минимум**: 1080x1920 (Full HD)
 - **Оптимально**: 1080x1920 (большинство платформ)
 - **Максимум**: 2160x3840 (4K, но редко нужен)
 
 **Соотношение сторон:**
+
 - 9:16 (идеально для TikTok, Reels, Shorts)
 - 4:5 (допустимо для Instagram Feed, но хуже для Reels)
 
 **Safe zones (безопасные зоны):**
+
 ```
 ┌─────────────┐
 │   UI (logo) │ ← Верх: 100-200px (лого TikTok, Instagram)
@@ -94,6 +105,7 @@
 ### Экспорт настройки
 
 **Premiere Pro / Final Cut:**
+
 ```
 Sequence Settings:
 - Frame Size: 1080 x 1920
@@ -108,6 +120,7 @@ Export Settings:
 ```
 
 **CapCut (мобильное приложение):**
+
 - Новый проект → 9:16
 - Автоматически настроен для TikTok/Reels
 
@@ -118,11 +131,13 @@ Export Settings:
 ### Стратегия хештегов
 
 **Правило трёх категорий:**
+
 1. **Mega hashtags** (>1M постов): Широкий охват, низкая вероятность попадания в топ
 2. **Mid-tier hashtags** (100K-1M): Золотая середина
 3. **Niche hashtags** (<100K): Таргетированная аудитория
 
 **Пример для lo-fi трека:**
+
 ```
 Mega: #music #lofi #chillvibes (10M+ постов)
 Mid: #lofimusic #chillbeats #studymusic (500K-1M)
@@ -132,22 +147,26 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
 ### Количество хештегов
 
 **Instagram:**
+
 - **Оптимум**: 5-10 хештегов
 - **Макс**: До 30, но не рекомендуется (выглядит как спам)
 - **Размещение**: В комментарии (а не в caption) для чистоты поста
 
 **TikTok:**
+
 - **Оптимум**: 3-5 хештегов
 - **Макс**: Ограничение на длину caption (150 символов)
 - **Фокус**: 1-2 trending + 2-3 niche
 
 **YouTube Shorts:**
+
 - **Оптимум**: 3-5 хештегов
 - **Размещение**: В описании + #Shorts обязательно
 
 ### Исследование трендов
 
 **TikTok Trends:**
+
 1. Откройте TikTok → Discover (лупа)
 2. Смотрите "Trending" секцию
 3. Обратите внимание на:
@@ -156,6 +175,7 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
    - Viral challenges
 
 **Instagram Trends:**
+
 1. Explore → Reels
 2. Анализируйте что в топе:
    - Какие звуки используют
@@ -163,6 +183,7 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
    - Стиль визуала
 
 **Инструменты:**
+
 - **TikTok Creative Center**: [ads.tiktok.com/business/creativecenter](https://ads.tiktok.com/business/creativecenter) (бесплатно)
 - **Tokboard**: Аналитика трендов TikTok
 - **Instagram Insights**: Встроенная аналитика (нужен Creator аккаунт)
@@ -170,6 +191,7 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
 ### Создание собственного тренда
 
 **Как запустить challenge:**
+
 1. Создайте простое действие под ваш трек (танец, жест, визуал)
 2. Снимите демо-видео с объяснением
 3. Используйте призыв: "Попробуй и отметь меня! #YourChallenge"
@@ -177,6 +199,7 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
 5. Реагируйте на каждое участие (комментарий, дуэт, стич)
 
 **Пример успешного challenge:**
+
 - **#RenegadeChallenge** (K Camp - "Lottery") → 30M+ видео
 - **#SavageLoveChallenge** (Jawsh 685 x Jason Derulo) → вирусный хит
 
@@ -187,25 +210,30 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
 ### Оптимальная частота
 
 **TikTok:**
+
 - **Минимум**: 3-5 видео в неделю
 - **Оптимум**: 1-2 видео в день
 - **Максимум**: 3-4 видео в день (больше = dilution эффекта)
 
 **Почему часто:**
+
 - Алгоритм TikTok награждает активность
 - Больше контента = больше шансов попасть в For You Page (FYP)
 - TikTok аудитория ожидает свежий контент
 
 **Instagram Reels:**
+
 - **Минимум**: 2-3 Reels в неделю
 - **Оптимум**: 4-7 Reels в неделю (1 в день)
 - **Макс**: 2 Reels в день (больше = спам)
 
 **Почему умеренно:**
+
 - Instagram алгоритм фокусируется на качестве > количестве
 - Перепост снижает engagement rate
 
 **YouTube Shorts:**
+
 - **Минимум**: 2-3 Shorts в неделю
 - **Оптимум**: 3-5 Shorts в неделю
 - **Макс**: 1-2 Shorts в день
@@ -213,11 +241,13 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
 ### Лучшее время для постинга
 
 **TikTok (для музыки):**
+
 - **Будние дни**: 18:00-22:00 (после работы/учёбы)
 - **Выходные**: 10:00-12:00, 19:00-23:00
 - **Лучшие дни**: Пятница вечер, Воскресенье вечер
 
 **Instagram Reels:**
+
 - **Будние дни**: 12:00-13:00 (обед), 18:00-21:00 (вечер)
 - **Выходные**: 10:00-14:00
 - **Лучшие дни**: Среда, Пятница
@@ -225,12 +255,14 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
 **Совет:** Используйте Instagram Insights → Audience → Most Active Times (персонализированная статистика вашей аудитории)
 
 **YouTube Shorts:**
+
 - **Будние дни**: 14:00-16:00, 20:00-22:00
 - **Выходные**: В любое время (алгоритм Shorts не так зависит от времени)
 
 ### Календарь контента
 
 **Пример недели:**
+
 ```
 Понедельник:
 - TikTok: AI Reel #1 (intro трека) в 19:00
@@ -264,6 +296,7 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
 ### Анатомия вирусного контента
 
 **Элементы вирусного видео:**
+
 1. **Hook** (первые 3 секунды): Останавливает скролл
 2. **Emotional trigger**: Вызывает эмоцию (ностальгия, радость, удивление)
 3. **Relatability**: "Это про меня!"
@@ -273,11 +306,13 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
 ### Hook стратегии для музыки
 
 **Тип 1: Визуальный hook**
+
 - Яркий цвет/эффект в первом кадре
 - Неожиданная смена сцен
 - Лицо человека (привлекает внимание)
 
 **Тип 2: Текстовый hook**
+
 ```
 "POV: You discover the perfect study music 📚"
 "When this beat drops at 0:15 🔥"
@@ -285,6 +320,7 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
 ```
 
 **Тип 3: Звуковой hook**
+
 - Начните с самого запоминающегося момента (не с intro!)
 - Используйте неожиданный звук (glitch, vocal chop)
 
@@ -294,6 +330,7 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
 Неожиданный элемент, который ломает ожидание зрителя.
 
 **Примеры:**
+
 - Резкая смена визуала на середине трека
 - Внезапный drop bass после тихого intro
 - Текст, появляющийся неожиданно: "Wait... did you hear that?"
@@ -301,11 +338,13 @@ Niche: #lofihiphop2024 #ambientlofi #aimusic (50K-100K)
 ### Storytelling для музыки
 
 **Формула:**
+
 1. **Setup** (0-3 сек): "Я создал трек для..."
 2. **Conflict** (3-10 сек): "Но было сложно найти правильное настроение..."
 3. **Resolution** (10-30 сек): "Пока я не попробовал AI + мой вокал" + играет музыка
 
 **Пример текста:**
+
 ```
 "Spent 3 months trying to make the perfect chill beat...
 Then I discovered AI music.
@@ -319,30 +358,35 @@ Here's what happened: 🎵"
 ### Ответы на комментарии
 
 **Правило первых 48 часов:**
+
 - Отвечайте на КАЖДЫЙ комментарий в первые 48 часов
 - Алгоритм видит активность = boosted охват
 
 **Типы ответов:**
 
 **1. Благодарность:**
+
 ```
 Комментарий: "This is fire 🔥"
 Ваш ответ: "Thank you so much! 🙏 More coming soon!"
 ```
 
 **2. Вопрос обратно:**
+
 ```
 Комментарий: "What genre is this?"
 Ваш ответ: "It's ambient lo-fi! Do you like this vibe? 🎧"
 ```
 
 **3. Призыв к действию:**
+
 ```
 Комментарий: "Where can I find the full song?"
 Ваш ответ: "Link in bio! 🔗 Also on Spotify if you wanna add to your playlist 💙"
 ```
 
 **4. Персонализация:**
+
 ```
 Комментарий: "Perfect for studying!"
 Ваш ответ: "That's exactly what I made it for! What are you studying? 📚"
@@ -351,32 +395,38 @@ Here's what happened: 🎵"
 ### Дуэты и Стичи (TikTok)
 
 **Duet (дуэт):**
+
 - Ваш трек + реакция другого пользователя
 - Разрешите дуэты в настройках видео
 - Сами делайте дуэты с фанатами (показывает appreciacию)
 
 **Stitch (стич):**
+
 - Кто-то использует часть вашего видео (до 5 сек) в своём
 - Отличный способ virality (цепная реакция)
 
 **Как стимулировать:**
+
 - "Duet this and show me your reaction! 🎧"
 - "Stitch this with your favorite part of the song!"
 
 ### Коллаборации с другими креаторами
 
 **Найдите подходящих:**
+
 - **Dancer creators**: Хореография под вашу музыку
 - **Artists/Illustrators**: Рисуют под ваш трек
 - **Study/Productivity creators**: Используют как background music
 - **Gamers**: Background music для геймплея
 
 **Типы коллабораций:**
+
 - **Feature**: Вы на их канале, они на вашем
 - **Shoutout**: Взаимное упоминание в Stories/видео
 - **Challenge**: Совместный challenge под ваш трек
 
 **Как связаться:**
+
 ```
 DM шаблон:
 "Hi [Name]! I love your [type of content].
@@ -393,6 +443,7 @@ I can send you the track if you're interested! 🎵"
 ### Как работает алгоритм
 
 **Факторы ранжирования:**
+
 1. **Engagement rate** (взаимодействие):
    - Likes, comments, shares, saves
    - Completion rate (досмотры до конца)
@@ -407,6 +458,7 @@ I can send you the track if you're interested! 🎵"
 ### Оптимизация для алгоритма
 
 **Увеличение engagement rate:**
+
 - Призывайте к действию: "Double tap if you love this vibe 💙"
 - Задавайте вопросы в caption: "What's your fav study music genre?"
 - Используйте интерактивные элементы:
@@ -414,11 +466,13 @@ I can send you the track if you're interested! 🎵"
   - Question sticker
 
 **Увеличение completion rate:**
+
 - Первые 3 сек = самые интересные
 - Оптимальная длина: 15-30 сек (короткое = чаще досматривают)
 - Loop эффект: Видео зацикливается естественно (конец = начало)
 
 **Увеличение saves:**
+
 - Образовательный контент: "How I made this beat"
 - Ценность: "5 best AI music tools"
 - Inspirational: Beautiful visual + music
@@ -426,6 +480,7 @@ I can send you the track if you're interested! 🎵"
 ### Timing и Insights
 
 **Используйте Instagram Insights:**
+
 1. Перейдите в профиль → Insights
 2. **Content You Shared** → Reels
 3. Анализируйте топ-3 Reels:
@@ -435,6 +490,7 @@ I can send you the track if you're interested! 🎵"
    - Likes, Comments, Shares, Saves
 
 **Ключевые метрики:**
+
 - **Reach / Followers ratio**: > 1.5 = хорошо (охват шире аудитории)
 - **Engagement rate**: (Likes+Comments+Shares+Saves)/Reach × 100%
   - < 3% = плохо
@@ -451,6 +507,7 @@ I can send you the track if you're interested! 🎵"
 **FYP** = персонализированная лента рекомендаций (90% контента, который видит пользователь).
 
 **Факторы попадания:**
+
 1. **Video information**:
    - Captions (описание)
    - Sounds (звук)
@@ -467,6 +524,7 @@ I can send you the track if you're interested! 🎵"
 ### Оптимизация для FYP
 
 **Watch time (время просмотра):**
+
 - **Главная метрика TikTok**
 - Цель: > 50% средний watch time
 - Как увеличить:
@@ -475,10 +533,12 @@ I can send you the track if you're interested! 🎵"
   - Loop эффект
 
 **Re-watch rate (повторные просмотры):**
+
 - Создавайте "эффект перемотки": "Wait, did you see that at 0:08?"
 - Сложные визуалы, которые хочется пересмотреть
 
 **Completion rate:**
+
 - % тех, кто досмотрел до конца
 - 70%+ = excellent
 - Избегайте "dead space" (скучных моментов)
@@ -486,15 +546,18 @@ I can send you the track if you're interested! 🎵"
 ### TikTok Pro аккаунт
 
 **Как переключиться:**
+
 1. Настройки → Manage account → Switch to Pro Account
 2. Выберите категорию: **Musician**
 
 **Преимущества:**
+
 - ✅ Детальная аналитика (views, followers, demographics)
 - ✅ Trending sounds/hashtags insights
 - ✅ Информация о лучшем времени постинга
 
 **Ключевые метрики:**
+
 - **Video views**: Общее количество просмотров
 - **Profile views**: Сколько зашли в профиль
 - **Follower growth**: График роста подписчиков
@@ -511,6 +574,7 @@ I can send you the track if you're interested! 🎵"
 **Цель:** Продвинуть новый трек "Midnight Drive"
 
 **Неделя 1:**
+
 - Понедельник: AI Reel #1 (intro + визуал ночной город) → TikTok, 18:00
   - Caption: "POV: 3am drive through empty city 🌃 #midnightvibes"
   - Результат: 2,500 views, 15 комментариев
@@ -521,23 +585,27 @@ I can send you the track if you're interested! 🎵"
   - Результат: 5,000 views, 30 комментариев (больше engagement!)
 
 **Неделя 2:**
+
 - Один из фанатов сделал Duet с танцем
 - Артист репостнул в Story + ответил в комментариях
 - Другие начали повторять танец → **chain reaction**
 - Результат недели: 50K views, +500 TikTok фолловеров
 
 **Неделя 3:**
+
 - Видео попало в FYP → 200K views за 48 часов
 - Spike в Spotify: +2,000 прослушиваний в день
 - Артист создал challenge: #MidnightDriveChallenge
 - Результат: 100+ видео с challenge
 
 **Итого 1 месяц:**
+
 - TikTok: 2,500 → 15,000 фолловеров
 - Spotify: 0 → 50,000 прослушиваний
 - Instagram: 500 → 3,000 фолловеров
 
 **Ключевые факторы успеха:**
+
 - ✅ Consistency (3-5 постов в неделю)
 - ✅ Engagement (ответы на КАЖДЫЙ комментарий)
 - ✅ Collaboration (дуэты с фанатами)
@@ -551,32 +619,38 @@ I can send you the track if you're interested! 🎵"
 ### Планирование и автоматизация
 
 **Later** (from $18/мес):
+
 - Планирование Instagram/TikTok постов
 - Визуальный календарь контента
 - Аналитика
 
 **Hootsuite** (от $49/мес):
+
 - Мультиплатформенный постинг
 - Управление комментариями
 - Team collaboration
 
 **Метрика (бесплатно для Instagram):**
+
 - Бесплатный планировщик для Instagram
 - Аналитика Stories, Reels
 
 ### Аналитика
 
 **TikTok Pro Account** (бесплатно):
+
 - Встроенная аналитика
 - Follower insights
 - Content performance
 
 **Instagram Insights** (бесплатно):
+
 - Детальная статистика Reels
 - Audience demographics
 - Best times to post
 
 **Analisa.io** (от $49/мес):
+
 - Глубокая аналитика Instagram/TikTok
 - Competitor analysis
 - Hashtag performance
@@ -584,15 +658,18 @@ I can send you the track if you're interested! 🎵"
 ### Монтаж
 
 **CapCut** (бесплатно):
+
 - Лучшее мобильное приложение для TikTok/Reels
 - Встроенные эффекты, переходы
 - Auto-captions (авто-субтитры)
 
 **InShot** (бесплатно + $3.99 Pro):
+
 - Простой монтаж на мобильном
 - Поддержка 9:16
 
 **Adobe Premiere Rush** (от $9.99/мес):
+
 - Кросс-платформенный (mobile + desktop)
 - Синхронизация проектов
 
@@ -601,6 +678,7 @@ I can send you the track if you're interested! 🎵"
 ## Чеклист Instagram/TikTok продвижения
 
 **Подготовка контента:**
+
 - [ ] AI Reels сгенерированы (3-5 вариантов)
 - [ ] Видео экспортированы в 1080x1920
 - [ ] Captions написаны для каждого поста
@@ -608,6 +686,7 @@ I can send you the track if you're interested! 🎵"
 - [ ] Best times to post определены (через Insights)
 
 **TikTok стратегия:**
+
 - [ ] Pro аккаунт активирован
 - [ ] Профиль оптимизирован (био, ссылка на Spotify)
 - [ ] Дуэты и стичи разрешены
@@ -615,18 +694,21 @@ I can send you the track if you're interested! 🎵"
 - [ ] Первые 3 видео запланированы
 
 **Instagram стратегия:**
+
 - [ ] Creator аккаунт настроен
 - [ ] Профиль оптимизирован (био, музыкальный стиль, ссылка)
 - [ ] Highlights созданы (New Music, Behind the Scenes)
 - [ ] Stories strategy готова (тизеры, polls, Q&A)
 
 **Engagement тактика:**
+
 - [ ] Время на ответы на комментарии выделено (30 мин/день)
 - [ ] План коллабораций (список 5-10 креаторов для контакта)
 - [ ] Challenge/Duet strategy готова
 - [ ] Community management rules установлены
 
 **Аналитика:**
+
 - [ ] TikTok/Instagram Insights проверяются еженедельно
 - [ ] Лучшие посты анализируются (что сработало?)
 - [ ] Корректировки стратегии на основе данных
@@ -641,13 +723,14 @@ I can send you the track if you're interested! 🎵"
 
 📍 **Вы здесь:** [Модуль 4: ДИСТРИБУЦИЯ](./README.md) → Урок 4.4
 
-| ⬅️ Предыдущий | 📚 Оглавление | Следующий ➡️ |
-|:---|:---:|---:|
+| ⬅️ Предыдущий                                          |            📚 Оглавление            |                             Следующий ➡️ |
+| :----------------------------------------------------- | :---------------------------------: | ---------------------------------------: |
 | [03-ПУБЛИКАЦИЯ-YOUTUBE.md](./03-ПУБЛИКАЦИЯ-YOUTUBE.md) | [📋 Главное меню](../ОГЛАВЛЕНИЕ.md) | [05-МОНЕТИЗАЦИЯ.md](./05-МОНЕТИЗАЦИЯ.md) |
 
 **Прогресс модуля:** `[████████░] 80% (4/5 уроков)`
 
 **Связанные уроки:**
+
 - 🔗 [Prerequisite] Модуль 2 Урок 2.6 - AI Reels
 - 🔗 [Следующий] Урок 4.5 - Монетизация
 - 🔗 [Стратегия] AI Reels для вирусного контента

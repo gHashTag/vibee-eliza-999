@@ -112,7 +112,7 @@ export const configAddAction: Action = {
       // Создаём новый конфиг
       const newConfig: CreateChatConfig = {
         chatId: String(chatId),
-        chatTitle: `Chat ${chatId}`,
+        tgChatTitle: `Chat ${chatId}`,
         chatType: 'supergroup',
         personaName: personaArg,
         systemPrompt: DEFAULT_SYSTEM_PROMPT,

@@ -142,18 +142,18 @@ export class KolsLogger {
    */
   static incomingMessage(params: {
     chatId: string;
-    chatTitle: string;
+    tgChatTitle: string;
     chatType: '\u041B\u0421' | '\u0433\u0440\u0443\u043F\u043F\u0430' | '\u043A\u0430\u043D\u0430\u043B';
     userId: string;
     userName: string;
     text: string;
   }): void {
-    const { chatId, chatTitle, chatType, userId, userName, text } = params;
+    const { chatId, tgChatTitle, chatType, userId, userName, text } = params;
     const preview = text.length > 100 ? text.substring(0, 100) + '...' : text;
 
     console.log('');
     console.log(`${ANSI.brightCyan}${'\u2500'.repeat(60)}${ANSI.reset}`);
-    console.log(this.format('MSG_IN', `[${chatType}] ${chatTitle}`));
+    console.log(this.format('MSG_IN', `[${chatType}] ${tgChatTitle}`));
     console.log(`   ${ANSI.gray}\u0427\u0430\u0442 ID:${ANSI.reset}      ${ANSI.cyan}${chatId}${ANSI.reset}`);
     console.log(`   ${ANSI.gray}\u041E\u0442:${ANSI.reset}          ${ANSI.yellow}${userName}${ANSI.reset} ${ANSI.dim}(ID: ${userId})${ANSI.reset}`);
     console.log(`   ${ANSI.gray}\u0422\u0435\u043A\u0441\u0442:${ANSI.reset}       ${preview}`);
@@ -165,15 +165,15 @@ export class KolsLogger {
    */
   static outgoingMessage(params: {
     chatId: string;
-    chatTitle: string;
+    tgChatTitle: string;
     text: string;
     replyToUser?: string;
   }): void {
-    const { chatId, chatTitle, text, replyToUser } = params;
+    const { chatId, tgChatTitle, text, replyToUser } = params;
     const preview = text.length > 80 ? text.substring(0, 80) + '...' : text;
 
     const replyInfo = replyToUser ? ` \u2192 ${replyToUser}` : '';
-    console.log(this.format('MSG_OUT', `${chatTitle}${replyInfo}`));
+    console.log(this.format('MSG_OUT', `${tgChatTitle}${replyInfo}`));
     console.log(`   ${ANSI.gray}\u0427\u0430\u0442 ID:${ANSI.reset}      ${ANSI.cyan}${chatId}${ANSI.reset}`);
     console.log(`   ${ANSI.gray}\u041E\u0442\u0432\u0435\u0442:${ANSI.reset}       ${ANSI.green}${preview}${ANSI.reset}`);
   }
@@ -183,14 +183,14 @@ export class KolsLogger {
    */
   static skippedMessage(params: {
     chatId: string;
-    chatTitle: string;
+    tgChatTitle: string;
     chatType: '\u041B\u0421' | '\u0433\u0440\u0443\u043F\u043F\u0430';
     reason: string;
   }): void {
-    const { chatId, chatTitle, chatType, reason } = params;
+    const { chatId, tgChatTitle, chatType, reason } = params;
     console.log(
       `${ANSI.dim}\u23ED\uFE0F  [${this.getTimestamp()}] \u041F\u0440\u043E\u043F\u0443\u0449\u0435\u043D\u043E [${chatType}]: ` +
-      `${chatTitle} (${chatId}) - ${reason}${ANSI.reset}`
+      `${tgChatTitle} (${chatId}) - ${reason}${ANSI.reset}`
     );
   }
 

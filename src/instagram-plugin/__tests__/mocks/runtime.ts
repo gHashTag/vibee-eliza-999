@@ -1,20 +1,20 @@
-import { IAgentRuntime, Memory, type UUID } from '@elizaos/core';
-import { mock } from 'bun:test';
+import { IAgentRuntime, Memory, type UUID } from "@elizaos/core";
+import { mock } from "bun:test";
 
 /**
  * Мок для IAgentRuntime
  */
 export function createMockRuntime(): IAgentRuntime {
   return {
-    agentId: '00000000-0000-0000-0000-000000000001' as UUID,
-    characterName: 'VIBEE',
+    agentId: "00000000-0000-0000-0000-000000000001" as UUID,
+    characterName: "VIBEE",
     databaseAdapter: {} as any,
     ensureUserExists: mock().mockResolvedValue({
-      id: '00000000-0000-0000-0000-000000000002' as UUID,
-      name: 'Test User',
+      id: "00000000-0000-0000-0000-000000000002" as UUID,
+      name: "Test User",
     }),
     getService: mock().mockReturnValue({
-      publishPost: mock().mockResolvedValue({ id: 'post-123' }),
+      publishPost: mock().mockResolvedValue({ id: "post-123" }),
       validateToken: mock().mockResolvedValue(true),
     }),
     addMemory: mock().mockResolvedValue(undefined),
@@ -23,7 +23,7 @@ export function createMockRuntime(): IAgentRuntime {
     composeState: mock().mockImplementation(async (message: Memory) => ({
       values: {},
       data: {},
-      text: message.content.text || '',
+      text: message.content.text || "",
       message: message.content.text,
       currentContext: [],
     })),
@@ -33,7 +33,7 @@ export function createMockRuntime(): IAgentRuntime {
       error: mock(),
       warn: mock(),
       debug: mock(),
-      level: 'info',
+      level: "info",
       trace: mock(),
       fatal: mock(),
       success: mock(),
@@ -46,14 +46,17 @@ export function createMockRuntime(): IAgentRuntime {
 /**
  * Мок для сообщения Telegram
  */
-export function createTelegramMessage(text: string, attachments?: any[]): Memory {
+export function createTelegramMessage(
+  text: string,
+  attachments?: any[],
+): Memory {
   return {
-    id: '00000000-0000-0000-0000-000000000003' as UUID,
-    entityId: '00000000-0000-0000-0000-000000000002' as UUID,
-    roomId: '00000000-0000-0000-0000-000000000004' as UUID,
+    id: "00000000-0000-0000-0000-000000000003" as UUID,
+    entityId: "00000000-0000-0000-0000-000000000002" as UUID,
+    roomId: "00000000-0000-0000-0000-000000000004" as UUID,
     content: {
       text,
-      source: 'telegram',
+      source: "telegram",
       attachments: attachments || [],
     },
     createdAt: Date.now(),

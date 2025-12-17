@@ -881,52 +881,31 @@
   "missing": [
     {
       "file": "/-1-ОСНОВЫ-НЕЙРОСЕТЕЙ/00-СТРУКТУРА-МОДУЛЯ.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/-1-ОСНОВЫ-НЕЙРОСЕТЕЙ/05-ВСЕ-МОДЕЛИ-БОТА-ДЕТАЛЬНО.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/00-ВВЕДЕНИЕ/01-ДОБРО-ПОЖАЛОВАТЬ.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/00-ВВЕДЕНИЕ/02-ОБЗОР-ФУНКЦИЙ-БОТА.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/00-ВВЕДЕНИЕ/03-РЕГИСТРАЦИЯ-И-ПОДПИСКА.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/00-ВВЕДЕНИЕ/04-ФИЛОСОФИЯ-НЕЙРОПРОДЮСЕРА.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/00-ПРОГРАММА-AI-MUSIC-PRODUCTION.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/01-01-ЧТО-ДЕЛАЕТ-ХОРОШУЮ-ОБЛОЖКУ.md",
@@ -939,186 +918,111 @@
     },
     {
       "file": "/01-СОЗДАНИЕ-ОБЛОЖКИ/01-ЧТО-ДЕЛАЕТ-ХОРОШУЮ-ОБЛОЖКУ.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/01-СОЗДАНИЕ-ОБЛОЖКИ/02-КНОПКА-ИИ-ФОТОШОП.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/01-СОЗДАНИЕ-ОБЛОЖКИ/03-СТИЛИ-И-ПРОМПТЫ.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/01-СОЗДАНИЕ-ОБЛОЖКИ/04-СЕРИЯ-ОБЛОЖЕК-ДЛЯ-EP.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/01-СОЗДАНИЕ-ОБЛОЖКИ/05-УЛУЧШЕНИЕ-КАЧЕСТВА.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/01-СОЗДАНИЕ-ОБЛОЖКИ/README.md",
-      "issues": [
-        "No images/screenshots"
-      ]
+      "issues": ["No images/screenshots"]
     },
     {
       "file": "/02-МУЗЫКАЛЬНОЕ-ВИДЕО/01-КОНЦЕПЦИЯ-КЛИПА.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/02-МУЗЫКАЛЬНОЕ-ВИДЕО/02-ГЕНЕРАЦИЯ-МУЗЫКИ-SUNO.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/02-МУЗЫКАЛЬНОЕ-ВИДЕО/03-КНОПКА-ВИДЕО-ИЗ-ТЕКСТА.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/02-МУЗЫКАЛЬНОЕ-ВИДЕО/04-КНОПКА-ФОТО-В-ВИДЕО.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/02-МУЗЫКАЛЬНОЕ-ВИДЕО/05-КНОПКА-LIPSYNC.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/02-МУЗЫКАЛЬНОЕ-ВИДЕО/06-КНОПКА-AI-REELS.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/02-МУЗЫКАЛЬНОЕ-ВИДЕО/07-КНОПКА-МОРФИНГ.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/02-МУЗЫКАЛЬНОЕ-ВИДЕО/08-МОНТАЖ-ФИНАЛЬНОГО-КЛИПА.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/02-МУЗЫКАЛЬНОЕ-ВИДЕО/README.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/03-СОЗДАНИЕ-АРТИСТА/01-КОНЦЕПЦИЯ-АРТИСТА.md",
-      "issues": [
-        "No images/screenshots"
-      ]
+      "issues": ["No images/screenshots"]
     },
     {
       "file": "/03-СОЗДАНИЕ-АРТИСТА/02-КНОПКА-ЦИФРОВОЕ-ТЕЛО.md",
-      "issues": [
-        "No images/screenshots"
-      ]
+      "issues": ["No images/screenshots"]
     },
     {
       "file": "/03-СОЗДАНИЕ-АРТИСТА/03-КНОПКА-ИИ-ГЕРОИ.md",
-      "issues": [
-        "No images/screenshots"
-      ]
+      "issues": ["No images/screenshots"]
     },
     {
       "file": "/03-СОЗДАНИЕ-АРТИСТА/04-КНОПКА-ТЕКСТ-В-ГОЛОС.md",
-      "issues": [
-        "No images/screenshots"
-      ]
+      "issues": ["No images/screenshots"]
     },
     {
       "file": "/03-СОЗДАНИЕ-АРТИСТА/05-КНОПКА-НЕЙРОФОТО.md",
-      "issues": [
-        "No images/screenshots"
-      ]
+      "issues": ["No images/screenshots"]
     },
     {
       "file": "/03-СОЗДА��ИЕ-АРТИСТА/06-СЕРИЯ-КОНТЕНТА-АРТИСТА.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/04-ДИСТРИБУЦИЯ/01-ПОДГОТОВКА-К-РЕЛИЗУ.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/04-ДИСТРИБУЦИЯ/02-ДИСТРИБУЦИЯ-SPOTIFY.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/04-ДИСТРИБУЦИЯ/03-ПУБЛИКАЦИЯ-YOUTUBE.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/04-ДИСТРИБУЦИЯ/04-INSTAGRAM-TIKTOK-ПРОДВИЖЕНИЕ.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/04-ДИСТРИБУЦИЯ/05-МОНЕТИЗАЦИЯ.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     },
     {
       "file": "/README.md",
-      "issues": [
-        "No images/screenshots",
-        "No practical exercises"
-      ]
+      "issues": ["No images/screenshots", "No practical exercises"]
     }
   ],
   "fileAnalyses": [

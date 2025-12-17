@@ -28,7 +28,7 @@ function formatConfigStatus(config: ChatConfig): string {
 
   return `📊 **Статус конфигурации чата**
 
-**Чат:** ${config.chatTitle || config.chatId}
+**Чат:** ${config.tgChatTitle || config.chatId}
 **Тип:** ${config.chatType}
 **Статус:** ${status}
 

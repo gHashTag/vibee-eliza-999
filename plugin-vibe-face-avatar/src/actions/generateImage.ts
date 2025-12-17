@@ -154,11 +154,18 @@ export const generateImageAction: Action = {
         };
       }
 
+      console.log(`[GENERATE_NEUROPHOTO] userId=${userId}, telegramId=${telegramId}, userIdentifier=${userIdentifier}`);
       logger.info({ userId, telegramId, userIdentifier }, "Using user ID for model lookup");
 
-      // Передаём UUID напрямую - modelLoader умеет искать по entity_id
-      const modelsTask = getUserModelsTask(userIdentifier, 'neuro_face_bot');
+      // ВАЖНО: Используем telegramId для поиска, если он есть (числовой ID)
+      // telegramId уже number, передаём как number для правильного поиска в modelLoader
+      const searchId = telegramId || userIdentifier;
+      console.log(`[GENERATE_NEUROPHOTO] Searching models with searchId=${searchId} (type=${typeof searchId})`);
+
+      const modelsTask = getUserModelsTask(searchId, 'neuro_face_bot');
       const modelsResult = await modelsTask();
+
+      console.log(`[GENERATE_NEUROPHOTO] Models result: isLeft=${modelsResult.isLeft()}, count=${modelsResult.isRight() ? modelsResult.value.length : 0}`);
 
       if (modelsResult.isLeft() || modelsResult.value.length === 0) {
         await callback?.({

@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "vibee": {
+      "url": "https://vibee-mcp.fly.dev/sse"
+    }
+  }
+}

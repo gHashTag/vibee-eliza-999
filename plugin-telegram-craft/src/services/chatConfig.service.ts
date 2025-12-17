@@ -26,6 +26,7 @@ import type {
   DEFAULT_STYLE_RULES,
   DEFAULT_SALES_CONFIG,
 } from '../types/chatConfig.types';
+import { AGENTS_CONFIG, type AgentConfig } from '../config/agents.config';
 
 /**
  * Логгер для ChatConfigService
@@ -169,38 +170,64 @@ export class ChatConfigService extends Service {
   }
 
   /**
-   * Fallback: загрузка статических конфигов из targetChats.ts
+   * Fallback: загрузка статических конфигов из AGENTS_CONFIG
    */
   private async loadStaticConfigs(): Promise<void> {
-    log.info('Загрузка статических конфигураций (fallback режим)...');
+    log.info('Загрузка статических конфигураций из agents.config.ts (fallback режим)...');
 
-    // Импортируем статические чаты
-    const { TARGET_CHATS } = await import('../config/targetChats');
+    // Проходим по всем агентам и их целевым чатам
+    const allAgents = Object.values(AGENTS_CONFIG);
+    let loadedCount = 0;
 
-    // Создаём базовые конфигурации для статических чатов
-    for (const chatId of TARGET_CHATS) {
-      const config: ChatConfig = {
-        id: `static-${chatId}`,
-        chatId: chatId,
-        chatTitle: `Chat ${chatId}`,
-        chatType: 'supergroup',
-        personaName: 'VIBEE',
-        systemPrompt: this.getDefaultSystemPrompt(),
-        styleRules: this.getDefaultStyleRules(),
-        responseExamples: [],
-        knowledgeSources: [],
-        triggerWords: ['vibecoding', 'вайбкодинг', 'elizaos', 'агент'],
-        responseProbability: 1.0,
-        requireMention: false,
-        salesMode: false,
-        isActive: true,
-        priority: 0,
-      };
+    for (const agent of allAgents) {
+      for (const target of agent.targetChats) {
+        if (!target.isActive) continue;
 
-      this.configCache.set(chatId, config);
+        // Определяем триггеры: customTriggers (если есть) или общие triggers.words
+        // Если есть customTriggers, используем ТОЛЬКО их (для специфичных чатов)
+        const effectiveTriggers = target.customTriggers && target.customTriggers.length > 0
+          ? target.customTriggers
+          : agent.triggers.words;
+
+        const config: ChatConfig = {
+          id: `static-${target.chatId}`,
+          chatId: target.chatId,
+          tgChatTitle: target.chatName || `Chat ${target.chatId}`,
+          chatType: target.type,
+          personaName: agent.name,
+          // Генерируем system prompt на основе стиля агента
+          systemPrompt: `Ты ${agent.name}. Твоя роль: ${agent.style.adjectives.join(', ')}.`, 
+          // Используем стиль из конфига агента
+          styleRules: {
+             language: agent.style.language,
+             formality: agent.style.formality,
+             emojisAllowed: agent.style.emojisAllowed,
+             maxResponseLength: agent.style.maxResponseLength,
+             adjectives: agent.style.adjectives,
+             slangs: agent.style.slangs,
+          },
+          responseExamples: agent.style.responseExamples,
+          knowledgeSources: agent.knowledge.sources,
+          triggerWords: effectiveTriggers, // Используем вычисленные триггеры
+          // Используем override вероятность если есть, иначе базовую
+          responseProbability: target.responseProbability ?? agent.triggers.responseProbability,
+          requireMention: agent.triggers.requireMention,
+          salesMode: false,
+          isActive: true,
+          priority: 0,
+          forwardChatId: target.forwardChatId,
+          forwardTriggerCategories: target.forwardTriggerCategories,
+        };
+
+        // Сохраняем в кэш (последний конфиг побеждает если есть дубликаты chatId)
+        // Нормализуем ID перед сохранением, так как getConfig ожидает нормализованный ID
+        const normalizedId = this.normalizeChatId(target.chatId);
+        this.configCache.set(normalizedId, config);
+        loadedCount++;
+      }
     }
 
-    log.info(`Загружено ${TARGET_CHATS.length} статических конфигураций`);
+    log.info(`Загружено ${loadedCount} статических конфигураций из AGENTS_CONFIG`);
   }
 
   /**
@@ -285,7 +312,7 @@ export class ChatConfigService extends Service {
 
     const insertData = {
       chatId: data.chatId,
-      chatTitle: data.chatTitle,
+      tgChatTitle: data.tgChatTitle,
       chatType: data.chatType,
       personaName: data.personaName,
       systemPrompt: data.systemPrompt,
@@ -413,7 +440,7 @@ export class ChatConfigService extends Service {
     return {
       id: record.id,
       chatId: record.chatId,
-      chatTitle: record.chatTitle || '',
+      tgChatTitle: record.tgChatTitle || '',
       chatType: record.chatType as ChatConfig['chatType'],
       personaName: record.personaName,
       systemPrompt: record.systemPrompt,

@@ -1,10 +1,10 @@
-import { logger, type IAgentRuntime } from '@elizaos/core';
-import { instagramAgent } from '../characters/instagram';
-import { instagramPlugin } from './instagram-plugin/index';
+import { logger, type IAgentRuntime } from "@elizaos/core";
+import { instagramAgent } from "../characters/instagram";
+import { instagramPlugin } from "./instagram-plugin/index";
 
 const initInstagramCharacter = ({ runtime }: { runtime: IAgentRuntime }) => {
-  logger.info('Initializing Instagram Expert character');
-  logger.info({ name: instagramAgent.name }, 'Name:');
+  logger.info("Initializing Instagram Expert character");
+  logger.info({ name: instagramAgent.name }, "Name:");
 };
 
 /**
@@ -13,7 +13,8 @@ const initInstagramCharacter = ({ runtime }: { runtime: IAgentRuntime }) => {
  */
 export const instagramProjectAgent = {
   character: instagramAgent,
-  init: async (runtime: IAgentRuntime) => await initInstagramCharacter({ runtime }),
+  init: async (runtime: IAgentRuntime) =>
+    await initInstagramCharacter({ runtime }),
   plugins: [instagramPlugin],
 };
 

@@ -3,6 +3,7 @@
 > **"Windows - это когда мощь встречается с удобством"** — Современный Windows разработчик
 
 ## 📋 Содержание
+
 1. [🎯 Обзор Windows окружения](#-обзор-windows-окружения)
 2. [💻 Базовое окружение разработчика](#-базовое-окружение-разработчика)
 3. [🤖 AI-инструменты для VibeCoding](#-ai-инструменты-для-vibecoding)
@@ -24,6 +25,7 @@ Windows — самая распространенная ОС в мире, а WSL
 - **Результат** — лучшее из обоих миров!
 
 ### Минимальный набор VibeCoder'а:
+
 - **🖥️ Windows 10/11** — ваша основная ОС. WSL2 добавляет Linux-совместимость
   - 🔗 [Windows 11](https://www.microsoft.com/windows/windows-11) | [WSL2](https://docs.microsoft.com/windows/wsl/)
 - **🤖 Cursor AI** — умный редактор кода с AI-помощником. Как Word + умный коллега
@@ -36,6 +38,7 @@ Windows — самая распространенная ОС в мире, а WSL
   - 🔗 [Официальный сайт](https://git-scm.com/) | [GitHub Desktop](https://desktop.github.com/)
 
 ### Рекомендуемый набор Pro:
+
 - **🚀 Bun** — быстрый "движок" для JavaScript. Как спортивный автомобиль
   - 🔗 [Официальный сайт](https://bun.sh/) | [GitHub](https://github.com/oven-sh/bun)
 - **🐳 Docker Desktop** — контейнеризация. Упаковывает приложения в "коробки"
@@ -48,6 +51,7 @@ Windows — самая распространенная ОС в мире, а WSL
   - 🔗 [Официальный сайт](https://docs.microsoft.com/windows/powertoys/) | [GitHub](https://github.com/microsoft/PowerToys)
 
 ### Как всё работает вместе?
+
 ```
 Windows ← основная система
     ↓
@@ -69,6 +73,7 @@ Obsidian ← документирование проектов
 ## 💻 Базовое окружение разработчика
 
 ### 1. Установка Windows Terminal
+
 ```powershell
 # Установка через Microsoft Store
 winget install --id=Microsoft.WindowsTerminal -e
@@ -93,6 +98,7 @@ EOF
 ```
 
 ### 2. Установка WSL2 (рекомендуется)
+
 ```powershell
 # Включение WSL2
 wsl --install
@@ -108,6 +114,7 @@ wsl --set-default-version 2
 ```
 
 ### 3. Установка Git для Windows
+
 ```powershell
 # Через winget
 winget install --id=Git.Git -e
@@ -127,16 +134,18 @@ git config --global core.editor "code --wait"
 
 **Аналогия с банковской картой:**
 ```
+
 💳 Приватный ключ (id_ed25519) = Ваш ПИН-код от карты
-   • Никогда не говорите никому!
-   • Только вы должны знать
-   • Храните в секрете
+• Никогда не говорите никому!
+• Только вы должны знать
+• Храните в секрете
 
 🏪 Публичный ключ (id_ed25519.pub) = Номер вашей карты
-   • Можно показывать в магазине
-   • Банк проверяет соответствие
-   • Позволяет подтверждать платежи
-```
+• Можно показывать в магазине
+• Банк проверяет соответствие
+• Позволяет подтверждать платежи
+
+````
 
 **Принцип работы:**
 1. Вы создаете пару ключей на компьютере
@@ -169,11 +178,12 @@ cat ~/.ssh/id_ed25519.pub
 # Или в PowerShell:
 # Get-Content ~/.ssh/id_ed25519.pub
 # Скопируйте ВЕСЬ текст (начинается с ssh-ed25519)
-```
+````
 
 **Где и куда добавлять ключи:**
 
 **На GitHub:**
+
 1. Зайдите на github.com → Нажмите на аватар → Settings
 2. В меню слева выберите "SSH and GPG keys"
 3. Нажмите зеленую кнопку "New SSH key"
@@ -182,11 +192,13 @@ cat ~/.ssh/id_ed25519.pub
 6. Нажмите "Add SSH key"
 
 **На GitLab:**
+
 1. User Settings → SSH Keys
 2. Вставьте публичный ключ
 3. Выберите срок действия (рекомендую 365 дней)
 
 **Проверка работы:**
+
 ```powershell
 ssh -T git@github.com
 # Ожидаемый результат:
@@ -195,6 +207,7 @@ ssh -T git@github.com
 ```
 
 **Дополнительные настройки для Windows:**
+
 ```powershell
 # Проверка известных хостов
 ssh-keyscan -H github.com >> ~/.ssh/known_hosts
@@ -211,13 +224,15 @@ icacls ~/.ssh/id_ed25519.pub /inheritance:r /grant:r "$env:USERNAME:(R)"
 ```
 
 **Правила безопасности:**
+
 - ✅ Публичный ключ можно публиковать
 - ❌ Приватный ключ НИКОГДА не передавайте
 - 🔒 Используйте пароль для ключа
 - 🔄 Создавайте отдельные ключи для каждого устройства
 - ⏰ Обновляйте ключи каждые 6-12 месяцев
 - 🪟 В Windows ключи хранятся в папке C:\Users\ВашеИмя\.ssh\
-```
+
+````
 
 ### 4. Node.js и пакетные менеджеры
 
@@ -229,9 +244,10 @@ winget install OpenJS.NodeJS.LTS
 # Проверка
 node --version
 npm --version
-```
+````
 
 #### Установка nvm для Windows
+
 ```powershell
 # Установка nvm-windows
 winget install nvm-windows
@@ -247,6 +263,7 @@ npm --version
 ```
 
 #### Установка pnpm
+
 ```powershell
 # Через npm
 npm install -g pnpm
@@ -262,6 +279,7 @@ pnpm --version
 ```
 
 #### Установка Bun
+
 ```powershell
 # Через PowerShell
 powershell -c "irm bun.sh/install.ps1 | iex"
@@ -281,6 +299,7 @@ bun --version
 ### 1. Cursor AI - IDE с интегрированным AI
 
 #### Установка Cursor
+
 ```powershell
 # Через winget
 winget install --id=Anysphere.Cursor  -e
@@ -290,6 +309,7 @@ winget install --id=Anysphere.Cursor  -e
 ```
 
 #### Настройка Cursor для VibeCoding
+
 ```json
 // %APPDATA%\Cursor\User\settings.json
 {
@@ -331,6 +351,7 @@ winget install --id=Anysphere.Cursor  -e
 ```
 
 ### 2. Windows Terminal настройка
+
 ```json
 // %LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json
 {
@@ -376,12 +397,14 @@ winget install --id=Anysphere.Cursor  -e
 **Зачем нужен?** Claude Code — это специализированный AI-помощник от Anthropic, который помогает писать, анализировать и улучшать код. Он понимает контекст проекта и может работать с большими кодовыми базами.
 
 **Возможности:**
+
 - **Анализ кода:** Понимает сложные проекты и предлагает улучшения
 - **Генерация кода:** Создает функции, классы и целые модули
 - **Рефакторинг:** Предлагает оптимизацию существующего кода
 - **Объяснения:** Детально разбирает, как работает код
 
 **Установка на Windows:**
+
 ```powershell
 # Через браузер (рекомендуется)
 # Зайдите на https://claude.ai/code
@@ -391,11 +414,13 @@ winget install --id=Anysphere.Cursor  -e
 ```
 
 **Интеграция с Windows:**
+
 - Работает в любом браузере
 - Интегрируется с WSL2
 - Поддерживает PowerShell команды
 
 **Ссылки:**
+
 - 🔗 [Claude Code](https://claude.ai/code) | [Anthropic](https://www.anthropic.com/claude)
 
 ### 4. Claude Flow - Рабочие процессы с ИИ
@@ -403,17 +428,20 @@ winget install --id=Anysphere.Cursor  -e
 **Зачем нужен?** Claude Flow помогает создавать автоматизированные рабочие процессы с использованием ИИ. Это как "конвейер" для повторяющихся задач разработки.
 
 **Возможности:**
+
 - **Автоматизация задач:** Создание скриптов для рутинных операций
 - **Рабочие процессы:** Последовательности действий для сложных задач
 - **Интеграции:** Связь с другими инструментами разработки
 - **Шаблоны:** Готовые решения для типичных сценариев
 
 **Использование в Windows:**
+
 - Веб-интерфейс через браузер
 - Интеграция с PowerShell
 - Поддержка Windows Script Host
 
 **Ссылки:**
+
 - 🔗 [Claude Flow](https://claude.ai/flow) | [Anthropic](https://www.anthropic.com/claude)
 
 ### 5. Claude Router - Управление проектами
@@ -421,17 +449,20 @@ winget install --id=Anysphere.Cursor  -e
 **Зачем нужен?** Claude Router помогает организовывать и управлять проектами разработки. Это как "диспетчерская" для ваших идей и задач.
 
 **Возможности:**
+
 - **Управление задачами:** Создание и отслеживание задач разработки
 - **Планирование проектов:** Структурирование больших проектов
 - **Приоритизация:** Определение важности различных функций
 - **Отслеживание прогресса:** Мониторинг выполнения задач
 
 **Использование в Windows:**
+
 - Веб-интерфейс через браузер
 - Экспорт в markdown для Obsidian
 - Интеграция с Git и системами контроля версий
 
 **Ссылки:**
+
 - 🔗 [Claude Router](https://claude.ai/router) | [Anthropic](https://www.anthropic.com/claude)
 
 ### 6. Cloud Code - Профессиональная облачная IDE
@@ -439,12 +470,14 @@ winget install --id=Anysphere.Cursor  -e
 **Зачем нужен?** Cloud Code — это облачная среда разработки от Anthropic с интегрированным Claude AI для профессиональной разработки.
 
 **Возможности:**
+
 - **Облачная IDE:** Полнофункциональный редактор кода в браузере
 - **Интеграция Claude:** Прямой доступ к AI для кода
 - **Командная разработка:** Совместная работа в реальном времени
 - **Предварительный просмотр:** Мгновенное тестирование
 
 **Установка на Windows:**
+
 ```powershell
 # Через браузер (рекомендуется)
 # Зайдите на https://claude.com/product/claude-code
@@ -454,6 +487,7 @@ winget install --id=Anysphere.Cursor  -e
 ```
 
 **Ссылки:**
+
 - 🔗 [Cloud Code](https://claude.com/product/claude-code) | [Anthropic](https://www.anthropic.com/claude)
 
 ### 8. OpenRouter - Универсальный AI API
@@ -461,12 +495,14 @@ winget install --id=Anysphere.Cursor  -e
 **Зачем нужен?** OpenRouter предоставляет доступ к множеству AI моделей через единый API.
 
 **Возможности:**
+
 - **Множественные модели:** Доступ к разным AI
 - **Управление кредитами:** Контроль расходов
 - **Единый API:** Один интерфейс для всех моделей
 - **Аналитика:** Отслеживание использования
 
 **Установка на Windows:**
+
 ```powershell
 # Через npm
 npm install -g openrouter-cli
@@ -479,6 +515,7 @@ choco install openrouter
 ```
 
 **Ссылки:**
+
 - 🔗 [OpenRouter](https://openrouter.ai/settings/credits) | [Документация](https://openrouter.ai/docs)
 
 ### 9. Kilo Code - AI-first редактор
@@ -486,12 +523,14 @@ choco install openrouter
 **Зачем нужен?** Kilo Code — это инновационный редактор кода, полностью ориентированный на работу с AI.
 
 **Возможности:**
+
 - **AI-first подход:** Постоянная поддержка ИИ
 - **Умные предложения:** Контекстные рекомендации
 - **Быстрая разработка:** Ускорение процесса
 - **Современный UI:** Интуитивный интерфейс
 
 **Установка на Windows:**
+
 ```powershell
 # Через браузер
 # Зайдите на https://kilocode.ai/
@@ -504,15 +543,15 @@ choco install kilocode
 ```
 
 **Ссылки:**
+
 - 🔗 [Kilo Code](https://kilocode.ai/) | [Документация](https://kilocode.ai/docs)
-
-
 
 ### 10. Crystal - Управление сессиями Claude
 
 **Зачем нужен?** Crystal — это революционный инструмент для управления множественными сессиями Claude AI, который кардинально меняет подход к разработке. Это полноценная Integrated Vibe Environment (IVE), которая позволяет работать с несколькими проектами одновременно, не теряя контекст и не переключаясь между вкладками.
 
 **Возможности:**
+
 - **Множественные сессии:** Запускайте столько сессий Claude Code, сколько нужно для параллельной работы
 - **Изоляция Git Worktree:** Каждая сессия работает в отдельном Git worktree, предотвращая конфликты
 - **Управление контекстом:** Полное сохранение истории разговоров и контекста для каждой сессии
@@ -524,6 +563,7 @@ choco install kilocode
 - **MCP интеграция:** Подключение к Stravu для совместной работы бизнес-пользователей и разработчиков
 
 **Как это работает:**
+
 1. **Git Worktree изоляция:** Каждая сессия работает в собственном Git worktree, предотвращая конфликты между параллельными разработками
 2. **Мониторинг сессий:** Централизованный интерфейс для управления всеми Claude Code сессиями
 3. **Непрерывность разговора:** Возобновление любой сессии с полной историей разговора
@@ -531,6 +571,7 @@ choco install kilocode
 5. **Выполнение и тестирование:** Запуск кода для проверки изменений одним нажатием кнопки
 
 **Установка на Windows:**
+
 ```powershell
 # Через браузер (рекомендуется)
 # Зайдите на https://stravu.com/blog/crystal
@@ -551,6 +592,7 @@ npm install -g crystal-cli
 ```
 
 **Ссылки:**
+
 - 🔗 [Crystal](https://stravu.com/blog/crystal-supercharge-your-development-with-multi-session-claude-code-management) | [GitHub](https://github.com/stravu/crystal)
 - 🔗 [Claude Desktop](https://claude.ai/download) | [Anthropic](https://www.anthropic.com/claude)
 - 🔗 [ChatGPT](https://chat.openai.com/) | [OpenAI](https://openai.com/)
@@ -579,6 +621,7 @@ Obsidian ← документирование
 ```
 
 **Как использовать вместе:**
+
 1. **Cursor** → писать код с AI-подсказками
 2. **GitHub Copilot** → генерировать функции
 3. **Claude Code** → анализировать и улучшать
@@ -595,6 +638,7 @@ Obsidian ← документирование
 ### 1. Obsidian - База знаний VibeCoder'а
 
 #### Установка Obsidian
+
 ```powershell
 # Через winget
 winget install Obsidian.Obsidian
@@ -604,6 +648,7 @@ choco install obsidian
 ```
 
 #### Настройка Obsidian для VibeCoding
+
 ```powershell
 # Создание VibeCoding Vault
 mkdir "$env:USERPROFILE\VibeCoding\Vault\Projects"
@@ -643,6 +688,7 @@ tags: [project, vibecoding]
 ### 2. Дополнительные инструменты документирования
 
 #### PowerShell Markdown модуль
+
 ```powershell
 # Установка модуля
 Install-Module -Name PowerShellMarkdown -Scope CurrentUser
@@ -656,6 +702,7 @@ New-MarkdownDocument -Title "VibeCoding Project" -Path .\README.md
 ## 🔧 Дополнительные утилиты
 
 ### 1. PowerToys - Утилиты для продуктивности
+
 ```powershell
 # Через winget
 winget install Microsoft.PowerToys
@@ -668,6 +715,7 @@ winget install Microsoft.PowerToys
 ```
 
 ### 2. Windows Subsystem for Linux (WSL2)
+
 ```powershell
 # Установка дополнительных дистрибутивов
 wsl --install -d Debian
@@ -687,6 +735,7 @@ generateHosts=false
 ```
 
 ### 3. Chocolatey - Пакетный менеджер
+
 ```powershell
 # Установка Chocolatey
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -698,6 +747,7 @@ choco --version
 ```
 
 ### 4. Scoop - Альтернативный пакетный менеджер
+
 ```powershell
 # Установка Scoop
 iex (new-object net.webclient).downloadstring('https://get.scoop.sh')
@@ -711,6 +761,7 @@ scoop install sudo curl wget git vim nano
 ```
 
 ### 5. HTTPie - Удобный HTTP клиент
+
 ```powershell
 # Через Chocolatey
 choco install httpie
@@ -720,6 +771,7 @@ scoop install httpie
 ```
 
 ### 6. jq - Обработка JSON
+
 ```powershell
 # Через Chocolatey
 choco install jq
@@ -729,6 +781,7 @@ scoop install jq
 ```
 
 ### 7. bat - Улучшенный cat с подсветкой
+
 ```powershell
 # Через Chocolatey
 choco install bat
@@ -741,6 +794,7 @@ function cat { bat $args }
 ```
 
 ### 8. exa - Современная замена ls
+
 ```powershell
 # Через Chocolatey
 choco install exa
@@ -755,6 +809,7 @@ function la { exa -la $args }
 ```
 
 ### 9. fzf - Fuzzy поиск
+
 ```powershell
 # Через Chocolatey
 choco install fzf
@@ -769,6 +824,7 @@ scoop install fzf
 ```
 
 ### 10. Docker Desktop
+
 ```powershell
 # Через winget
 winget install Docker.DockerDesktop
@@ -785,6 +841,7 @@ docker compose version
 **Зачем нужен?** DBeaver — это бесплатный универсальный инструмент для работы с базами данных. Поддерживает практически все популярные СУБД: PostgreSQL, MySQL, SQLite, Oracle, SQL Server, MongoDB и многие другие.
 
 **Возможности:**
+
 - **Универсальность:** Работа с любыми базами данных через единый интерфейс
 - **SQL редактор:** Подсветка синтаксиса, автодополнение, форматирование
 - **Визуализация данных:** Диаграммы, графики, экспорт в различные форматы
@@ -794,6 +851,7 @@ docker compose version
 - **Бесплатность:** Community Edition полностью бесплатна
 
 **Установка на Windows:**
+
 ```powershell
 # Через winget (рекомендуется)
 winget install dbeaver.dbeaver
@@ -806,6 +864,7 @@ choco install dbeaver
 ```
 
 **Первоначальная настройка:**
+
 ```powershell
 # После установки DBeaver:
 # 1. Запустите DBeaver
@@ -823,6 +882,7 @@ choco install dbeaver
 **Подключение к популярным БД:**
 
 **PostgreSQL (например, Neon, Supabase):**
+
 ```
 Host: your-host.neon.tech
 Port: 5432
@@ -833,6 +893,7 @@ SSL: require
 ```
 
 **MySQL:**
+
 ```
 Host: localhost
 Port: 3306
@@ -842,11 +903,13 @@ Password: your-password
 ```
 
 **SQLite:**
+
 ```
 Path: C:\path\to\your\database.db
 ```
 
 **MongoDB:**
+
 ```
 Host: localhost
 Port: 27017
@@ -855,6 +918,7 @@ Authentication: SCRAM-SHA-1
 ```
 
 **Полезные функции DBeaver:**
+
 - **Ctrl+Enter** — выполнить SQL запрос
 - **Ctrl+Shift+F** — форматировать SQL
 - **F4** — открыть редактор данных
@@ -862,6 +926,7 @@ Authentication: SCRAM-SHA-1
 - **Alt+X** — выполнить выделенный текст
 
 **Ссылки:**
+
 - 🔗 [Официальный сайт](https://dbeaver.io/) | [Скачать](https://dbeaver.io/download/)
 - 🔗 [Документация](https://dbeaver.io/docs/) | [GitHub](https://github.com/dbeaver/dbeaver)
 
@@ -870,6 +935,7 @@ Authentication: SCRAM-SHA-1
 ## ✅ Проверка установки
 
 ### Скрипт проверки окружения для Windows
+
 ```powershell
 # check-windows-vibecoding.ps1
 
@@ -972,6 +1038,7 @@ Write-Host "- Настройте PowerShell профиль для удобств
 ```
 
 Запустите проверку:
+
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 .\check-windows-vibecoding.ps1
@@ -984,6 +1051,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ### Распространенные проблемы и решения:
 
 #### 1. **Windows Terminal не устанавливается**
+
 ```
 Проблема: winget: command not found
 Решение:
@@ -993,6 +1061,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 #### 2. **WSL2 не работает**
+
 ```
 Проблема: WSL 2 requires an update to its kernel component
 Решение:
@@ -1003,6 +1072,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 #### 3. **Docker не запускается**
+
 ```
 Проблема: Docker Desktop - Access denied
 Решение:
@@ -1013,6 +1083,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 #### 4. **Node.js не устанавливается**
+
 ```
 Проблема: nvm: command not found
 Решение:
@@ -1023,6 +1094,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 #### 5. **Git SSH не подключается**
+
 ```
 Проблема: Permission denied (publickey)
 Решение:
@@ -1033,6 +1105,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 #### 6. **Cursor не открывает файлы**
+
 ```
 Проблема: Cannot open file with Cursor
 Решение:
@@ -1043,6 +1116,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 ### Диагностические команды PowerShell:
+
 ```powershell
 # Проверить систему
 systeminfo | Select-String "OS Version","System Type"
@@ -1064,6 +1138,7 @@ $env:PATH -split ';' | Select-String "node"
 ```
 
 ### Если ничего не помогает:
+
 1. **Обновите Windows:** Settings → Update & Security → Windows Update
 2. **Проверьте антивирус:** Временно отключите и попробуйте снова
 3. **Сбросьте настройки:** Для инструментов удалите и переустановите
@@ -1074,6 +1149,7 @@ $env:PATH -split ';' | Select-String "node"
 ## 🎓 Первый VibeCoding проект
 
 ### Быстрый старт проекта
+
 ```powershell
 # 1. Создание проекта
 mkdir my-vibecoding-app
@@ -1210,6 +1286,7 @@ pnpm dev
 ```
 
 ### Структура VibeCoding проекта
+
 ```
 my-vibecoding-app/
 ├── src/
@@ -1234,6 +1311,7 @@ my-vibecoding-app/
 ## 🎯 Чеклист готовности к VibeCoding
 
 ### Обязательные компоненты:
+
 - [x] Windows Terminal установлен и настроен
 - [x] Git установлен и настроен
 - [x] Node.js (LTS версия) установлен
@@ -1242,6 +1320,7 @@ my-vibecoding-app/
 - [x] Obsidian установлен для документации
 
 ### Рекомендуемые компоненты:
+
 - [x] WSL2 установлен для Linux-совместимости
 - [x] Bun установлен как альтернатива Node.js
 - [x] Docker Desktop для контейнеризации
@@ -1251,6 +1330,7 @@ my-vibecoding-app/
 - [ ] Полезные CLI утилиты (bat, exa, fzf, jq)
 
 ### Настройки и конфигурации:
+
 - [x] SSH ключи для GitHub созданы
 - [x] PowerShell профиль настроен
 - [ ] Cursor AI extensions установлены
@@ -1263,18 +1343,21 @@ my-vibecoding-app/
 ## 📚 Полезные ресурсы для Windows
 
 ### Официальная документация:
+
 - [Windows Terminal Documentation](https://docs.microsoft.com/en-us/windows/terminal/)
 - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/)
 - [PowerShell Documentation](https://docs.microsoft.com/en-us/powershell/)
 - [Chocolatey Documentation](https://chocolatey.org/docs/)
 
 ### VibeCoding сообщество:
+
 - [Windows VibeCoding Guide](https://github.com/vibecoding/windows-guide)
 - [PowerToys Documentation](https://docs.microsoft.com/en-us/windows/powertoys/)
 - [Windows Developer Documentation](https://docs.microsoft.com/en-us/windows/dev-environment/)
 - [WSL Best Practices](https://docs.microsoft.com/en-us/windows/wsl/best-practices)
 
 ### Обучающие материалы:
+
 - [Windows Command Line](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/windows-commands)
 - [PowerShell Scripting](https://docs.microsoft.com/en-us/powershell/scripting/overview)
 - [WSL Setup Guide](https://docs.microsoft.com/en-us/windows/wsl/setup/environment)
@@ -1285,6 +1368,7 @@ my-vibecoding-app/
 ## 🎯 Проверь себя: Windows окружение
 
 **Вопрос 1:** В чём основное различие между PowerShell, Command Prompt (CMD) и WSL?
+
 - A) Это разные названия одной и той же программы
 - B) PowerShell — современная оболочка Windows, CMD — устаревшая, WSL — Linux внутри Windows
 - C) CMD только для старых компьютеров, PowerShell только для серверов
@@ -1295,16 +1379,19 @@ my-vibecoding-app/
 B) PowerShell — современная оболочка Windows, CMD — устаревшая, WSL — Linux внутри Windows
 
 **Объяснение:**
+
 - **PowerShell** — это современная командная оболочка Windows с поддержкой скриптов, объектной модели и автоматизации. Используйте для большинства задач разработки.
 - **Command Prompt (CMD)** — это устаревшая командная строка Windows. Сохранена для совместимости со старыми скриптами.
 - **WSL (Windows Subsystem for Linux)** — это настоящий Linux, работающий внутри Windows. Идеально для кроссплатформенной разработки.
 
 **Windows совет:** Для современной разработки используйте Windows Terminal с PowerShell как основной оболочкой, а WSL — когда нужна Linux-совместимость (например, для Docker или специфичных Linux-инструментов).
+
 </details>
 
 ---
 
 **Вопрос 2:** Что произойдёт, если установить Node.js через `nvm-windows`, а потом напрямую через `winget install NodeJS`?
+
 - A) Ничего страшного, они будут работать параллельно
 - B) Возникнет конфликт версий в PATH, команды могут работать непредсказуемо
 - C) Windows автоматически удалит старую версию
@@ -1315,23 +1402,28 @@ B) PowerShell — современная оболочка Windows, CMD — ус�
 B) Возникнет конфликт версий в PATH, команды могут работать непредсказуемо
 
 **Объяснение:** Когда вы устанавливаете Node.js несколькими способами, обе установки добавляют свои пути в переменную окружения PATH. Windows будет использовать первую найденную версию, что может привести к:
+
 - Запуску неожиданной версии Node.js
 - Ошибкам при установке пакетов
 - Несоответствию версий между `node` и `npm`
 
 **Windows совет:** Выберите ОДИН способ установки:
+
 - **nvm-windows** — если нужны разные версии Node.js для разных проектов
 - **winget** или **прямая установка** — если используете одну стабильную версию
 
 Проверить конфликты можно командой:
+
 ```powershell
 where.exe node  # Покажет ВСЕ найденные версии в PATH
 ```
+
 </details>
 
 ---
 
 **Вопрос 3:** При установке Git вы получили ошибку "Permission denied" при создании SSH ключей. В чём вероятная причина?
+
 - A) У вас нет папки `.ssh`
 - B) Антивирус блокирует создание ключей
 - C) Неправильные права доступа к папке `.ssh` или ключам
@@ -1344,6 +1436,7 @@ D) Все вышеперечисленное
 **Объяснение:** В Windows с SSH ключами могут быть проблемы по нескольким причинам:
 
 1. **Отсутствие папки `.ssh`**: Windows может не создать её автоматически
+
    ```powershell
    mkdir ~/.ssh  # Создайте вручную
    ```
@@ -1356,6 +1449,7 @@ D) Все вышеперечисленное
    ```
 
 **Windows совет:** Всегда проверяйте права на ключи после создания:
+
 ```powershell
 # Проверить права
 icacls ~/.ssh/id_ed25519
@@ -1363,11 +1457,13 @@ icacls ~/.ssh/id_ed25519
 # Правильные права: только ваш пользователь с правом чтения
 # Неправильные: BUILTIN\Users, Everyone и другие группы
 ```
+
 </details>
 
 ---
 
 **Вопрос 4:** В Windows Terminal вы хотите быстро переключаться между PowerShell и WSL. Какое сочетание клавиш самое эффективное?
+
 - A) Alt+Tab для переключения между окнами
 - B) Ctrl+Shift+T для новой вкладки и выбор профиля
 - C) Ctrl+Shift+[1-9] для переключения на конкретный профиль
@@ -1384,16 +1480,19 @@ C) Ctrl+Shift+[1-9] для переключения на конкретный п
 - **Ctrl+Shift+3** и далее — другие профили
 
 Другие полезные сочетания:
+
 - **Ctrl+Shift+D** — дублировать текущую вкладку
 - **Ctrl+Tab** / **Ctrl+Shift+Tab** — переключение между вкладками
 - **Ctrl+,** — открыть настройки
 
 **Windows совет:** Настройте порядок профилей в настройках Windows Terminal для удобства. Поставьте часто используемые профили на первые позиции.
+
 </details>
 
 ---
 
 **Вопрос 5:** Ваш проект работает в WSL, но вы хотите редактировать файлы в Cursor на Windows. Как правильно открыть проект?
+
 - A) Скопировать все файлы из WSL в Windows и работать с копией
 - B) Использовать путь `\\wsl$\Ubuntu\home\username\project` в Cursor
 - C) Открыть файлы через WSL командой `cursor .` из папки проекта
@@ -1406,25 +1505,30 @@ D) Варианты B и C правильные
 **Объяснение:** Windows и WSL интегрированы, и есть два основных способа работы с файлами:
 
 **Способ 1: Через сетевой путь Windows**
+
 ```powershell
 # В Cursor или проводнике Windows используйте:
 \\wsl$\Ubuntu\home\username\project
 ```
+
 Плюсы: Работает из любого места Windows
 Минусы: Чуть медленнее, чем нативный доступ
 
 **Способ 2: Через команду из WSL**
+
 ```bash
 # В WSL терминале:
 cd /home/username/project
 cursor .  # Откроет Cursor с текущей папкой
 ```
+
 Плюсы: Быстрый доступ, правильные права
 Минусы: Нужен открытый WSL терминал
 
 **Windows совет:** Лучшая практика — хранить код в WSL файловой системе (`/home/username/`) для максимальной производительности, особенно с Git и Node.js. Доступ из Windows через `\\wsl$\` очень удобен для редактирования.
 
 **Не делайте так:**
+
 - ❌ Копирование файлов туда-сюда (потеря синхронизации)
 - ❌ Хранение проектов в `/mnt/c/` (медленная работа Git и npm)
 </details>
@@ -1432,6 +1536,7 @@ cursor .  # Откроет Cursor с текущей папкой
 ---
 
 **Вопрос 6:** Docker Desktop на Windows работает через WSL2. Что это означает для разработчика?
+
 - A) Docker не будет работать в PowerShell, только в WSL
 - B) Docker команды работают везде, но контейнеры выполняются в WSL2 backend
 - C) Нужно устанавливать Docker отдельно в WSL
@@ -1444,17 +1549,20 @@ B) Docker команды работают везде, но контейнеры 
 **Объяснение:** Docker Desktop на Windows использует WSL2 как backend для запуска контейнеров, что даёт лучшую производительность:
 
 **Как это работает:**
+
 ```
 PowerShell/CMD → Docker CLI → Docker Desktop → WSL2 Backend → Контейнеры
 ```
 
 **Что это значит:**
+
 - ✅ Команды `docker` работают в PowerShell, CMD и WSL
 - ✅ Производительность почти как на нативном Linux
 - ✅ Файловая система WSL2 работает быстрее для Docker volumes
 - ✅ Можно использовать Linux-контейнеры без виртуализации
 
 **Windows совет:** Для максимальной производительности:
+
 1. Храните Dockerfiles и код в WSL файловой системе (`/home/username/`)
 2. Используйте WSL2 терминал для Docker команд
 3. Настройте ресурсы WSL2 в `.wslconfig`:
@@ -1463,11 +1571,12 @@ PowerShell/CMD → Docker CLI → Docker Desktop → WSL2 Backend → Конте
    memory=4GB
    processors=2
    ```
-</details>
+   </details>
 
 ---
 
 **Вопрос 7:** Переменная окружения PATH в Windows — что это и зачем она нужна разработчику?
+
 - A) Это путь к папке пользователя
 - B) Список папок, где Windows ищет исполняемые файлы команд
 - C) Конфигурационный файл для настройки терминала
@@ -1480,6 +1589,7 @@ B) Список папок, где Windows ищет исполняемые фа�
 **Объяснение:** PATH — это одна из самых важных переменных окружения. Когда вы вводите команду (например, `git` или `node`), Windows ищет исполняемый файл по всем путям в PATH:
 
 **Как это работает:**
+
 ```powershell
 # Вы вводите команду
 > node --version
@@ -1492,6 +1602,7 @@ C:\Users\YourName\AppData\Local\Programs\
 ```
 
 **Проверить PATH:**
+
 ```powershell
 # Посмотреть все пути
 $env:PATH -split ';'
@@ -1502,6 +1613,7 @@ where.exe git
 ```
 
 **Добавить в PATH:**
+
 ```powershell
 # Временно (до закрытия PowerShell)
 $env:PATH += ";C:\MyPrograms\bin"
@@ -1511,6 +1623,7 @@ $env:PATH += ";C:\MyPrograms\bin"
 ```
 
 **Windows совет:** Проблемы с "command not found" в 90% случаев связаны с PATH. Всегда проверяйте:
+
 1. Установлена ли программа? `where.exe имя_программы`
 2. Есть ли путь в PATH? `$env:PATH -split ';' | Select-String "имя"`
 3. Перезапустили ли PowerShell после установки?
@@ -1525,6 +1638,7 @@ $env:PATH += ";C:\MyPrograms\bin"
 **Цель:** Настроить профессиональную среду разработки в Windows Terminal.
 
 **Шаги:**
+
 1. Установите Windows Terminal из Microsoft Store или через winget
 2. Настройте PowerShell как профиль по умолчанию
 3. Измените цветовую схему на Dracula или другую на ваш вкус
@@ -1532,6 +1646,7 @@ $env:PATH += ";C:\MyPrograms\bin"
 5. Создайте профиль PowerShell с вашими настройками
 
 **Критерии успеха:**
+
 - ✅ Windows Terminal открывается с PowerShell по умолчанию
 - ✅ Красивая цветовая схема применена
 - ✅ Шрифт с лигатурами установлен и настроен
@@ -1539,6 +1654,7 @@ $env:PATH += ";C:\MyPrograms\bin"
 - ✅ Можете переключаться между профилями горячими клавишами
 
 **Команды проверки (PowerShell):**
+
 ```powershell
 # Проверить версию PowerShell
 $PSVersionTable
@@ -1552,6 +1668,7 @@ cat $PROFILE  # Должен показать ваши алиасы и наст�
 ```
 
 **Дополнительное задание (+10 мин):**
+
 - Настройте красивый PowerShell промпт с помощью Oh My Posh:
   ```powershell
   winget install JanDeDobbeleer.OhMyPosh
@@ -1565,6 +1682,7 @@ cat $PROFILE  # Должен показать ваши алиасы и наст�
 **Цель:** Настроить бесшовную работу между Windows и Linux окружениями.
 
 **Шаги:**
+
 1. Установите WSL2 с Ubuntu: `wsl --install -d Ubuntu`
 2. Создайте пользователя и пароль в Ubuntu
 3. Обновите пакеты: `sudo apt update && sudo apt upgrade -y`
@@ -1582,6 +1700,7 @@ cat $PROFILE  # Должен показать ваши алиасы и наст�
 7. Убедитесь, что Git работает корректно в обоих окружениях
 
 **Критерии успеха:**
+
 - ✅ WSL2 установлен и работает
 - ✅ Ubuntu обновлен до последней версии
 - ✅ Node.js и Git установлены в WSL
@@ -1590,6 +1709,7 @@ cat $PROFILE  # Должен показать ваши алиасы и наст�
 - ✅ Git команды работают в PowerShell и WSL
 
 **Команды проверки (WSL):**
+
 ```bash
 # В WSL терминале
 cat /etc/os-release  # Информация о Ubuntu
@@ -1605,6 +1725,7 @@ cat README.md
 ```
 
 **Команды проверки (PowerShell):**
+
 ```powershell
 # В PowerShell
 wsl --list --verbose  # Должен показать Ubuntu с версией 2
@@ -1613,6 +1734,7 @@ ls \\wsl$\Ubuntu\home\  # Увидеть файлы WSL из Windows
 ```
 
 **Дополнительное задание (+15 мин):**
+
 - Настройте VS Code Remote WSL расширение для работы напрямую в WSL
 - Сравните скорость работы Git в WSL vs Windows (подсказка: WSL быстрее!)
 
@@ -1625,8 +1747,10 @@ ls \\wsl$\Ubuntu\home\  # Увидеть файлы WSL из Windows
 **Шаги:**
 
 **Часть 1: Установка инструментов (15 мин)**
+
 1. Установите пакетный менеджер (Chocolatey или Scoop)
 2. Установите через него базовые инструменты:
+
    ```powershell
    # Через Chocolatey
    choco install git nodejs pnpm docker-desktop vscode -y
@@ -1634,10 +1758,13 @@ ls \\wsl$\Ubuntu\home\  # Увидеть файлы WSL из Windows
    # Или через Scoop
    scoop install git nodejs pnpm
    ```
+
 3. Установите PowerToys для повышения продуктивности
 
 **Часть 2: Настройка окружения (15 мин)**
+
 1. Создайте PowerShell профиль с алиасами и функциями:
+
    ```powershell
    # Откройте профиль
    code $PROFILE
@@ -1649,11 +1776,13 @@ ls \\wsl$\Ubuntu\home\  # Увидеть файлы WSL из Windows
    function dev { pnpm run dev }
    function build { pnpm run build }
    ```
+
 2. Настройте Git с правильным именем и email
 3. Создайте SSH ключи для GitHub
 4. Добавьте SSH ключ на GitHub
 
 **Часть 3: Тестовый проект (20 мин)**
+
 1. Создайте новый проект в PowerShell:
    ```powershell
    mkdir test-vibecoding-windows
@@ -1669,11 +1798,13 @@ ls \\wsl$\Ubuntu\home\  # Увидеть файлы WSL из Windows
 5. Запустите тесты: `pnpm exec vitest`
 
 **Часть 4: WSL версия (10 мин)**
+
 1. Повторите создание проекта в WSL
 2. Сравните производительность установки пакетов
 3. Откройте проект из WSL в Cursor из Windows
 
 **Критерии успеха:**
+
 - ✅ Пакетный менеджер установлен и работает
 - ✅ Все инструменты установлены и доступны в PATH
 - ✅ PowerShell профиль настроен с алиасами
@@ -1685,12 +1816,14 @@ ls \\wsl$\Ubuntu\home\  # Увидеть файлы WSL из Windows
 
 **Документация:**
 Создайте файл `WINDOWS-SETUP.md` с описанием:
+
 - Какие инструменты установлены и зачем
 - Какие настройки применены
 - Ваш предпочтительный workflow (PowerShell vs WSL)
 - Решения найденных проблем
 
 **Дополнительное задание (+20 мин):**
+
 1. Установите Docker Desktop и запустите контейнер:
    ```powershell
    docker run -d -p 3000:80 nginx
@@ -1707,11 +1840,13 @@ ls \\wsl$\Ubuntu\home\  # Увидеть файлы WSL из Windows
 **Выберите свой путь:**
 
 1. **Быстрая установка одной командой** → **[06-ONE-CLICK-SETUP.md](06-ONE-CLICK-SETUP.md)**
+
    - Автоматизированная установка всех инструментов
    - Скрипты для PowerShell и Bash
    - Проверка окружения
 
 2. **Развенчание мифов о VibeCoding** → **[07-МИФЫ-О-VIBECODING.md](07-МИФЫ-О-VIBECODING.md)**
+
    - "VibeCoding только для профессионалов?"
    - "Нужно знать много инструментов?"
    - "Windows не подходит для разработки?"
@@ -1722,6 +1857,7 @@ ls \\wsl$\Ubuntu\home\  # Увидеть файлы WSL из Windows
    - Продвинутые настройки
 
 **Рекомендация для Windows пользователей:**
+
 - Если вы новичок → начните с **06-ONE-CLICK-SETUP.md**
 - Если хотите понять глубже → читайте **08-TOOLS-EXPLAINED.md**
 - Если сомневаетесь в VibeCoding → **07-МИФЫ-О-VIBECODING.md** развеет сомнения
@@ -1734,8 +1870,6 @@ ls \\wsl$\Ubuntu\home\  # Увидеть файлы WSL из Windows
 
 1. **Настройте WSL2** в [WSL2-SETUP.md]
 
-
 ---
 
-
-*Добро пожаловать в мир Windows VibeCoding! Ваше окружение готово, теперь время творить эффективно! 🪟✨*
+_Добро пожаловать в мир Windows VibeCoding! Ваше окружение готово, теперь время творить эффективно! 🪟✨_

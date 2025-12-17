@@ -214,6 +214,47 @@ const STYLE_REFERENCE_IMAGE_PATH = path.join(
 );
 
 /**
+ * Чёрный список пользователей - всегда исключаются из проактивной рассылки
+ * Формат: username (без @) или user ID (строка)
+ *
+ * Примеры:
+ * - "atimukta" - исключить по username
+ * - "123456789" - исключить по ID
+ *
+ * ⚠️ ВАЖНО: Этот список можно расширить через конфигурацию агента в будущем
+ */
+/**
+ * Чёрный список пользователей - всегда исключаются из проактивной рассылки
+ *
+ * Формат: username (без @, lowercase) или user ID (строка)
+ *
+ * ⚠️ ВАЖНО:
+ * - Username проверяется в нижнем регистре без символа @
+ * - Можно добавить как username, так и user ID для надёжности
+ * - Если username меняется, нужно обновить список
+ */
+/**
+ * Чёрный список пользователей - всегда исключаются из проактивной рассылки
+ *
+ * ⚠️ КРИТИЧНО: Пользователи из этого списка НИКОГДА не получат проактивные сообщения
+ * даже если они есть в группе и имеют бесплатные фото.
+ *
+ * Формат: username (без @, lowercase) или user ID (строка)
+ *
+ * ⚠️ ВАЖНО:
+ * - Username проверяется в нижнем регистре без символа @
+ * - Можно добавить как username, так и user ID для надёжности
+ * - Если username меняется, нужно обновить список
+ */
+const EXCLUDED_USERS = new Set<string>([
+  "atimukta", // ❌ Мужчина - исключаем из проактивной рассылки (только для девочек)
+  "muse_nataly", // ❌ Лимит исчерпан - исключаем из проактивной рассылки (чтобы не спамить сообщениями о paywall)
+  // Добавьте сюда других пользователей для исключения
+  // Формат: username (без @, lowercase) или user ID (строка)
+  // Пример: "username123" или "123456789"
+]);
+
+/**
  * Состояние проактивного сервиса
  */
 interface ProactiveState {
@@ -225,7 +266,14 @@ interface ProactiveState {
   isActive: boolean;
   /** ID таймера */
   timerId: NodeJS.Timeout | null;
+  /** Флаг выполнения (защита от одновременных запусков) */
+  isExecuting: boolean;
+  /** ID таймера начальной задержки */
+  initialTimeoutId: NodeJS.Timeout | null;
 }
+
+// 🔒 ГЛОБАЛЬНЫЙ SINGLETON: Один ProactiveAvatarService на весь процесс
+let globalProactiveAvatarServiceInstance: ProactiveAvatarService | null = null;
 
 /**
  * ProactiveAvatarService - проактивная реклама через аватарки
@@ -238,8 +286,15 @@ export class ProactiveAvatarService extends Service {
    * Static start method required by ElizaOS 1.6+
    */
   static async start(runtime: IAgentRuntime): Promise<Service> {
-    log.info("STATIC start() called");
+    // 🔒 SINGLETON CHECK
+    if (globalProactiveAvatarServiceInstance) {
+      log.info("🔒 Returning existing singleton instance");
+      return globalProactiveAvatarServiceInstance;
+    }
+
+    log.info("🆕 Creating new singleton instance");
     const instance = new ProactiveAvatarService();
+    globalProactiveAvatarServiceInstance = instance;
     await instance.initialize(runtime);
     await instance.start();
     return instance;
@@ -262,7 +317,7 @@ export class ProactiveAvatarService extends Service {
     "Проактивная реклама через креативные аватарки участников группы";
 
   /** Runtime агента */
-  private runtime: IAgentRuntime | null = null;
+  protected runtime: IAgentRuntime | null = null;
 
   /** Состояние по чатам */
   private stateByChat: Map<string, ProactiveState> = new Map();
@@ -447,9 +502,15 @@ export class ProactiveAvatarService extends Service {
     for (const [chatId, state] of this.stateByChat) {
       if (state.timerId) {
         clearInterval(state.timerId);
-        state.isActive = false;
-        log.info(`Stopped proactive loop for chat ${chatId}`);
+        log.info(`Cleared interval timer for chat ${chatId}`);
       }
+      if (state.initialTimeoutId) {
+        clearTimeout(state.initialTimeoutId);
+        log.info(`Cleared initial timeout for chat ${chatId}`);
+      }
+      state.isActive = false;
+      state.isExecuting = false;
+      log.info(`Stopped proactive loop for chat ${chatId}`);
     }
 
     this.stateByChat.clear();
@@ -464,8 +525,18 @@ export class ProactiveAvatarService extends Service {
     // Проверяем, не запущен ли уже таймер
     const existingState = this.stateByChat.get(chatId);
     if (existingState?.isActive) {
-      log.warn(`Proactive loop already running for chat ${chatId}`);
-      return;
+      log.warn(
+        `⚠️ Proactive loop already running for chat ${chatId}, stopping old timer first`
+      );
+      // Останавливаем старый таймер перед созданием нового
+      if (existingState.timerId) {
+        clearInterval(existingState.timerId);
+      }
+      if (existingState.initialTimeoutId) {
+        clearTimeout(existingState.initialTimeoutId);
+      }
+      // Очищаем состояние
+      this.stateByChat.delete(chatId);
     }
 
     // Создаём состояние
@@ -474,14 +545,43 @@ export class ProactiveAvatarService extends Service {
       lastSentTime: null,
       isActive: true,
       timerId: null,
+      isExecuting: false,
+      initialTimeoutId: null,
     };
 
     // Конвертируем минуты в миллисекунды
     const intervalMs =
       Math.max(intervalMinutes, MIN_INTERVAL_MINUTES) * 60 * 1000;
 
-    // Запускаем таймер (БЕЗ немедленного выполнения - только по расписанию)
+    // 🛡️ Защита от одновременных запусков: проверяем интервал между отправками
+    log.info(
+      `⏰ Setting up interval timer for chat ${chatId}: ${intervalMinutes} minutes (${intervalMs / 1000 / 60} min in ms)`
+    );
     state.timerId = setInterval(async () => {
+      // Проверяем, не выполняется ли уже действие
+      if (state.isExecuting) {
+        log.warn(
+          `⏸️ Skipping execution for chat ${chatId}: previous execution still in progress`
+        );
+        return;
+      }
+
+      // Проверяем, прошло ли достаточно времени с последней отправки
+      if (state.lastSentTime) {
+        const timeSinceLastSent = Date.now() - state.lastSentTime.getTime();
+        const minIntervalMs = intervalMs * 0.95; // 95% от интервала (защита от досрочных запусков)
+        if (timeSinceLastSent < minIntervalMs) {
+          const minutesPassed = Math.round(timeSinceLastSent / 1000 / 60);
+          log.warn(
+            `⏰ Skipping execution for chat ${chatId}: only ${minutesPassed} min passed since last send (need ${intervalMinutes} min, ${Math.round(minIntervalMs / 1000 / 60)} min minimum)`
+          );
+          return;
+        }
+      }
+
+      log.info(
+        `⏰ Interval timer triggered for chat ${chatId}, last sent: ${state.lastSentTime ? Math.round((Date.now() - state.lastSentTime.getTime()) / 1000 / 60) + " min ago" : "never"}`
+      );
       await this.executeProactiveAction(chatId);
     }, intervalMs);
 
@@ -489,7 +589,15 @@ export class ProactiveAvatarService extends Service {
 
     // Начальная задержка 2 минуты для избежания rate limit при старте
     const initialDelayMs = 2 * 60 * 1000; // 2 минуты
-    setTimeout(async () => {
+    state.initialTimeoutId = setTimeout(async () => {
+      // Проверяем, не выполняется ли уже действие
+      if (state.isExecuting) {
+        log.warn(
+          `⏸️ Skipping initial execution for chat ${chatId}: execution already in progress`
+        );
+        return;
+      }
+
       log.info(
         `Initial proactive execution for chat ${chatId} (after ${initialDelayMs / 1000} sec delay)`
       );
@@ -516,9 +624,44 @@ export class ProactiveAvatarService extends Service {
       return;
     }
 
-    log.info(`Executing proactive action for chat ${chatId}`);
+    // 🛡️ Защита от одновременных запусков
+    if (state.isExecuting) {
+      log.warn(
+        `⏸️ Execution already in progress for chat ${chatId}, skipping duplicate call`
+      );
+      return;
+    }
+
+    // Проверяем минимальный интервал между отправками
+    // Получаем интервал из конфигурации агента
+    const salesConfig = getAgentConfig("sales");
+    const configuredIntervalMinutes =
+      salesConfig?.behavior.proactiveIntervalMinutes || 180;
+    const minIntervalMs = configuredIntervalMinutes * 60 * 1000; // Используем настроенный интервал
+
+    if (state.lastSentTime) {
+      const timeSinceLastSent = Date.now() - state.lastSentTime.getTime();
+      if (timeSinceLastSent < minIntervalMs) {
+        const minutesPassed = Math.round(timeSinceLastSent / 1000 / 60);
+        log.warn(
+          `⏰ Skipping execution for chat ${chatId}: only ${minutesPassed} min passed since last send (need ${configuredIntervalMinutes} min / ${Math.round(minIntervalMs / 1000 / 60)} min)`
+        );
+        // Сбрасываем флаг, так как мы не выполняем действие
+        state.isExecuting = false;
+        return;
+      }
+    }
+
+    log.info(
+      `⏰ Executing for chat ${chatId}: last sent ${state.lastSentTime ? Math.round((Date.now() - state.lastSentTime.getTime()) / 1000 / 60) + " min ago" : "never"}, interval: ${configuredIntervalMinutes} min`
+    );
+
+    // Устанавливаем флаг выполнения
+    state.isExecuting = true;
 
     try {
+      log.info(`🚀 Executing proactive action for chat ${chatId}`);
+
       // Получаем сервисы
       const telegram =
         this.runtime.getService<TelegramService>("telegram-craft");
@@ -554,25 +697,93 @@ export class ProactiveAvatarService extends Service {
 
       log.info(`✅ Found ${members.length} members in chat ${chatId}`);
 
-      // Фильтруем: исключаем уже обработанных, тех у кого нет username, и самого бота
-      const availableMembers = members.filter(
-        (m) =>
-          m.username &&
-          !state.processedUsers.has(m.id.toString()) &&
-          m.id.toString() !== botId // Исключаем бота
-      );
+      // Получаем PaymentService для проверки лимитов
+      const paymentService =
+        this.runtime?.getService<PaymentService>("payment");
+
+      // Фильтруем: исключаем уже обработанных, тех у кого нет username, самого бота, чёрный список, и тех у кого исчерпан лимит
+      const availableMembers = members.filter((m) => {
+        // Проверяем username (без @)
+        const username = m.username?.replace(/^@/, "").toLowerCase() || "";
+        const userId = m.id.toString();
+
+        // Исключаем если:
+        // 1. Нет username
+        // 2. Уже обработан
+        // 3. Это бот
+        // 4. В чёрном списке (по username или ID)
+        // 5. Исчерпан лимит бесплатных фото (для проактивной рассылки не выбираем таких)
+        const hasNoFreePhotos =
+          paymentService && !paymentService.hasFreePhotosRemaining(userId);
+
+        // 🛡️ КРИТИЧНО: Если лимит исчерпан - сразу исключаем и помечаем как обработанного
+        // НЕ отправляем сообщение о paywall в проактивной рассылке - это спам!
+        if (hasNoFreePhotos) {
+          // Помечаем как обработанного, чтобы не выбирать снова
+          state.processedUsers.add(userId);
+          // Логируем для отладки
+          log.debug(
+            `🚫 User ${userId} (${m.username || "no username"}) excluded: no free photos remaining`
+          );
+          return false; // Исключаем из выборки
+        }
+
+        // 🛡️ КРИТИЧНО: Проверяем чёрный список ПЕРВЫМ (до всех остальных проверок)
+        if (EXCLUDED_USERS.has(username) || EXCLUDED_USERS.has(userId)) {
+          // Помечаем как обработанного сразу, чтобы не проверять снова
+          state.processedUsers.add(userId);
+          log.debug(
+            `🚫 User ${userId} (${username || "no username"}) excluded: in EXCLUDED_USERS blacklist`
+          );
+          return false; // Исключаем из выборки
+        }
+
+        return (
+          m.username && !state.processedUsers.has(userId) && userId !== botId
+        );
+      });
+
+      // Логируем исключённых пользователей для отладки
+      const excludedCount = members.length - availableMembers.length;
+      if (excludedCount > 0) {
+        const excluded = members.filter((m) => {
+          const username = m.username?.replace(/^@/, "").toLowerCase() || "";
+          const userId = m.id.toString();
+          return (
+            !m.username ||
+            state.processedUsers.has(userId) ||
+            userId === botId ||
+            EXCLUDED_USERS.has(username) ||
+            EXCLUDED_USERS.has(userId)
+          );
+        });
+        const blacklisted = excluded.filter((m) => {
+          const username = m.username?.replace(/^@/, "").toLowerCase() || "";
+          const userId = m.id.toString();
+          return EXCLUDED_USERS.has(username) || EXCLUDED_USERS.has(userId);
+        });
+        if (blacklisted.length > 0) {
+          log.info(
+            `🚫 Excluded ${blacklisted.length} user(s) from blacklist: ${blacklisted.map((m) => m.username || m.id).join(", ")}`
+          );
+        }
+      }
 
       log.info(
-        `📊 Filtering stats: ${members.length} total members, ${availableMembers.length} available (with username, not processed, not bot)`
+        `📊 Filtering stats: ${members.length} total members, ${availableMembers.length} available (with username, not processed, not bot, not blacklisted)`
       );
       log.info(`📊 Processed users count: ${state.processedUsers.size}`);
 
       if (availableMembers.length === 0) {
-        // Сбрасываем список обработанных, начинаем заново
+        // 🛡️ КРИТИЧНО: НЕ очищаем список обработанных!
+        // Каждому пользователю отправляется ТОЛЬКО ОДИН РАЗ
+        // Если все обработаны - просто ждём следующего интервала
         log.info(
-          `All members processed (${state.processedUsers.size} total), resetting list`
+          `📊 All available members processed (${state.processedUsers.size} total). No new users to send photos to. Waiting for next interval...`
         );
-        state.processedUsers.clear();
+        log.info(
+          `💡 To reset processed users for a chat, restart the agent or manually clear the state`
+        );
         return;
       }
 
@@ -591,6 +802,43 @@ export class ProactiveAvatarService extends Service {
         // Выбираем случайного участника
         const randomIndex = Math.floor(Math.random() * availableMembers.length);
         const candidate = availableMembers[randomIndex];
+
+        // 🛡️ КРИТИЧЕСКАЯ ПРОВЕРКА: Чёрный список (должно быть отфильтровано выше, но проверяем ещё раз)
+        const candidateUsername =
+          candidate.username?.replace(/^@/, "").toLowerCase() || "";
+        const candidateUserId = candidate.id.toString();
+        if (
+          EXCLUDED_USERS.has(candidateUsername) ||
+          EXCLUDED_USERS.has(candidateUserId)
+        ) {
+          log.error(
+            `🚫 CRITICAL: User ${candidate.firstName || candidate.username} (${candidate.id}, username: ${candidate.username || "none"}) is in EXCLUDED_USERS but passed filter! This is a bug!`
+          );
+          log.error(
+            `🚫 Checked: username="${candidateUsername}", userId="${candidateUserId}", in blacklist=${EXCLUDED_USERS.has(candidateUsername) || EXCLUDED_USERS.has(candidateUserId)}`
+          );
+          // Помечаем как обработанного и удаляем из списка
+          state.processedUsers.add(candidateUserId);
+          availableMembers.splice(randomIndex, 1);
+          if (availableMembers.length === 0) {
+            log.info("No more available members");
+            return;
+          }
+          continue;
+        }
+
+        // 🛡️ ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: processedUsers (должно быть отфильтровано выше, но проверяем ещё раз)
+        if (state.processedUsers.has(candidateUserId)) {
+          log.error(
+            `🚫 CRITICAL: User ${candidate.firstName || candidate.username} (${candidate.id}) is already in processedUsers but passed filter! This is a bug!`
+          );
+          availableMembers.splice(randomIndex, 1);
+          if (availableMembers.length === 0) {
+            log.info("No more available members");
+            return;
+          }
+          continue;
+        }
 
         log.info(
           `🔍 Attempt ${attempt + 1}/${maxAttempts}: Trying user ${candidate.firstName || candidate.username} (${candidate.id}), username: ${candidate.username || "none"}`
@@ -712,65 +960,72 @@ export class ProactiveAvatarService extends Service {
       );
 
       // ============================================
+      // 🛡️ КРИТИЧЕСКАЯ ЗАЩИТА: Проверяем ДО генерации
+      // ============================================
+      const finalUsername =
+        selectedUser.username?.replace(/^@/, "").toLowerCase() || "";
+      const finalUserId = selectedUser.id.toString();
+
+      // 1. Проверка чёрного списка
+      if (
+        EXCLUDED_USERS.has(finalUsername) ||
+        EXCLUDED_USERS.has(finalUserId)
+      ) {
+        log.error(
+          `🚫 CRITICAL: User ${finalUserId} (${finalUsername}) is in EXCLUDED_USERS but was selected! This should not happen. Skipping immediately.`
+        );
+        state.processedUsers.add(finalUserId);
+        return; // НЕ отправляем сообщение, НЕ генерируем фото
+      }
+
+      // 2. Проверка processedUsers
+      if (state.processedUsers.has(finalUserId)) {
+        log.error(
+          `🚫 CRITICAL: User ${finalUserId} (${finalUsername}) is already in processedUsers but was selected! This should not happen. Skipping immediately.`
+        );
+        return; // НЕ отправляем сообщение, НЕ генерируем фото
+      }
+
+      // 3. Добавляем в processedUsers СРАЗУ после выбора (до генерации)
+      // Это гарантирует, что даже если что-то пойдёт не так, пользователь не будет выбран снова
+      state.processedUsers.add(finalUserId);
+      log.info(
+        `✅ User ${finalUserId} (${finalUsername}) added to processedUsers BEFORE generation. Total processed: ${state.processedUsers.size}`
+      );
+
+      // ============================================
       // FREEMIUM: Проверка лимита бесплатных фото
       // ============================================
-      const paymentService = this.runtime.getService<PaymentService>("payment");
+      // ⚠️ ВАЖНО: Эта проверка уже выполнена при фильтрации участников выше
+      // Если пользователь попал сюда - у него есть бесплатные фото
+      const paymentServiceForProactive =
+        this.runtime.getService<PaymentService>("payment");
       const userId = selectedUser.id.toString();
 
-      if (paymentService && !paymentService.hasFreePhotosRemaining(userId)) {
-        // Лимит бесплатных фото исчерпан - показываем кнопку оплаты
-        log.info(
-          `User ${userId} has no free photos remaining, showing payment button`
+      // Дополнительная проверка на всякий случай (защита от багов)
+      if (
+        paymentServiceForProactive &&
+        !paymentServiceForProactive.hasFreePhotosRemaining(userId)
+      ) {
+        // Лимит исчерпан - пропускаем пользователя БЕЗ отправки сообщения
+        // (чтобы не спамить в проактивной рассылке)
+        log.warn(
+          `⚠️ User ${userId} (${selectedUser.username || selectedUser.firstName}) has no free photos remaining, skipping (should have been filtered earlier)`
+        );
+        log.warn(
+          `🚫 НЕ отправляем сообщение о paywall в проактивной рассылке - это спам!`
         );
 
-        // Уведомляем владельца о paywall
-        paymentService
-          .notifyOwner("paywall", {
-            userId,
-            username: selectedUser.username,
-            firstName: selectedUser.firstName,
-            chatId,
-          })
-          .catch((err) =>
-            log.error("Failed to notify owner about paywall", err)
-          );
-
-        const remaining = paymentService.getFreePhotosRemaining(userId);
-        const used = paymentService.getFreePhotosUsed(userId);
-
-        // Создаём ссылку на инвойс (для групп нельзя sendInvoice, только ссылка)
-        const invoiceLink = await paymentService.createInvoiceLink(
-          PRICES.PERSONAL_PHOTO,
-          userId
-        );
-
-        const paymentCaption = `@${selectedUser.username || selectedUser.firstName}, ваш лимит бесплатных фото (${FREE_PHOTOS_LIMIT} шт.) исчерпан.
-
-Стоимость персонального AI-портрета: ${PRICES.PERSONAL_PHOTO} ⭐`;
-
-        // Отправляем сообщение с URL-кнопкой оплаты
-        if (invoiceLink) {
-          await telegram.sendMessageWithUrlButtons(chatId, paymentCaption, [
-            [
-              {
-                text: `Заказать (${PRICES.PERSONAL_PHOTO} ⭐)`,
-                url: invoiceLink,
-              },
-            ],
-          ]);
-        } else {
-          await telegram.sendMessage(chatId, paymentCaption);
-        }
-
-        // Помечаем пользователя как обработанного
+        // Помечаем как обработанного и выходим БЕЗ отправки сообщения
         state.processedUsers.add(userId);
-        state.lastSentTime = new Date();
+        // НЕ обновляем lastSentTime, чтобы не сбивать интервал
         return;
       }
 
       // Логируем статус бесплатных фото
-      if (paymentService) {
-        const remaining = paymentService.getFreePhotosRemaining(userId);
+      if (paymentServiceForProactive) {
+        const remaining =
+          paymentServiceForProactive.getFreePhotosRemaining(userId);
         log.info(
           `User ${userId} has ${remaining}/${FREE_PHOTOS_LIMIT} free photos remaining`
         );
@@ -926,12 +1181,13 @@ export class ProactiveAvatarService extends Service {
         );
 
         // FREEMIUM: Увеличиваем счётчик использованных бесплатных фото
-        if (paymentService) {
+        if (paymentServiceForProactive) {
           // Проверяем, первая ли это генерация для пользователя
-          const freeUsedBefore = paymentService.getFreePhotosUsed(userId);
+          const freeUsedBefore =
+            paymentServiceForProactive.getFreePhotosUsed(userId);
           if (freeUsedBefore === 0) {
             // Уведомляем владельца о новом пользователе
-            paymentService
+            paymentServiceForProactive
               .notifyOwner("new_user", {
                 userId,
                 username: selectedUser.username,
@@ -943,27 +1199,41 @@ export class ProactiveAvatarService extends Service {
               );
           }
 
-          paymentService.incrementFreePhotos(userId);
-          const remaining = paymentService.getFreePhotosRemaining(userId);
+          paymentServiceForProactive.incrementFreePhotos(userId);
+          const remaining =
+            paymentServiceForProactive.getFreePhotosRemaining(userId);
           log.info(
             `User ${userId} used a free photo, ${remaining}/${FREE_PHOTOS_LIMIT} remaining`
           );
         }
 
-        // Обновляем состояние
-        state.processedUsers.add(selectedUser.id.toString());
+        // 🛡️ КРИТИЧНО: Пользователь УЖЕ добавлен в processedUsers ДО генерации (см. выше)
+        // Обновляем только lastSentTime
         state.lastSentTime = new Date();
+        log.info(
+          `✅ Successfully sent photo to user ${selectedUser.id} (${selectedUser.username || selectedUser.firstName}). User was already in processedUsers. Total processed: ${state.processedUsers.size}`
+        );
       } else {
         log.error(
           `❌ Failed to send photo to chat ${chatId}: ${sendResult.error}`
         );
         log.error(`Photo URL was: ${result.imageUrl?.substring(0, 100)}...`);
         log.error(`Caption length: ${caption.length} chars`);
+        // ❌ НЕ добавляем в processedUsers при ошибке отправки - попробуем снова в следующем цикле
+        log.warn(
+          `⚠️ User ${selectedUser.id} NOT added to processedUsers due to send failure. Will retry in next cycle.`
+        );
       }
     } catch (error: any) {
       log.error("❌ Error executing proactive action", error);
       log.error(`Error details: ${error?.message || error}`);
       log.error(`Stack: ${error?.stack || "no stack"}`);
+    } finally {
+      // 🛡️ Сбрасываем флаг выполнения в любом случае
+      if (state) {
+        state.isExecuting = false;
+        log.debug(`✅ Execution completed for chat ${chatId}, flag reset`);
+      }
     }
   }
 

@@ -86,6 +86,19 @@ export const PRICES = {
 export const FREE_PHOTOS_LIMIT = 5
 
 /**
+ * ID владельца для уведомлений о платежах
+ */
+export const OWNER_CHAT_ID = '144022504'
+
+/**
+ * Типы уведомлений для владельца
+ */
+export type OwnerNotificationType = 'payment' | 'new_user' | 'paywall' | 'photo_generated'
+
+// 🔒 ГЛОБАЛЬНЫЙ SINGLETON: Один PaymentService на весь процесс
+let globalPaymentServiceInstance: PaymentService | null = null
+
+/**
  * PaymentService - обработка платежей через Telegram Stars
  */
 export class PaymentService extends Service {
@@ -96,8 +109,15 @@ export class PaymentService extends Service {
    * Static start method required by ElizaOS 1.6+
    */
   static async start(runtime: IAgentRuntime): Promise<Service> {
-    log.info('STATIC start() called')
+    // 🔒 SINGLETON CHECK: Если уже есть instance - возвращаем его
+    if (globalPaymentServiceInstance) {
+      log.info('🔒 Returning existing singleton instance (skipping duplicate)')
+      return globalPaymentServiceInstance
+    }
+
+    log.info('🆕 Creating new singleton instance')
     const instance = new PaymentService()
+    globalPaymentServiceInstance = instance
     await instance.initialize(runtime)
     await instance.start()
     return instance
@@ -120,7 +140,7 @@ export class PaymentService extends Service {
   private botApi: BotApiAdapter | null = null
 
   /** Runtime агента */
-  private runtime: IAgentRuntime | null = null
+  protected runtime: IAgentRuntime | null = null
 
   /** Флаг инициализации */
   private isInitialized = false
@@ -573,6 +593,10 @@ export class PaymentService extends Service {
       currency?: string
       amount?: number
       transactionId?: string
+      username?: string
+      firstName?: string
+      chatId?: string
+      chatName?: string
     }
   ): void {
     const current = this.paidPhotos.get(userId) || 0
@@ -586,6 +610,18 @@ export class PaymentService extends Service {
       (metadata?.currency ? ` (${metadata.amount} ${metadata.currency})` : '') +
       `. Total paid photos: ${current + credits}`
     )
+
+    // Уведомление владельцу о платеже
+    this.notifyOwner('payment', {
+      userId,
+      username: metadata?.username,
+      firstName: metadata?.firstName,
+      amount: metadata?.amount,
+      currency: metadata?.currency,
+      credits,
+      chatId: metadata?.chatId,
+      chatName: metadata?.chatName,
+    }).catch((err) => log.error('Failed to notify owner about payment', err))
 
     // TODO: Сохранить в PostgreSQL когда будет интеграция
     // await db.insert(paymentHistory).values({...})
@@ -712,6 +748,90 @@ export class PaymentService extends Service {
 💳 Баланс: ${quota.paidPhotos} фото
 
 Теперь можешь генерировать! Просто напиши что хочешь увидеть.`
+  }
+
+  // ============================================
+  // OWNER NOTIFICATIONS: Уведомления владельцу
+  // ============================================
+
+  /**
+   * Отправить уведомление владельцу бота
+   * @param type - Тип уведомления
+   * @param data - Данные для уведомления
+   */
+  async notifyOwner(
+    type: OwnerNotificationType,
+    data: {
+      userId?: string
+      username?: string
+      firstName?: string
+      amount?: number
+      currency?: string
+      credits?: number
+      chatId?: string
+      chatName?: string
+      error?: string
+    }
+  ): Promise<boolean> {
+    if (!this.botApi) {
+      log.warn('Cannot notify owner: BotApi not initialized')
+      return false
+    }
+
+    try {
+      let message: string
+
+      switch (type) {
+        case 'payment':
+          message = `💰 Новый платёж!
+
+От: ${data.username ? `@${data.username}` : data.firstName || 'Unknown'} (ID: ${data.userId})
+Сумма: ${data.amount} ${data.currency}
+Зачислено: ${data.credits} фото
+Чат: ${data.chatName || data.chatId || 'Private'}`
+          break
+
+        case 'new_user':
+          message = `👤 Новый пользователь!
+
+${data.username ? `@${data.username}` : data.firstName || 'Unknown'} (ID: ${data.userId})
+Чат: ${data.chatName || data.chatId || 'Private'}
+Начал первую генерацию`
+          break
+
+        case 'paywall':
+          message = `⚠️ Пользователь упёрся в paywall
+
+${data.username ? `@${data.username}` : data.firstName || 'Unknown'} (ID: ${data.userId})
+Чат: ${data.chatName || data.chatId || 'Private'}
+Исчерпал бесплатный лимит`
+          break
+
+        case 'photo_generated':
+          message = `📸 Фото сгенерировано
+
+${data.username ? `@${data.username}` : data.firstName || 'Unknown'} (ID: ${data.userId})
+Чат: ${data.chatName || data.chatId || 'Private'}`
+          break
+
+        default:
+          log.warn(`Unknown notification type: ${type}`)
+          return false
+      }
+
+      const result = await this.botApi.sendMessage(OWNER_CHAT_ID, message)
+
+      if (result.success) {
+        log.info(`Owner notification sent: ${type}`)
+        return true
+      } else {
+        log.error(`Failed to send owner notification: ${result.error}`)
+        return false
+      }
+    } catch (error) {
+      log.error('Failed to notify owner', error)
+      return false
+    }
   }
 }
 

@@ -17,6 +17,7 @@
 **Дата:** 6 октября 2025, Сан-Франциско
 
 ### 📊 Масштаб OpenAI (на момент DevDay):
+
 - **800 миллионов** пользователей в неделю
 - **4 миллиона** разработчиков
 - **8 миллиардов токенов** обрабатывается в минуту через API
@@ -30,6 +31,7 @@
 ### ⚠️ ВАЖНО: Это НЕ no-code инструмент!
 
 **AgentKit — это для разработчиков:**
+
 ```
 Традиционная разработка агентов → Ручная настройка API + хостинг + debugging
                                    ↑_______ Часы настройки _______↓
@@ -39,6 +41,7 @@ AgentKit → Готовые блоки + тестирование + деплой
 ```
 
 **Отличие от no-code:**
+
 - ❌ Нет визуального drag-and-drop редактора
 - ✅ Программный доступ через OpenAI API
 - ✅ Полный контроль через код
@@ -51,12 +54,14 @@ AgentKit → Готовые блоки + тестирование + деплой
 ### 1️⃣ **Agent Builder**
 
 **Визуальный canvas для создания логики агентов:**
+
 - Соединение узлов, инструментов и workflow
 - Проектирование логики принятия решений
 - Создание под-агентов для сложных задач
 - Live демонстрация: инженер OpenAI создала 2 агента за **8 минут**
 
 **Пример архитектуры:**
+
 ```
 [Главный агент]
     ↓
@@ -68,29 +73,33 @@ AgentKit → Готовые блоки + тестирование + деплой
 ### 2️⃣ **ChatKit**
 
 **Встраиваемый чат-интерфейс для ваших приложений:**
+
 - Готовый UI компонент для чата
 - Интеграция в любое приложение
 - Customizable дизайн
 - Полная интеграция с OpenAI API
 
 **Use case:**
+
 ```javascript
 // Псевдокод интеграции ChatKit
-import { ChatKit } from '@openai/agentkit';
+import { ChatKit } from "@openai/agentkit";
 
 const chat = new ChatKit({
-  agentId: 'your-agent-id',
-  theme: 'dark',
-  position: 'bottom-right'
+  agentId: "your-agent-id",
+  theme: "dark",
+  position: "bottom-right",
 });
 
-chat.render('#chat-container');
+chat.render("#chat-container");
 ```
 
 ### 3️⃣ **Connector Registry**
 
 **Централизованное управление подключениями:**
+
 - **Встроенные интеграции:**
+
   - Dropbox
   - Google Drive
   - Microsoft SharePoint
@@ -104,6 +113,7 @@ chat.render('#chat-container');
   - Мониторинг использования
 
 **Преимущество:**
+
 > Больше не нужно писать отдельные интеграции для каждого сервиса — всё централизовано!
 
 ### 4️⃣ **Evals for Agents**
@@ -111,12 +121,14 @@ chat.render('#chat-container');
 **Инструменты для измерения производительности агентов:**
 
 **Включает:**
+
 - ✅ **Trace grading** — пошаговая оценка действий агента
 - ✅ **Datasets** — наборы данных для тестирования компонентов
 - ✅ **Automated prompt optimization** — автоматическая оптимизация промптов
 - ✅ **External model testing** — запуск тестов на других моделях прямо с платформы OpenAI
 
 **Зачем нужно:**
+
 ```
 Без тестирования:
 Агент → Деплой → Пользователи жалуются → Фикс → Повтор
@@ -134,6 +146,7 @@ chat.render('#chat-container');
 ### Что такое n8n?
 
 **n8n** — это low-code платформа для workflow automation:
+
 - Визуальный редактор для создания автоматизаций
 - 1000+ интеграций с сервисами
 - Open-source alternative Zapier
@@ -143,29 +156,32 @@ chat.render('#chat-container');
 
 **Сравнение подходов:**
 
-| Характеристика | **AgentKit** | **n8n** |
-|----------------|-------------|---------|
-| **Фокус** | AI агенты и reasoning | Workflow automation |
-| **Интерфейс** | Программный API + Builder | Визуальный node-editor |
-| **Экосистема** | Только OpenAI | 1000+ сервисов |
-| **Use case** | Комплексные AI агенты | Автоматизация бизнес-процессов |
-| **Hosting** | platform.openai.com | Self-hosted или cloud |
+| Характеристика | **AgentKit**              | **n8n**                        |
+| -------------- | ------------------------- | ------------------------------ |
+| **Фокус**      | AI агенты и reasoning     | Workflow automation            |
+| **Интерфейс**  | Программный API + Builder | Визуальный node-editor         |
+| **Экосистема** | Только OpenAI             | 1000+ сервисов                 |
+| **Use case**   | Комплексные AI агенты     | Автоматизация бизнес-процессов |
+| **Hosting**    | platform.openai.com       | Self-hosted или cloud          |
 
 ### 🎯 Когда использовать что?
 
 **Используй AgentKit если:**
+
 - Строишь комплексные AI агенты с reasoning
 - Нужны под-агенты и сложная логика
 - Остаёшься в экосистеме OpenAI
 - Критичны Evals и тестирование
 
 **Используй n8n если:**
+
 - Автоматизируешь workflow между сервисами
 - Нужна интеграция с множеством API
 - Требуется визуальное проектирование
 - AI — только часть более крупного процесса
 
 **Используй оба вместе если:**
+
 - AI агент из AgentKit триггерит n8n workflows
 - n8n workflow вызывает AgentKit агентов
 - Комбинируешь AI reasoning + бизнес автоматизацию
@@ -200,6 +216,7 @@ chat.render('#chat-container');
 ```
 
 **Время разработки:**
+
 - **Без AgentKit:** 2-3 недели (API интеграции, тестирование, UI)
 - **С AgentKit:** 1-2 дня (готовые блоки, тестирование встроено)
 
@@ -207,16 +224,17 @@ chat.render('#chat-container');
 
 ## 🆚 СРАВНЕНИЕ С ДРУГИМИ ИНСТРУМЕНТАМИ
 
-| Инструмент | **AgentKit** | Claude Code | n8n | LangChain |
-|-----------|-------------|-------------|-----|-----------|
-| **Тип** | Agent framework | AI coding assistant | Workflow automation | Agent framework |
-| **Подход** | API-first, hosted | Terminal-based | Visual editor | Code-first, library |
-| **Интеграции** | Connector Registry | File system | 1000+ nodes | Custom code |
-| **Тестирование** | ✅ Evals встроены | ❌ Ручное | ⚠️ Limited | ⚠️ Custom |
-| **Deployment** | ✅ platform.openai.com | ❌ Local only | ✅ Cloud/self-hosted | ❌ DIY |
-| **UI компоненты** | ✅ ChatKit | ❌ Нет | ❌ Нет | ❌ Нет |
+| Инструмент        | **AgentKit**           | Claude Code         | n8n                  | LangChain           |
+| ----------------- | ---------------------- | ------------------- | -------------------- | ------------------- |
+| **Тип**           | Agent framework        | AI coding assistant | Workflow automation  | Agent framework     |
+| **Подход**        | API-first, hosted      | Terminal-based      | Visual editor        | Code-first, library |
+| **Интеграции**    | Connector Registry     | File system         | 1000+ nodes          | Custom code         |
+| **Тестирование**  | ✅ Evals встроены      | ❌ Ручное           | ⚠️ Limited           | ⚠️ Custom           |
+| **Deployment**    | ✅ platform.openai.com | ❌ Local only       | ✅ Cloud/self-hosted | ❌ DIY              |
+| **UI компоненты** | ✅ ChatKit             | ❌ Нет              | ❌ Нет               | ❌ Нет              |
 
 **Главное отличие:**
+
 > AgentKit — это **полный lifecycle** для AI агентов: build → test → deploy → monitor
 
 ---
@@ -232,6 +250,7 @@ chat.render('#chat-container');
 ### Шаг 2: Создай первого агента (15 минут)
 
 **В Agent Builder:**
+
 ```
 1. Создай новый агент
 2. Определи цель (например: "Анализ отзывов клиентов")
@@ -243,13 +262,14 @@ chat.render('#chat-container');
 ### Шаг 3: Интегрируй в приложение (10 минут)
 
 **Используй ChatKit:**
+
 ```html
 <!-- Псевдокод -->
 <script src="https://cdn.openai.com/chatkit.js"></script>
 <script>
   ChatKit.init({
-    agentId: 'agent_abc123',
-    apiKey: process.env.OPENAI_API_KEY
+    agentId: "agent_abc123",
+    apiKey: process.env.OPENAI_API_KEY,
   });
 </script>
 ```
@@ -267,16 +287,19 @@ chat.render('#chat-container');
 ### ✅ AgentKit подходит:
 
 **1. Разработчики приложений**
+
 - Быстро добавить AI агентов в существующее приложение
 - Использовать ChatKit для UI
 - Connector Registry для интеграций
 
 **2. AI/ML инженеры**
+
 - Строить комплексные multi-agent системы
 - Использовать Evals для оптимизации
 - Экспериментировать с под-агентами
 
 **3. Стартапы**
+
 - Быстрый переход от MVP до продакшена
 - Готовые компоненты экономят время
 - Меньше инфраструктуры для поддержки
@@ -284,16 +307,19 @@ chat.render('#chat-container');
 ### ❌ AgentKit НЕ подходит:
 
 **1. Абсолютные новички**
+
 - Требуются базовые знания API
 - Нужно понимание архитектуры агентов
 - Лучше начать с Claude Code или Cursor
 
 **2. No-code энтузиасты**
+
 - Это НЕ визуальный редактор в стиле Bubble
 - Нужны навыки программирования
 - Для no-code → смотри n8n или Zapier
 
 **3. Non-OpenAI проекты**
+
 - Привязка к экосистеме OpenAI
 - Для других моделей → LangChain или custom
 
@@ -304,6 +330,7 @@ chat.render('#chat-container');
 ### 1️⃣ **Customer Support Automation**
 
 **Setup:**
+
 - AgentKit агент анализирует запросы
 - Connector Registry подключен к Zendesk
 - ChatKit встроен в support portal
@@ -315,6 +342,7 @@ chat.render('#chat-container');
 ### 2️⃣ **Internal Knowledge Assistant**
 
 **Setup:**
+
 - Агент подключен к Google Drive, Notion, Confluence
 - ChatKit встроен в Slack
 - Evals тестируют точность ответов
@@ -326,6 +354,7 @@ chat.render('#chat-container');
 ### 3️⃣ **Sales Lead Qualification**
 
 **Setup:**
+
 - Агент анализирует входящие лиды
 - n8n workflow обогащает данными из LinkedIn
 - AgentKit классифицирует и роутит в CRM
@@ -337,14 +366,17 @@ chat.render('#chat-container');
 ## 🔍 OPENAI DEVDAY 2025: ДРУГИЕ АНОНСЫ
 
 ### **Sora 2 в API**
+
 - Генерация видео теперь доступна через API
 - Для разработчиков приложений с видео-контентом
 
 ### **Повышение лимитов API**
+
 - С 300 миллионов → **6 миллиардов токенов/минуту**
 - Масштаб для enterprise клиентов
 
 ### **Apps Inside ChatGPT**
+
 - Приложения теперь работают внутри ChatGPT
 - App SDK для разработчиков
 
@@ -355,12 +387,15 @@ chat.render('#chat-container');
 ### Как AgentKit вписывается в VibeCoding философию?
 
 **VibeCoding принцип:**
+
 > "Описываешь намерение → AI создаёт решение"
 
 **AgentKit расширяет это:**
+
 > "Описываешь поведение агента → AgentKit создаёт production-ready систему"
 
 **Workflow:**
+
 ```
 1. Claude Code → Создаёшь MVP приложения
 2. AgentKit → Добавляешь AI агентов в приложение
@@ -377,6 +412,7 @@ chat.render('#chat-container');
 **Вы сейчас здесь:** 📍 Статья 09 из 11
 
 ### ✅ Пройдено:
+
 1. ✅ [01-ЧТО-ТАКОЕ-AGENTIC-VIBECODING.md](01-ЧТО-ТАКОЕ-AGENTIC-VIBECODING.md) — Основы философии
 2. ✅ [02-УСТАНОВКА-CLAUDE-CODE.md](02-УСТАНОВКА-CLAUDE-CODE.md) — Установка и настройка
 3. ✅ [03-ПЕРВЫЙ-АГЕНТ-ЗА-5-МИНУТ.md](03-ПЕРВЫЙ-АГЕНТ-ЗА-5-МИНУТ.md) — Первый опыт
@@ -390,6 +426,7 @@ chat.render('#chat-container');
 ### 🎯 Следующие шаги:
 
 **→ Следующая статья:** [**10-PERPLEXITY-COMET-BROWSER-AGENT.md**](10-PERPLEXITY-COMET-BROWSER-AGENT.md)
+
 - AI-браузер с встроенным ассистентом
 - Comet Assistant видит веб-страницы
 - Фоновые агенты для параллельных задач
@@ -402,6 +439,7 @@ chat.render('#chat-container');
 ### **AgentKit = Production-Ready AI Agents**
 
 **Главные преимущества:**
+
 - ⚡ **Скорость разработки** — от прототипа до продакшена за дни
 - 🧪 **Встроенное тестирование** — Evals for Agents
 - 🔌 **Готовые интеграции** — Connector Registry
@@ -409,12 +447,14 @@ chat.render('#chat-container');
 - 🚀 **Managed hosting** — всё на platform.openai.com
 
 **Когда использовать:**
+
 - Строишь AI-агентов для продакшена
 - Нужны надёжность и тестирование
 - Остаёшься в экосистеме OpenAI
 - Важна скорость time-to-market
 
 **Комбинируй с:**
+
 - **Claude Code** — для создания базового приложения
 - **n8n** — для автоматизации workflow
 - **Cursor AI** — для разработки кода
@@ -431,12 +471,14 @@ chat.render('#chat-container');
 **AgentKit** — это профессиональный набор инструментов от OpenAI для создания, тестирования и развертывания AI агентов в production.
 
 **Ключевые характеристики:**
+
 - ✅ Это **для разработчиков** (требуются навыки программирования)
 - ✅ Полный lifecycle агентов: build → test → deploy → monitor
 - ✅ Hosted на platform.openai.com
 - ✅ Включает 4 основных компонента: Agent Builder, ChatKit, Connector Registry, Evals
 
 **Это НЕ:**
+
 - ❌ No-code инструмент (как Bubble)
 - ❌ Визуальный drag-and-drop редактор
 - ❌ Альтернатива Claude Code или Cursor
@@ -452,6 +494,7 @@ chat.render('#chat-container');
 **AgentKit решает проблему сложности создания production-ready AI агентов.**
 
 **Без AgentKit (традиционный подход):**
+
 ```
 API интеграции (руками) → Настройка хостинга → Debugging →
 → Тестирование (руками) → Развертывание → Мониторинг
@@ -459,12 +502,14 @@ API интеграции (руками) → Настройка хостинга 
 ```
 
 **С AgentKit:**
+
 ```
 Agent Builder → Connector Registry → Evals → Deploy
 └───────────── 1-2 дня ─────────────┘
 ```
 
 **Основные use cases:**
+
 1. **Customer Support Automation** — обработка запросов клиентов
 2. **Internal Knowledge Assistant** — поиск информации в корп. системах
 3. **Sales Lead Qualification** — автоматическая квалификация лидов
@@ -509,6 +554,7 @@ Agent Builder → Connector Registry → Evals → Deploy
 ```
 
 **Пример Customer Support агента:**
+
 ```
 [Email/Slack input]
      ↓
@@ -532,31 +578,34 @@ Agent Builder → Connector Registry → Evals → Deploy
 
 **Таблица сравнения:**
 
-| Характеристика | **AgentKit** | **Claude Code** |
-|----------------|--------------|-----------------|
-| **Цель** | Создание AI агентов для приложений | AI ассистент для разработки кода |
-| **Интерфейс** | Web dashboard + API | Terminal + VS Code |
-| **Deployment** | Hosted на OpenAI | Local execution only |
-| **Тестирование** | ✅ Встроенные Evals | ❌ Ручное |
-| **UI компоненты** | ✅ ChatKit | ❌ Нет |
-| **Интеграции** | ✅ Connector Registry | ❌ Только file system |
-| **Use case** | Production AI agents | Coding assistance |
+| Характеристика    | **AgentKit**                       | **Claude Code**                  |
+| ----------------- | ---------------------------------- | -------------------------------- |
+| **Цель**          | Создание AI агентов для приложений | AI ассистент для разработки кода |
+| **Интерфейс**     | Web dashboard + API                | Terminal + VS Code               |
+| **Deployment**    | Hosted на OpenAI                   | Local execution only             |
+| **Тестирование**  | ✅ Встроенные Evals                | ❌ Ручное                        |
+| **UI компоненты** | ✅ ChatKit                         | ❌ Нет                           |
+| **Интеграции**    | ✅ Connector Registry              | ❌ Только file system            |
+| **Use case**      | Production AI agents               | Coding assistance                |
 
 **Когда использовать что:**
 
 **Claude Code:**
+
 - Быстрое прототипирование MVP
 - Разработка базового кода приложения
 - Local development
 - Обучение программированию
 
 **AgentKit:**
+
 - Production-ready AI агенты
 - Интеграция агентов в существующие приложения
 - Комплексные multi-agent системы
 - Enterprise deployment
 
 **Идеальная комбинация:**
+
 ```
 1. Claude Code → Создай MVP приложения
 2. AgentKit → Добавь AI агентов в приложение
@@ -576,27 +625,32 @@ Agent Builder → Connector Registry → Evals → Deploy
 **4 основных компонента AgentKit:**
 
 **1️⃣ Agent Builder**
+
 - Визуальный canvas для создания логики агентов
 - Проектирование под-агентов
 - Соединение узлов и инструментов
 
 **2️⃣ ChatKit**
+
 - Готовый UI компонент для чата
 - Встраивание в любое приложение
 - Customizable дизайн
 
 **3️⃣ Connector Registry**
+
 - Встроенные интеграции: Dropbox, Google Drive, SharePoint, Teams
 - Админ-панель для контроля доступа
 - Безопасное подключение к внутренним системам
 
 **4️⃣ Evals for Agents**
+
 - Trace grading (пошаговая оценка действий)
 - Datasets для тестирования
 - Automated prompt optimization
 - Тестирование на внешних моделях
 
 **Почему это важно:**
+
 - **Agent Builder** — создаёшь логику
 - **Connector Registry** — подключаешь данные
 - **ChatKit** — добавляешь интерфейс
@@ -616,6 +670,7 @@ Agent Builder → Connector Registry → Evals → Deploy
 **AgentKit vs n8n — разные задачи:**
 
 **Используй AgentKit если:**
+
 - ✅ Строишь AI агентов с reasoning (принятие решений)
 - ✅ Нужны под-агенты и сложная логика
 - ✅ Критичны Evals и тестирование
@@ -623,6 +678,7 @@ Agent Builder → Connector Registry → Evals → Deploy
 - **Пример:** Customer support bot, который анализирует запросы и принимает решения
 
 **Используй n8n если:**
+
 - ✅ Автоматизируешь workflow между сервисами
 - ✅ Нужна интеграция с множеством API
 - ✅ AI — только часть процесса (не главная логика)
@@ -630,11 +686,13 @@ Agent Builder → Connector Registry → Evals → Deploy
 - **Пример:** Автоматическая отправка данных из Google Sheets в CRM
 
 **Используй оба вместе если:**
+
 - 🚀 AgentKit агент принимает решения → n8n выполняет actions
 - 🚀 n8n собирает данные → AgentKit агент анализирует
 - 🚀 Комбинируешь AI reasoning + бизнес автоматизацию
 
 **Пример связки:**
+
 ```
 n8n → Собирает лиды из форм
   ↓
@@ -650,11 +708,13 @@ n8n → Отправляет qualified лиды в CRM
 ## 🎯 ПРАКТИЧЕСКИЕ ЗАДАНИЯ
 
 ### 📘 Задание 1: Базовое (15 минут)
+
 **Цель:** Установить AgentKit и запустить первый пример агента
 
 **Шаги:**
 
 1. **Регистрация на платформе (5 мин)**
+
    ```bash
    # Открой в браузере
    https://platform.openai.com
@@ -664,6 +724,7 @@ n8n → Отправляет qualified лиды в CRM
    ```
 
 2. **Создай тестового агента (7 мин)**
+
    - Открой Agent Builder в dashboard
    - Нажми "Create New Agent"
    - Задай цель агента: "Отвечать на вопросы о продуктах компании"
@@ -677,11 +738,13 @@ n8n → Отправляет qualified лиды в CRM
    - Проверь trace — как агент принимал решения
 
 **Результат:**
+
 - ✅ Аккаунт на platform.openai.com
 - ✅ Первый агент создан
 - ✅ Понимание как работает Agent Builder
 
 **Возможные проблемы:**
+
 - **"No API key"** → Создай ключ в разделе Settings → API Keys
 - **"Agent не отвечает"** → Проверь, что добавлен хотя бы один инструмент
 - **"Нет доступа к Agent Builder"** → Проверь, что используешь актуальную версию платформы
@@ -689,11 +752,13 @@ n8n → Отправляет qualified лиды в CRM
 ---
 
 ### 📗 Задание 2: Продвинутое (30 минут)
+
 **Цель:** Создать простого агента с одной функцией и интегрировать его через API
 
 **Шаги:**
 
 1. **Создай агента "Анализатор настроения отзывов" (10 мин)**
+
    - Цель агента: "Анализировать отзывы клиентов и классифицировать настроение"
    - Добавь логику в Agent Builder:
      ```
@@ -707,6 +772,7 @@ n8n → Отправляет qualified лиды в CRM
      ```
 
 2. **Настрой Evals для тестирования (10 мин)**
+
    - Перейди в раздел "Evals"
    - Создай dataset с примерами отзывов:
      ```
@@ -717,18 +783,19 @@ n8n → Отправляет qualified лиды в CRM
    - Запусти Eval и проверь точность
 
 3. **Интегрируй через API (10 мин)**
+
    ```javascript
    // Псевдокод для вызова агента
-   const response = await fetch('https://api.openai.com/v1/agents/run', {
-     method: 'POST',
+   const response = await fetch("https://api.openai.com/v1/agents/run", {
+     method: "POST",
      headers: {
-       'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-       'Content-Type': 'application/json'
+       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+       "Content-Type": "application/json",
      },
      body: JSON.stringify({
-       agent_id: 'your-agent-id',
-       input: 'Потрясающий сервис, буду рекомендовать друзьям!'
-     })
+       agent_id: "your-agent-id",
+       input: "Потрясающий сервис, буду рекомендовать друзьям!",
+     }),
    });
 
    const result = await response.json();
@@ -736,11 +803,13 @@ n8n → Отправляет qualified лиды в CRM
    ```
 
 **Результат:**
+
 - ✅ Функциональный агент с одной чёткой задачей
 - ✅ Протестированный через Evals
 - ✅ Работающая API интеграция
 
 **Критерии успеха:**
+
 - Агент правильно классифицирует минимум 8 из 10 тестовых отзывов
 - API возвращает структурированный JSON
 - Confidence score > 0.7 для однозначных отзывов
@@ -748,21 +817,25 @@ n8n → Отправляет qualified лиды в CRM
 ---
 
 ### 📕 Задание 3: Проектное (50 минут)
+
 **Цель:** Создать агента для автоматизации личной задачи с полным lifecycle
 
 **Выбери одну из задач:**
 
 **Вариант A: Email Assistant**
+
 - Классифицирует входящие письма (важные/неважные/spam)
 - Генерирует draft-ответы на стандартные запросы
 - Отправляет уведомления о срочных письмах
 
 **Вариант B: Личный Research Agent**
+
 - Собирает информацию по заданной теме
 - Анализирует источники и фильтрует нерелевантные
 - Создаёт краткий summary с ключевыми инсайтами
 
 **Вариант C: Task Automation Agent**
+
 - Анализирует todo-list
 - Приоритизирует задачи по срочности/важности
 - Предлагает оптимальный порядок выполнения
@@ -770,6 +843,7 @@ n8n → Отправляет qualified лиды в CRM
 **Шаги выполнения (любой вариант):**
 
 1. **Проектирование (15 мин)**
+
    ```
    - Определи цель агента (конкретная проблема)
    - Распиши логику работы (шаг за шагом)
@@ -778,12 +852,14 @@ n8n → Отправляет qualified лиды в CRM
    ```
 
 2. **Создание в Agent Builder (20 мин)**
+
    - Создай агента с чёткой целью
    - Настрой инструменты (Connector Registry)
    - Добавь под-агентов если нужна декомпозиция
    - Протестируй в Test режиме вручную
 
 3. **Тестирование через Evals (10 мин)**
+
    - Создай dataset с реальными примерами
    - Запусти автоматические тесты
    - Добейся точности >80%
@@ -795,18 +871,21 @@ n8n → Отправляет qualified лиды в CRM
    - Проверь метрики в dashboard
 
 **Результат:**
+
 - ✅ Production-ready агент для реальной задачи
 - ✅ Протестированный через Evals (>80% точность)
 - ✅ Развёрнутый и готовый к использованию
 - ✅ Понимание полного lifecycle AgentKit
 
 **Критерии оценки:**
+
 - **Функциональность:** Агент решает поставленную задачу
 - **Качество:** Evals показывают >80% точности
 - **Архитектура:** Логичная структура с правильными инструментами
 - **Deployment:** Агент развёрнут и доступен через API или ChatKit
 
 **Бонусные задачи (опционально):**
+
 - Интегрируй агента с n8n для автоматизации
 - Добавь ChatKit интерфейс в простое HTML приложение
 - Настрой мониторинг и alerting через dashboard
@@ -816,23 +895,28 @@ n8n → Отправляет qualified лиды в CRM
 ## 🧭 НАВИГАЦИЯ
 
 ### ← Предыдущая статья:
+
 [**08-CURSOR-AI.md**](08-CURSOR-AI.md)
+
 - AI-enhanced code editor
 - Код + чат в одном окне
 - **Время:** 20 минут
 
 ### → Следующая статья:
+
 [**10-PERPLEXITY-COMET-BROWSER-AGENT.md**](10-PERPLEXITY-COMET-BROWSER-AGENT.md)
+
 - AI-браузер с встроенным ассистентом
 - Comet Assistant видит веб-страницы
 - Фоновые агенты для параллельных задач
 - **Время:** 15 минут
 
 ### 📚 Вернуться к оглавлению:
+
 [**README.md**](../README.md) — Полный список всех статей раздела
 
 ---
 
-*Сложность: 6/10 | Время освоения: 35 минут | Релиз: DevDay Oct 6, 2025 | Для разработчиков*
+_Сложность: 6/10 | Время освоения: 35 минут | Релиз: DevDay Oct 6, 2025 | Для разработчиков_
 
-*Создано на основе OpenAI DevDay 2025 announcements | 800M users, 4M developers, 8B tokens/min 🚀*
+_Создано на основе OpenAI DevDay 2025 announcements | 800M users, 4M developers, 8B tokens/min 🚀_

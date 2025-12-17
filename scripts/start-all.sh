@@ -71,6 +71,7 @@ echo "📋 Запускаем агентов (каждый на своем по�
 # 3. VIBEE Agent (порт 3000) - ПЕРВЫЙ, ждём полной инициализации
 if ! lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
     echo "  1. VIBEE (главный) → порт 3000"
+    echo "DEBUG: Running VIBEE agent command: env PORT=3000 DATABASE_URL=\"$DATABASE_URL\" DATABASE_ADAPTER=\"$DATABASE_ADAPTER\" TELEGRAM_BOT_TOKEN=\"[REDACTED]\" OPENROUTER_API_KEY=\"[REDACTED]\" SECRET_SALT=\"[REDACTED]\" npx elizaos start --character /Users/playra/vibee-agent/characters/vibeeAgent.json"
     env PORT=3000 \
         DATABASE_URL="$DATABASE_URL" \
         DATABASE_ADAPTER="$DATABASE_ADAPTER" \
@@ -98,6 +99,7 @@ fi
 # 4. Instagram Expert (порт 3001) - ВТОРОЙ
 if ! lsof -Pi :3001 -sTCP:LISTEN -t >/dev/null 2>&1; then
     echo "  2. Instagram Expert → порт 3001"
+    echo "DEBUG: Running Instagram agent command: env PORT=3001 DATABASE_URL=\"$DATABASE_URL\" DATABASE_ADAPTER=\"$DATABASE_ADAPTER\" TELEGRAM_BOT_TOKEN=\"[REDACTED]\" OPENROUTER_API_KEY=\"[REDACTED]\" SECRET_SALT=\"[REDACTED]\" npx elizaos start --character /Users/playra/vibee-agent/characters/instagramExpert.json"
     env PORT=3001 \
         DATABASE_URL="$DATABASE_URL" \
         DATABASE_ADAPTER="$DATABASE_ADAPTER" \
@@ -123,6 +125,7 @@ fi
 # 5. KOLS Agent (порт 3002) - ТРЕТИЙ
 if ! lsof -Pi :3002 -sTCP:LISTEN -t >/dev/null 2>&1; then
     echo "  3. KOLS Agent → порт 3002"
+    echo "DEBUG: Running KOLS agent command: env PORT=3002 DATABASE_URL=\"$DATABASE_URL\" DATABASE_ADAPTER=\"$DATABASE_ADAPTER\" TELEGRAM_API_ID=\"[REDACTED]\" TELEGRAM_API_HASH=\"[REDACTED]\" TELEGRAM_SESSION_STRING=\"[REDACTED]\" TELEGRAM_BOT_TOKEN=\"[REDACTED]\" OPENROUTER_API_KEY=\"[REDACTED]\" SECRET_SALT=\"[REDACTED]\" npx elizaos start --character /Users/playra/vibee-agent/characters/kolsAgent.json"
     env PORT=3002 \
         DATABASE_URL="$DATABASE_URL" \
         DATABASE_ADAPTER="$DATABASE_ADAPTER" \
@@ -178,9 +181,4 @@ cleanup() {
 # Ловим Ctrl+C
 trap cleanup SIGINT SIGTERM
 
-# Показываем логи всех агентов в реальном времени
-tail -f logs/vibee.log logs/instagram.log logs/kols.log 2>/dev/null &
-TAIL_PID=$!
 
-# Ждём завершения (Ctrl+C)
-wait $TAIL_PID

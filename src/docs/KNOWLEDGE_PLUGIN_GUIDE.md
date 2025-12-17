@@ -12,16 +12,17 @@
 
 ```typescript
 export const character = {
-  name: 'MyAgent',
+  name: "MyAgent",
   plugins: [
-    '@elizaos/plugin-openai', // Обязательно
-    '@elizaos/plugin-knowledge', // Добавить эту строку
+    "@elizaos/plugin-openai", // Обязательно
+    "@elizaos/plugin-knowledge", // Добавить эту строку
     // ... другие плагины
   ],
 };
 ```
 
 **Требования:**
+
 - Обязательно нужен `OPENAI_API_KEY` в файле `.env` для создания эмбеддингов
 - Нужен хотя бы один AI-провайдер плагин (например, `@elizaos/plugin-openai`)
 
@@ -40,6 +41,7 @@ your-project/
 ```
 
 2. **Добавьте в `.env`:**
+
 ```env
 LOAD_DOCS_ON_STARTUP=true
 ```
@@ -114,6 +116,7 @@ docs/
 ### Кастомная папка для документов
 
 В файле `.env`:
+
 ```env
 KNOWLEDGE_PATH=/path/to/your/documents
 ```
@@ -121,18 +124,20 @@ KNOWLEDGE_PATH=/path/to/your/documents
 ### Настройки для OpenRouter
 
 В файле персонажа:
+
 ```typescript
 export const character = {
-  name: 'MyAgent',
+  name: "MyAgent",
   plugins: [
-    '@elizaos/plugin-openrouter',
-    '@elizaos/plugin-openai', // Обязательно для эмбеддингов
-    '@elizaos/plugin-knowledge',
+    "@elizaos/plugin-openrouter",
+    "@elizaos/plugin-openai", // Обязательно для эмбеддингов
+    "@elizaos/plugin-knowledge",
   ],
 };
 ```
 
 В файле `.env`:
+
 ```env
 OPENROUTER_API_KEY=your-openrouter-api-key
 OPENAI_API_KEY=your-openai-api-key
@@ -162,6 +167,7 @@ A: Документы обрабатываются и хранятся в баз
 ### Документы не загружаются
 
 Проверьте:
+
 - Папка `docs` существует в правильном месте
 - `LOAD_DOCS_ON_STARTUP=true` в файле `.env`
 - Файлы в поддерживаемых форматах
@@ -169,6 +175,7 @@ A: Документы обрабатываются и хранятся в баз
 ### Нет доступа к веб-интерфейсу
 
 Проверьте:
+
 - Агент запущен (`elizaos start`)
 - Правильный URL: `http://localhost:3000`
 - Порт 3000 не занят другим приложением
@@ -176,6 +183,7 @@ A: Документы обрабатываются и хранятся в баз
 ### Агент не может найти информацию
 
 Попробуйте:
+
 - Использовать более простые поисковые термины
 - Проверить, был ли документ успешно обработан
 - Проверить вкладку Knowledge, что документ там есть

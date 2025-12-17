@@ -71,6 +71,9 @@ export interface CryptoPayment {
  */
 const PAYMENT_BOTS = ['push', 'wallet', 'cryptobot', 'tonrocketbot', 'cryptopayhub_bot']
 
+// 🔒 ГЛОБАЛЬНЫЙ SINGLETON: Один CryptoPaymentService на весь процесс
+let globalCryptoPaymentServiceInstance: CryptoPaymentService | null = null
+
 /**
  * CryptoPaymentService - обработка крипто-платежей
  */
@@ -82,8 +85,15 @@ export class CryptoPaymentService extends Service {
    * Static start method required by ElizaOS 1.6+
    */
   static async start(runtime: IAgentRuntime): Promise<Service> {
-    log.info('STATIC start() called')
+    // 🔒 SINGLETON CHECK
+    if (globalCryptoPaymentServiceInstance) {
+      log.info('🔒 Returning existing singleton instance')
+      return globalCryptoPaymentServiceInstance
+    }
+
+    log.info('🆕 Creating new singleton instance')
     const instance = new CryptoPaymentService()
+    globalCryptoPaymentServiceInstance = instance
     await instance.initialize(runtime)
     return instance
   }
@@ -102,7 +112,7 @@ export class CryptoPaymentService extends Service {
   capabilityDescription = 'Обработка крипто-платежей через @push/@Wallet (TON/USDT/NOT)'
 
   /** Runtime агента */
-  private runtime: IAgentRuntime | null = null
+  protected runtime: IAgentRuntime | null = null
 
   /** Флаг инициализации */
   private isInitialized = false

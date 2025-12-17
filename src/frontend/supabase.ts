@@ -1,11 +1,13 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * Конфигурация Supabase для фронтенда
  * Использует анонимный ключ для доступа к Storage
  */
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL || "https://placeholder.supabase.co";
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_ANON_KEY || "placeholder-key";
 
 /**
  * Создаем Supabase клиент для фронтенда
@@ -26,30 +28,30 @@ export interface UploadResult {
  */
 export const uploadFileToStorage = async (
   file: File,
-  bucket: string = 'instagram-uploads'
+  bucket: string = "instagram-uploads",
 ): Promise<UploadResult | null> => {
   try {
     // Создаем уникальное имя файла
     const timestamp = Date.now();
     const randomSuffix = Math.random().toString(36).substring(7);
-    const fileExtension = file.name.split('.').pop();
+    const fileExtension = file.name.split(".").pop();
     const fileName = `${timestamp}-${randomSuffix}.${fileExtension}`;
 
     // Загружаем файл
     const { data, error } = await supabase.storage
       .from(bucket)
       .upload(fileName, file, {
-        cacheControl: '3600',
+        cacheControl: "3600",
         upsert: false,
       });
 
     if (error) {
-      console.error('❌ [Supabase] Ошибка загрузки:', error);
+      console.error("❌ [Supabase] Ошибка загрузки:", error);
       return null;
     }
 
     if (!data) {
-      console.error('❌ [Supabase] Нет данных от сервера');
+      console.error("❌ [Supabase] Нет данных от сервера");
       return null;
     }
 
@@ -58,7 +60,7 @@ export const uploadFileToStorage = async (
       .from(bucket)
       .getPublicUrl(data.path);
 
-    console.log('✅ [Supabase] Файл загружен:', urlData.publicUrl);
+    console.log("✅ [Supabase] Файл загружен:", urlData.publicUrl);
 
     return {
       path: data.path,
@@ -66,7 +68,7 @@ export const uploadFileToStorage = async (
       fullPath: data.fullPath,
     };
   } catch (error) {
-    console.error('❌ [Supabase] Исключение при загрузке:', error);
+    console.error("❌ [Supabase] Исключение при загрузке:", error);
     return null;
   }
 };
@@ -76,20 +78,20 @@ export const uploadFileToStorage = async (
  */
 export const deleteFileFromStorage = async (
   path: string,
-  bucket: string = 'instagram-uploads'
+  bucket: string = "instagram-uploads",
 ): Promise<boolean> => {
   try {
     const { error } = await supabase.storage.from(bucket).remove([path]);
 
     if (error) {
-      console.error('❌ [Supabase] Ошибка удаления:', error);
+      console.error("❌ [Supabase] Ошибка удаления:", error);
       return false;
     }
 
-    console.log('✅ [Supabase] Файл удален:', path);
+    console.log("✅ [Supabase] Файл удален:", path);
     return true;
   } catch (error) {
-    console.error('❌ [Supabase] Исключение при удалении:', error);
+    console.error("❌ [Supabase] Исключение при удалении:", error);
     return false;
   }
 };
@@ -99,7 +101,8 @@ export const deleteFileFromStorage = async (
  */
 export const checkStorageAvailability = async (): Promise<boolean> => {
   try {
-    const { data, error } = await supabase.storage.getBucket('instagram-uploads');
+    const { data, error } =
+      await supabase.storage.getBucket("instagram-uploads");
     return !error;
   } catch {
     return false;

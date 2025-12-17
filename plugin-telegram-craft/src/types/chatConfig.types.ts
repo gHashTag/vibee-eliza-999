@@ -87,7 +87,7 @@ export interface ChatConfig {
   /** Telegram chat ID */
   chatId: string;
   /** Название чата для отображения */
-  chatTitle: string;
+  tgChatTitle: string;
   /** Тип чата */
   chatType: ChatType;
 
@@ -125,6 +125,12 @@ export interface ChatConfig {
   /** Приоритет обработки */
   priority: number;
 
+  // === Dialog Forwarding ===
+  /** ID чата для пересылки диалогов (лиды) */
+  forwardChatId?: string;
+  /** Категории триггеров, при которых пересылать диалог */
+  forwardTriggerCategories?: string[];
+
   // === Metadata ===
   /** Дата создания */
   createdAt?: Date;
@@ -153,7 +159,7 @@ export interface MessageContext {
   /** Username отправителя */
   senderUsername?: string;
   /** Название чата */
-  chatTitle: string;
+  tgChatTitle: string;
   /** История предыдущих сообщений */
   conversationHistory?: Array<{
     role: 'user' | 'assistant';

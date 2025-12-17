@@ -69,6 +69,14 @@ export interface ChatTarget {
   customTriggers?: string[];
   /** Вероятность ответа (0.0 - 1.0), переопределяет базовую */
   responseProbability?: number;
+  /** Может ли бот писать в этот чат (по умолчанию true) */
+  canWrite?: boolean;
+  /** ID чата для пересылки диалогов (лиды) */
+  forwardChatId?: string;
+  /** Категории триггеров, при которых пересылать диалог */
+  forwardTriggerCategories?: string[];
+  /** Разрешена ли генерация изображений (по умолчанию true) */
+  allowImages?: boolean;
 }
 
 /**
@@ -478,6 +486,7 @@ export const AGENTS_CONFIG: Record<string, AgentConfig> = {
         type: "supergroup",
         isActive: true,
         responseProbability: 0.9,
+        forwardChatId: "2737186844", // Forward to Lead group
       },
       {
         chatId: "2298297094",
@@ -492,6 +501,64 @@ export const AGENTS_CONFIG: Record<string, AgentConfig> = {
         type: "private",
         isActive: true,
         responseProbability: 1.0,
+      },
+      {
+        chatId: "5082217642",
+        chatName: "Крипто Группа (ONLY BUY)",
+        type: "supergroup",
+        isActive: true,
+        canWrite: true, // Explicitly allow writing
+        responseProbability: 0.0, // Only respond to trigger
+        customTriggers: [
+          "куплю крипту",
+          "купить крипту",
+          "куплю крипты",
+          "купить крипты",
+          "где купить",
+          "где куплю",
+          "подскажите где купить",
+          "как купить",
+          "обменять крипту",
+          "обмен крипты",
+          "обменять на",
+          "usdt",
+          "баты",
+          "обменник",
+          "обмен",
+          "п2п",
+          "p2p",
+          "купить usdt",
+          "куплю usdt",
+          "где взять",
+          "где достать",
+          "хочу купить",
+          "хочу куплю",
+          "я бы купил",
+          "я бы крипты купил",
+          "пацаны где",
+          "ребята где",
+          "где можно купить",
+          "где можно обменять",
+          "криптовалюту",
+          "биткоин",
+          "эфир",
+          "токены",
+          "монеты",
+          "валюту",
+          "крипту купить",
+          "крипты купить",
+          "куплю биткоин",
+          "купить биткоин",
+          "обменять биткоин",
+          "биткоин на",
+          "на биткоин",
+          "крипта на",
+          "на крипту",
+          "крипты на",
+          "на крипты",
+        ],
+        forwardChatId: "2737186844", // Forward to Lead group
+        allowImages: false, // Disable image generation
       },
     ],
 
@@ -564,6 +631,12 @@ export const AGENTS_CONFIG: Record<string, AgentConfig> = {
           name: "Project Docs",
           description: "Документация проекта VIBEE",
         },
+        {
+          type: "md_directory",
+          path: "knowledge-base/vibecoder-bible",
+          name: "VibeCoder Bible",
+          description: "Библия вайбкодера (от KOLS)",
+        },
       ],
       embeddingModel: "nomic-embed-text",
       searchLimit: 5,
@@ -586,16 +659,24 @@ export const AGENTS_CONFIG: Record<string, AgentConfig> = {
     name: "KOLS",
     username: "kols_mentor",
 
-    targetChats: [
-      {
-        chatId: "2643951085",
-        chatName: "Основной чат",
-        type: "supergroup",
-        isActive: true,
-        customTriggers: ["вайбкодер", "дмитрий", "кольс"],
-      },
-    ],
-
+            targetChats: [
+              {
+                chatId: "2643951085",
+                chatName: "Основной чат",
+                type: "supergroup",
+                isActive: true, // Enabling KOLS for this chat
+                customTriggers: ["вайбкодер", "дмитрий", "кольс"],
+                canWrite: true,
+              },
+              {
+                chatId: "2298297094",
+                chatName: "Дополнительный чат",
+                type: "supergroup",
+                isActive: true,
+                customTriggers: ["вайбкодинг", "промпт", "claude code",],
+                canWrite: true,
+              },
+            ],
     triggers: {
       words: ["вайбкодинг", "промпт", "claude code", "kols", "кольс"],
       categories: ["VIBECODING"],
@@ -714,7 +795,7 @@ export const AGENTS_CONFIG: Record<string, AgentConfig> = {
         chatId: "-4832231272",
         chatName: "Сдача контент - завода cocoage",
         type: "group",
-        isActive: true,
+        isActive: true, // ✅ Включена рассылка фото
         responseProbability: 1.0,
         customTriggers: [
           "как ты это сделал",
@@ -732,28 +813,7 @@ export const AGENTS_CONFIG: Record<string, AgentConfig> = {
           "красивое фото",
         ],
       },
-      {
-        chatId: "1144640997",
-        chatName: "Тай Инфо Чат",
-        type: "supergroup",
-        isActive: true,
-        responseProbability: 1.0,
-        customTriggers: [
-          "как ты это сделал",
-          "как это работает",
-          "какая нейросеть",
-          "что за бот",
-          "мне можешь",
-          "мне тоже",
-          "хочу такое",
-          "хочу себе",
-          "сделай мне",
-          "сколько стоит",
-          "как заказать",
-          "круто получилось",
-          "красивое фото",
-        ],
-      },
+      // "Тай Инфо Чат" (-1001144640997) удалён - это НЕ целевой чат для бота
     ],
 
     triggers: {
@@ -996,7 +1056,7 @@ export const AGENTS_CONFIG: Record<string, AgentConfig> = {
     behavior: {
       minIntervalMs: 3000,
       maxMessagesPerHour: 20,
-      proactiveEnabled: true,
+      proactiveEnabled: false, // ❌ ВРЕМЕННО ОТКЛЮЧЕНО - пока нет кредитов Replicate
       proactiveIntervalMinutes: 15, // 15 минут между проактивными действиями
     },
   },
@@ -2335,6 +2395,38 @@ export function isChatTargetForAgent(chatId: string, agentId: string): boolean {
 }
 
 /**
+ * Проверить, есть ли права на запись в чат
+ * Возвращает true для личных чатов и чатов с canWrite !== false
+ */
+export function canWriteToChat(chatId: string): boolean {
+  const normalizedChatId = normalizeChatId(chatId);
+
+  // Личные чаты - всегда можем писать
+  const chatIdNum = parseInt(normalizedChatId, 10);
+  if (!isNaN(chatIdNum) && chatIdNum > 0 && chatIdNum < 1000000000) {
+    return true;
+  }
+
+  // Ищем чат во всех агентах
+  for (const config of Object.values(AGENTS_CONFIG)) {
+    const chatTarget = config.targetChats.find(
+      (c) => c.isActive && normalizeChatId(c.chatId) === normalizedChatId
+    );
+    if (chatTarget) {
+      // Если canWrite явно false - нельзя писать
+      if (chatTarget.canWrite === false) {
+        return false;
+      }
+      // По умолчанию можно писать
+      return true;
+    }
+  }
+
+  // Чат не в списке - не пишем
+  return false;
+}
+
+/**
  * Проверить, нужно ли отвечать в чате
  */
 export function shouldRespondInChat(
@@ -2354,6 +2446,11 @@ export function shouldRespondInChat(
   // Если чат не в списке целевых - не отвечаем
   if (!chatTarget) return false;
 
+  // Если нет прав на запись в чат - не отвечаем
+  if (chatTarget.canWrite === false) {
+    return false;
+  }
+
   // Если требуется упоминание, но его нет
   if (config.triggers.requireMention && !hasMention) {
     return false;
@@ -2369,9 +2466,14 @@ export function shouldRespondInChat(
   const lowerText = messageText.toLowerCase();
   const hasTrigger = triggers.some((t) => lowerText.includes(t.toLowerCase()));
 
-  // Если нет триггера - не отвечаем (если не личный чат)
-  if (!hasTrigger && chatTarget.type !== "private") {
-    return false;
+  // Если есть триггер - отвечаем
+  if (hasTrigger) {
+    return true;
+  }
+
+  // Для личных чатов всегда отвечаем
+  if (chatTarget.type === "private") {
+    return true;
   }
 
   // Проверяем вероятность ответа

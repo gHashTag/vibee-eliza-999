@@ -33,7 +33,7 @@ function formatConfigList(configs: ChatConfig[]): string {
     lines.push(`**Активные (${active.length}):**`);
     active.forEach((config, i) => {
       const salesIcon = config.salesMode ? '🛒' : '';
-      const title = config.chatTitle || `Chat ${config.chatId}`;
+      const title = config.tgChatTitle || `Chat ${config.chatId}`;
       lines.push(`${i + 1}. ${salesIcon} **${title}**`);
       lines.push(`   ID: \`${config.chatId}\` | Персона: ${config.personaName}`);
     });
@@ -43,7 +43,7 @@ function formatConfigList(configs: ChatConfig[]): string {
     lines.push('');
     lines.push(`**Неактивные (${inactive.length}):**`);
     inactive.forEach((config, i) => {
-      const title = config.chatTitle || `Chat ${config.chatId}`;
+      const title = config.tgChatTitle || `Chat ${config.chatId}`;
       lines.push(`${i + 1}. ⏸️ ${title} (\`${config.chatId}\`)`);
     });
   }

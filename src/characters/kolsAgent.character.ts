@@ -249,14 +249,17 @@ export const kolsAgentCharacter: Character = {
   ],
 
   // Настройки - секреты берутся из runtime.character.settings.secrets
+  // 🕉️ TELEGRAM_SESSION_STRING теперь управляется через config/userbot-sessions.ts
+  // Для переключения сессий используй: bun scripts/switch-userbot.ts <session_id>
   settings: {
     secrets: {
       TELEGRAM_API_ID: "94892",
       TELEGRAM_API_HASH: "cacf9ad137d228611b49b2ecc6d68d43",
-      TELEGRAM_SESSION_STRING:
-        "1ApWapzMBu7_l3Ag6iecyMij5-mFLMmQvi5axSimPVoH2QcUb9FBcWJ8Sq3aqEEri2kYJKts-fd2pUYKGWNYxQ10YrBmP7oN-Yoedb1HO1VFolcvKrqFciy63SowMnk80GRLmrqQ7ZHxVmGbd0uO1NhoDG2sBuvCC_B_9CxCpHo8WBL_83yjJND0OaAvXAfedTrPWgjFUn7h_Fn_5B5GnrWsj6g-u14J26NqEqg0bwa1o9TfHTzH0A5xhnUC5-WqdcU23jq_4lfWtwiCafzWf7g16Rm3R48io53Sho2dKL8nyQeAtNWSXmBvcrSmVnfrXQz0EC0qA0XzriuXoHzE-fukmXns725g=",
+      // TELEGRAM_SESSION_STRING теперь берётся из централизованного конфига
+      // Если нужно задать явно, раскомментируй строку ниже:
+      // TELEGRAM_SESSION_STRING: "...",
       OPENROUTER_API_KEY:
-        "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",
+        "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",
       OPENROUTER_BASE_URL: "https://openrouter.ai/api/v1",
     },
     avatar: "/avatars/vibee-agent.svg",

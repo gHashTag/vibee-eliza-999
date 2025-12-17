@@ -3,6 +3,7 @@
 > **"В Linux всё возможно, если знаешь как"** — Философия open-source
 
 ## 📋 Содержание
+
 1. [🎯 Обзор Linux окружения](#-обзор-linux-окружения)
 2. [💻 Базовое окружение разработчика](#-базовое-окружение-разработчика)
 3. [🤖 AI-инструменты для VibeCoding](#-ai-инструменты-для-vibecoding)
@@ -25,6 +26,7 @@ Linux — это бесплатная операционная система, �
 - **Выбрать удобный дистрибутив** — Ubuntu для новичков, Arch для опытных
 
 ### Минимальный набор VibeCoder'а:
+
 - **🖥️ Linux (Ubuntu/Debian/Fedora/Arch)** — это основа, как фундамент дома. Ubuntu — самый дружелюбный для новичков
   - 🔗 [Ubuntu](https://ubuntu.com/) | [Debian](https://www.debian.org/) | [Fedora](https://getfedora.org/) | [Arch Linux](https://archlinux.org/)
 - **🧠 Cursor AI** — умный редактор кода с AI-помощником. Представьте Word, но для программистов + умный коллега
@@ -37,6 +39,7 @@ Linux — это бесплатная операционная система, �
   - 🔗 [Официальный сайт](https://git-scm.com/) | [GitHub](https://github.com/)
 
 ### Рекомендуемый набор Pro:
+
 - **🚀 Bun** — быстрый "движок" для JavaScript. Как гоночный автомобиль вместо обычного
   - 🔗 [Официальный сайт](https://bun.sh/) | [GitHub](https://github.com/oven-sh/bun)
 - **🐳 Docker** — контейнеризация. Упаковывает приложения в "коробки" для легкого развертывания
@@ -49,6 +52,7 @@ Linux — это бесплатная операционная система, �
   - 🔗 [GitHub](https://github.com/cboxdoerfer/fsearch) | [PPA](https://launchpad.net/~christian-boxdoerfer/+archive/ubuntu/fsearch-daily)
 
 ### Как всё работает вместе?
+
 ```
 Linux ← основа всей системы
     ↓
@@ -66,6 +70,7 @@ Obsidian ← документирование
 ## 💻 Базовое окружение разработчика
 
 ### 1. Обновление системы
+
 ```bash
 # Ubuntu/Debian
 sudo apt update && sudo apt upgrade -y
@@ -81,6 +86,7 @@ sudo zypper update
 ```
 
 ### 2. Установка базовых инструментов
+
 ```bash
 # Ubuntu/Debian
 sudo apt install -y \
@@ -101,6 +107,7 @@ sudo pacman -S \
 ```
 
 ### 3. Установка Git
+
 ```bash
 # Настройка Git
 git config --global user.name "Ваше Имя"
@@ -114,6 +121,7 @@ git config --global core.editor "vim"
 **Зачем нужны SSH ключи?** SSH ключи позволяют безопасно подключаться к GitHub без ввода пароля каждый раз. Это как "умный замок" — вы один раз настраиваете доступ, и потом входите автоматически.
 
 **Аналогия с замком:**
+
 ```
 🔑 Приватный ключ (id_ed25519) = Ключ от вашего дома
    • Храните в секрете!
@@ -127,12 +135,14 @@ git config --global core.editor "vim"
 ```
 
 **Принцип работы:**
+
 1. Вы создаете пару ключей на компьютере
 2. Публичный ключ загружаете на GitHub
 3. При подключении GitHub проверяет: "Этот публичный ключ соответствует приватному ключу пользователя?"
 4. Если да → доступ разрешен
 
 **Пошаговое создание SSH ключей:**
+
 ```bash
 # Создание SSH ключей
 ssh-keygen -t ed25519 -C "your.email@example.com"
@@ -160,6 +170,7 @@ cat ~/.ssh/id_ed25519.pub
 **Где и куда добавлять ключи:**
 
 **На GitHub:**
+
 1. Зайдите на github.com → Нажмите на аватар → Settings
 2. В меню слева выберите "SSH and GPG keys"
 3. Нажмите зеленую кнопку "New SSH key"
@@ -168,11 +179,13 @@ cat ~/.ssh/id_ed25519.pub
 6. Нажмите "Add SSH key"
 
 **На GitLab:**
+
 1. User Settings → SSH Keys
 2. Вставьте публичный ключ
 3. Выберите срок действия (рекомендую 365 дней)
 
 **Проверка работы:**
+
 ```bash
 ssh -T git@github.com
 # Ожидаемый результат:
@@ -181,6 +194,7 @@ ssh -T git@github.com
 ```
 
 **Дополнительные настройки безопасности:**
+
 ```bash
 # Проверка известных хостов
 ssh-keyscan -H github.com >> ~/.ssh/known_hosts
@@ -195,6 +209,7 @@ echo 'ssh-add ~/.ssh/id_ed25519' >> ~/.bashrc
 ```
 
 **Правила безопасности:**
+
 - ✅ Публичный ключ можно публиковать
 - ❌ Приватный ключ НИКОГДА не передавайте
 - 🔒 Используйте пароль для ключа
@@ -204,6 +219,7 @@ echo 'ssh-add ~/.ssh/id_ed25519' >> ~/.bashrc
 ### 4. Node.js и пакетные менеджеры
 
 #### Установка через NodeSource (рекомендуется)
+
 ```bash
 # Ubuntu/Debian
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
@@ -218,6 +234,7 @@ npm --version
 ```
 
 #### Установка nvm (альтернативный метод)
+
 ```bash
 # Установка nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
@@ -236,6 +253,7 @@ npm --version
 ```
 
 #### Установка pnpm (рекомендуется для проектов)
+
 ```bash
 # Установка pnpm
 npm install -g pnpm
@@ -248,6 +266,7 @@ pnpm --version
 ```
 
 #### Установка Bun (опционально, но рекомендуется)
+
 ```bash
 # Установка Bun
 curl -fsSL https://bun.sh/install | bash
@@ -267,6 +286,7 @@ bun --version
 ### 1. Cursor AI - IDE с интегрированным AI
 
 #### Установка Cursor через AppImage
+
 ```bash
 # Скачивание Cursor
 wget https://download.cursor.sh/linux/appimage/Cursor-0.40.0-x86_64.AppImage
@@ -289,6 +309,7 @@ EOF
 ```
 
 #### Настройка Cursor для VibeCoding
+
 ```json
 // ~/.config/Cursor/User/settings.json
 {
@@ -310,6 +331,7 @@ EOF
 ```
 
 ### 2. VS Code (альтернатива)
+
 ```bash
 # Ubuntu/Debian
 sudo apt install -y code
@@ -328,12 +350,14 @@ yay -S visual-studio-code-bin
 **Зачем нужен?** Claude Code — это специализированный AI-помощник от Anthropic, который помогает писать, анализировать и улучшать код. Он понимает контекст проекта и может работать с большими кодовыми базами.
 
 **Возможности:**
+
 - **Анализ кода:** Понимает сложные проекты и предлагает улучшения
 - **Генерация кода:** Создает функции, классы и целые модули
 - **Рефакторинг:** Предлагает оптимизацию существующего кода
 - **Объяснения:** Детально разбирает, как работает код
 
 **Установка на Linux:**
+
 ```bash
 # Через браузер (рекомендуется)
 # Зайдите на https://claude.ai/code
@@ -343,6 +367,7 @@ yay -S visual-studio-code-bin
 ```
 
 **Ссылки:**
+
 - 🔗 [Claude Code](https://claude.ai/code) | [Anthropic](https://www.anthropic.com/claude)
 
 ### 4. Claude Flow - Рабочие процессы с ИИ
@@ -350,17 +375,20 @@ yay -S visual-studio-code-bin
 **Зачем нужен?** Claude Flow помогает создавать автоматизированные рабочие процессы с использованием ИИ. Это как "конвейер" для повторяющихся задач разработки.
 
 **Возможности:**
+
 - **Автоматизация задач:** Создание скриптов для рутинных операций
 - **Рабочие процессы:** Последовательности действий для сложных задач
 - **Интеграции:** Связь с другими инструментами разработки
 - **Шаблоны:** Готовые решения для типичных сценариев
 
 **Использование в Linux:**
+
 - Работает через браузер
 - Интегрируется с локальными инструментами
 - Поддерживает bash скрипты и автоматизацию
 
 **Установка на Linux:**
+
 ```bash
 # Через npm
 npm install -g claude-flow
@@ -371,6 +399,7 @@ cd claude-flow && npm install
 ```
 
 **Ссылки:**
+
 - 🔗 [Claude Flow](https://claude.ai/flow) | [Anthropic](https://www.anthropic.com/claude)
 - 🔗 [GitHub](https://github.com/ruvnet/claude-flow)
 
@@ -379,17 +408,20 @@ cd claude-flow && npm install
 **Зачем нужен?** Claude Router помогает организовывать и управлять проектами разработки. Это как "диспетчерская" для ваших идей и задач.
 
 **Возможности:**
+
 - **Управление задачами:** Создание и отслеживание задач разработки
 - **Планирование проектов:** Структурирование больших проектов
 - **Приоритизация:** Определение важности различных функций
 - **Отслеживание прогресса:** Мониторинг выполнения задач
 
 **Использование в Linux:**
+
 - Веб-интерфейс через браузер
 - Экспорт в markdown для Obsidian
 - Интеграция с Git и системами контроля версий
 
 **Ссылки:**
+
 - 🔗 [Claude Router](https://claude.ai/router) | [Anthropic](https://www.anthropic.com/claude)
 
 ### 6. Cristal - Анализ и визуализация кода
@@ -397,12 +429,14 @@ cd claude-flow && npm install
 **Зачем нужен?** Cristal помогает анализировать и визуализировать структуру кода. Это как "рентген" для ваших проектов — показывает связи и зависимости.
 
 **Возможности:**
+
 - **Анализ структуры:** Понимание архитектуры проекта
 - **Визуализация зависимостей:** Графическое представление связей
 - **Поиск проблем:** Обнаружение потенциальных ошибок
 - **Оптимизация:** Предложения по улучшению структуры
 
 **Установка на Linux:**
+
 ```bash
 # Через npm (если есть Node.js)
 npm install -g cristal-cli
@@ -412,6 +446,7 @@ npm install -g cristal-cli
 ```
 
 **Ссылки:**
+
 - 🔗 [Cristal](https://cristal.app/) | [GitHub](https://github.com/cristal/cristal)
 
 ### 7. Cloud Code - Профессиональная облачная IDE
@@ -419,12 +454,14 @@ npm install -g cristal-cli
 **Зачем нужен?** Cloud Code — это облачная среда разработки от Anthropic с интегрированным Claude AI для профессиональной разработки.
 
 **Возможности:**
+
 - **Облачная IDE:** Полнофункциональный редактор в браузере
 - **Интеграция Claude:** Прямой доступ к AI для кода
 - **Командная разработка:** Совместная работа в реальном времени
 - **Предварительный просмотр:** Мгновенное тестирование
 
 **Установка на Linux:**
+
 ```bash
 # Через браузер (рекомендуется)
 # Зайдите на https://claude.com/product/claude-code
@@ -434,6 +471,7 @@ npm install -g cristal-cli
 ```
 
 **Ссылки:**
+
 - 🔗 [Cloud Code](https://claude.com/product/claude-code) | [Anthropic](https://www.anthropic.com/claude)
 
 ### 8. OpenRouter - Универсальный AI API
@@ -441,12 +479,14 @@ npm install -g cristal-cli
 **Зачем нужен?** OpenRouter предоставляет доступ к множеству AI моделей через единый API, включая Claude, GPT и другие.
 
 **Возможности:**
+
 - **Множественные модели:** Доступ к различным AI
 - **Управление кредитами:** Контроль расходов
 - **Единый API:** Один интерфейс для всех моделей
 - **Аналитика:** Отслеживание использования
 
 **Установка на Linux:**
+
 ```bash
 # Через npm
 npm install -g openrouter-cli
@@ -456,6 +496,7 @@ npm install -g openrouter-cli
 ```
 
 **Ссылки:**
+
 - 🔗 [OpenRouter](https://openrouter.ai/settings/credits) | [Документация](https://openrouter.ai/docs)
 
 ### 9. Kilo Code - AI-first редактор
@@ -463,12 +504,14 @@ npm install -g openrouter-cli
 **Зачем нужен?** Kilo Code — это инновационный редактор кода, полностью ориентированный на работу с AI.
 
 **Возможности:**
+
 - **AI-first подход:** Постоянная поддержка ИИ
 - **Умные предложения:** Контекстные рекомендации
 - **Быстрая разработка:** Ускорение процесса
 - **Современный UI:** Интуитивный интерфейс
 
 **Установка на Linux:**
+
 ```bash
 # Через браузер
 # Зайдите на https://kilocode.ai/
@@ -480,6 +523,7 @@ chmod +x kilocode-linux.AppImage
 ```
 
 **Ссылки:**
+
 - 🔗 [Kilo Code](https://kilocode.ai/) | [Документация](https://kilocode.ai/docs)
 
 ### 10. Crystal - Управление сессиями Claude
@@ -487,6 +531,7 @@ chmod +x kilocode-linux.AppImage
 **Зачем нужен?** Crystal — это революционный инструмент для управления множественными сессиями Claude AI, который кардинально меняет подход к разработке. Это полноценная Integrated Vibe Environment (IVE), которая позволяет работать с несколькими проектами одновременно, не теряя контекст и не переключаясь между вкладками.
 
 **Возможности:**
+
 - **Множественные сессии:** Запускайте столько сессий Claude Code, сколько нужно для параллельной работы
 - **Изоляция Git Worktree:** Каждая сессия работает в отдельном Git worktree, предотвращая конфликты
 - **Управление контекстом:** Полное сохранение истории разговоров и контекста для каждой сессии
@@ -498,6 +543,7 @@ chmod +x kilocode-linux.AppImage
 - **MCP интеграция:** Подключение к Stravu для совместной работы бизнес-пользователей и разработчиков
 
 **Как это работает:**
+
 1. **Git Worktree изоляция:** Каждая сессия работает в собственном Git worktree, предотвращая конфликты между параллельными разработками
 2. **Мониторинг сессий:** Централизованный интерфейс для управления всеми Claude Code сессиями
 3. **Непрерывность разговора:** Возобновление любой сессии с полной историей разговора
@@ -505,6 +551,7 @@ chmod +x kilocode-linux.AppImage
 5. **Выполнение и тестирование:** Запуск кода для проверки изменений одним нажатием кнопки
 
 **Установка на Linux:**
+
 ```bash
 # Через браузер (рекомендуется)
 # Зайдите на https://stravu.com/blog/crystal
@@ -524,6 +571,7 @@ chmod +x crystal-linux.AppImage
 ```
 
 **Ссылки:**
+
 - 🔗 [Crystal](https://stravu.com/blog/crystal-supercharge-your-development-with-multi-session-claude-code-management) | [GitHub](https://github.com/stravu/crystal)
 - 🔗 [Claude Desktop](https://claude.ai/download) | [Anthropic](https://www.anthropic.com/claude)
 - 🔗 [ChatGPT](https://chat.openai.com/) | [OpenAI](https://openai.com/)
@@ -550,6 +598,7 @@ Obsidian ← документирование
 ```
 
 **Как использовать вместе:**
+
 1. **Cursor** → писать код с AI-подсказками
 2. **GitHub Copilot** → генерировать функции
 3. **Claude Code** → анализировать и улучшать
@@ -566,6 +615,7 @@ Obsidian ← документирование
 ### 1. Obsidian - База знаний VibeCoder'а
 
 #### Установка Obsidian
+
 ```bash
 # Ubuntu/Debian
 wget -O obsidian.deb "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.4.16/obsidian_1.4.16_amd64.deb"
@@ -580,6 +630,7 @@ yay -S obsidian
 ```
 
 #### Настройка Obsidian для VibeCoding
+
 ```bash
 # Создание VibeCoding Vault
 mkdir -p ~/VibeCoding/Vault/{Projects,Knowledge,Templates,Daily}
@@ -616,11 +667,13 @@ EOF
 ### 2. Дополнительные инструменты документирования
 
 #### Mermaid CLI для диаграмм
+
 ```bash
 npm install -g @mermaid-js/mermaid-cli
 ```
 
 #### Pandoc для конвертации документов
+
 ```bash
 # Ubuntu/Debian
 sudo apt install -y pandoc texlive-latex-base texlive-fonts-recommended
@@ -637,6 +690,7 @@ sudo pacman -S pandoc texlive-core
 ## 🔧 Дополнительные утилиты
 
 ### 1. FSearch - Быстрый поиск файлов
+
 ```bash
 # Ubuntu/Debian
 sudo add-apt-repository ppa:christian-boxdoerfer/fsearch-daily
@@ -651,6 +705,7 @@ yay -S fsearch-git
 ```
 
 ### 2. Kitty - Современный терминал
+
 ```bash
 # Ubuntu/Debian
 sudo apt install kitty
@@ -663,6 +718,7 @@ sudo pacman -S kitty
 ```
 
 ### 3. HTTPie - Удобный HTTP клиент
+
 ```bash
 # Ubuntu/Debian
 sudo apt install httpie
@@ -675,6 +731,7 @@ sudo pacman -S httpie
 ```
 
 ### 4. jq - Обработка JSON
+
 ```bash
 # Ubuntu/Debian/Fedora
 sudo apt install jq  # или dnf install jq
@@ -684,6 +741,7 @@ sudo pacman -S jq
 ```
 
 ### 5. bat - Улучшенный cat с подсветкой
+
 ```bash
 # Ubuntu/Debian
 sudo apt install bat
@@ -699,6 +757,7 @@ echo 'alias cat="bat --style=numbers,changes"' >> ~/.bashrc
 ```
 
 ### 6. exa - Современная замена ls
+
 ```bash
 # Ubuntu/Debian
 sudo apt install exa
@@ -719,6 +778,7 @@ EOF
 ```
 
 ### 7. fzf - Fuzzy поиск
+
 ```bash
 # Ubuntu/Debian
 sudo apt install fzf
@@ -735,6 +795,7 @@ echo 'source /usr/share/doc/fzf/examples/completion.bash' >> ~/.bashrc
 ```
 
 ### 8. Docker
+
 ```bash
 # Ubuntu/Debian
 sudo apt install -y docker.io docker-compose
@@ -753,6 +814,7 @@ sudo usermod -aG docker $USER
 ```
 
 ### 9. DBeaver - GUI для баз данных
+
 ```bash
 # Ubuntu/Debian
 sudo snap install dbeaver-ce
@@ -769,6 +831,7 @@ yay -S dbeaver
 ## ✅ Проверка установки
 
 ### Скрипт проверки окружения для Linux
+
 ```bash
 #!/bin/bash
 # check-linux-vibecoding.sh
@@ -856,6 +919,7 @@ echo "- Настройте .bashrc для персональных алиасо�
 ```
 
 Запустите проверку:
+
 ```bash
 chmod +x check-linux-vibecoding.sh
 ./check-linux-vibecoding.sh
@@ -868,6 +932,7 @@ chmod +x check-linux-vibecoding.sh
 ### Распространенные проблемы и решения:
 
 #### 1. **Permission denied (Отказано в доступе)**
+
 ```
 Проблема: sudo: command not found
 Решение: Вы не в sudoers. Обратитесь к администратору системы
@@ -875,6 +940,7 @@ chmod +x check-linux-vibecoding.sh
 ```
 
 #### 2. **Пакет не найден**
+
 ```
 Проблема: E: Unable to locate package nodejs
 Решение:
@@ -884,6 +950,7 @@ chmod +x check-linux-vibecoding.sh
 ```
 
 #### 3. **Docker не работает**
+
 ```
 Проблема: Cannot connect to the Docker daemon
 Решение:
@@ -893,6 +960,7 @@ chmod +x check-linux-vibecoding.sh
 ```
 
 #### 4. **Cursor не запускается**
+
 ```
 Проблема: ./Cursor-*.AppImage: cannot execute binary file
 Решение:
@@ -902,6 +970,7 @@ chmod +x check-linux-vibecoding.sh
 ```
 
 #### 5. **Node.js не устанавливается**
+
 ```
 Проблема: nvm: command not found
 Решение:
@@ -911,6 +980,7 @@ chmod +x check-linux-vibecoding.sh
 ```
 
 #### 6. **Git не подключается к GitHub**
+
 ```
 Проблема: Permission denied (publickey)
 Решение:
@@ -921,6 +991,7 @@ chmod +x check-linux-vibecoding.sh
 ```
 
 ### Диагностические команды:
+
 ```bash
 # Проверить систему
 uname -a && lsb_release -a
@@ -942,6 +1013,7 @@ curl -I https://nodejs.org
 ```
 
 ### Если ничего не помогает:
+
 1. **Обновите систему:** sudo apt update && sudo apt upgrade
 2. **Проверьте логи:** journalctl -xe (для systemd)
 3. **Перезагрузите систему:** sudo reboot
@@ -952,6 +1024,7 @@ curl -I https://nodejs.org
 ## 🎓 Первый VibeCoding проект
 
 ### Быстрый старт проекта
+
 ```bash
 # 1. Создание проекта
 mkdir my-vibecoding-app && cd my-vibecoding-app
@@ -1087,6 +1160,7 @@ pnpm dev
 ```
 
 ### Структура VibeCoding проекта
+
 ```
 my-vibecoding-app/
 ├── src/
@@ -1111,6 +1185,7 @@ my-vibecoding-app/
 ## 🎯 Чеклист готовности к VibeCoding
 
 ### Обязательные компоненты:
+
 - [x] Система Linux обновлена
 - [x] Git установлен и настроен
 - [x] Node.js (LTS версия) установлен
@@ -1119,6 +1194,7 @@ my-vibecoding-app/
 - [x] Obsidian установлен для документации
 
 ### Рекомендуемые компоненты:
+
 - [ ] Bun установлен как альтернатива Node.js
 - [x] Docker для контейнеризации
 - [ ] VS Code как альтернативная IDE
@@ -1127,6 +1203,7 @@ my-vibecoding-app/
 - [ ] Полезные CLI утилиты (bat, exa, fzf, jq)
 
 ### Настройки и конфигурации:
+
 - [x] SSH ключи для GitHub созданы
 - [x] .bashrc настроен с алиасами
 - [ ] Cursor AI extensions установлены
@@ -1139,18 +1216,21 @@ my-vibecoding-app/
 ## 📚 Полезные ресурсы для Linux
 
 ### Официальная документация:
+
 - [Linux Command Line Basics](https://ubuntu.com/tutorials/command-line-for-beginners)
 - [Bash Scripting Guide](https://tldp.org/LDP/Bash-Beginners-Guide/html/)
 - [Systemd Documentation](https://systemd.io/)
 - [Docker Documentation](https://docs.docker.com/)
 
 ### VibeCoding сообщество:
+
 - [Linux VibeCoding Guide](https://github.com/vibecoding/linux-guide)
 - [Arch Linux Wiki](https://wiki.archlinux.org/)
 - [Ubuntu Documentation](https://help.ubuntu.com/)
 - [Fedora Documentation](https://docs.fedoraproject.org/)
 
 ### Обучающие материалы:
+
 - [The Linux Command Line](https://linuxcommand.org/tlcl.php)
 - [Advanced Bash Scripting](https://tldp.org/LDP/abs/html/)
 - [Linux System Administration](https://www.admin.com/)
@@ -1179,6 +1259,7 @@ my-vibecoding-app/
 **Linux совет:** Всегда выполняйте `sudo apt update` перед установкой пакетов, чтобы обновить индекс доступных версий. Это как обновить каталог магазина перед покупкой.
 
 **Для других дистрибутивов:**
+
 - Fedora/RHEL: `sudo dnf update && sudo dnf install пакет`
 - Arch Linux: `sudo pacman -Syu пакет`
 - openSUSE: `sudo zypper refresh && sudo zypper install пакет`
@@ -1203,6 +1284,7 @@ my-vibecoding-app/
 **Linux совет:** Никогда не запускайте `sudo` для команд, если не понимаете, что они делают. Это как дать кому-то ключи от вашей квартиры — доверяйте только проверенным командам.
 
 **Философия безопасности Linux:**
+
 - Обычный пользователь → безопасная песочница
 - sudo → временный доступ для конкретной задачи
 - root (su) → полный контроль (используется редко)
@@ -1227,12 +1309,14 @@ my-vibecoding-app/
 **Linux совет:** Создавайте резервную копию `.bashrc` перед изменениями: `cp ~/.bashrc ~/.bashrc.backup`. Если что-то пойдет не так, всегда можно восстановить оригинал.
 
 **Различия конфигурационных файлов:**
+
 - `~/.bashrc` → загружается в интерактивных non-login shell (новые вкладки терминала)
 - `~/.bash_profile` → загружается при login shell (первый вход в систему)
 - `/etc/bash.bashrc` → системный файл для всех пользователей (требует sudo)
 - `~/.bash_history` → история команд (НЕ для конфигурации)
 
 **Для других shell:**
+
 - zsh: `~/.zshrc`
 - fish: `~/.config/fish/config.fish`
 </details>
@@ -1256,6 +1340,7 @@ my-vibecoding-app/
 **Linux совет:** При сборке из исходников всегда используйте `./configure --prefix=/usr/local` чтобы не засорять системные директории. Это облегчает управление и удаление.
 
 **Иерархия Linux файловой системы:**
+
 ```
 /bin         → базовые системные команды (ls, cat, cp)
 /usr/bin     → пакеты из репозиториев (устанавливаются apt/dnf/pacman)
@@ -1265,6 +1350,7 @@ my-vibecoding-app/
 ```
 
 **Правило:**
+
 - Системные пакеты → `/usr/bin` (управляются пакетным менеджером)
 - Сборка из исходников → `/usr/local/bin` (управляется вручную)
 - Только для пользователя → `~/.local/bin` (в $PATH)
@@ -1289,6 +1375,7 @@ my-vibecoding-app/
 **Linux совет:** После `chmod +x` скрипт можно запустить как `./script.sh`. Точка и слэш `./` означают "текущая директория", что важно для безопасности.
 
 **Права доступа в Linux (rwx):**
+
 ```
 r = read    (чтение)    = 4
 w = write   (запись)    = 2
@@ -1296,6 +1383,7 @@ x = execute (выполнение) = 1
 ```
 
 **Примеры chmod:**
+
 ```bash
 chmod +x file.sh          # Добавить execute всем
 chmod 755 file.sh         # rwxr-xr-x (владелец: все, остальные: read+execute)
@@ -1304,10 +1392,12 @@ chmod u+x,go-w file.sh    # Добавить execute владельцу, убр�
 ```
 
 **Проверка прав:**
+
 ```bash
 ls -l file.sh
 # -rwxr-xr-x  владелец группа остальные
 ```
+
 </details>
 
 ---
@@ -1330,16 +1420,17 @@ ls -l file.sh
 
 **Сравнение подходов:**
 
-| Аспект | Системные пакеты | Пользовательские пакеты |
-|--------|-----------------|------------------------|
-| Установка | `sudo apt install git` | `npm install -g пакет` |
-| Расположение | `/usr/bin`, `/usr/lib` | `~/.npm`, `~/.cargo/bin` |
-| Права | Требуется sudo | Без sudo |
-| Доступность | Всем пользователям | Только текущему пользователю |
-| Обновления | Системный менеджер | Специфичный менеджер (npm, cargo) |
-| Версии | Стабильные (иногда старые) | Последние версии |
+| Аспект       | Системные пакеты           | Пользовательские пакеты           |
+| ------------ | -------------------------- | --------------------------------- |
+| Установка    | `sudo apt install git`     | `npm install -g пакет`            |
+| Расположение | `/usr/bin`, `/usr/lib`     | `~/.npm`, `~/.cargo/bin`          |
+| Права        | Требуется sudo             | Без sudo                          |
+| Доступность  | Всем пользователям         | Только текущему пользователю      |
+| Обновления   | Системный менеджер         | Специфичный менеджер (npm, cargo) |
+| Версии       | Стабильные (иногда старые) | Последние версии                  |
 
 **Примеры:**
+
 ```bash
 # Системная установка (требует sudo)
 sudo apt install nodejs    # Node.js для всей системы
@@ -1354,6 +1445,7 @@ npm install -g pnpm        # Пакетный менеджер в пользов
 ```
 
 **Unix философия:** Используйте системные пакеты для инфраструктуры, пользовательские для проектов.
+
 </details>
 
 ---
@@ -1375,6 +1467,7 @@ npm install -g pnpm        # Пакетный менеджер в пользов
 **Linux совет:** Добавляйте свои скрипты в `~/.local/bin` и включите эту директорию в `$PATH` в файле `~/.bashrc`. Это позволит запускать их из любой директории без указания полного пути.
 
 **Просмотр и настройка PATH:**
+
 ```bash
 # Посмотреть текущий PATH
 echo $PATH
@@ -1396,6 +1489,7 @@ source ~/.bashrc  # Перезагрузить конфигурацию
 ```
 
 **Типичный PATH:**
+
 ```
 ~/.local/bin        → пользовательские скрипты
 /usr/local/bin      → программы из исходников
@@ -1405,6 +1499,7 @@ source ~/.bashrc  # Перезагрузить конфигурацию
 ```
 
 **Важно:** Порядок имеет значение! Если одинаковые команды в разных директориях, выполнится первая найденная.
+
 </details>
 
 ---
@@ -1418,6 +1513,7 @@ source ~/.bashrc  # Перезагрузить конфигурацию
 **Шаги:**
 
 1. **Определите ваш дистрибутив:**
+
 ```bash
 # Узнать дистрибутив
 cat /etc/os-release
@@ -1426,6 +1522,7 @@ lsb_release -a
 ```
 
 2. **Обновите систему:**
+
 ```bash
 # Ubuntu/Debian
 sudo apt update && sudo apt upgrade -y
@@ -1441,6 +1538,7 @@ sudo zypper update
 ```
 
 3. **Установите Git:**
+
 ```bash
 # Ubuntu/Debian
 sudo apt install -y git
@@ -1456,6 +1554,7 @@ sudo zypper install git
 ```
 
 4. **Установите Node.js и npm:**
+
 ```bash
 # Ubuntu/Debian (через NodeSource для актуальной версии)
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
@@ -1472,6 +1571,7 @@ sudo zypper install nodejs npm
 ```
 
 5. **Установите основные инструменты разработки:**
+
 ```bash
 # Ubuntu/Debian
 sudo apt install -y build-essential curl wget
@@ -1488,6 +1588,7 @@ sudo zypper install curl wget
 ```
 
 6. **Настройте Git:**
+
 ```bash
 git config --global user.name "Ваше Имя"
 git config --global user.email "your.email@example.com"
@@ -1495,6 +1596,7 @@ git config --global init.defaultBranch main
 ```
 
 **Критерии успеха:**
+
 - ✅ Система обновлена до последней версии
 - ✅ Git установлен и настроен с именем/email
 - ✅ Node.js версии 18+ установлен
@@ -1502,6 +1604,7 @@ git config --global init.defaultBranch main
 - ✅ Базовые инструменты сборки установлены (gcc, make, etc.)
 
 **Команды проверки:**
+
 ```bash
 # Проверка установки
 echo "=== Проверка окружения ==="
@@ -1524,6 +1627,7 @@ echo -e "\nГотово! ✅"
 ```
 
 **Ожидаемый результат:**
+
 ```
 === Проверка окружения ===
 Дистрибутив:
@@ -1553,6 +1657,7 @@ gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
 **Шаги:**
 
 1. **Выберите и настройте shell:**
+
 ```bash
 # Проверить текущий shell
 echo $SHELL
@@ -1573,6 +1678,7 @@ chsh -s $(which zsh)
 ```
 
 2. **Настройте алиасы в ~/.bashrc (или ~/.zshrc):**
+
 ```bash
 # Создать резервную копию
 cp ~/.bashrc ~/.bashrc.backup
@@ -1622,6 +1728,7 @@ source ~/.bashrc
 ```
 
 3. **Настройте Git конфигурацию:**
+
 ```bash
 # Базовая информация
 git config --global user.name "Ваше Имя"
@@ -1647,6 +1754,7 @@ git config --list
 ```
 
 4. **Установите и настройте tmux (терминальный мультиплексор):**
+
 ```bash
 # Установка tmux
 # Ubuntu/Debian
@@ -1700,6 +1808,7 @@ tmux new -s test
 ```
 
 5. **Создайте SSH ключи:**
+
 ```bash
 # Генерация SSH ключа
 ssh-keygen -t ed25519 -C "your.email@example.com"
@@ -1722,6 +1831,7 @@ ssh -T git@github.com
 ```
 
 **Критерии успеха:**
+
 - ✅ Shell настроен с кастомными алиасами
 - ✅ Алиасы для навигации и Git работают
 - ✅ Git правильно настроен (имя, email, editor)
@@ -1730,6 +1840,7 @@ ssh -T git@github.com
 - ✅ `ssh -T git@github.com` успешно аутентифицирует
 
 **Команды проверки:**
+
 ```bash
 echo "=== Проверка пользовательской среды ==="
 
@@ -1761,6 +1872,7 @@ ssh -T git@github.com 2>&1 | head -n 1
 **Шаги:**
 
 1. **Установите инструменты разработки (build-essential):**
+
 ```bash
 # Ubuntu/Debian
 sudo apt install -y \
@@ -1796,6 +1908,7 @@ cmake --version
 ```
 
 2. **Соберите программу из исходников (практика):**
+
 ```bash
 # Пример: установим ripgrep (быстрый grep) из исходников
 # Это научит вас процессу ./configure, make, make install
@@ -1823,6 +1936,7 @@ rg --version
 ```
 
 3. **Настройте переменные окружения:**
+
 ```bash
 # Создайте файл для переменных окружения
 cat >> ~/.bashrc << 'EOF'
@@ -1857,6 +1971,7 @@ source ~/.bashrc
 ```
 
 4. **Создайте systemd user service (опционально, для продвинутых):**
+
 ```bash
 # Пример: автоматический запуск SSH агента при логине
 mkdir -p ~/.config/systemd/user
@@ -1891,6 +2006,7 @@ systemctl --user status ssh-agent.service
 ```
 
 5. **Создайте dotfiles репозиторий:**
+
 ```bash
 # Создайте репозиторий для ваших конфигурационных файлов
 cd ~
@@ -1948,6 +2064,7 @@ echo "Dotfiles репозиторий создан в ~/dotfiles"
 ```
 
 6. **Установите продвинутые CLI инструменты:**
+
 ```bash
 # bat (cat с подсветкой синтаксиса)
 # Ubuntu/Debian
@@ -1989,6 +2106,7 @@ source ~/.bashrc
 ```
 
 **Критерии успеха:**
+
 - ✅ Build tools установлены (gcc, make, cmake)
 - ✅ Успешно собрана программа из исходников (ripgrep)
 - ✅ Переменные окружения настроены в ~/.bashrc
@@ -1998,6 +2116,7 @@ source ~/.bashrc
 - ✅ Современные CLI инструменты установлены
 
 **Команды проверки:**
+
 ```bash
 #!/bin/bash
 echo "=== Проверка продвинутой среды разработчика ==="
@@ -2035,6 +2154,7 @@ echo -e "\n✅ Проверка завершена!"
 **Бонусные задания (для энтузиастов):**
 
 1. **Настройте zsh с Oh My Zsh:**
+
 ```bash
 # Установка Oh My Zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -2048,6 +2168,7 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 ```
 
 2. **Настройте Neovim как IDE:**
+
 ```bash
 # Установка Neovim
 # Ubuntu/Debian
@@ -2080,17 +2201,21 @@ EOF
 Отличная работа! Ваше Linux окружение настроено. Продолжайте обучение:
 
 ### Быстрый путь:
+
 📄 **06-ONE-CLICK-SETUP.md** → Автоматизированная установка одной командой
 
 ### Погружение в философию:
+
 🧘 **07-МИФЫ-О-VIBECODING.md** → Развенчание заблуждений о VibeCoding
 
 ### Linux специфика:
+
 🐧 **Изучите Linux философию** — принципы Unix, KISS, DRY
 📚 **Освойте командную строку** — bash scripting, pipes, redirects
 🔧 **Погрузитесь в systemd** — управление службами и таймерами
 
 ### Сообщество:
+
 - 💬 [Ubuntu Forums](https://ubuntuforums.org/)
 - 🐧 [Arch Linux Wiki](https://wiki.archlinux.org/) — лучший источник знаний
 - 📖 [Linux From Scratch](https://www.linuxfromscratch.org/) — для понимания системы изнутри
@@ -2111,4 +2236,4 @@ EOF
 
 > **"В Linux нет ограничений, только возможности"** — Философия open-source
 
-*Добро пожаловать в мир Linux VibeCoding! Ваше окружение готово, теперь время творить свободно! 🐧✨*
+_Добро пожаловать в мир Linux VibeCoding! Ваше окружение готово, теперь время творить свободно! 🐧✨_

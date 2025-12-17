@@ -12,6 +12,7 @@ data/
 .env.dev
 .env.*.local
 .env.ollama
+.env.force
 *.env.bak*
 .infisical.env
 .infisical.env.bak*

@@ -24,11 +24,16 @@ import { NanoBananaService, type LeadMagnetOptions, type AspectRatio, type Resol
 import { TelegramService } from '../services/telegram.service';
 import { PaymentService, PRICES } from '../services/payment.service';
 import { CryptoPaymentService, CRYPTO_RATES } from '../services/cryptoPayment.service';
+import { detectGenderByName } from '../utils/genderDetection';
+import { promptEnhancer } from '../services/promptEnhancer.service';
 
 /**
  * Типы команд
  */
-type CommandType = 'generate' | 'leadmagnet' | 'edit' | 'avatar_photo';
+type CommandType = 'generate' | 'leadmagnet' | 'edit' | 'avatar_photo' | 'repeat';
+
+/** Хранилище последнего промпта для повторной генерации (userId -> prompt) */
+const lastPromptCache = new Map<string, string>();
 
 /**
  * Схема валидации для генерации
@@ -63,17 +68,18 @@ export const nanoBananaAction: Action = {
 
     console.log('[NanoBanana] validate() called with text:', text.substring(0, 100));
 
-    // Команды для генерации
+    // Команды для генерации (БЕЗ /neurophoto - его обрабатывает plugin-vibe-face-avatar с LoRA)
     const generateCommands = ['/generate', '/gen', '/image', '/img', '/картинка'];
     const generateIntents = [
       'сгенерируй', 'нарисуй', 'создай картинку', 'создай изображение',
       'generate', 'create image', 'make image', 'draw',
     ];
 
-    // Паттерны для кастомных фото с аватаркой (например: "сделай из моей аватарки фото супермена")
+    // Паттерны для кастомных фото с аватаркой
     const avatarPhotoIntents = [
       'сделай из моей аватарки', 'сделай из аватарки', 'из моей аватарки',
       'сделай фото', 'сделай мне фото', 'сделай моё фото',
+      'фото сделай', 'фото где я', 'фото как я',
       'make me a photo', 'make photo from my avatar',
     ];
 
@@ -88,14 +94,44 @@ export const nanoBananaAction: Action = {
     const editCommands = ['/edit', '/редактировать'];
     const editIntents = ['отредактируй', 'измени фото', 'edit photo'];
 
+    // Команды для повторной генерации (короткие триггеры)
+    const repeatTriggers = ['ещё', 'еще', 'ещё варианты', 'еще варианты', 'другой вариант'];
+    const isRepeat = repeatTriggers.some((t) => text === t || text.startsWith(t + ' '));
+
+    // === УМНОЕ ОПРЕДЕЛЕНИЕ НАМЕРЕНИЯ ===
+    // Паттерны "я + где/как/кем" - пользователь описывает себя в ситуации
+    const selfDescriptionPatterns = [
+      /\bя\s+(в|на|как|типа|будто)\s+\w+/i,        // "я в клубе", "я на пляже", "я как супермен"
+      /\b(меня|мне)\s+(в|на|как)\s+\w+/i,          // "меня в костюме", "мне как рокеру"
+      /\bфото\s+.{2,30}$/i,                         // "фото астронавта", "фото киберпанк" (короткие запросы с "фото")
+      /\b(хочу|давай|покажи)\s+.{0,10}(фото|картинк|изображ)/i, // "хочу фото", "давай картинку"
+      /\bв\s+(стиле|образе|роли)\s+\w+/i,          // "в стиле киберпанк", "в образе рокера"
+      /\b(супермен|бэтмен|астронавт|диджей|рокер|бизнесмен|пират|ковбой|самурай|ниндзя|викинг|рыцарь)\b/i, // популярные образы
+    ];
+    const isSelfDescription = selfDescriptionPatterns.some((pattern) => pattern.test(text));
+
+    // Проверка на короткие креативные запросы (3-50 символов, без вопросов)
+    const isShortCreativeRequest =
+      text.length >= 3 &&
+      text.length <= 50 &&
+      !text.includes('?') &&
+      !text.startsWith('как ') &&
+      !text.startsWith('что ') &&
+      !text.startsWith('почему ') &&
+      !text.startsWith('когда ') &&
+      (text.includes(' я ') || text.startsWith('я ') || text.endsWith(' я') || isSelfDescription);
+
     return (
+      isRepeat ||
       generateCommands.some((cmd) => text.startsWith(cmd)) ||
       generateIntents.some((intent) => text.includes(intent)) ||
       avatarPhotoIntents.some((intent) => text.includes(intent)) ||
       leadMagnetCommands.some((cmd) => text.startsWith(cmd)) ||
       leadMagnetIntents.some((intent) => text.includes(intent)) ||
       editCommands.some((cmd) => text.startsWith(cmd)) ||
-      editIntents.some((intent) => text.includes(intent))
+      editIntents.some((intent) => text.includes(intent)) ||
+      isSelfDescription ||
+      isShortCreativeRequest
     );
   },
 
@@ -113,7 +149,7 @@ export const nanoBananaAction: Action = {
       // Получаем сервисы
       const nanoBanana = runtime.getService<NanoBananaService>('nano-banana');
       const telegram = runtime.getService<TelegramService>('telegram-craft');
-      const paymentService = runtime.getService<PaymentService>('payment');
+      const paymentServiceForNano = runtime.getService<PaymentService>('payment');
       const cryptoPayment = runtime.getService<CryptoPaymentService>('crypto-payment');
 
       if (!nanoBanana) {
@@ -129,7 +165,7 @@ export const nanoBananaAction: Action = {
 
       switch (commandType) {
         case 'generate':
-          return await handleGenerate(text, nanoBanana, telegram, message, callback);
+          return await handleGenerate(text, nanoBanana, telegram, message, callback, runtime);
 
         case 'leadmagnet':
           return await handleLeadMagnet(text, nanoBanana, telegram, message, callback);
@@ -138,16 +174,20 @@ export const nanoBananaAction: Action = {
           return await handleEdit(text, nanoBanana, telegram, message, callback);
 
         case 'avatar_photo':
-          return await handleAvatarPhoto(text, nanoBanana, telegram, message, callback, paymentService, cryptoPayment);
+          return await handleAvatarPhoto(text, nanoBanana, telegram, message, callback, paymentServiceForNano, cryptoPayment);
+
+        case 'repeat':
+          return await handleRepeat(nanoBanana, telegram, message, callback, paymentServiceForNano, cryptoPayment);
 
         default:
           throw new Error('Unknown command type');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
+      const userFriendlyMessage = formatUserFriendlyError(errorMessage);
 
       await callback?.({
-        text: `Ошибка генерации: ${errorMessage}`,
+        text: userFriendlyMessage,
       });
 
       return {
@@ -191,6 +231,12 @@ export const nanoBananaAction: Action = {
  * Определение типа команды
  */
 function detectCommandType(text: string): CommandType {
+  // Повторная генерация - проверяем ПЕРВЫМ
+  const repeatTriggers = ['ещё', 'еще', 'ещё варианты', 'еще варианты', 'другой вариант'];
+  if (repeatTriggers.some((t) => text === t || text.startsWith(t + ' '))) {
+    return 'repeat';
+  }
+
   const leadMagnetTriggers = ['/leadmagnet', '/лидмагнит', '/визитка', 'визитку', 'лидмагнит', 'business card', 'lead magnet'];
   const editTriggers = ['/edit', '/редактировать', 'отредактируй', 'измени фото'];
 
@@ -201,6 +247,17 @@ function detectCommandType(text: string): CommandType {
     'make me a photo', 'make photo from my avatar',
   ];
 
+  // Умные паттерны - пользователь описывает себя в ситуации
+  const selfDescriptionPatterns = [
+    /\bя\s+(в|на|как|типа|будто)\s+\w+/i,
+    /\b(меня|мне)\s+(в|на|как)\s+\w+/i,
+    /\bфото\s+.{2,30}$/i,
+    /\b(хочу|давай|покажи)\s+.{0,10}(фото|картинк|изображ)/i,
+    /\bв\s+(стиле|образе|роли)\s+\w+/i,
+    /\b(супермен|бэтмен|астронавт|диджей|рокер|бизнесмен|пират|ковбой|самурай|ниндзя|викинг|рыцарь)\b/i,
+  ];
+  const isSelfDescription = selfDescriptionPatterns.some((pattern) => pattern.test(text));
+
   if (leadMagnetTriggers.some((t) => text.includes(t))) {
     return 'leadmagnet';
   }
@@ -209,8 +266,13 @@ function detectCommandType(text: string): CommandType {
     return 'edit';
   }
 
-  // Проверка avatar_photo ДО generate (иначе срабатывает generate)
-  if (avatarPhotoTriggers.some((t) => text.includes(t))) {
+  // Проверка avatar_photo - включая умные паттерны
+  if (avatarPhotoTriggers.some((t) => text.includes(t)) || isSelfDescription) {
+    return 'avatar_photo';
+  }
+
+  // Короткие креативные запросы с "я" тоже идут в avatar_photo
+  if (text.length <= 50 && (text.includes(' я ') || text.startsWith('я ') || text.endsWith(' я'))) {
     return 'avatar_photo';
   }
 
@@ -229,7 +291,8 @@ async function handleGenerate(
   nanoBanana: NanoBananaService,
   telegram: TelegramService | undefined,
   message: Memory,
-  callback?: HandlerCallback
+  callback?: HandlerCallback,
+  runtime?: IAgentRuntime
 ): Promise<ActionResult> {
   // Извлекаем промпт
   const prompt = extractPrompt(text);
@@ -250,25 +313,37 @@ async function handleGenerate(
   // Извлекаем параметры
   const params = extractGenerateParams(text);
 
-  // Формируем сообщение статуса
+  // RAG: Улучшаем промпт через knowledge base с гайдами по промптингу
+  let enhancedPrompt = prompt;
+  if (runtime) {
+    try {
+      console.log(`[NanoBanana] Улучшаю промпт через RAG: "${prompt.substring(0, 50)}..."`);
+      enhancedPrompt = await promptEnhancer.enhancePrompt(prompt, runtime);
+      console.log(`[NanoBanana] Улучшенный промпт: "${enhancedPrompt.substring(0, 80)}..."`);
+    } catch (err) {
+      console.warn('[NanoBanana] Ошибка улучшения промпта, используем оригинальный:', err);
+    }
+  }
+
+  // Формируем сообщение статуса с улучшенным промптом
   const statusMsg = photoUrls.length > 1
-    ? `Генерирую из ${photoUrls.length} фото: "${prompt.substring(0, 40)}${prompt.length > 40 ? '...' : ''}"`
+    ? `Генерирую из ${photoUrls.length} фото...`
     : photoUrls.length === 1
-    ? `Генерирую с твоим фото: "${prompt.substring(0, 40)}${prompt.length > 40 ? '...' : ''}"`
-    : `Генерирую изображение: "${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"`;
+    ? `Генерирую с твоим фото...`
+    : `Генерирую: "${enhancedPrompt.substring(0, 60)}${enhancedPrompt.length > 60 ? '...' : ''}"`;
 
   await callback?.({
     text: statusMsg,
   });
 
-  // Генерируем с фото или без
+  // Генерируем с улучшенным промптом
   const result = photoUrls.length >= 2
-    ? await nanoBanana.blendImages(photoUrls, prompt, {
+    ? await nanoBanana.blendImages(photoUrls, enhancedPrompt, {
         aspectRatio: params.aspectRatio,
         resolution: params.resolution,
       })
     : await nanoBanana.generate({
-        prompt,
+        prompt: enhancedPrompt,
         images: photoUrls,
         aspectRatio: params.aspectRatio,
         resolution: params.resolution,
@@ -472,6 +547,14 @@ async function handleAvatarPhoto(
     const hasPhotos = paymentService.hasAvailablePhotos(userId);
 
     if (!hasPhotos) {
+      // Уведомляем владельца о paywall
+      paymentService.notifyOwner('paywall', {
+        userId,
+        username: (message.content as any)?.metadata?.username,
+        firstName: (message.content as any)?.metadata?.firstName,
+        chatId: extractChatId(message) || undefined,
+      }).catch((err) => console.error('Failed to notify owner about paywall', err));
+
       // Показываем инструкцию оплаты
       const paymentInstructions = generatePaymentInstructions(cryptoPayment);
       await callback?.({
@@ -481,8 +564,15 @@ async function handleAvatarPhoto(
     }
   }
 
-  // Извлекаем кастомный промпт
-  const customPrompt = extractAvatarPhotoPrompt(text);
+  // Определяем пол пользователя по имени из metadata
+  const firstName = (message.content as any)?.metadata?.firstName;
+  const lastName = (message.content as any)?.metadata?.lastName;
+  const username = (message.content as any)?.metadata?.username;
+  const detectedGender = detectGenderByName(firstName, lastName, username);
+  console.log(`[AvatarPhoto] Detected gender: ${detectedGender} for firstName="${firstName}", username="${username}"`);
+
+  // Извлекаем кастомный промпт с учётом пола
+  const customPrompt = extractAvatarPhotoPrompt(text, detectedGender);
 
   if (!customPrompt || customPrompt.length < 3) {
     await callback?.({
@@ -532,8 +622,22 @@ async function handleAvatarPhoto(
 
   // ============ ИСПОЛЬЗОВАНИЕ КВОТЫ ============
   if (paymentService && telegramUserId) {
-    paymentService.usePhoto(telegramUserId.toString());
-    const quota = paymentService.getQuotaStatus(telegramUserId.toString());
+    const userId = telegramUserId.toString();
+
+    // Проверяем, первая ли это генерация для пользователя
+    const freeUsedBefore = paymentService.getFreePhotosUsed(userId);
+    if (freeUsedBefore === 0) {
+      // Уведомляем владельца о новом пользователе
+      paymentService.notifyOwner('new_user', {
+        userId,
+        username: (message.content as any)?.metadata?.username,
+        firstName: (message.content as any)?.metadata?.firstName,
+        chatId: extractChatId(message) || undefined,
+      }).catch((err) => console.error('Failed to notify owner about new user', err));
+    }
+
+    paymentService.usePhoto(userId);
+    const quota = paymentService.getQuotaStatus(userId);
     console.log(`[AvatarPhoto] Used photo for user ${telegramUserId}, remaining: free=${quota.freeRemaining}, paid=${quota.paidPhotos}`);
   }
 
@@ -550,9 +654,14 @@ async function handleAvatarPhoto(
     ? paymentService.formatBalanceMessage(telegramUserId.toString())
     : '';
 
+  // Сохраняем промпт для повторной генерации
+  if (telegramUserId) {
+    lastPromptCache.set(telegramUserId.toString(), customPrompt);
+  }
+
   const modelName = result.metadata?.model || 'google/nano-banana-pro';
   await callback?.({
-    text: `Готово! Твоё персональное фото создано.${balanceMessage}\n\nХочешь ещё? Просто напиши что хочешь получить!`,
+    text: `Готово! Твоё персональное фото создано.${balanceMessage}\n\nХочешь ещё? Напиши "ещё" или новый промпт!`,
     attachments: [{ url: result.imageUrl, type: 'image' }],
   });
 
@@ -563,6 +672,59 @@ async function handleAvatarPhoto(
       prompt: customPrompt,
     },
   };
+}
+
+/**
+ * Обработка повторной генерации ("ещё")
+ */
+async function handleRepeat(
+  nanoBanana: NanoBananaService,
+  telegram: TelegramService | undefined,
+  message: Memory,
+  callback?: HandlerCallback,
+  paymentService?: PaymentService | null,
+  cryptoPayment?: CryptoPaymentService | null
+): Promise<ActionResult> {
+  const telegramUserId = (message.content as any)?.metadata?.fromId
+    || (message.content as any)?.fromId
+    || (message as any).fromId;
+
+  if (!telegramUserId) {
+    await callback?.({
+      text: 'Не удалось определить пользователя. Напиши, что хочешь сгенерировать.',
+    });
+    return { success: false, error: new Error('User ID not found') };
+  }
+
+  const userId = telegramUserId.toString();
+  const lastPrompt = lastPromptCache.get(userId);
+
+  if (!lastPrompt) {
+    await callback?.({
+      text: 'Нет предыдущего запроса для повтора. Напиши, что хочешь сгенерировать!',
+    });
+    return { success: false, error: new Error('No previous prompt') };
+  }
+
+  // Используем handleAvatarPhoto с сохранённым промптом
+  // Создаём fake message с последним промптом
+  const fakeMessage = {
+    ...message,
+    content: {
+      ...message.content,
+      text: `сделай фото ${lastPrompt.replace('Professional photorealistic portrait, ', '').replace(', high quality, studio lighting', '')}`,
+    },
+  } as Memory;
+
+  return await handleAvatarPhoto(
+    fakeMessage.content?.text || lastPrompt,
+    nanoBanana,
+    telegram,
+    fakeMessage,
+    callback,
+    paymentService,
+    cryptoPayment
+  );
 }
 
 /**
@@ -627,7 +789,7 @@ function extractAspectRatio(text: string): AspectRatio {
  * Извлечение промпта для avatar_photo из текста
  * "сделай из моей аватарки фото супермена" → "superhero superman portrait"
  */
-function extractAvatarPhotoPrompt(text: string): string {
+function extractAvatarPhotoPrompt(text: string, gender: 'male' | 'female' = 'male'): string {
   // Убираем триггеры и оставляем только описание
   const triggers = [
     'сделай из моей аватарки фото', 'сделай из аватарки фото',
@@ -655,8 +817,11 @@ function extractAvatarPhotoPrompt(text: string): string {
   // Сохраняем оригинальное описание но добавляем контекст
   const cleanPrompt = prompt.replace(/^\s*(как|в образе|в стиле|типа)\s*/i, '').trim();
 
-  // Создаём английский промпт для генерации
-  return `Professional photorealistic portrait, ${cleanPrompt}, high quality, studio lighting`;
+  // Определяем слово для пола
+  const genderWord = gender === 'female' ? 'woman' : 'man';
+
+  // Создаём английский промпт для генерации с указанием пола
+  return `Professional photorealistic portrait of a ${genderWord}, ${cleanPrompt}, high quality, studio lighting`;
 }
 
 /**
@@ -664,7 +829,7 @@ function extractAvatarPhotoPrompt(text: string): string {
  */
 function extractPrompt(text: string): string {
   // Убираем команду
-  const commands = ['/generate', '/gen', '/image', '/img', '/картинка', '/edit', '/редактировать'];
+  const commands = ['/generate', '/gen', '/image', '/img', '/картинка', '/neurophoto', '/нейрофото', '/edit', '/редактировать'];
   let prompt = text;
 
   for (const cmd of commands) {
@@ -761,6 +926,79 @@ function extractChatId(message: Memory): string | null {
     return roomStr;
   }
   return null;
+}
+
+/**
+ * Форматирование ошибок в понятный для пользователя текст
+ */
+function formatUserFriendlyError(errorMessage: string): string {
+  // E005 - Sensitive content (NSFW, violence, etc.)
+  if (errorMessage.includes('E005') || errorMessage.includes('sensitive')) {
+    return `Не удалось сгенерировать изображение.
+
+Причина: Фото или промпт содержат контент, который модель не может обработать (откровенный контент, насилие и т.п.)
+
+Что делать:
+• Попробуй другое фото (без откровенных поз)
+• Измени промпт на более нейтральный
+• Используй фото в одежде`;
+  }
+
+  // Timeout errors
+  if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+    return `Превышено время ожидания генерации.
+
+Сервер перегружен. Попробуй через минуту.`;
+  }
+
+  // Rate limit
+  if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
+    return `Слишком много запросов.
+
+Подожди немного и попробуй снова.`;
+  }
+
+  // Invalid image
+  if (errorMessage.includes('invalid image') || errorMessage.includes('Invalid image')) {
+    return `Не удалось обработать фото.
+
+Убедись что:
+• Фото в формате JPG или PNG
+• Размер не больше 10 МБ
+• Фото не повреждено`;
+  }
+
+  // API key / auth errors
+  if (errorMessage.includes('API key') || errorMessage.includes('unauthorized') || errorMessage.includes('401')) {
+    return `Ошибка настройки сервиса. Обратись к администратору.`;
+  }
+
+  // Network errors
+  if (errorMessage.includes('network') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('fetch')) {
+    return `Ошибка соединения с сервисом генерации.
+
+Попробуй позже или обратись к администратору.`;
+  }
+
+  // Generic prediction failed
+  if (errorMessage.includes('Prediction failed')) {
+    // Extract the actual reason if present
+    const reasonMatch = errorMessage.match(/Prediction failed: (.+?)(?:\s*\(|$)/);
+    const reason = reasonMatch ? reasonMatch[1] : 'неизвестная ошибка';
+    return `Генерация не удалась: ${reason}
+
+Попробуй:
+• Изменить промпт
+• Использовать другое фото
+• Повторить через минуту`;
+  }
+
+  // Default - return original but cleaned up
+  return `Ошибка генерации.
+
+${errorMessage.substring(0, 200)}${errorMessage.length > 200 ? '...' : ''}
+
+Попробуй изменить промпт или фото.`;
 }
 
 export default nanoBananaAction;

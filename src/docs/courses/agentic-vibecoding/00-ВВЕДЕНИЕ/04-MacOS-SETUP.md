@@ -3,6 +3,7 @@
 > **"macOS - это когда элегантность встречается с мощью"** — Современный Apple разработчик
 
 ## 📋 Содержание
+
 1. [🎯 Обзор macOS окружения](#-обзор-macos-окружения)
 2. [💻 Базовое окружение разработчика](#-базовое-окружение-разработчика)
 3. [🤖 AI-инструменты для VibeCoding](#-ai-инструменты-для-vibecoding)
@@ -25,6 +26,7 @@ macOS — это операционная система Apple, которая �
 - **Отличная поддержка** — для веб-разработки, мобильной разработки и творчества
 
 ### Минимальный набор VibeCoder'а:
+
 - **🖥️ macOS 12+ (Monterey или новее)** — ваша основная ОС с Unix-основой
   - 🔗 [macOS](https://www.apple.com/macos/) | [Скачать](https://apps.apple.com/app/macos/id1547778386)
 - **🤖 Cursor AI** — умный редактор кода с AI-помощником. Как VS Code + умный коллега
@@ -37,6 +39,7 @@ macOS — это операционная система Apple, которая �
   - 🔗 [Официальный сайт](https://git-scm.com/) | [GitHub Desktop](https://desktop.github.com/)
 
 ### Рекомендуемый набор Pro:
+
 - **🚀 Bun** — быстрый "движок" для JavaScript. Как спортивный автомобиль
   - 🔗 [Официальный сайт](https://bun.sh/) | [GitHub](https://github.com/oven-sh/bun)
 - **🐳 Docker Desktop** — контейнеризация. Упаковывает приложения в "коробки"
@@ -49,6 +52,7 @@ macOS — это операционная система Apple, которая �
   - 🔗 [Официальный сайт](https://raycast.com/) | [App Store](https://apps.apple.com/app/raycast/id1546270676)
 
 ### Как всё работает вместе?
+
 ```
 macOS ← основная система с Unix-основой
     ↓
@@ -70,6 +74,7 @@ Obsidian ← документирование проектов
 ## 💻 Базовое окружение разработчика
 
 ### 1. Обновление macOS
+
 ```bash
 # Проверить текущую версию
 sw_vers
@@ -80,6 +85,7 @@ softwareupdate -i -a
 ```
 
 ### 2. Установка Command Line Tools
+
 ```bash
 # Установка инструментов командной строки
 xcode-select --install
@@ -89,6 +95,7 @@ xcode-select -p
 ```
 
 ### 3. Установка Homebrew (рекомендуется)
+
 ```bash
 # Установка Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -102,6 +109,7 @@ brew --version
 ```
 
 ### 4. Установка Git
+
 ```bash
 # Через Homebrew
 brew install git
@@ -118,6 +126,7 @@ git config --global core.editor "code --wait"
 **Зачем нужны SSH ключи?** SSH ключи позволяют безопасно подключаться к GitHub без ввода пароля каждый раз. Это как "электронный пропуск" — один раз настроили, и дальше входите автоматически.
 
 **Аналогия с банковской картой:**
+
 ```
 💳 Приватный ключ (id_ed25519) = Ваш ПИН-код от карты
     • Никогда не говорите никому!
@@ -131,12 +140,14 @@ git config --global core.editor "code --wait"
 ```
 
 **Принцип работы:**
+
 1. Вы создаете пару ключей на компьютере
 2. Публичный ключ загружаете на GitHub
 3. При подключении GitHub проверяет: "Этот публичный ключ соответствует приватному ключу пользователя?"
 4. Если да → доступ разрешен
 
 **Пошаговое создание SSH ключей:**
+
 ```bash
 # Создание SSH ключей
 ssh-keygen -t ed25519 -C "your.email@example.com"
@@ -162,6 +173,7 @@ cat ~/.ssh/id_ed25519.pub
 **Где и куда добавлять ключи:**
 
 **На GitHub:**
+
 1. Зайдите на github.com → Нажмите на аватар → Settings
 2. В меню слева выберите "SSH and GPG keys"
 3. Нажмите зеленую кнопку "New SSH key"
@@ -170,11 +182,13 @@ cat ~/.ssh/id_ed25519.pub
 6. Нажмите "Add SSH key"
 
 **На GitLab:**
+
 1. User Settings → SSH Keys
 2. Вставьте публичный ключ
 3. Выберите срок действия (рекомендую 365 дней)
 
 **Проверка работы:**
+
 ```bash
 ssh -T git@github.com
 # Ожидаемый результат:
@@ -183,6 +197,7 @@ ssh -T git@github.com
 ```
 
 **Дополнительные настройки безопасности:**
+
 ```bash
 # Проверка известных хостов
 ssh-keyscan -H github.com >> ~/.ssh/known_hosts
@@ -197,6 +212,7 @@ echo 'ssh-add ~/.ssh/id_ed25519' >> ~/.zshrc
 ```
 
 **Правила безопасности:**
+
 - ✅ Публичный ключ можно публиковать
 - ❌ Приватный ключ НИКОГДА не передавайте
 - 🔒 Используйте пароль для ключа
@@ -207,6 +223,7 @@ echo 'ssh-add ~/.ssh/id_ed25519' >> ~/.zshrc
 ### 5. Node.js и пакетные менеджеры
 
 #### Установка через Homebrew (рекомендуется)
+
 ```bash
 # Установка Node.js LTS
 brew install node
@@ -217,6 +234,7 @@ npm --version
 ```
 
 #### Установка nvm (альтернативный метод)
+
 ```bash
 # Установка nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
@@ -235,6 +253,7 @@ npm --version
 ```
 
 #### Установка pnpm (рекомендуется для проектов)
+
 ```bash
 # Установка pnpm
 npm install -g pnpm
@@ -247,6 +266,7 @@ pnpm --version
 ```
 
 #### Установка Bun (опционально, но рекомендуется)
+
 ```bash
 # Установка Bun
 curl -fsSL https://bun.sh/install | bash
@@ -266,6 +286,7 @@ bun --version
 ### 1. Cursor AI - IDE с интегрированным AI
 
 #### Установка Cursor
+
 ```bash
 # Через Homebrew
 brew install --cask cursor
@@ -275,6 +296,7 @@ brew install --cask cursor
 ```
 
 #### Настройка Cursor для VibeCoding
+
 ```json
 // ~/Library/Application Support/Cursor/User/settings.json
 {
@@ -309,6 +331,7 @@ brew install --cask cursor
 ```
 
 ### 2. Xcode Command Line Tools
+
 ```bash
 # Уже установлены с Command Line Tools
 # Проверка
@@ -320,12 +343,14 @@ xcodebuild -version
 **Зачем нужен?** Claude Code — это специализированный AI-помощник от Anthropic, который помогает писать, анализировать и улучшать код. Он понимает контекст проекта и может работать с большими кодовыми базами.
 
 **Возможности:**
+
 - **Анализ кода:** Понимает сложные проекты и предлагает улучшения
 - **Генерация кода:** Создает функции, классы и целые модули
 - **Рефакторинг:** Предлагает оптимизацию существующего кода
 - **Объяснения:** Детально разбирает, как работает код
 
 **Установка на macOS:**
+
 ```bash
 # Через браузер (рекомендуется)
 # Зайдите на https://claude.ai/code
@@ -335,11 +360,13 @@ xcodebuild -version
 ```
 
 **Интеграция с macOS:**
+
 - Работает в любом браузере
 - Интегрируется с Terminal
 - Поддерживает zsh/bash команды
 
 **Ссылки:**
+
 - 🔗 [Claude Code](https://claude.ai/code) | [Anthropic](https://www.anthropic.com/claude)
 
 ### 4. Claude Flow - Рабочие процессы с ИИ
@@ -347,17 +374,20 @@ xcodebuild -version
 **Зачем нужен?** Claude Flow помогает создавать автоматизированные рабочие процессы с использованием ИИ. Это как "конвейер" для повторяющихся задач разработки.
 
 **Возможности:**
+
 - **Автоматизация задач:** Создание скриптов для рутинных операций
 - **Рабочие процессы:** Последовательности действий для сложных задач
 - **Интеграции:** Связь с другими инструментами разработки
 - **Шаблоны:** Готовые решения для типичных сценариев
 
 **Использование в macOS:**
+
 - Веб-интерфейс через браузер
 - Интеграция с Terminal
 - Поддержка AppleScript и Automator
 
 **Ссылки:**
+
 - 🔗 [Claude Flow](https://claude.ai/flow) | [Anthropic](https://www.anthropic.com/claude)
 
 ### 5. Claude Router - Управление проектами
@@ -365,17 +395,20 @@ xcodebuild -version
 **Зачем нужен?** Claude Router помогает организовывать и управлять проектами разработки. Это как "диспетчерская" для ваших идей и задач.
 
 **Возможности:**
+
 - **Управление задачами:** Создание и отслеживание задач разработки
 - **Планирование проектов:** Структурирование больших проектов
 - **Приоритизация:** Определение важности различных функций
 - **Отслеживание прогресса:** Мониторинг выполнения задач
 
 **Использование в macOS:**
+
 - Веб-интерфейс через браузер
 - Экспорт в markdown для Obsidian
 - Интеграция с Git и системами контроля версий
 
 **Ссылки:**
+
 - 🔗 [Claude Router](https://claude.ai/router) | [Anthropic](https://www.anthropic.com/claude)
 
 ### 6. Cloud Code - Профессиональная облачная IDE
@@ -383,12 +416,14 @@ xcodebuild -version
 **Зачем нужен?** Cloud Code — это облачная среда разработки от Anthropic с интегрированным Claude AI для профессиональной разработки.
 
 **Возможности:**
+
 - **Облачная IDE:** Полнофункциональный редактор кода в браузере
 - **Интеграция Claude:** Прямой доступ к AI для кода
 - **Командная разработка:** Совместная работа в реальном времени
 - **Предварительный просмотр:** Мгновенное тестирование
 
 **Установка на macOS:**
+
 ```bash
 # Через браузер (рекомендуется)
 # Зайдите на https://claude.com/product/claude-code
@@ -398,6 +433,7 @@ xcodebuild -version
 ```
 
 **Ссылки:**
+
 - 🔗 [Cloud Code](https://claude.com/product/claude-code) | [Anthropic](https://www.anthropic.com/claude)
 
 ### 7. OpenRouter - Универсальный AI API
@@ -405,12 +441,14 @@ xcodebuild -version
 **Зачем нужен?** OpenRouter предоставляет доступ к множеству AI моделей через единый API, включая Claude, GPT и другие.
 
 **Возможности:**
+
 - **Множественные модели:** Доступ к различным AI
 - **Управление кредитами:** Контроль расходов
 - **Единый API:** Один интерфейс для всех моделей
 - **Аналитика:** Отслеживание использования
 
 **Установка на macOS:**
+
 ```bash
 # Через npm
 npm install -g openrouter-cli
@@ -420,6 +458,7 @@ npm install -g openrouter-cli
 ```
 
 **Ссылки:**
+
 - 🔗 [OpenRouter](https://openrouter.ai/settings/credits) | [Документация](https://openrouter.ai/docs)
 
 ### 8. Kilo Code - AI-first редактор
@@ -427,12 +466,14 @@ npm install -g openrouter-cli
 **Зачем нужен?** Kilo Code — это инновационный редактор кода, полностью ориентированный на работу с AI.
 
 **Возможности:**
+
 - **AI-first подход:** Постоянная поддержка ИИ
 - **Умные предложения:** Контекстные рекомендации
 - **Быстрая разработка:** Ускорение процесса
 - **Современный UI:** Интуитивный интерфейс
 
 **Установка на macOS:**
+
 ```bash
 # Через браузер
 # Зайдите на https://kilocode.ai/
@@ -442,6 +483,7 @@ npm install -g openrouter-cli
 ```
 
 **Ссылки:**
+
 - 🔗 [Kilo Code](https://kilocode.ai/) | [Документация](https://kilocode.ai/docs)
 
 ### 9. Crystal - Управление сессиями Claude
@@ -449,6 +491,7 @@ npm install -g openrouter-cli
 **Зачем нужен?** Crystal — это революционный инструмент для управления множественными сессиями Claude AI, который кардинально меняет подход к разработке. Это полноценная Integrated Vibe Environment (IVE), которая позволяет работать с несколькими проектами одновременно, не теряя контекст и не переключаясь между вкладками.
 
 **Возможности:**
+
 - **Множественные сессии:** Запускайте столько сессий Claude Code, сколько нужно для параллельной работы
 - **Изоляция Git Worktree:** Каждая сессия работает в отдельном Git worktree, предотвращая конфликты
 - **Управление контекстом:** Полное сохранение истории разговоров и контекста для каждой сессии
@@ -460,6 +503,7 @@ npm install -g openrouter-cli
 - **MCP интеграция:** Подключение к Stravu для совместной работы бизнес-пользователей и разработчиков
 
 **Как это работает:**
+
 1. **Git Worktree изоляция:** Каждая сессия работает в собственном Git worktree, предотвращая конфликты между параллельными разработками
 2. **Мониторинг сессий:** Централизованный интерфейс для управления всеми Claude Code сессиями
 3. **Непрерывность разговора:** Возобновление любой сессии с полной историей разговора
@@ -467,6 +511,7 @@ npm install -g openrouter-cli
 5. **Выполнение и тестирование:** Запуск кода для проверки изменений одним нажатием кнопки
 
 **Установка на macOS:**
+
 ```bash
 # Через браузер (рекомендуется)
 # Зайдите на https://stravu.com/blog/crystal
@@ -484,6 +529,7 @@ npm install -g openrouter-cli
 ```
 
 **Ссылки:**
+
 - 🔗 [Crystal](https://stravu.com/blog/crystal-supercharge-your-development-with-multi-session-claude-code-management) | [GitHub](https://github.com/stravu/crystal)
 - 🔗 [Claude Desktop](https://claude.ai/download) | [Anthropic](https://www.anthropic.com/claude)
 - 🔗 [ChatGPT](https://chat.openai.com/) | [OpenAI](https://openai.com/)
@@ -512,6 +558,7 @@ Obsidian ← документирование
 ```
 
 **Как использовать вместе:**
+
 1. **Cursor** → писать код с AI-подсказками
 2. **GitHub Copilot** → генерировать функции
 3. **Claude Code** → анализировать и улучшать
@@ -528,6 +575,7 @@ Obsidian ← документирование
 ### 1. Obsidian - База знаний VibeCoder'а
 
 #### Установка Obsidian
+
 ```bash
 # Через Homebrew
 brew install --cask obsidian
@@ -537,6 +585,7 @@ brew install --cask obsidian
 ```
 
 #### Настройка Obsidian для VibeCoding
+
 ```bash
 # Создание VibeCoding Vault
 mkdir -p ~/VibeCoding/Vault/{Projects,Knowledge,Templates,Daily}
@@ -573,12 +622,14 @@ EOF
 ### 2. Дополнительные инструменты документирования
 
 #### Typora для markdown
+
 ```bash
 # Через Homebrew
 brew install --cask typora
 ```
 
 #### PlantUML для диаграмм
+
 ```bash
 # Через Homebrew
 brew install plantuml
@@ -589,6 +640,7 @@ brew install plantuml
 ## 🔧 Дополнительные утилиты
 
 ### 1. Raycast - Улучшение Spotlight
+
 ```bash
 # Через Homebrew
 brew install --cask raycast
@@ -601,6 +653,7 @@ brew install --cask raycast
 ```
 
 ### 2. iTerm2 - Продвинутый терминал
+
 ```bash
 # Через Homebrew
 brew install --cask iterm2
@@ -610,18 +663,21 @@ brew install --cask iterm2
 ```
 
 ### 3. HTTPie - Удобный HTTP клиент
+
 ```bash
 # Через Homebrew
 brew install httpie
 ```
 
 ### 4. jq - Обработка JSON
+
 ```bash
 # Через Homebrew
 brew install jq
 ```
 
 ### 5. bat - Улучшенный cat с подсветкой
+
 ```bash
 # Через Homebrew
 brew install bat
@@ -631,6 +687,7 @@ echo 'alias cat="bat --style=numbers,changes"' >> ~/.zshrc
 ```
 
 ### 6. exa - Современная замена ls
+
 ```bash
 # Через Homebrew
 brew install exa
@@ -645,6 +702,7 @@ EOF
 ```
 
 ### 7. fzf - Fuzzy поиск
+
 ```bash
 # Через Homebrew
 brew install fzf
@@ -654,6 +712,7 @@ $(brew --prefix)/opt/fzf/install
 ```
 
 ### 8. Docker Desktop
+
 ```bash
 # Через Homebrew
 brew install --cask docker
@@ -663,12 +722,14 @@ open /Applications/Docker.app
 ```
 
 ### 9. TablePlus - GUI для баз данных
+
 ```bash
 # Через Homebrew
 brew install --cask tableplus
 ```
 
 ### 10. Rectangle - Управление окнами
+
 ```bash
 # Через Homebrew
 brew install --cask rectangle
@@ -679,6 +740,7 @@ brew install --cask rectangle
 ## ✅ Проверка установки
 
 ### Скрипт проверки окружения для macOS
+
 ```bash
 #!/bin/bash
 # check-macos-vibecoding.sh
@@ -772,6 +834,7 @@ echo "- Настройте .zshrc для персональных алиасов
 ```
 
 Запустите проверку:
+
 ```bash
 chmod +x check-macos-vibecoding.sh
 ./check-macos-vibecoding.sh
@@ -784,6 +847,7 @@ chmod +x check-macos-vibecoding.sh
 ### Распространенные проблемы и решения:
 
 #### 1. **Homebrew не работает**
+
 ```
 Проблема: brew: command not found
 Решение:
@@ -794,6 +858,7 @@ chmod +x check-macos-vibecoding.sh
 ```
 
 #### 2. **Node.js не устанавливается**
+
 ```
 Проблема: nvm: command not found
 Решение:
@@ -803,6 +868,7 @@ chmod +x check-macos-vibecoding.sh
 ```
 
 #### 3. **Git SSH не подключается**
+
 ```
 Проблема: Permission denied (publickey)
 Решение:
@@ -812,6 +878,7 @@ chmod +x check-macos-vibecoding.sh
 ```
 
 #### 4. **Cursor не открывает файлы**
+
 ```
 Проблема: Cannot open file with Cursor
 Решение:
@@ -821,6 +888,7 @@ chmod +x check-macos-vibecoding.sh
 ```
 
 #### 5. **Docker не запускается**
+
 ```
 Проблема: Docker Desktop не открывается
 Решение:
@@ -830,6 +898,7 @@ chmod +x check-macos-vibecoding.sh
 ```
 
 ### Диагностические команды:
+
 ```bash
 # Проверить систему
 sw_vers && sysctl -n machdep.cpu.brand_string
@@ -849,6 +918,7 @@ curl -I https://nodejs.org
 ```
 
 ### Если ничего не помогает:
+
 1. **Обновите macOS:** System Settings → General → Software Update
 2. **Проверьте разрешения:** System Settings → Privacy & Security
 3. **Сбросьте настройки:** Для инструментов удалите и переустановите
@@ -859,6 +929,7 @@ curl -I https://nodejs.org
 ## 🎓 Первый VibeCoding проект
 
 ### Быстрый старт проекта
+
 ```bash
 # 1. Создание проекта
 mkdir my-vibecoding-app && cd my-vibecoding-app
@@ -994,6 +1065,7 @@ pnpm dev
 ```
 
 ### Структура VibeCoding проекта
+
 ```
 my-vibecoding-app/
 ├── src/
@@ -1018,6 +1090,7 @@ my-vibecoding-app/
 ## 🎯 Чеклист готовности к VibeCoding
 
 ### Обязательные компоненты:
+
 - [x] macOS обновлена до последней версии
 - [x] Command Line Tools установлены
 - [x] Homebrew установлен и настроен
@@ -1028,6 +1101,7 @@ my-vibecoding-app/
 - [x] Obsidian установлен для документации
 
 ### Рекомендуемые компоненты:
+
 - [ ] Bun установлен как альтернатива Node.js
 - [x] Docker Desktop для контейнеризации
 - [ ] iTerm2 как продвинутый терминал
@@ -1037,6 +1111,7 @@ my-vibecoding-app/
 - [ ] Полезные CLI утилиты (bat, exa, fzf, jq)
 
 ### Настройки и конфигурации:
+
 - [x] SSH ключи для GitHub созданы
 - [x] .zshrc настроен с алиасами
 - [ ] Cursor AI extensions установлены
@@ -1049,18 +1124,21 @@ my-vibecoding-app/
 ## 📚 Полезные ресурсы для macOS
 
 ### Официальная документация:
+
 - [macOS Documentation](https://developer.apple.com/documentation/macos)
 - [Terminal User Guide](https://support.apple.com/guide/terminal/welcome/mac)
 - [Homebrew Documentation](https://docs.brew.sh/)
 - [Docker for Mac](https://docs.docker.com/desktop/mac/)
 
 ### VibeCoding сообщество:
+
 - [macOS VibeCoding Guide](https://github.com/vibecoding/macos-guide)
 - [Raycast Documentation](https://docs.raycast.com/)
 - [iTerm2 Documentation](https://iterm2.com/documentation.html)
 - [Xcode Documentation](https://developer.apple.com/documentation/xcode)
 
 ### Обучающие материалы:
+
 - [macOS Command Line](https://developer.apple.com/library/archive/documentation/OpenSource/Conceptual/ShellScripting/CommandLInePrimer/CommandLine.html)
 - [zsh Guide](https://zsh.sourceforge.io/Guide/)
 - [Homebrew Tips](https://docs.brew.sh/Homebrew-Tips-and-Tricks)
@@ -1209,17 +1287,20 @@ my-vibecoding-app/
 **Шаги:**
 
 1. **Установка Xcode Command Line Tools**
+
    ```bash
    xcode-select --install
    # Следуйте инструкциям в GUI
    ```
 
 2. **Установка Homebrew**
+
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
 
 3. **Настройка PATH для Homebrew**
+
    ```bash
    # Для Apple Silicon (M1/M2/M3)
    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
@@ -1231,11 +1312,13 @@ my-vibecoding-app/
    ```
 
 4. **Установка Git через Homebrew**
+
    ```bash
    brew install git
    ```
 
 5. **Установка Claude Code и других инструментов**
+
    ```bash
    # Установка Node.js
    brew install node
@@ -1245,6 +1328,7 @@ my-vibecoding-app/
    ```
 
 **Критерии успеха:**
+
 - ✅ Xcode Command Line Tools установлены (`xcode-select -p` показывает путь)
 - ✅ Homebrew работает (`brew doctor` выводит "Your system is ready to brew")
 - ✅ Git установлен через Homebrew (`which git` показывает путь Homebrew)
@@ -1252,6 +1336,7 @@ my-vibecoding-app/
 - ✅ Node.js установлен (`node --version` показывает версию)
 
 **Команды проверки:**
+
 ```bash
 # Проверка архитектуры Mac
 uname -m
@@ -1297,6 +1382,7 @@ sw_vers  # Версия macOS
 **Шаги:**
 
 1. **Установка и настройка iTerm2**
+
    ```bash
    # Установка iTerm2
    brew install --cask iterm2
@@ -1306,11 +1392,13 @@ sw_vers  # Версия macOS
    ```
 
 2. **Установка Oh My Zsh**
+
    ```bash
    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
    ```
 
 3. **Настройка полезных алиасов в ~/.zshrc**
+
    ```bash
    cat >> ~/.zshrc << 'EOF'
 
@@ -1346,6 +1434,7 @@ sw_vers  # Версия macOS
    ```
 
 4. **Установка полезных CLI-инструментов**
+
    ```bash
    # Современные замены стандартных команд
    brew install bat      # cat с подсветкой синтаксиса
@@ -1360,11 +1449,13 @@ sw_vers  # Версия macOS
    ```
 
 5. **Настройка горячих клавиш и профилей iTerm2**
+
    - Preferences → Keys → Hotkey → Create a Dedicated Hotkey Window (например, ⌥Space)
    - Preferences → Profiles → Colors → Import → Выбрать тему (Dracula, Solarized)
    - Preferences → Profiles → Text → Font → JetBrains Mono (установить: `brew install --cask font-jetbrains-mono`)
 
 6. **Установка дополнительных инструментов продуктивности**
+
    ```bash
    # Raycast - замена Spotlight
    brew install --cask raycast
@@ -1377,6 +1468,7 @@ sw_vers  # Версия macOS
    ```
 
 **Критерии успеха:**
+
 - ✅ iTerm2 установлен и настроен с темой
 - ✅ Oh My Zsh работает (видна тема в промпте)
 - ✅ Все алиасы работают (проверьте `gs`, `ll`, `bu`)
@@ -1385,6 +1477,7 @@ sw_vers  # Версия macOS
 - ✅ Rectangle управляет окнами
 
 **Команды проверки:**
+
 ```bash
 # Проверка zsh и Oh My Zsh
 echo $SHELL  # Должно быть /bin/zsh
@@ -1454,6 +1547,7 @@ alias gco="git branch | fzf | xargs git checkout"  # Выбор веток
 **Шаги:**
 
 1. **Определение архитектуры вашего Mac**
+
    ```bash
    # Проверка архитектуры процессора
    uname -m
@@ -1468,6 +1562,7 @@ alias gco="git branch | fzf | xargs git checkout"  # Выбор веток
    ```
 
 2. **Установка Rosetta 2 (только для Apple Silicon)**
+
    ```bash
    # Rosetta 2 нужна для запуска приложений Intel на Apple Silicon
    softwareupdate --install-rosetta --agree-to-license
@@ -1477,6 +1572,7 @@ alias gco="git branch | fzf | xargs git checkout"  # Выбор веток
    ```
 
 3. **Проверка расположения Homebrew**
+
    ```bash
    # Для Apple Silicon должно быть /opt/homebrew
    # Для Intel должно быть /usr/local
@@ -1494,6 +1590,7 @@ alias gco="git branch | fzf | xargs git checkout"  # Выбор веток
    ```
 
 4. **Тестирование нативных vs Rosetta приложений**
+
    ```bash
    # Создайте тестовый скрипт
    cat > ~/test-architecture.sh << 'EOF'
@@ -1523,6 +1620,7 @@ alias gco="git branch | fzf | xargs git checkout"  # Выбор веток
    ```
 
 5. **Проверка архитектуры установленных приложений**
+
    ```bash
    # Создайте скрипт для проверки
    cat > ~/check-app-arch.sh << 'EOF'
@@ -1568,6 +1666,7 @@ alias gco="git branch | fzf | xargs git checkout"  # Выбор веток
    ```
 
 6. **Создание таблицы совместимости инструментов**
+
    ```bash
    # Создайте документ совместимости
    cat > ~/Desktop/macos-compatibility-checklist.md << 'EOF'
@@ -1621,6 +1720,7 @@ alias gco="git branch | fzf | xargs git checkout"  # Выбор веток
    ```
 
 7. **Настройка для работы с обеими архитектурами (Apple Silicon)**
+
    ```bash
    # Добавьте функции в ~/.zshrc для переключения архитектур
    cat >> ~/.zshrc << 'EOF'
@@ -1643,6 +1743,7 @@ alias gco="git branch | fzf | xargs git checkout"  # Выбор веток
    ```
 
 **Критерии успеха:**
+
 - ✅ Знаете свою архитектуру Mac (arm64 или x86_64)
 - ✅ Homebrew установлен в правильной директории
   - Apple Silicon: `/opt/homebrew`
@@ -1653,6 +1754,7 @@ alias gco="git branch | fzf | xargs git checkout"  # Выбор веток
 - ✅ Понимаете разницу в производительности нативных vs Rosetta приложений
 
 **Команды проверки:**
+
 ```bash
 # Проверка архитектуры
 uname -m
@@ -1732,6 +1834,7 @@ fi
 **Решение проблем:**
 
 **Проблема:** Homebrew установлен в неправильную директорию
+
 ```bash
 # Решение: Переустановка Homebrew
 # 1. Удалить текущий Homebrew
@@ -1751,12 +1854,14 @@ source ~/.zprofile
 ```
 
 **Проблема:** Приложение требует Rosetta, но она не установлена
+
 ```bash
 # Установка Rosetta 2
 softwareupdate --install-rosetta --agree-to-license
 ```
 
 **Проблема:** Медленная работа некоторых инструментов
+
 ```bash
 # Проверьте, не запущены ли они через Rosetta
 ps aux | grep [имя_процесса] | awk '{print $2}' | xargs file
@@ -1795,4 +1900,4 @@ brew reinstall [пакет]
 
 > **"macOS - это когда элегантность встречается с мощью"** — Современный Apple разработчик
 
-*Добро пожаловать в мир macOS VibeCoding! Ваше окружение готово, теперь время творить эффективно! 🍎✨*
+_Добро пожаловать в мир macOS VibeCoding! Ваше окружение готово, теперь время творить эффективно! 🍎✨_

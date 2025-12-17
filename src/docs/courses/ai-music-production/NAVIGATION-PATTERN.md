@@ -12,24 +12,27 @@
 
 ```markdown
 ## 📍 ВЫ ЗДЕСЬ
-
 ```
+
 [●]━━━[ ]━━━[ ]━━━[ ]━━━[ ]━━━[ ]━━━[ ]━━━[ ]
- 01    02    03    04    05    06    07    08
-Основы                                  Будущее
+01 02 03 04 05 06 07 08
+Основы Будущее
+
 ```
 
 **Прогресс:** 0% (0 из 8 глав) | **Время:** ~1.5 часа чтения
 ```
 
 **Применение для AI Music Production:**
+
 ```markdown
 ## 📍 ВЫ ЗДЕСЬ
-
 ```
+
 [●]━━━[ ]━━━[ ]━━━[ ]━━━[ ]━━━[ ]━━━[ ]
- 01    02    03    04    05    06    07
-Основы  DAW  Синтез  Mixing  Master  Promo
+01 02 03 04 05 06 07
+Основы DAW Синтез Mixing Master Promo
+
 ```
 
 **Прогресс:** 0% (0 из 7 модулей) | **Время:** ~2 часа чтения
@@ -50,6 +53,7 @@
 ```
 
 **Применение:**
+
 ```markdown
 ## 🧭 НАВИГАЦИЯ
 
@@ -70,6 +74,7 @@
 **→ Следующая статья:** [**02-УСТАНОВКА-CLAUDE-CODE.md**](02-УСТАНОВКА-CLAUDE-CODE.md)
 
 **Что будет:**
+
 - Установка Claude Code CLI за 5 минут
 - Первая команда в терминале
 - Выбор тарифа (бесплатный vs Pro)
@@ -79,12 +84,14 @@
 ```
 
 **Применение:**
+
 ```markdown
 ### 🎯 Следующие шаги:
 
 **→ Следующий урок:** [**03-DAW-SETUP-AND-WORKFLOW.md**](03-DAW-SETUP-AND-WORKFLOW.md)
 
 **Что вас ждёт:**
+
 - Установка и настройка Ableton Live/FL Studio
 - Первый проект с AI-инструментами
 - Интеграция MIDI-контроллера
@@ -100,14 +107,13 @@
 #### Паттерн A: Inline-ссылки на термины
 
 ```markdown
-> **"ChatGPT это [AI-агент](../СЛОВАРЬ-ВАЙБКОДЕРА.md#ai-агент)?"**
-> **💡 Новые термины?** См. [📖 СЛОВАРЬ ВАЙБКОДЕРА](../СЛОВАРЬ-ВАЙБКОДЕРА.md)
+> **"ChatGPT это [AI-агент](../СЛОВАРЬ-ВАЙБКОДЕРА.md#ai-агент)?"** > **💡 Новые термины?** См. [📖 СЛОВАРЬ ВАЙБКОДЕРА](../СЛОВАРЬ-ВАЙБКОДЕРА.md)
 ```
 
 **Применение:**
+
 ```markdown
-> **"MIDI это [протокол управления](../GLOSSARY.md#midi-protocol)?"**
-> **💡 Незнакомые термины?** См. [📖 МУЗЫКАЛЬНЫЙ СЛОВАРЬ](../GLOSSARY.md)
+> **"MIDI это [протокол управления](../GLOSSARY.md#midi-protocol)?"** > **💡 Незнакомые термины?** См. [📖 МУЗЫКАЛЬНЫЙ СЛОВАРЬ](../GLOSSARY.md)
 ```
 
 ---
@@ -118,16 +124,19 @@
 ## 💡 Термины из этой главы
 
 Подробнее см. [📖 СЛОВАРЬ ВАЙБКОДЕРА](../СЛОВАРЬ-ВАЙБКОДЕРА.md):
+
 - [AI-агент](../СЛОВАРЬ-ВАЙБКОДЕРА.md#ai-агент) — автономная система
 - [Восприятие](../СЛОВАРЬ-ВАЙБКОДЕРА.md#perception) — получение информации
 - [Автономность](../СЛОВАРЬ-ВАЙБКОДЕРА.md#autonomy) — способность действовать
 ```
 
 **Применение:**
+
 ```markdown
 ## 💡 Термины из этого урока
 
 Подробнее см. [📖 МУЗЫКАЛЬНЫЙ СЛОВАРЬ](../GLOSSARY.md):
+
 - [DAW](../GLOSSARY.md#daw) — Digital Audio Workstation
 - [MIDI](../GLOSSARY.md#midi) — Musical Instrument Digital Interface
 - [Latency](../GLOSSARY.md#latency) — задержка звука
@@ -144,6 +153,7 @@
 ## 🎯 Что вы узнаете (30 минут чтения)
 
 После прочтения этой статьи вы:
+
 - ✅ Поймете разницу между традиционным программированием и VibeCoding
 - ✅ Узнаете, почему agentic подход — это революция (не эволюция!)
 - ✅ Освоите 5 ключевых принципов агентного кодинга
@@ -152,10 +162,12 @@
 ```
 
 **Применение:**
+
 ```markdown
 ## 🎯 Что вы узнаете (45 минут чтения + практики)
 
 После завершения этого урока вы:
+
 - ✅ Поймёте, как AI изменяет музыкальное производство
 - ✅ Узнаете о 7 ключевых AI-инструментах для музыкантов
 - ✅ Освоите базовую интеграцию AI в ваш DAW
@@ -175,6 +187,7 @@
 **Вы сейчас здесь:** 📍 Статья 03 из 11
 
 ### ✅ Пройдено:
+
 1. ✅ [01-ЧТО-ТАКОЕ-AGENTIC-VIBECODING.md](01-ЧТО-ТАКОЕ-AGENTIC-VIBECODING.md) — Основы философии
 2. ✅ [02-УСТАНОВКА-CLAUDE-CODE.md](02-УСТАНОВКА-CLAUDE-CODE.md) — Установка и настройка
 3. ✅ **03-ПЕРВЫЙ-АГЕНТ-ЗА-5-МИНУТ.md** ← **Вы здесь**
@@ -182,6 +195,7 @@
 ### 🎯 Следующие шаги:
 
 **→ Следующая статья:** [**04-ОСНОВНЫЕ-КОМАНДЫ-ТЕРМИНАЛА.md**](04-ОСНОВНЫЕ-КОМАНДЫ-ТЕРМИНАЛА.md)
+
 - Terminal-First философия VibeCoding
 - Warp Terminal — AI-powered терминал для вайбкодеров
 - Основные команды навигации и работы с файлами
@@ -190,42 +204,50 @@
 ### 📋 Полная дорожная карта раздела "Первые шаги":
 
 **🌱 Неделя 1: Базовые инструменты**
+
 - 01 ✅ Что такое Agentic VibeCoding
 - 02 ✅ Установка Claude Code
 - 03 ✅ Первый агент за 5 минут
 - 04 ⏳ Основные команды терминала
 
 **🔧 Неделя 2: Git и продуктивность**
+
 - 05 ⏳ Git для вайбкодеров
 - 06 ⏳ SSH ключи для GitHub
 - 07 ⏳ Горячие клавиши
 ```
 
 **Применение:**
+
 ```markdown
 ## 🗺️ Ваш путь в AI Music Production
 
 **Вы сейчас здесь:** 📍 Урок 02 из 12
 
 ### ✅ Пройдено:
+
 1. ✅ [01-INTRODUCTION-TO-AI-MUSIC.md](01-INTRODUCTION-TO-AI-MUSIC.md) — Основы AI в музыке
 
 ### 🎯 Текущий урок:
+
 2. **02-AI-TOOLS-OVERVIEW.md** ← **Вы здесь**
 
 ### 📋 Дальнейшая программа:
 
 **🎹 Модуль 1: Основы (Недели 1-2)**
+
 - 01 ✅ Introduction to AI Music
 - 02 📍 AI Tools Overview (текущий)
 - 03 ⏳ DAW Setup and Workflow
 
 **🎛️ Модуль 2: Синтез и Sound Design (Недели 3-4)**
+
 - 04 ⏳ AI-Powered Synthesis
 - 05 ⏳ Neural Sound Design
 - 06 ⏳ Sample Generation with AI
 
 **🎚️ Модуль 3: Mixing & Mastering (Недели 5-6)**
+
 - 07 ⏳ AI-Assisted Mixing
 - 08 ⏳ Automated Mastering
 ```
@@ -243,6 +265,7 @@
 ```
 
 **Применение:**
+
 ```markdown
 **Этот урок основывается на** материале из [01-INTRODUCTION-TO-AI-MUSIC.md](01-INTRODUCTION-TO-AI-MUSIC.md), где мы рассмотрели основы AI в музыке.
 
@@ -264,6 +287,7 @@
 ```
 
 **Применение:**
+
 ```markdown
 ### Почему следующий урок важен:
 
@@ -282,24 +306,27 @@
 
 ```markdown
 ## 📍 ВЫ ЗДЕСЬ
-
 ```
+
 [●]━━━[ ]━━━[ ]━━━[ ]━━━[ ]━━━[ ]━━━[ ]━━━[ ]
- 01    02    03    04    05    06    07    08
-Основы                                  Будущее
+01 02 03 04 05 06 07 08
+Основы Будущее
+
 ```
 
 **Прогресс:** 12.5% (1 из 8 глав) | **Время:** ~1.5 часа до следующей главы
 ```
 
 **Рекомендация для AI Music Production:**
+
 ```markdown
 ## 📍 ПРОГРЕСС В КУРСЕ
-
 ```
+
 [●]━━━[●]━━━[ ]━━━[ ]━━━[ ]━━━[ ]━━━[ ]
- 01    02    03    04    05    06    07
-Intro Tools DAW   Mix   Mstr  Promo Export
+01 02 03 04 05 06 07
+Intro Tools DAW Mix Mstr Promo Export
+
 ```
 
 **Прогресс:** 28.6% (2 из 7 модулей) | **Время:** ~3 часа до следующего модуля
@@ -316,9 +343,11 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 # [НОМЕР]-[НАЗВАНИЕ-УРОКА].md
 
 ## 📍 ВЫ ЗДЕСЬ
+
 [ASCII прогресс-бар с позицией]
 
 ## 🎯 Что вы узнаете (X минут)
+
 [Список целей обучения с галочками]
 
 ---
@@ -328,6 +357,7 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 ---
 
 ## 💡 Термины из этого урока
+
 [Ссылки на GLOSSARY.md с якорями]
 
 ## 🧭 НАВИГАЦИЯ
@@ -337,6 +367,7 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 **↑ К содержанию:** [README.md](README.md)
 
 ### 🗺️ Ваш путь в AI Music Production
+
 [Полная дорожная карта с прогрессом]
 ```
 
@@ -350,6 +381,7 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 ## A
 
 ### AI-Generated Music {#ai-generated-music}
+
 **Определение:** Музыка, созданная с помощью алгоритмов искусственного интеллекта...
 **Примеры:** AIVA, Amper Music, OpenAI MuseNet
 **См. также:** [Neural Networks](#neural-networks), [Deep Learning](#deep-learning)
@@ -357,11 +389,13 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 ## D
 
 ### DAW (Digital Audio Workstation) {#daw}
+
 **Определение:** Программное обеспечение для записи, редактирования и производства аудио...
 **Популярные DAW:** Ableton Live, FL Studio, Logic Pro X, Pro Tools
 **См. урок:** [03-DAW-SETUP-AND-WORKFLOW.md](03-DAW-SETUP-AND-WORKFLOW.md)
 
 ### Delay {#delay}
+
 **Определение:** Эффект задержки звука...
 **Типы:** Digital Delay, Analog Delay, Tape Delay
 **См. урок:** [07-AI-ASSISTED-MIXING.md](07-AI-ASSISTED-MIXING.md)
@@ -372,12 +406,14 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 ### 3. Используйте визуальные индикаторы
 
 **Статусы уроков:**
+
 - ✅ Завершено
 - 📍 Текущий
 - ⏳ В ожидании
 - 🔒 Заблокировано (требует завершения предыдущих)
 
 **Типы контента:**
+
 - 🎯 Цели обучения
 - 💡 Термины
 - 🧭 Навигация
@@ -392,16 +428,19 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 ### 4. Шаблоны ссылок между уроками
 
 **Контекстная ссылка (в тексте):**
+
 ```markdown
 Как мы уже обсуждали в [Уроке 1: Введение в AI Music](01-INTRODUCTION-TO-AI-MUSIC.md#neural-networks), нейросети способны генерировать мелодии...
 ```
 
 **Ссылка с призывом к действию:**
+
 ```markdown
 **→ Готовы применить на практике?** Переходите к [03-DAW-SETUP-AND-WORKFLOW.md](03-DAW-SETUP-AND-WORKFLOW.md) для настройки вашей студии!
 ```
 
 **Ссылка на предварительные требования:**
+
 ```markdown
 > ⚠️ **Требуется:** Для этого урока необходимо завершить [02-AI-TOOLS-OVERVIEW.md](02-AI-TOOLS-OVERVIEW.md) и установить DAW из [03-DAW-SETUP](03-DAW-SETUP-AND-WORKFLOW.md#installation).
 ```
@@ -414,14 +453,17 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 ## 🔗 Связанные материалы
 
 **Предыдущие темы:**
+
 - [01-INTRODUCTION](01-INTRODUCTION-TO-AI-MUSIC.md) — Основы AI в музыке
 - [02-AI-TOOLS](02-AI-TOOLS-OVERVIEW.md#midi-generation) — MIDI генерация
 
 **Следующие темы:**
+
 - [04-SYNTHESIS](04-AI-POWERED-SYNTHESIS.md) — AI синтез
 - [07-MIXING](07-AI-ASSISTED-MIXING.md#automation) — Автоматизация микса
 
 **Дополнительное чтение:**
+
 - [GLOSSARY.md#neural-networks](GLOSSARY.md#neural-networks) — Что такое нейросети
 - [RESOURCES.md#courses](RESOURCES.md#courses) — Внешние курсы
 ```
@@ -453,11 +495,12 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 # 01-INTRODUCTION-TO-AI-MUSIC.md
 
 ## 📍 ВЫ ЗДЕСЬ
-
 ```
+
 [●]━━━[ ]━━━[ ]━━━[ ]━━━[ ]━━━[ ]━━━[ ]
- 01    02    03    04    05    06    07
-Intro Tools DAW   Mix   Mstr  Promo Export
+01 02 03 04 05 06 07
+Intro Tools DAW Mix Mstr Promo Export
+
 ```
 
 **Прогресс:** 0% (Начало курса) | **Время:** ~45 минут
@@ -531,11 +574,12 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 # 04-AI-POWERED-SYNTHESIS.md
 
 ## 📍 ВЫ ЗДЕСЬ
-
 ```
+
 [●]━━━[●]━━━[●]━━━[●]━━━[ ]━━━[ ]━━━[ ]
- 01    02    03    04    05    06    07
-Intro Tools DAW   Mix   Mstr  Promo Export
+01 02 03 04 05 06 07
+Intro Tools DAW Mix Mstr Promo Export
+
 ```
 
 **Прогресс:** 57% (4 из 7 модулей) | **Оставшееся время:** ~3 часа
@@ -604,16 +648,19 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 **Начало:** 2025-10-21 | **Цель завершения:** 2025-12-31
 
 ## Модуль 1: Основы ✅ (100%)
+
 - [x] 01 Introduction to AI Music
 - [x] 02 AI Tools Overview
 - [x] 03 DAW Setup and Workflow
 
 ## Модуль 2: Production ⏳ (33%)
+
 - [x] 04 AI-Powered Synthesis
 - [ ] 05 Neural Sound Design
 - [ ] 06 Sample Generation
 
 ## Практические проекты
+
 - [x] Проект 1: Первый AI-бит (Модуль 1)
 - [ ] Проект 2: AI Synth Track (Модуль 2)
 - [ ] Проект 3: Full Production (Модуль 3)
@@ -623,7 +670,7 @@ Intro Tools DAW   Mix   Mstr  Promo Export
 
 ### 2. Визуальная карта курса (Mermaid diagram)
 
-```markdown
+````markdown
 ```mermaid
 graph LR
     A[01 Intro] -->|Основы| B[02 Tools]
@@ -639,6 +686,8 @@ graph LR
     style C fill:#FFD700
     style D fill:#D3D3D3
 ```
+````
+
 ```
 
 ---
@@ -675,3 +724,4 @@ graph LR
 **Создано:** 2025-10-21
 **Автор:** Research Agent
 **Источник:** Анализ курса "Agentic VibeCoding"
+```

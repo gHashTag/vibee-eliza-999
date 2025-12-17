@@ -31,9 +31,11 @@ Output styles работают точно так же — Claude может от
 ## 📚 EXPLANATORY — Стиль для обучения
 
 ### 🎯 Задача
+
 Вы учите новую технологию и вам нужно **понять**, как всё работает.
 
 ### 💡 Когда использовать
+
 - Изучаете новый язык или фреймворк
 - Нужно понять WHY, а не только HOW
 - Объясняете код коллеге
@@ -59,6 +61,7 @@ async function fetchUserData(userId) {
 ```
 
 **Что здесь происходит:**
+
 1. `try` — пытаемся выполнить код
 2. `await fetch()` — ждём ответ от сервера
 3. `if (!response.ok)` — проверяем код ответа (200, 404, 500 и т.д.)
@@ -76,14 +79,12 @@ async function fetchUserData(userId) {
 }
 ```
 
-**Что здесь происходит:**
-4. `response.json()` — превращаем ответ в JavaScript объект
-5. `catch (error)` — ловим любую ошибку из блока try
-6. `throw error` — пробрасываем ошибку дальше
+**Что здесь происходит:** 4. `response.json()` — превращаем ответ в JavaScript объект 5. `catch (error)` — ловим любую ошибку из блока try 6. `throw error` — пробрасываем ошибку дальше
 
 ✅ **Результат:** Полное понимание каждого шага + защита от ошибок
 
 **⚠️ Частые ошибки:**
+
 - Забыть `await` — получите Promise вместо данных
 - Не проверить `response.ok` — пропустите ошибки сервера
 - "Проглотить" ошибку в catch — скрыть проблему
@@ -93,9 +94,11 @@ async function fetchUserData(userId) {
 ## ⚡ CONCISE — Стиль для быстрой работы
 
 ### 🎯 Задача
+
 Вы знаете контекст, нужен только готовый код.
 
 ### 💡 Когда использовать
+
 - Быстрая разработка
 - Code review или рефакторинг
 - Работа со знакомыми технологиями
@@ -113,7 +116,7 @@ async function fetchUserData(userId) {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Fetch failed:', error);
+    console.error("Fetch failed:", error);
     throw error;
   }
 }
@@ -126,9 +129,11 @@ async function fetchUserData(userId) {
 ## 🔧 TECHNICAL — Стиль для экспертов
 
 ### 🎯 Задача
+
 Нужны технические детали, типы данных, оптимизации.
 
 ### 💡 Когда использовать
+
 - Системное программирование
 - Performance-критичный код
 - Работа с низкоуровневыми API
@@ -141,12 +146,11 @@ async function fetchUserData(userId) {
 
 ```typescript
 // Безопасная обработка с типами
-type Result<T> =
-  | { success: true; data: T }
-  | { success: false; error: Error };
+type Result<T> = { success: true; data: T } | { success: false; error: Error };
 ```
 
 **Что здесь происходит:**
+
 - Создаём тип Result, который может быть либо успехом, либо ошибкой
 - `<T>` — дженерик (generic), позволяет работать с любым типом данных
 
@@ -159,6 +163,7 @@ async function fetchUserData(userId: string): Promise<Result<User>> {
 ```
 
 **Что здесь происходит:**
+
 - `Promise<Result<User>>` — функция вернёт промис с Result содержащим User
 - `AbortSignal.timeout(5000)` — встроенный таймаут (без дополнительных библиотек)
 
@@ -177,6 +182,7 @@ async function fetchUserData(userId: string): Promise<Result<User>> {
 ```
 
 **Что здесь происходит:**
+
 - Вместо throw возвращаем объект с ошибкой
 - `as User` — явное приведение типов для TypeScript
 - Обрабатываем ошибки сети, таймауты, JSON parsing
@@ -184,8 +190,9 @@ async function fetchUserData(userId: string): Promise<Result<User>> {
 ✅ **Результат:** Типобезопасный код с оптимизациями
 
 **Использование:**
+
 ```typescript
-const result = await fetchUserData('123');
+const result = await fetchUserData("123");
 if (result.success) {
   console.log(result.data.name); // TypeScript знает тип
 } else {
@@ -197,14 +204,14 @@ if (result.success) {
 
 ## 🎨 Когда какой стиль использовать
 
-| Ситуация | Стиль | Почему |
-|----------|-------|--------|
-| 🎓 Изучаю новый фреймворк | EXPLANATORY | Нужен контекст |
-| ⚡ Пишу знакомый код | CONCISE | Нужна скорость |
-| 🔧 Оптимизирую код | TECHNICAL | Нужны детали |
-| 👨‍🏫 Помогаю новичку | EXPLANATORY | Нужны объяснения |
-| 👀 Code review | CONCISE | Быстро понять |
-| 🏗️ Архитектурное решение | TECHNICAL | Нужны спецификации |
+| Ситуация                  | Стиль       | Почему             |
+| ------------------------- | ----------- | ------------------ |
+| 🎓 Изучаю новый фреймворк | EXPLANATORY | Нужен контекст     |
+| ⚡ Пишу знакомый код      | CONCISE     | Нужна скорость     |
+| 🔧 Оптимизирую код        | TECHNICAL   | Нужны детали       |
+| 👨‍🏫 Помогаю новичку        | EXPLANATORY | Нужны объяснения   |
+| 👀 Code review            | CONCISE     | Быстро понять      |
+| 🏗️ Архитектурное решение  | TECHNICAL   | Нужны спецификации |
 
 ---
 
@@ -221,6 +228,7 @@ if (result.success) {
 ```
 
 **Что здесь происходит:**
+
 1. `/style explanatory` — все следующие ответы будут подробными
 2. `[concise]` — только этот ответ будет кратким
 
@@ -235,13 +243,14 @@ if (result.success) {
 
 // Ключевые слова для каждого стиля
 const keywords = {
-  learning: ['как работает', 'почему', 'объясни'],
-  production: ['быстро', 'срочно', 'исправь'],
-  optimization: ['оптимизируй', 'performance', 'ускорь']
+  learning: ["как работает", "почему", "объясни"],
+  production: ["быстро", "срочно", "исправь"],
+  optimization: ["оптимизируй", "performance", "ускорь"],
 };
 ```
 
 **Что здесь происходит:**
+
 - `learning` — слова для обучения → EXPLANATORY стиль
 - `production` — слова для работы → CONCISE стиль
 - `optimization` — слова для оптимизации → TECHNICAL стиль
@@ -251,11 +260,11 @@ module.exports = async (prompt, context) => {
   // Проверяем каждую категорию
   for (const [category, words] of Object.entries(keywords)) {
     // Ищем совпадения в вашем вопросе
-    if (words.some(word => prompt.toLowerCase().includes(word))) {
+    if (words.some((word) => prompt.toLowerCase().includes(word))) {
       const styleMap = {
-        learning: 'explanatory',
-        production: 'concise',
-        optimization: 'technical'
+        learning: "explanatory",
+        production: "concise",
+        optimization: "technical",
       };
 
       context.outputStyle = styleMap[category];
@@ -268,12 +277,14 @@ module.exports = async (prompt, context) => {
 ```
 
 **Что здесь происходит:**
+
 1. `for...of` — проходим по каждой категории ключевых слов
 2. `words.some(...)` — проверяем, есть ли хоть одно ключевое слово
 3. `styleMap[category]` — выбираем соответствующий стиль
 4. `context.outputStyle` — устанавливаем новый стиль
 
 ✅ **Результат:**
+
 - Спросили "почему не работает?" → подробный ответ
 - Спросили "быстро исправь" → только код
 - Спросили "оптимизируй" → технические детали
@@ -283,6 +294,7 @@ module.exports = async (prompt, context) => {
 ## 🛠️ Создание своего стиля
 
 ### 🎯 Задача
+
 Создать специальный стиль для работы с Telegram ботами.
 
 ### 💡 Простое решение
@@ -297,6 +309,7 @@ module.exports = {
 ```
 
 **Что здесь происходит:**
+
 - `name` — имя стиля для вызова
 - `description` — описание назначения
 
@@ -317,6 +330,7 @@ module.exports = {
 ```
 
 **Что здесь происходит:**
+
 - Включаем полезные опции для Telegram ботов
 - `showBotToken: false` — безопасность (не показываем секретные токены)
 - Специфичные настройки для Telegram API
@@ -344,6 +358,7 @@ ${answer.telegramNotes || 'N/A'}
 ```
 
 **Что здесь происходит:**
+
 - `template` — функция форматирования ответа
 - Используем эмодзи для визуального разделения
 - `${question}` — вставляем ваш вопрос
@@ -362,6 +377,7 @@ ${answer.telegramNotes || 'N/A'}
 ```
 
 **Что получите:**
+
 ```
 🤖 TELEGRAM BOT DEVELOPMENT
 
@@ -400,6 +416,7 @@ https://core.telegram.org/bots/api#inlinekeyboardmarkup
 ```
 
 **Что здесь происходит:**
+
 - `default` — стиль по умолчанию
 - `verbosity` — подробность ответа (высокая/низкая)
 - `includeExamples` — включать примеры (да/нет)
@@ -427,6 +444,7 @@ https://core.telegram.org/bots/api#inlinekeyboardmarkup
 ```
 
 **Что здесь происходит:**
+
 1. `autoSwitch.enabled: true` — включаем автоматику
 2. `pattern` — регулярное выражение для поиска слов
 3. `style` — какой стиль применить при совпадении
@@ -449,15 +467,16 @@ https://core.telegram.org/bots/api#inlinekeyboardmarkup
 {
   "name": "learning",
   "features": {
-    "stepByStep": true,           // Пошагово
-    "includeAnalogies": true,     // Аналогии из жизни
-    "commonMistakes": true,       // Частые ошибки
-    "practiceExercises": true     // Упражнения
+    "stepByStep": true, // Пошагово
+    "includeAnalogies": true, // Аналогии из жизни
+    "commonMistakes": true, // Частые ошибки
+    "practiceExercises": true // Упражнения
   }
 }
 ```
 
 **Что даёт:**
+
 - ✅ Глубокое понимание
 - ✅ Примеры из жизни
 - ✅ Предупреждения об ошибках
@@ -469,14 +488,15 @@ https://core.telegram.org/bots/api#inlinekeyboardmarkup
 {
   "name": "production",
   "features": {
-    "codeOnly": true,          // Только код
-    "noExplanations": true,    // Без объяснений
-    "optimized": true          // Оптимизированный
+    "codeOnly": true, // Только код
+    "noExplanations": true, // Без объяснений
+    "optimized": true // Оптимизированный
   }
 }
 ```
 
 **Что даёт:**
+
 - ✅ Быстрые ответы
 - ✅ Готовый код
 - ✅ Высокая скорость
@@ -527,6 +547,7 @@ https://core.telegram.org/bots/api#inlinekeyboardmarkup
 ## ✍️ Упражнение
 
 ### 🎯 Задача
+
 Создайте стиль для REST API разработки с автоматическими curl примерами.
 
 <details>
@@ -547,43 +568,45 @@ https://core.telegram.org/bots/api#inlinekeyboardmarkup
 ```javascript
 // ~/.claude/output-styles/api-dev.js
 module.exports = {
-  name: 'api-dev',
+  name: "api-dev",
 
   template: (question, answer) => {
     return `
 📡 REST API
 
-🎯 Endpoint: ${answer.endpoint || 'N/A'}
+🎯 Endpoint: ${answer.endpoint || "N/A"}
 
 💻 Код:
 ${answer.code}
 
 🔧 Тест (cURL):
-${answer.curlExample || 'N/A'}
+${answer.curlExample || "N/A"}
     `.trim();
   },
 
   postProcess: (response) => {
     // Найти метод (GET или POST)
-    const method = response.includes('app.post') ? 'POST' : 'GET';
+    const method = response.includes("app.post") ? "POST" : "GET";
 
     // Найти endpoint путь
-    const endpoint = response.match(/['"]([/\w:-]+)['"]/)?.[1] || '/api';
+    const endpoint = response.match(/['"]([/\w:-]+)['"]/)?.[1] || "/api";
 
     // Создать curl команду
-    const curl = method === 'POST'
-      ? `curl -X POST http://localhost:3000${endpoint} -H "Content-Type: application/json" -d '{"key": "value"}'`
-      : `curl http://localhost:3000${endpoint}`;
+    const curl =
+      method === "POST"
+        ? `curl -X POST http://localhost:3000${endpoint} -H "Content-Type: application/json" -d '{"key": "value"}'`
+        : `curl http://localhost:3000${endpoint}`;
 
     // Добавить curl в ответ
     response += `\n\n🔧 Тест:\n\`\`\`bash\n${curl}\n\`\`\``;
 
     return response;
-  }
+  },
 };
 ```
 
 **Что здесь происходит:**
+
 1. `template` — форматируем ответ с секциями
 2. `postProcess` — обрабатываем ответ после генерации
 3. Автоматически создаём curl команду для тестирования
@@ -595,14 +618,14 @@ ${answer.curlExample || 'N/A'}
 
 ## 📖 Словарь простыми словами
 
-| Термин | Простыми словами |
-|--------|------------------|
-| **Output Style** | Стиль ответа (как Claude отвечает) |
-| **Verbosity** | Подробность ответа (много или мало текста) |
-| **Template** | Шаблон (форма для ответов) |
+| Термин              | Простыми словами                             |
+| ------------------- | -------------------------------------------- |
+| **Output Style**    | Стиль ответа (как Claude отвечает)           |
+| **Verbosity**       | Подробность ответа (много или мало текста)   |
+| **Template**        | Шаблон (форма для ответов)                   |
 | **Post-processing** | Обработка после генерации (доработка ответа) |
-| **Context-aware** | Умный (учитывает ситуацию) |
-| **Auto-detection** | Автоопределение (сам выбирает нужное) |
+| **Context-aware**   | Умный (учитывает ситуацию)                   |
+| **Auto-detection**  | Автоопределение (сам выбирает нужное)        |
 
 ---
 
@@ -627,6 +650,7 @@ ${answer.curlExample || 'N/A'}
 Output styles — это способ управления тем, **как** Claude отвечает на вопросы. Это настройка формата, подробности и стиля ответов в зависимости от задачи.
 
 **Зачем они нужны:**
+
 - Для обучения — подробные объяснения (EXPLANATORY)
 - Для быстрой работы — только код (CONCISE)
 - Для оптимизации — технические детали (TECHNICAL)
@@ -645,16 +669,19 @@ Output styles — это способ управления тем, **как** Cl
 <summary>✅ Правильный ответ</summary>
 
 **1. EXPLANATORY (Объясняющий)**
+
 - **Формат:** Подробные объяснения, примеры, аналогии, частые ошибки
 - **Когда:** Изучаете новую технологию, объясняете код, пишете документацию
 - **Пример использования:** Изучаете React hooks, нужно понять WHY, а не только HOW
 
 **2. CONCISE (Краткий)**
+
 - **Формат:** Только готовый код, минимум текста
 - **Когда:** Быстрая разработка, code review, знакомые технологии
 - **Пример использования:** Срочный фикс бага, нужен готовый код без объяснений
 
 **3. TECHNICAL (Технический)**
+
 - **Формат:** Типы данных, оптимизации, низкоуровневые детали
 - **Когда:** Performance-критичный код, системное программирование
 - **Пример использования:** Оптимизация API с type-safe обработкой ошибок
@@ -671,6 +698,7 @@ Output styles — это способ управления тем, **как** Cl
 <summary>✅ Правильный ответ</summary>
 
 **📚 EXPLANATORY стиль:**
+
 ```javascript
 // Функция сортировки массива чисел по возрастанию
 function sortArray(numbers) {
@@ -692,6 +720,7 @@ const sorted = sortArray(unsorted); // [1, 2, 5, 8, 9]
 ```
 
 **⚡ CONCISE стиль:**
+
 ```javascript
 function sortArray(numbers) {
   return numbers.sort((a, b) => a - b);
@@ -699,6 +728,7 @@ function sortArray(numbers) {
 ```
 
 **🔧 TECHNICAL стиль:**
+
 ```typescript
 // Type-safe сортировка с O(n log n) сложностью
 function sortArray<T extends number>(numbers: T[]): T[] {
@@ -712,7 +742,7 @@ type Comparator<T> = (a: T, b: T) => number;
 
 function genericSort<T>(
   arr: T[],
-  compareFn: Comparator<T> = (a, b) => Number(a) - Number(b)
+  compareFn: Comparator<T> = (a, b) => Number(a) - Number(b),
 ): T[] {
   return [...arr].sort(compareFn);
 }
@@ -730,40 +760,42 @@ function genericSort<T>(
 <summary>✅ Правильный ответ</summary>
 
 **1. Глобальное переключение для сессии:**
+
 ```bash
 /style explanatory
 # Все следующие ответы будут подробными
 ```
 
 **2. Разовое переключение для одного вопроса:**
+
 ```bash
 [concise] Создай React компонент
 # Только этот ответ будет кратким
 ```
 
 **3. Автоматическое переключение через hook:**
+
 ```javascript
 // ~/.claude/hooks/auto-style-switch.js
 module.exports = async (prompt, context) => {
-  if (prompt.includes('как работает') || prompt.includes('почему')) {
-    context.outputStyle = 'explanatory';
-  } else if (prompt.includes('быстро') || prompt.includes('срочно')) {
-    context.outputStyle = 'concise';
+  if (prompt.includes("как работает") || prompt.includes("почему")) {
+    context.outputStyle = "explanatory";
+  } else if (prompt.includes("быстро") || prompt.includes("срочно")) {
+    context.outputStyle = "concise";
   }
   return { approved: true };
 };
 ```
 
 **Бонус: Через settings.json:**
+
 ```json
 {
   "outputStyle": {
     "default": "concise",
     "autoSwitch": {
       "enabled": true,
-      "rules": [
-        { "pattern": "как работает|почему", "style": "explanatory" }
-      ]
+      "rules": [{ "pattern": "как работает|почему", "style": "explanatory" }]
     }
   }
 }
@@ -781,38 +813,43 @@ module.exports = async (prompt, context) => {
 <summary>✅ Правильный ответ</summary>
 
 **Минимальная структура:**
+
 ```javascript
 module.exports = {
-  name: 'my-style',           // Имя для вызова
-  description: 'Описание',    // Что делает стиль
+  name: "my-style", // Имя для вызова
+  description: "Описание", // Что делает стиль
 
-  rules: {                    // Правила форматирования
+  rules: {
+    // Правила форматирования
     includeExamples: true,
     showTypes: false,
-    verbosity: 'medium'
+    verbosity: "medium",
   },
 
-  template: (question, answer) => {  // Шаблон ответа
+  template: (question, answer) => {
+    // Шаблон ответа
     return `
 🎯 ЗАДАЧА: ${question}
 
 💻 РЕШЕНИЕ:
 ${answer.code}
     `.trim();
-  }
+  },
 };
 ```
 
 **Дополнительные элементы:**
+
 - `preProcess()` — обработка ДО генерации ответа
 - `postProcess()` — обработка ПОСЛЕ генерации
 - `validator()` — проверка корректности ответа
 - `contextAnalyzer()` — анализ контекста для выбора формата
 
 **Пример расширенного стиля:**
+
 ```javascript
 module.exports = {
-  name: 'debug-mode',
+  name: "debug-mode",
 
   preProcess: (question, context) => {
     // Добавить контекст к вопросу
@@ -827,7 +864,7 @@ module.exports = {
 - Память: ${process.memoryUsage().heapUsed}
     `;
     return answer + debug;
-  }
+  },
 };
 ```
 
@@ -842,6 +879,7 @@ module.exports = {
 **Цель:** Научиться переключаться между стилями и понять разницу в ответах.
 
 **Задача:**
+
 1. Выберите любую техническую задачу (например: "Создай функцию валидации email")
 2. Задайте этот вопрос Claude в трёх стилях: EXPLANATORY, CONCISE, TECHNICAL
 3. Сравните ответы и запишите:
@@ -851,6 +889,7 @@ module.exports = {
    - Технические детали (типы, оптимизации)
 
 **Как делать:**
+
 ```bash
 # Шаг 1: EXPLANATORY
 /style explanatory
@@ -869,11 +908,13 @@ module.exports = {
 ```
 
 **Критерии выполнения:**
+
 - ✅ Получены ответы во всех трёх стилях
 - ✅ Записано сравнение (таблица или текст)
 - ✅ Сделаны выводы о том, когда использовать каждый стиль
 
 **Ожидаемый результат:**
+
 ```
 СРАВНИТЕЛЬНАЯ ТАБЛИЦА:
 ┌─────────────┬──────────┬────────────┬──────────┬───────────┐
@@ -902,6 +943,7 @@ module.exports = {
 **Шаги:**
 
 **1. Определите требования:**
+
 ```
 МОЙ РАБОЧИЙ СТИЛЬ:
 - Технология: [React/Node.js/Python/etc]
@@ -911,23 +953,25 @@ module.exports = {
 ```
 
 **2. Создайте файл стиля:**
+
 ```bash
 mkdir -p ~/.claude/output-styles
 touch ~/.claude/output-styles/my-work-style.js
 ```
 
 **3. Напишите конфигурацию:**
+
 ```javascript
 module.exports = {
-  name: 'my-work-style',
-  description: 'Стиль для моего основного проекта',
+  name: "my-work-style",
+  description: "Стиль для моего основного проекта",
 
   rules: {
     // Ваши правила
     includeExamples: true,
     includeTests: true,
     includeDocLinks: true,
-    codeStyle: 'airbnb', // или ваш стандарт
+    codeStyle: "airbnb", // или ваш стандарт
   },
 
   template: (question, answer) => {
@@ -939,28 +983,31 @@ module.exports = {
 ${answer.code}
 
 🧪 ТЕСТЫ:
-${answer.tests || 'N/A'}
+${answer.tests || "N/A"}
 
 🔗 ДОКУМЕНТАЦИЯ:
-${answer.docLinks || 'N/A'}
+${answer.docLinks || "N/A"}
     `.trim();
-  }
+  },
 };
 ```
 
 **4. Протестируйте:**
+
 ```bash
 /style my-work-style
 "Создай компонент Button для моего проекта"
 ```
 
 **Критерии выполнения:**
+
 - ✅ Создан файл в `~/.claude/output-styles/`
 - ✅ Стиль работает и применяется через `/style`
 - ✅ Template включает нужные секции
 - ✅ Протестировано на 3+ разных вопросах
 
 **Дополнительные возможности (опционально):**
+
 - Добавить `postProcess` для автогенерации тестов
 - Добавить специфичные для вашего фреймворка правила
 - Интегрировать с вашим code style guide
@@ -975,17 +1022,18 @@ ${answer.docLinks || 'N/A'}
 Создайте три специализированных стиля для разных сценариев работы:
 
 **1. Debug Style — для отладки кода**
+
 ```javascript
 // ~/.claude/output-styles/debug.js
 module.exports = {
-  name: 'debug',
-  description: 'Стиль для debugging с детальной диагностикой',
+  name: "debug",
+  description: "Стиль для debugging с детальной диагностикой",
 
   rules: {
     includeConsoleLog: true,
     includeErrorHandling: true,
     includeTypeChecks: true,
-    verbosity: 'high'
+    verbosity: "high",
   },
 
   template: (question, answer) => {
@@ -996,16 +1044,16 @@ module.exports = {
 ${question}
 
 🔍 ДИАГНОСТИКА:
-${answer.diagnosis || 'Анализ...'}
+${answer.diagnosis || "Анализ..."}
 
 💻 ИСПРАВЛЕНИЕ:
 ${answer.code}
 
 🧪 ТЕСТОВЫЙ КОД:
-${answer.testCode || 'console.log тесты'}
+${answer.testCode || "console.log тесты"}
 
 📊 ЧТО ПРОВЕРИТЬ:
-${answer.checkList || '- Типы данных\n- Null/undefined\n- Асинхронность'}
+${answer.checkList || "- Типы данных\n- Null/undefined\n- Асинхронность"}
     `.trim();
   },
 
@@ -1013,19 +1061,20 @@ ${answer.checkList || '- Типы данных\n- Null/undefined\n- Асинхр
     // Автоматически добавить console.log в код
     const withLogs = answer.replace(
       /function (\w+)\(/g,
-      'function $1(console.log("Вызов $1"), '
+      'function $1(console.log("Вызов $1"), ',
     );
     return withLogs;
-  }
+  },
 };
 ```
 
 **2. Code Review Style — для ревью кода**
+
 ```javascript
 // ~/.claude/output-styles/code-review.js
 module.exports = {
-  name: 'code-review',
-  description: 'Стиль для code review с оценкой качества',
+  name: "code-review",
+  description: "Стиль для code review с оценкой качества",
 
   template: (question, answer) => {
     return `
@@ -1035,82 +1084,86 @@ module.exports = {
 ${question}
 
 ⭐ ОЦЕНКА КАЧЕСТВА:
-- Читаемость: ${answer.readability || '?'}/10
-- Производительность: ${answer.performance || '?'}/10
-- Безопасность: ${answer.security || '?'}/10
+- Читаемость: ${answer.readability || "?"}/10
+- Производительность: ${answer.performance || "?"}/10
+- Безопасность: ${answer.security || "?"}/10
 
 ✅ ЧТО ХОРОШО:
-${answer.pros || 'Анализ...'}
+${answer.pros || "Анализ..."}
 
 ⚠️ ЧТО УЛУЧШИТЬ:
-${answer.improvements || 'Рекомендации...'}
+${answer.improvements || "Рекомендации..."}
 
 💡 ПРЕДЛОЖЕННЫЕ ИЗМЕНЕНИЯ:
-${answer.suggestedCode || 'Нет изменений'}
+${answer.suggestedCode || "Нет изменений"}
 
 📚 BEST PRACTICES:
-${answer.bestPractices || 'См. документацию'}
+${answer.bestPractices || "См. документацию"}
     `.trim();
-  }
+  },
 };
 ```
 
 **3. Documentation Style — для создания документации**
+
 ```javascript
 // ~/.claude/output-styles/documentation.js
 module.exports = {
-  name: 'documentation',
-  description: 'Стиль для создания документации',
+  name: "documentation",
+  description: "Стиль для создания документации",
 
   template: (question, answer) => {
     return `
-# ${answer.title || 'Документация'}
+# ${answer.title || "Документация"}
 
 ## Описание
-${answer.description || 'Описание функционала'}
+${answer.description || "Описание функционала"}
 
 ## Использование
 
 \`\`\`javascript
-${answer.usageExample || '// Пример использования'}
+${answer.usageExample || "// Пример использования"}
 \`\`\`
 
 ## API Reference
 
-${answer.apiDocs || '### Методы\n- method(): описание'}
+${answer.apiDocs || "### Методы\n- method(): описание"}
 
 ## Параметры
 
-${answer.parameters || '- param1 (type): описание'}
+${answer.parameters || "- param1 (type): описание"}
 
 ## Возвращаемое значение
 
-${answer.returnValue || 'Описание возвращаемого значения'}
+${answer.returnValue || "Описание возвращаемого значения"}
 
 ## Примеры
 
-${answer.examples || '// Дополнительные примеры'}
+${answer.examples || "// Дополнительные примеры"}
 
 ## Примечания
 
-${answer.notes || '- Важные детали\n- Ограничения\n- Best practices'}
+${answer.notes || "- Важные детали\n- Ограничения\n- Best practices"}
     `.trim();
-  }
+  },
 };
 ```
 
 **Критерии выполнения:**
+
 - ✅ Созданы все три стиля
 - ✅ Каждый стиль протестирован на реальных задачах
 - ✅ Стили решают разные проблемы
 - ✅ Добавлены уникальные features для каждого стиля
 
 **Дополнительные задачи (опционально):**
+
 - Создать четвёртый стиль для вашей специфичной задачи
 - Добавить автопереключение между стилями через hook
 - Интегрировать стили с вашим CI/CD процессом
 
 **Ожидаемый результат:**
+
 ```bash
 # Структура файлов
 ~/.claude/output-styles/
@@ -1135,16 +1188,19 @@ ${answer.notes || '- Важные детали\n- Ограничения\n- Best
 ## 📊 Критерии оценки домашних заданий
 
 ### Задание 1 (базовое):
+
 - **3 балла** — получены ответы во всех стилях
 - **5 баллов** — добавлена таблица сравнения
 - **7 баллов** — сделаны выводы с примерами использования
 
 ### Задание 2 (продвинутое):
+
 - **5 баллов** — создан файл со стилем
 - **7 баллов** — стиль работает корректно
 - **10 баллов** — добавлены postProcess и уникальные features
 
 ### Задание 3 (проектное):
+
 - **8 баллов** — созданы три базовых стиля
 - **12 баллов** — стили протестированы на реальных задачах
 - **15 баллов** — добавлены автопереключение и дополнительные стили
@@ -1155,14 +1211,14 @@ ${answer.notes || '- Важные детали\n- Ограничения\n- Best
 
 ## 📖 Словарь простыми словами
 
-| Термин | Простыми словами |
-|--------|------------------|
-| **Output Style** | Стиль ответа (как Claude отвечает) |
-| **Verbosity** | Подробность ответа (много или мало текста) |
-| **Template** | Шаблон (форма для ответов) |
+| Термин              | Простыми словами                             |
+| ------------------- | -------------------------------------------- |
+| **Output Style**    | Стиль ответа (как Claude отвечает)           |
+| **Verbosity**       | Подробность ответа (много или мало текста)   |
+| **Template**        | Шаблон (форма для ответов)                   |
 | **Post-processing** | Обработка после генерации (доработка ответа) |
-| **Context-aware** | Умный (учитывает ситуацию) |
-| **Auto-detection** | Автоопределение (сам выбирает нужное) |
+| **Context-aware**   | Умный (учитывает ситуацию)                   |
+| **Auto-detection**  | Автоопределение (сам выбирает нужное)        |
 
 ---
 

@@ -16,6 +16,7 @@ export {
   getTargetChatsForAgent,
   isChatTargetForAgent,
   shouldRespondInChat,
+  canWriteToChat,
   getKnowledgeSources,
   getStyleConfig,
   getSalesConfig,
@@ -30,14 +31,14 @@ export {
   type KnowledgeSourceConfig,
   type AgentSalesConfig,
   type BehaviorConfig,
-} from './agents.config';
+} from "./agents.config";
 
 // Telegram Credentials
 export {
   getCredentials,
   hasValidCredentials,
-  type KolsCredentials
-} from './credentials';
+  type KolsCredentials,
+} from "./credentials";
 
 // Целевые чаты (обратная совместимость)
 export {
@@ -47,8 +48,8 @@ export {
   shouldProcessChat,
   getTargetChats,
   getTargetChatsAsNumbers,
-  type TargetChatId
-} from './targetChats';
+  type TargetChatId,
+} from "./targetChats";
 
 // Триггерные слова
 export {
@@ -56,8 +57,15 @@ export {
   TRIGGER_CATEGORIES,
   containsTrigger,
   findTriggers,
-  getTriggerCategory
-} from './triggers';
+  getTriggerCategory,
+} from "./triggers";
+
+// Централизованное управление чатами
+export {
+  ChatManager,
+  type ChatStatus,
+  type AgentProactiveStatus,
+} from "./chat-management";
 
 // Проактивное обучение
 export {
@@ -68,19 +76,20 @@ export {
   CONTENT_TYPES,
   getRandomInterval,
   getRandomContentType,
-  type ContentType
-} from './proactive';
+  type ContentType,
+} from "./proactive";
 
 /**
  * Объединённая конфигурация KOLS плагина
  */
 export const KOLS_CONFIG = {
   /** Версия плагина */
-  VERSION: '2.0.0',
+  VERSION: "2.0.0",
 
   /** Название плагина */
-  NAME: 'kols-userbot',
+  NAME: "kols-userbot",
 
   /** Описание */
-  DESCRIPTION: 'KOLS USERBOT - Изолированный плагин для проактивного обучения VibeCoding'
+  DESCRIPTION:
+    "KOLS USERBOT - Изолированный плагин для проактивного обучения VibeCoding",
 } as const;

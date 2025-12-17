@@ -48,12 +48,37 @@ auto_activate: true
 
 ## 🎯 Что Делает
 
-1. **Запуск Тестов**: Выполняет Rainbow Bridge сценарии
-2. **Критичные Проверки**: Фокус на critical тестах
-3. **Отчеты**: Генерирует HTML и JSON отчеты
-4. **CI/CD**: Интеграция с GitHub Actions
+1. **Запуск Тестов**: Выполняет Rainbow Bridge сценарии через MCP
+2. **Multi-Account Testing**: Два аккаунта - Tester и Bot
+3. **Критичные Проверки**: Фокус на critical тестах
+4. **Отчеты**: Генерирует JSON и Markdown отчеты
 5. **Диагностика**: Анализ проваленных тестов
-6. **Telegram API**: Настройка сессий и токенов
+6. **Telegram API**: Управление сессиями через MCP tools
+
+## 🔗 Multi-Account Architecture
+
+```
+┌─────────────────────┐           ┌─────────────────────┐
+│   TESTER ACCOUNT    │           │   BOT ACCOUNT       │
+│   @neuro_sage       │    ───►   │   @vibee_agent      │
+│   sess_deubhyi0p828 │  команды  │   sess_deukljn4q4mo │
+│   +79933420465      │   ◄───    │   +66624014170      │
+└─────────────────────┘  ответы   └─────────────────────┘
+```
+
+### Подключённые аккаунты
+
+| Role | Session ID | Username | User ID |
+|------|------------|----------|---------|
+| **Tester** | `sess_deubhyi0p828` | @neuro_sage | 144022504 |
+| **Bot** | `sess_deukljn4q4mo` | @vibee_agent | 6579515876 |
+
+### Правила тестирования
+
+1. **Tester ВСЕГДА отправляет команды** - `session_id="sess_deubhyi0p828"`
+2. **Bot обрабатывает и отвечает** - `session_id="sess_deukljn4q4mo"`
+3. **Проверка через Tester** - `telegram_get_history` с Tester session
+4. **Ожидание 2-5 сек** между командой и проверкой ответа
 
 ## ⚙️ Конфигурация
 
@@ -213,12 +238,49 @@ describe('MyService', () => {
 });
 ```
 
-### Running Tests:
-```bash
-# Rainbow Bridge (Telegram integration)
-python3 scripts/rainbow-bridge-runner.py tests/rainbow-bridge-scenarios.json --critical-only
+### Running Tests via MCP:
 
-# ElizaOS Plugin Tests (Component testing)
+```bash
+# 1. Отправить команду боту (Tester → Bot)
+mcp__vibee__telegram_send_message \
+  session_id="sess_deubhyi0p828" \
+  chat_id="6579515876" \
+  text="/start"
+
+# 2. Подождать и получить историю
+mcp__vibee__telegram_get_history \
+  session_id="sess_deubhyi0p828" \
+  chat_id="6579515876" \
+  limit=5
+
+# 3. Полный анализ бота
+mcp__vibee__bot_analyze \
+  bot_username="vibee_agent" \
+  session_id="sess_deubhyi0p828" \
+  depth="deep"
+
+# 4. Тест взаимодействий
+mcp__vibee__bot_test_interaction \
+  bot_username="vibee_agent" \
+  session_id="sess_deubhyi0p828" \
+  interactions='[{"type":"command","value":"/start"}]'
+```
+
+### Session Management:
+
+```bash
+# Список сессий
+mcp__vibee__session_list
+
+# Переключить активную
+mcp__vibee__session_set_active session_id="sess_deubhyi0p828"
+
+# Проверить текущего пользователя
+mcp__vibee__telegram_get_me session_id="sess_deubhyi0p828"
+```
+
+### ElizaOS Plugin Tests (Component testing):
+```bash
 bun test                          # All tests
 bun test --watch                  # Watch mode
 bun test --coverage               # Coverage report

@@ -55,6 +55,17 @@ export interface ISendMessageResult {
 }
 
 /**
+ * Recent message from chat for admin/logging
+ */
+export interface IRecentMessage {
+  chatId: string
+  tgChatTitle: string
+  fromUsername: string
+  text: string
+  timestamp: Date
+}
+
+/**
  * Telegram Adapter Interface
  *
  * Единый интерфейс для разных стратегий подключения к Telegram
@@ -78,7 +89,7 @@ export interface ITelegramAdapter {
   /**
    * Отправка сообщения
    */
-  sendMessage(chatId: string | number, text: string): Promise<ISendMessageResult>
+  sendMessage(chatId: string | number, text: string, replyTo?: number): Promise<ISendMessageResult>
 
   /**
    * Получение диалогов
@@ -94,4 +105,23 @@ export interface ITelegramAdapter {
    * Получение информации о пользователе
    */
   getMe(): Promise<ITelegramUser | null>
+
+  /**
+   * Получение информации о пользователе по ID (опционально)
+   */
+  getUser?(userId: string): Promise<ITelegramUser | undefined>
+
+  /**
+   * Присоединение к чату (опционально)
+   */
+  joinChat?(chatId: string): Promise<void>
+
+  /**
+   * Пересылка сообщения (опционально)
+   */
+  forwardMessage?(
+    fromChatId: string,
+    toChatId: string,
+    messageId: number
+  ): Promise<ISendMessageResult | undefined>
 }

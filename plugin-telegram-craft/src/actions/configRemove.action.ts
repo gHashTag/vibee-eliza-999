@@ -84,7 +84,7 @@ export const configRemoveAction: Action = {
         text: `✅ **Чат удалён из мониторинга**
 
 **ID:** \`${chatId}\`
-**Название:** ${existing.chatTitle || 'N/A'}
+**Название:** ${existing.tgChatTitle || 'N/A'}
 **Персона:** ${existing.personaName}
 
 Бот больше не будет отвечать в этом чате.

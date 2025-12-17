@@ -1,7 +1,7 @@
-import { Plugin } from '@elizaos/core'
+import { Plugin } from "@elizaos/core";
 
 // Импортируем все плагины проекта
-import { telegramCraftPlugin } from '../../plugin-telegram-craft/src/plugin'
+import { telegramCraftPlugin } from "../../plugin-telegram-craft/src/plugin";
 
 // Импортируем плагин Avatar Face (если есть)
 // import { vibeFaceAvatarPlugin } from '../../plugin-vibe-face-avatar/src/index'
@@ -10,8 +10,9 @@ import { telegramCraftPlugin } from '../../plugin-telegram-craft/src/plugin'
  * Главный плагин VIBEE - объединяет все плагины проекта
  */
 export const vibeeMainPlugin: Plugin = {
-  name: 'vibee-main',
-  description: 'Главный плагин VIBEE агента - объединяет все функциональные плагины',
+  name: "vibee-main",
+  description:
+    "Главный плагин VIBEE агента - объединяет все функциональные плагины",
 
   // Подключаем все плагины как сервисы
   services: [
@@ -44,11 +45,11 @@ export const vibeeMainPlugin: Plugin = {
    * Инициализация - подключаем все плагины
    */
   init: async (config, runtime) => {
-    console.log('🚀 [VIBEE Main Plugin] Initializing...')
+    console.log("🚀 [VIBEE Main Plugin] Initializing...");
 
     // Инициализируем Telegram Craft Plugin
     if (telegramCraftPlugin.init) {
-      await telegramCraftPlugin.init(config, runtime)
+      await telegramCraftPlugin.init(config, runtime);
     }
 
     // Инициализируем другие плагины
@@ -56,8 +57,8 @@ export const vibeeMainPlugin: Plugin = {
     //   await vibeFaceAvatarPlugin.init(config, runtime)
     // }
 
-    console.log('✅ [VIBEE Main Plugin] All plugins initialized')
+    console.log("✅ [VIBEE Main Plugin] All plugins initialized");
   },
-}
+};
 
-export default vibeeMainPlugin
+export default vibeeMainPlugin;

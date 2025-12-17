@@ -15,12 +15,9 @@ export DATABASE_ADAPTER=sqlite
 export ELIZA_ALLOW_DESTRUCTIVE_MIGRATIONS=true
 
 # Отключаем миграции в @elizaos/server (они используют PostgreSQL синтаксис)
-export ELIZA_SKIP_MIGRATIONS=true
+
 
 echo "✅ Database URL: $DATABASE_URL"
 echo "✅ Database adapter: $DATABASE_ADAPTER"
 
-# Миграции отключены (ELIZA_SKIP_MIGRATIONS=true) из-за PostgreSQL синтаксиса в @elizaos/server
-echo "📊 Skipping migrations (disabled due to PostgreSQL syntax in @elizaos/server)"
-echo "✅ Migrations skipped"
-echo "🚀 Ready to start all agents"
+echo "📊 Attempting ElizaOS internal migrations (if any) or auto-table creation..."

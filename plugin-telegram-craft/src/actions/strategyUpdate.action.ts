@@ -19,7 +19,7 @@ import type { ChatConfig, StyleRules, SalesConfig } from '../types/chatConfig.ty
 
 function formatStrategy(config: ChatConfig): string {
   const lines: string[] = [
-    `🎯 **Стратегия чата ${config.chatTitle || config.chatId}**`,
+    `🎯 **Стратегия чата ${config.tgChatTitle || config.chatId}**`,
     '',
     '**Персона и промпт:**',
     `• Имя: ${config.personaName}`,

@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
-import type { UUID } from '@elizaos/core';
-import { uploadFileToStorage, deleteFileFromStorage } from '../supabase';
+import React, { useState, useCallback } from "react";
+import type { UUID } from "@elizaos/core";
+import { uploadFileToStorage, deleteFileFromStorage } from "../supabase";
 
 interface FileUploadProps {
   agentId: UUID;
@@ -19,7 +19,10 @@ interface UploadedFile {
 /**
  * Компонент для загрузки файлов с drag & drop
  */
-const FileUpload: React.FC<FileUploadProps> = ({ agentId, onUploadComplete }) => {
+const FileUpload: React.FC<FileUploadProps> = ({
+  agentId,
+  onUploadComplete,
+}) => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -51,76 +54,97 @@ const FileUpload: React.FC<FileUploadProps> = ({ agentId, onUploadComplete }) =>
   }, []);
 
   // Обработка выбора файлов
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const selectedFiles = Array.from(e.target.files);
-      handleFiles(selectedFiles);
-    }
-  }, []);
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        const selectedFiles = Array.from(e.target.files);
+        handleFiles(selectedFiles);
+      }
+    },
+    [],
+  );
 
   // Обработка файлов
-  const handleFiles = useCallback((fileList: File[]) => {
-    const newFiles: UploadedFile[] = fileList.map(file => ({
-      file,
-      preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
-      uploading: false,
-    }));
+  const handleFiles = useCallback(
+    (fileList: File[]) => {
+      const newFiles: UploadedFile[] = fileList.map((file) => ({
+        file,
+        preview: file.type.startsWith("image/")
+          ? URL.createObjectURL(file)
+          : undefined,
+        uploading: false,
+      }));
 
-    setFiles(prev => [...prev, ...newFiles]);
+      setFiles((prev) => [...prev, ...newFiles]);
 
-    // Автоматическая загрузка
-    newFiles.forEach((uploadFile, index) => {
-      uploadFileToSupabase(uploadFile, files.length + index);
-    });
-  }, [files.length]);
+      // Автоматическая загрузка
+      newFiles.forEach((uploadFile, index) => {
+        uploadFileToSupabase(uploadFile, files.length + index);
+      });
+    },
+    [files.length],
+  );
 
   // Загрузка файла в Supabase Storage
-  const uploadFileToSupabase = useCallback(async (uploadFile: UploadedFile, index: number) => {
-    try {
-      // Обновляем статус на загрузку
-      setFiles(prev => prev.map((f, i) =>
-        i === index ? { ...f, uploading: true, error: undefined } : f
-      ));
+  const uploadFileToSupabase = useCallback(
+    async (uploadFile: UploadedFile, index: number) => {
+      try {
+        // Обновляем статус на загрузку
+        setFiles((prev) =>
+          prev.map((f, i) =>
+            i === index ? { ...f, uploading: true, error: undefined } : f,
+          ),
+        );
 
-      // Загружаем в Supabase Storage
-      const result = await uploadFileToStorage(uploadFile.file);
+        // Загружаем в Supabase Storage
+        const result = await uploadFileToStorage(uploadFile.file);
 
-      if (!result) {
-        throw new Error('Не удалось загрузить файл в Supabase');
+        if (!result) {
+          throw new Error("Не удалось загрузить файл в Supabase");
+        }
+
+        // Обновляем статус на успех
+        setFiles((prev) =>
+          prev.map((f, i) =>
+            i === index
+              ? {
+                  ...f,
+                  uploading: false,
+                  uploaded: true,
+                  url: result.url,
+                }
+              : f,
+          ),
+        );
+
+        // Уведомляем родительский компонент
+        if (onUploadComplete && result.url) {
+          onUploadComplete(result.url);
+        }
+
+        console.log("✅ [FileUpload] Файл загружен:", result.url);
+      } catch (error) {
+        console.error("❌ [FileUpload] Ошибка загрузки:", error);
+        setFiles((prev) =>
+          prev.map((f, i) =>
+            i === index
+              ? {
+                  ...f,
+                  uploading: false,
+                  error:
+                    error instanceof Error ? error.message : "Ошибка загрузки",
+                }
+              : f,
+          ),
+        );
       }
-
-      // Обновляем статус на успех
-      setFiles(prev => prev.map((f, i) =>
-        i === index ? {
-          ...f,
-          uploading: false,
-          uploaded: true,
-          url: result.url
-        } : f
-      ));
-
-      // Уведомляем родительский компонент
-      if (onUploadComplete && result.url) {
-        onUploadComplete(result.url);
-      }
-
-      console.log('✅ [FileUpload] Файл загружен:', result.url);
-
-    } catch (error) {
-      console.error('❌ [FileUpload] Ошибка загрузки:', error);
-      setFiles(prev => prev.map((f, i) =>
-        i === index ? {
-          ...f,
-          uploading: false,
-          error: error instanceof Error ? error.message : 'Ошибка загрузки'
-        } : f
-      ));
-    }
-  }, [onUploadComplete]);
+    },
+    [onUploadComplete],
+  );
 
   // Удаление файла
   const removeFile = useCallback(async (index: number) => {
-    setFiles(prev => {
+    setFiles((prev) => {
       const file = prev[index];
       if (file.preview) {
         URL.revokeObjectURL(file.preview);
@@ -129,10 +153,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ agentId, onUploadComplete }) =>
       // Удаляем из Supabase если файл был загружен
       if (file.url) {
         // Извлекаем путь из URL
-        const urlParts = file.url.split('/');
-        const path = urlParts.slice(-2).join('/'); // last two parts: bucket/path
-        deleteFileFromStorage(path).catch(err => {
-          console.error('❌ [FileUpload] Ошибка удаления из Storage:', err);
+        const urlParts = file.url.split("/");
+        const path = urlParts.slice(-2).join("/"); // last two parts: bucket/path
+        deleteFileFromStorage(path).catch((err) => {
+          console.error("❌ [FileUpload] Ошибка удаления из Storage:", err);
         });
       }
 
@@ -144,7 +168,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ agentId, onUploadComplete }) =>
     <div className="file-upload-container">
       {/* Зона drag & drop */}
       <div
-        className={`drag-drop-zone ${isDragging ? 'dragging' : ''}`}
+        className={`drag-drop-zone ${isDragging ? "dragging" : ""}`}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
@@ -172,7 +196,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ agentId, onUploadComplete }) =>
               multiple
               accept="image/*,video/*,.pdf,.doc,.docx"
               onChange={handleFileSelect}
-              style={{ display: 'none' }}
+              style={{ display: "none" }}
             />
             <span className="upload-button">Выберите файлы</span>
           </label>
@@ -209,14 +233,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ agentId, onUploadComplete }) =>
                       </div>
                     )}
                     {uploadFile.uploaded && (
-                      <div className="status uploaded">
-                        ✅ Загружено
-                      </div>
+                      <div className="status uploaded">✅ Загружено</div>
                     )}
                     {uploadFile.error && (
-                      <div className="status error">
-                        ❌ {uploadFile.error}
-                      </div>
+                      <div className="status error">❌ {uploadFile.error}</div>
                     )}
                   </div>
 

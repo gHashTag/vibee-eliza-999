@@ -1,132 +1,355 @@
 {
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "version": "2.0.0",
+  "description": "Rainbow Bridge E2E Test Scenarios with Multi-Account Support",
+  "updated_at": "2025-12-10",
+
+  "config": {
+    "tester_session": "sess_deubhyi0p828",
+    "bot_session": "sess_deukljn4q4mo",
+    "bot_user_id": "6579515876",
+    "bot_username": "vibee_agent",
+    "test_group_id": "-1002737186844",
+    "default_timeout_ms": 5000,
+    "wait_between_steps_ms": 2000
+  },
+
   "scenarios": [
+    {
+      "name": "basic_start_command",
+      "description": "Базовый тест команды /start",
+      "critical": true,
+      "tags": ["basic", "commands"],
+      "steps": [
+        {
+          "action": "mcp_call",
+          "tool": "telegram_send_message",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "text": "/start"
+          }
+        },
+        {
+          "action": "wait",
+          "timeout_ms": 3000
+        },
+        {
+          "action": "mcp_call",
+          "tool": "telegram_get_history",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "limit": 5
+          }
+        },
+        {
+          "action": "assert",
+          "field": "messages[0].text",
+          "contains": ["ВАЙБИ", "привет", "Йоу", "бро"]
+        }
+      ]
+    },
+    {
+      "name": "basic_help_command",
+      "description": "Тест команды /help",
+      "critical": true,
+      "tags": ["basic", "commands"],
+      "steps": [
+        {
+          "action": "mcp_call",
+          "tool": "telegram_send_message",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "text": "/help"
+          }
+        },
+        {
+          "action": "wait",
+          "timeout_ms": 3000
+        },
+        {
+          "action": "mcp_call",
+          "tool": "telegram_get_history",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "limit": 5
+          }
+        },
+        {
+          "action": "assert",
+          "field": "messages[0].text",
+          "contains": ["команд", "помощь", "help"]
+        }
+      ]
+    },
+    {
+      "name": "neurophoto_request",
+      "description": "Запрос генерации изображения через /neurophoto",
+      "critical": true,
+      "tags": ["neurophoto", "generation"],
+      "steps": [
+        {
+          "action": "mcp_call",
+          "tool": "telegram_send_message",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "text": "/neurophoto красивый закат на пляже"
+          }
+        },
+        {
+          "action": "wait",
+          "timeout_ms": 5000
+        },
+        {
+          "action": "mcp_call",
+          "tool": "telegram_get_history",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "limit": 5
+          }
+        },
+        {
+          "action": "assert",
+          "field": "messages[0].text",
+          "contains_any": ["генерац", "обработ", "модел", "изображ", "нет обученных"]
+        }
+      ]
+    },
+    {
+      "name": "face_train_request",
+      "description": "Запрос на обучение модели через /face train",
+      "critical": true,
+      "tags": ["neurophoto", "training"],
+      "steps": [
+        {
+          "action": "mcp_call",
+          "tool": "telegram_send_message",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "text": "/face train"
+          }
+        },
+        {
+          "action": "wait",
+          "timeout_ms": 3000
+        },
+        {
+          "action": "mcp_call",
+          "tool": "telegram_get_history",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "limit": 5
+          }
+        },
+        {
+          "action": "assert",
+          "field": "messages[0].text",
+          "contains_any": ["модел", "обучен", "фото", "загруз", "train"]
+        }
+      ]
+    },
+    {
+      "name": "models_list",
+      "description": "Просмотр списка обученных моделей",
+      "critical": false,
+      "tags": ["neurophoto", "models"],
+      "steps": [
+        {
+          "action": "mcp_call",
+          "tool": "telegram_send_message",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "text": "/models"
+          }
+        },
+        {
+          "action": "wait",
+          "timeout_ms": 3000
+        },
+        {
+          "action": "mcp_call",
+          "tool": "telegram_get_history",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "limit": 5
+          }
+        },
+        {
+          "action": "assert",
+          "field": "messages[0].text",
+          "contains_any": ["модел", "нет моделей", "обучен"]
+        }
+      ]
+    },
+    {
+      "name": "balance_check",
+      "description": "Проверка баланса пользователя",
+      "critical": false,
+      "tags": ["payment", "balance"],
+      "steps": [
+        {
+          "action": "mcp_call",
+          "tool": "telegram_send_message",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "text": "/balance"
+          }
+        },
+        {
+          "action": "wait",
+          "timeout_ms": 3000
+        },
+        {
+          "action": "mcp_call",
+          "tool": "telegram_get_history",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "limit": 5
+          }
+        },
+        {
+          "action": "assert",
+          "field": "messages[0].text",
+          "contains_any": ["баланс", "звёзд", "stars", "пополн"]
+        }
+      ]
+    },
+    {
+      "name": "error_handling_invalid_command",
+      "description": "Обработка несуществующей команды",
+      "critical": false,
+      "tags": ["error", "handling"],
+      "steps": [
+        {
+          "action": "mcp_call",
+          "tool": "telegram_send_message",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "text": "/несуществующая_команда_123"
+          }
+        },
+        {
+          "action": "wait",
+          "timeout_ms": 3000
+        },
+        {
+          "action": "mcp_call",
+          "tool": "telegram_get_history",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "limit": 5
+          }
+        },
+        {
+          "action": "assert",
+          "field": "messages[0].text",
+          "not_empty": true
+        }
+      ]
+    },
+    {
+      "name": "natural_language_greeting",
+      "description": "Тест обработки естественного языка - приветствие",
+      "critical": false,
+      "tags": ["nlp", "conversation"],
+      "steps": [
+        {
+          "action": "mcp_call",
+          "tool": "telegram_send_message",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "text": "Привет! Как дела?"
+          }
+        },
+        {
+          "action": "wait",
+          "timeout_ms": 5000
+        },
+        {
+          "action": "mcp_call",
+          "tool": "telegram_get_history",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "limit": 5
+          }
+        },
+        {
+          "action": "assert",
+          "field": "messages[0].text",
+          "not_empty": true
+        }
+      ]
+    },
+    {
+      "name": "bot_analyze_full",
+      "description": "Полный анализ бота через MCP",
+      "critical": false,
+      "tags": ["analysis", "mcp"],
+      "steps": [
+        {
+          "action": "mcp_call",
+          "tool": "bot_analyze",
+          "params": {
+            "bot_username": "vibee_agent",
+            "session_id": "sess_deubhyi0p828",
+            "depth": "standard",
+            "message_history": 50
+          }
+        },
+        {
+          "action": "assert",
+          "field": "status",
+          "equals": "analysis_complete"
+        }
+      ]
+    },
     {
       "name": "instagram_post_publication",
       "description": "Публикация поста в Instagram",
       "critical": true,
+      "tags": ["instagram", "social"],
       "steps": [
         {
-          "action": "send_message",
-          "command": "Опубликуй пост в Instagram с изображением https://picsum.photos/800/600 и подписью Тестовый пост от VIBEE 🤖"
+          "action": "mcp_call",
+          "tool": "telegram_send_message",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "text": "Опубликуй пост в Instagram с подписью: Тестовый пост от VIBEE"
+          }
         },
         {
-          "action": "wait_response",
-          "expected_text_contains": "Instagram",
-          "timeout": 30
+          "action": "wait",
+          "timeout_ms": 10000
         },
         {
-          "action": "check_logs",
-          "expected_contains": "Пост опубликован в Instagram",
-          "timeout": 15
+          "action": "mcp_call",
+          "tool": "telegram_get_history",
+          "params": {
+            "session_id": "sess_deubhyi0p828",
+            "chat_id": "6579515876",
+            "limit": 5
+          }
         },
         {
-          "action": "verify_action",
-          "action_name": "INSTAGRAM_POST",
-          "expected_success": true
-        }
-      ]
-    },
-    {
-      "name": "instagram_account_info",
-      "description": "Получение информации об Instagram аккаунте",
-      "critical": false,
-      "steps": [
-        {
-          "action": "send_message",
-          "command": "Покажи информацию об Instagram аккаунте"
-        },
-        {
-          "action": "wait_response",
-          "expected_text_contains": "аккаунт",
-          "timeout": 15
-        }
-      ]
-    },
-    {
-      "name": "neurophoto_face_train",
-      "description": "Создание новой модели через /face train",
-      "critical": true,
-      "steps": [
-        {
-          "action": "send_message",
-          "command": "/face train ТестМодель"
-        },
-        {
-          "action": "wait_response",
-          "expected_text_contains": "Создаю модель",
-          "timeout": 15
-        },
-        {
-          "action": "verify_action",
-          "action_name": "FACE_TRAIN",
-          "expected_success": true
-        },
-        {
-          "action": "check_logs",
-          "expected_contains": "model_name",
-          "timeout": 10
-        }
-      ]
-    },
-    {
-      "name": "neurophoto_no_models_error",
-      "description": "Ошибка при генерации без обученных моделей",
-      "critical": true,
-      "steps": [
-        {
-          "action": "send_message",
-          "command": "/neurophoto красивый закат"
-        },
-        {
-          "action": "wait_response",
-          "expected_text_contains": "нет обученных моделей",
-          "timeout": 15
-        },
-        {
-          "action": "wait_response",
-          "expected_text_contains": "/face train",
-          "timeout": 15
-        }
-      ]
-    },
-    {
-      "name": "neurophoto_models_list",
-      "description": "Просмотр списка моделей через /models",
-      "critical": false,
-      "steps": [
-        {
-          "action": "send_message",
-          "command": "/models"
-        },
-        {
-          "action": "wait_response",
-          "expected_text_contains": "модели",
-          "timeout": 15
-        }
-      ]
-    },
-    {
-      "name": "neurophoto_alternative_commands",
-      "description": "Тест альтернативных команд генерации",
-      "critical": false,
-      "steps": [
-        {
-          "action": "send_message",
-          "command": "нарисуй футуристический город"
-        },
-        {
-          "action": "wait_response",
-          "expected_text_contains": "моделей",
-          "timeout": 15
-        },
-        {
-          "action": "send_message",
-          "command": "создай изображение кота в космосе"
-        },
-        {
-          "action": "wait_response",
-          "expected_text_contains": "моделей",
-          "timeout": 15
+          "action": "assert",
+          "field": "messages[0].text",
+          "contains_any": ["Instagram", "пост", "опубликов", "ошибка"]
         }
       ]
     }

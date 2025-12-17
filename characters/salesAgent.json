@@ -21,9 +21,12 @@
     "OPENROUTER_SMALL_MODEL": "x-ai/grok-4.1-fast",
     "OPENROUTER_LARGE_MODEL": "x-ai/grok-4.1-fast",
     "proactive": {
-      "enabled": true,
-      "intervalMinutes": 1440,
-      "targetGroup": "4832231272",
+      "_comment": "⚠️ Настройки проактивной рассылки управляются через agents.config.ts",
+      "_comment2": "⚠️ Используйте: bun scripts/manage-chats.ts для управления",
+      "_comment3": "⚠️ Этот блок оставлен для совместимости, но игнорируется",
+      "enabled": false,
+      "intervalMinutes": 180,
+      "targetGroup": "",
       "styles": [
         "cyberpunk neon",
         "watercolor dreamy",

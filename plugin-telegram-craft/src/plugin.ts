@@ -1,44 +1,44 @@
-// @ts-nocheck
-import { Plugin, IAgentRuntime } from '@elizaos/core'
+import { Plugin, IAgentRuntime } from "@elizaos/core";
 
 // Actions
-import { getDialogsAction } from './actions/getDialogs.action'
-import { telegramAuthActions } from './actions/telegramAuth.action'
-import { configStatusAction } from './actions/configStatus.action'
-import { configListAction } from './actions/configList.action'
-import { configAddAction } from './actions/configAdd.action'
-import { configRemoveAction } from './actions/configRemove.action'
+import { getDialogsAction } from "./actions/getDialogs.action";
+import { telegramAuthActions } from "./actions/telegramAuth.action";
+import { configStatusAction } from "./actions/configStatus.action";
+import { configListAction } from "./actions/configList.action";
+import { configAddAction } from "./actions/configAdd.action";
+import { configRemoveAction } from "./actions/configRemove.action";
 import {
   strategyShowAction,
   strategyToneAction,
   strategySalesAction,
   strategyTriggersAction,
-} from './actions/strategyUpdate.action'
-import { nanoBananaAction } from './actions/nanoBanana.action'
+} from "./actions/strategyUpdate.action";
+import { nanoBananaAction } from "./actions/nanoBanana.action";
+import { salesAgentActions } from "./actions/salesAgent.action";
 
 // Providers
-import { vibeCodingKnowledgeProvider } from './providers/VibeCodingKnowledgeProvider'
+import { vibeCodingKnowledgeProvider } from "./providers/VibeCodingKnowledgeProvider";
 
 // Evaluators
 import {
   responseQualityEvaluator,
   factExtractionEvaluator,
   goalTrackingEvaluator,
-} from './evaluators'
+} from "./evaluators";
 
 // Routes (временно отключены - см. комментарий в routes секции)
 // import { getTelegramRoutes } from './routes'
 
 // Services
-import { TelegramService } from './services/telegram.service'
-import { ChatConfigService } from './services/chatConfig.service'
-import { PromptBuilderService } from './services/promptBuilder.service'
-import { KnowledgeService } from './services/knowledge.service'
-import { NanoBananaService } from './services/nanoBanana.service'
-import { ProactiveAvatarService } from './services/proactiveAvatar.service'
-import { PaymentService } from './services/payment.service'
-import { CryptoPaymentService } from './services/cryptoPayment.service'
-import { PhotoSessionService } from './services/photoSession.service'
+import { TelegramService } from "./services/telegram.service";
+import { ChatConfigService } from "./services/chatConfig.service";
+import { PromptBuilderService } from "./services/promptBuilder.service";
+import { KnowledgeService } from "./services/knowledge.service";
+import { NanoBananaService } from "./services/nanoBanana.service";
+import { ProactiveAvatarService } from "./services/proactiveAvatar.service";
+import { PaymentService } from "./services/payment.service";
+import { CryptoPaymentService } from "./services/cryptoPayment.service";
+import { PhotoSessionService } from "./services/photoSession.service";
 
 /**
  * Telegram Craft Plugin
@@ -53,9 +53,9 @@ import { PhotoSessionService } from './services/photoSession.service'
  * - Services: TelegramService - MTProto через GramJS
  */
 export const telegramCraftPlugin: Plugin = {
-  name: 'telegram-craft',
+  name: "telegram-craft",
   description:
-    'ElizaOS plugin для Telegram userbot через MTProto (GramJS) с RAG, Evaluators и HTTP API',
+    "ElizaOS plugin для Telegram userbot через MTProto (GramJS) с RAG, Evaluators и HTTP API",
 
   /**
    * Actions - что агент может делать
@@ -75,6 +75,8 @@ export const telegramCraftPlugin: Plugin = {
     strategyTriggersAction,
     // Nano Banana Pro - генерация изображений и лидмагнитов
     nanoBananaAction,
+    // Sales Agent Wizard - создание AI-агентов продаж
+    ...salesAgentActions,
   ],
 
   /**
@@ -124,37 +126,41 @@ export const telegramCraftPlugin: Plugin = {
    * NOTE: Сервисы автоматически инициализируются ElizaOS из массива services[]
    */
   init: async (config, runtime) => {
-    console.log('[telegram-craft] Initializing plugin...')
+    console.log("[telegram-craft] Initializing plugin...");
 
     try {
-      // Получаем credentials из character secrets и устанавливаем в env
-      const apiId = config.TELEGRAM_API_ID || process.env.TELEGRAM_API_ID
-      const apiHash = config.TELEGRAM_API_HASH || process.env.TELEGRAM_API_HASH
-      const sessionString =
-        config.TELEGRAM_SESSION_STRING || process.env.TELEGRAM_SESSION_STRING
+      // 🕉️ Используем централизованную систему управления сессиями
+      let apiId = config.TELEGRAM_API_ID || process.env.TELEGRAM_API_ID;
+      let apiHash = config.TELEGRAM_API_HASH || process.env.TELEGRAM_API_HASH;
+      let sessionString =
+        config.TELEGRAM_SESSION_STRING || process.env.TELEGRAM_SESSION_STRING;
+
+      // Если sessionString не задан, оставляем пустым - адаптер сам обработает
 
       if (!apiId || !apiHash) {
         console.warn(
-          '[telegram-craft] Missing TELEGRAM_API_ID or TELEGRAM_API_HASH - MTProto disabled'
-        )
+          "[telegram-craft] Missing TELEGRAM_API_ID or TELEGRAM_API_HASH - MTProto disabled"
+        );
       }
 
       // Установка env переменных для использования сервисами
-      if (apiId) process.env.TELEGRAM_API_ID = String(apiId)
-      if (apiHash) process.env.TELEGRAM_API_HASH = String(apiHash)
+      if (apiId) process.env.TELEGRAM_API_ID = String(apiId);
+      if (apiHash) process.env.TELEGRAM_API_HASH = String(apiHash);
       if (sessionString)
-        process.env.TELEGRAM_SESSION_STRING = String(sessionString)
+        process.env.TELEGRAM_SESSION_STRING = String(sessionString);
 
       // Логируем статистику компонентов
-      console.log(`[telegram-craft] Plugin initialized successfully`)
-      console.log(`  Actions: ${telegramCraftPlugin.actions?.length || 0}`)
-      console.log(`  Providers: ${telegramCraftPlugin.providers?.length || 0}`)
-      console.log(`  Evaluators: ${telegramCraftPlugin.evaluators?.length || 0}`)
-      console.log(`  Services: ${telegramCraftPlugin.services?.length || 0}`)
+      console.log(`[telegram-craft] Plugin initialized successfully`);
+      console.log(`  Actions: ${telegramCraftPlugin.actions?.length || 0}`);
+      console.log(`  Providers: ${telegramCraftPlugin.providers?.length || 0}`);
+      console.log(
+        `  Evaluators: ${telegramCraftPlugin.evaluators?.length || 0}`
+      );
+      console.log(`  Services: ${telegramCraftPlugin.services?.length || 0}`);
     } catch (error) {
-      console.error('[telegram-craft] Failed to initialize:', error)
+      console.error("[telegram-craft] Failed to initialize:", error);
     }
   },
-}
+};
 
-export default telegramCraftPlugin
+export default telegramCraftPlugin;

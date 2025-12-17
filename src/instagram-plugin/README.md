@@ -88,11 +88,13 @@ src/instagram-plugin/
 Обрабатывает команды для публикации постов.
 
 **Триггеры:**
+
 - `/instagram пост`
 - `опубликуй в инстаграм`
 - `пост в instagram`
 
 **Пример:**
+
 ```
 /instagram пост с изображением https://example.com/image.jpg и подписью Тестовая публикация #vibee
 ```
@@ -102,6 +104,7 @@ src/instagram-plugin/
 Взаимодействие с Meta Graph API.
 
 **Методы:**
+
 - `createMediaContainer(imageUrl, caption)` - Создание медиа-контейнера
 - `publishMedia(creationId)` - Публикация контента
 - `checkTokenValidity()` - Проверка токена
@@ -111,12 +114,14 @@ src/instagram-plugin/
 Извлекает структурированные данные из текста.
 
 **Входные данные:**
+
 ```typescript
 text: string
 attachments?: any[]
 ```
 
 **Выходные данные:**
+
 ```typescript
 {
   imageUrl: string;
@@ -129,15 +134,19 @@ attachments?: any[]
 
 ```javascript
 // 1. С URL в тексте
-parseInstagramPost("/instagram https://example.com/photo.jpg с подписью Привет")
+parseInstagramPost(
+  "/instagram https://example.com/photo.jpg с подписью Привет",
+);
 // => { imageUrl: "https://...", caption: "Привет", hashtags: [] }
 
 // 2. С вложениями
-parseInstagramPost("опубликуй с подписью Тест #vibee", [{ url: "https://..." }])
+parseInstagramPost("опубликуй с подписью Тест #vibee", [
+  { url: "https://..." },
+]);
 // => { imageUrl: "https://...", caption: "Тест #vibee", hashtags: ["vibee"] }
 
 // 3. С хэштегами
-parseInstagramPost("пост в инстаграм https://img.jpg текст #ai #test")
+parseInstagramPost("пост в инстаграм https://img.jpg текст #ai #test");
 // => { imageUrl: "https://...", caption: "текст #ai #test", hashtags: ["ai", "test"] }
 ```
 
@@ -147,10 +156,10 @@ parseInstagramPost("пост в инстаграм https://img.jpg текст #a
 
 ### Типы токенов
 
-| Тип токена     | Срок жизни | Автообновление | Рекомендация      |
-|----------------|------------|----------------|-------------------|
-| Short-lived    | ~2 часа    | ❌ Нет         | ❌ Не использовать|
-| Long-lived     | 60 дней    | ✅ Есть        | ✅ Рекомендуется  |
+| Тип токена  | Срок жизни | Автообновление | Рекомендация       |
+| ----------- | ---------- | -------------- | ------------------ |
+| Short-lived | ~2 часа    | ❌ Нет         | ❌ Не использовать |
+| Long-lived  | 60 дней    | ✅ Есть        | ✅ Рекомендуется   |
 
 ### Получение токенов (пошагово)
 
@@ -190,6 +199,7 @@ parseInstagramPost("пост в инстаграм https://img.jpg текст #a
 ```
 
 Скрипт автоматически:
+
 - ✅ Конвертирует токен в long-lived (60 дней)
 - ✅ Найдёт Instagram Account ID
 - ✅ Обновит `.env` файл
@@ -210,6 +220,7 @@ parseInstagramPost("пост в инстаграм https://img.jpg текст #a
 #### 2. Публикация с вложением
 
 Отправьте изображение с подписью:
+
 ```
 опубликуй в инстаграм с подписью Тестовый пост
 ```
@@ -223,7 +234,7 @@ parseInstagramPost("пост в инстаграм https://img.jpg текст #a
 ### Программное использование
 
 ```typescript
-import { instagramPostAction } from './actions/instagramPostAction';
+import { instagramPostAction } from "./actions/instagramPostAction";
 
 // В вашем коде
 const result = await instagramPostAction.handler(
@@ -231,11 +242,11 @@ const result = await instagramPostAction.handler(
   message,
   state,
   options,
-  callback
+  callback,
 );
 
 if (result.success) {
-  console.log('Пост опубликован!', result.data);
+  console.log("Пост опубликован!", result.data);
 }
 ```
 
@@ -259,6 +270,7 @@ Content-Type: application/json
 ```
 
 **Ответ:**
+
 ```json
 {
   "id": "18548069389040052"
@@ -278,6 +290,7 @@ Content-Type: application/json
 ```
 
 **Ответ:**
+
 ```json
 {
   "id": "18110822722608572"
@@ -286,13 +299,13 @@ Content-Type: application/json
 
 ### Требования к изображениям
 
-| Параметр        | Требование                     |
-|-----------------|--------------------------------|
-| Формат          | JPG, PNG                       |
-| Размер файла    | < 8 MB                         |
-| Разрешение      | Min 320px, Max 1080px          |
-| Aspect Ratio    | 1:1, 4:5, 1.91:1               |
-| URL             | Публично доступный, HTTPS      |
+| Параметр     | Требование                |
+| ------------ | ------------------------- |
+| Формат       | JPG, PNG                  |
+| Размер файла | < 8 MB                    |
+| Разрешение   | Min 320px, Max 1080px     |
+| Aspect Ratio | 1:1, 4:5, 1.91:1          |
+| URL          | Публично доступный, HTTPS |
 
 ---
 
@@ -309,6 +322,7 @@ npm test -- --coverage
 ```
 
 **Тесты parseInstagramPost:**
+
 - ✅ Извлечение URL из текста
 - ✅ Извлечение URL из вложений
 - ✅ Парсинг команды "опубликуй"
@@ -326,6 +340,7 @@ npm test src/instagram-plugin/__tests__/integration
 ```
 
 **Тесты сервиса:**
+
 - ✅ Создание медиа-контейнера
 - ✅ Публикация медиа
 - ✅ Проверка токена
@@ -341,6 +356,7 @@ node test-instagram-final.js
 ```
 
 **Ожидаемый результат:**
+
 ```
 🎉 УСПЕХ! ПОСТ ОПУБЛИКОВАН!
 📍 Post ID: 18110822722608572
@@ -380,6 +396,7 @@ npm run dev
 ```
 
 Скрипт автоматически:
+
 1. ✅ Проверит текущий токен
 2. ✅ Получит long-lived токен (60 дней)
 3. ✅ Найдёт Instagram Account ID
@@ -411,12 +428,14 @@ npm run dev
 #### 1. Токен истёк
 
 **Симптомы:**
+
 ```
 ❌ Токен истек или недействителен!
    Ошибка: Session has expired
 ```
 
 **Решение:**
+
 ```bash
 # 1. Получите свежий токен из Graph API Explorer
 # 2. Запустите обновление
@@ -426,12 +445,14 @@ npm run dev
 #### 2. Aspect ratio not supported
 
 **Симптомы:**
+
 ```
 ❌ The aspect ratio is not supported.
 ```
 
 **Решение:**
 Используйте изображения с поддерживаемыми соотношениями:
+
 - Квадрат: 1:1 (рекомендуется)
 - Портрет: 4:5
 - Ландшефт: 1.91:1
@@ -439,11 +460,13 @@ npm run dev
 #### 3. Не удалось скачать медиафайл
 
 **Симптомы:**
+
 ```
 ❌ Не удалось скачать медиафайл. Его URI не соответствует нашим требованиям.
 ```
 
 **Решение:**
+
 - Убедитесь, что URL публично доступен
 - Используйте HTTPS (не HTTP)
 - Избегайте redirect URLs (picsum.photos и подобные)
@@ -452,11 +475,13 @@ npm run dev
 #### 4. Instagram Business аккаунт не найден
 
 **Симптомы:**
+
 ```
 ❌ Instagram Business аккаунты не найдены
 ```
 
 **Решение:**
+
 1. Убедитесь, что ваш Instagram профиль переключён на **Business** аккаунт
 2. Привяжите Instagram к Facebook Page
 3. Выдайте необходимые права в Graph API Explorer:

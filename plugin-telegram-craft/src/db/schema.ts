@@ -51,7 +51,7 @@ export const chatConfigs = pgTable('chat_configs', {
 
   // Идентификация чата
   chatId: varchar('chat_id', { length: 50 }).notNull().unique(),
-  chatTitle: varchar('chat_title', { length: 255 }),
+  tgChatTitle: varchar('tg_chat_title', { length: 255 }),
   chatType: varchar('chat_type', { length: 20 }).notNull().default('group'),
 
   // Persona
@@ -305,7 +305,7 @@ const responseExampleSchema = z.object({
 // Chat Config insert schema
 export const insertChatConfigSchema = createInsertSchema(chatConfigs, {
   chatId: z.string().min(1).max(50),
-  chatTitle: z.string().max(255).optional(),
+  tgChatTitle: z.string().max(255).optional(),
   chatType: z.enum(['group', 'supergroup', 'channel', 'private']),
   personaName: z.string().min(1).max(100),
   systemPrompt: z.string().min(1),

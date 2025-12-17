@@ -114,8 +114,8 @@ npm run type-check         # Проверка типов
 npm run format:check       # Проверка форматирования
 npm run check-all          # Всё вместе
 
-# Rainbow Bridge (автономное тестирование через Telegram)
-python3 scripts/rainbow-bridge-runner.py tests/rainbow-bridge-scenarios.json --critical-only
+# Rainbow Bridge (автономное тестирование через MCP)
+# См. секцию "Rainbow Bridge" ниже для MCP команд
 
 # Разработка плагина
 cd plugin-vibe-face-avatar && bun install && bun run build
@@ -131,14 +131,58 @@ pkill -f 'elizaos' && pkill -f 'vite'
 
 ---
 
-## 🌈 Rainbow Bridge
+## 🌈 Rainbow Bridge (Multi-Account E2E Testing)
 
-Автономное тестирование через реальный Telegram:
-1. Использует Telegram API с session string
-2. Отправляет команды боту
-3. Валидирует ответы
-4. Проверяет состояние БД
-5. Генерирует отчёт
+Автономное тестирование VIBEE через два Telegram аккаунта с MCP инструментами.
+
+### Подключённые аккаунты
+
+| Role | Session ID | Username | User ID | Назначение |
+|------|------------|----------|---------|------------|
+| **Tester** | `sess_deubhyi0p828` | @neuro_sage | 144022504 | Отправляет команды |
+| **Bot** | `sess_deukljn4q4mo` | @vibee_agent | 6579515876 | Юзербот с нейрофункциями |
+
+### Правила тестирования
+
+1. **Tester ВСЕГДА отправляет** - `session_id="sess_deubhyi0p828"`
+2. **Bot обрабатывает** - `session_id="sess_deukljn4q4mo"`
+3. **Проверка через Tester** - `telegram_get_history` с Tester session
+4. **Ожидание 2-5 сек** между командой и проверкой
+
+### MCP команды тестирования
+
+```bash
+# Отправить команду боту (Tester → Bot)
+mcp__vibee__telegram_send_message \
+  session_id="sess_deubhyi0p828" \
+  chat_id="6579515876" \
+  text="/start"
+
+# Проверить ответ (подождать 3 сек)
+mcp__vibee__telegram_get_history \
+  session_id="sess_deubhyi0p828" \
+  chat_id="6579515876" \
+  limit=5
+
+# Полный анализ бота
+mcp__vibee__bot_analyze \
+  bot_username="vibee_agent" \
+  session_id="sess_deubhyi0p828" \
+  depth="deep"
+
+# Список сессий
+mcp__vibee__session_list
+
+# Переключить активную сессию
+mcp__vibee__session_set_active session_id="sess_deubhyi0p828"
+```
+
+### Документация
+
+- **Полная документация:** `docs/testing/RAINBOW_BRIDGE_MULTI_ACCOUNT.md`
+- **Конфигурация:** `config/rainbow-bridge-sessions.json`
+- **Сценарии:** `tests/rainbow-bridge-scenarios.json`
+- **Skill:** `.claude/skills/vibe-rainbow-bridge/SKILL.md`
 
 ---
 
@@ -293,3 +337,8 @@ characters/kolsAgent.json       # KOLS мониторинг
 - https://docs.elizaos.ai/agents/character-interface
 - runtime.character?.settings?.secrets Используй секреты исключительно из этого
 - ключ берётся только из character.settings.secrets
+- vibee - telegram_get_history (MCP)(session_id:
+                                    "sess_deubhyi0p828",
+                                     chat_id:
+                                    "6579515876", limit:
+                                     8)

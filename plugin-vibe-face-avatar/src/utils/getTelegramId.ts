@@ -3,11 +3,27 @@
  * Поддерживает как реальные Telegram ID, так и UUID для веб-интерфейса
  */
 export function getTelegramId(message: any): number | null {
+  console.log('[getTelegramId] Input:', JSON.stringify({
+    'content.metadata': message?.content?.metadata,
+    'metadata': message?.metadata,
+    'entityId': message?.entityId,
+  }, null, 2));
+
+  // Приоритет 0: Из content.metadata.fromId (Telegram сообщения)
+  if (message?.content?.metadata?.fromId) {
+    const fromId = String(message.content.metadata.fromId);
+    if (/^\d+$/.test(fromId)) {
+      console.log('[getTelegramId] Found fromId in content.metadata:', fromId);
+      return parseInt(fromId, 10);
+    }
+  }
+
   // Приоритет 1: Из metadata.targetUserId (если есть)
   if (message?.metadata?.targetUserId && typeof message.metadata.targetUserId === 'string') {
     const targetUserId = message.metadata.targetUserId;
     // Проверяем, это UUID или числовой ID
     if (/^\d+$/.test(targetUserId)) {
+      console.log('[getTelegramId] Found targetUserId:', targetUserId);
       return parseInt(targetUserId, 10);
     }
   }
@@ -16,6 +32,7 @@ export function getTelegramId(message: any): number | null {
   if (message?.metadata?.senderId && typeof message.metadata.senderId === 'string') {
     const senderId = message.metadata.senderId;
     if (/^\d+$/.test(senderId)) {
+      console.log('[getTelegramId] Found senderId:', senderId);
       return parseInt(senderId, 10);
     }
   }

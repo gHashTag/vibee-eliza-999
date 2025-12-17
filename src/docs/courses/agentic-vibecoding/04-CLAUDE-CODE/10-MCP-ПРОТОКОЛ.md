@@ -11,15 +11,17 @@
 Представьте Claude как вашего личного помощника в офисе:
 
 **Без MCP** — помощник сидит в пустой комнате:
+
 - Вы: "Проверь данные пользователя 123"
 - Помощник: "Принеси мне файл с данными"
-- Вы: *идёте в архив, ищете, копируете, приносите*
+- Вы: _идёте в архив, ищете, копируете, приносите_
 - Помощник: "Теперь принеси его баланс"
-- Вы: *снова идёте...*
+- Вы: _снова идёте..._
 
 **С MCP** — помощник имеет пропуск во все комнаты:
+
 - Вы: "Проверь данные пользователя 123"
-- Помощник: *сам идёт в архив, берёт данные, проверяет баланс, возвращается*
+- Помощник: _сам идёт в архив, берёт данные, проверяет баланс, возвращается_
 - Помощник: "Готово! Пользователь найден, баланс 15,000"
 
 ### 🎯 Простое определение
@@ -38,6 +40,7 @@
 Вы делаете Telegram бота. Пользователь пишет: "У меня не работает подписка!"
 
 **Без MCP** (10 минут работы):
+
 ```
 1. Скопировать Telegram ID
 2. Подключиться к серверу по SSH
@@ -52,6 +55,7 @@
 ```
 
 **С MCP** (10 секунд):
+
 ```
 Вы: Проверь пользователя 5439920152
 
@@ -93,11 +97,13 @@ Claude:
 Превратить Claude из "советчика" в "исполнителя"
 
 **Было:**
+
 - Claude: "Выполни эту команду: `SELECT * FROM users`"
-- Вы: *копируете, выполняете, возвращаете*
+- Вы: _копируете, выполняете, возвращаете_
 
 **Стало:**
-- Claude: *сам выполняет `SELECT * FROM users`*
+
+- Claude: _сам выполняет `SELECT _ FROM users`\*
 - Claude: "Вот результаты!"
 
 ---
@@ -118,6 +124,7 @@ claude mcp add supabase npx @modelcontextprotocol/server-supabase
 ```
 
 **Что здесь происходит:**
+
 1. `npm install` — скачивает MCP сервер для Supabase
 2. `claude mcp add` — подключает его к Claude Code
 3. Теперь Claude может работать с вашей базой!
@@ -141,6 +148,7 @@ claude mcp add supabase npx @modelcontextprotocol/server-supabase
 ```
 
 **Что здесь происходит:**
+
 1. Указываем адрес вашей базы Supabase
 2. Даём ключ доступа
 3. Claude теперь может читать/писать в базу
@@ -153,7 +161,7 @@ claude mcp add supabase npx @modelcontextprotocol/server-supabase
 Вы: Проверь пользователя 5439920152
 
 Claude: [подключается к Supabase]
-        [выполняет SELECT * FROM users WHERE telegram_id = '5439920152']
+[выполняет SELECT * FROM users WHERE telegram_id = '5439920152']
 
         📊 Данные пользователя:
         - Username: @john_doe
@@ -168,6 +176,7 @@ Claude: [подключается к Supabase]
 ```
 
 **Что произошло:**
+
 1. Claude сам подключился к базе
 2. Нашёл пользователя по ID
 3. Проверил баланс и подписку
@@ -190,6 +199,7 @@ claude mcp add filesystem npx @modelcontextprotocol/server-filesystem /path/to/p
 ```
 
 **Что здесь происходит:**
+
 1. Подключаем Filesystem MCP
 2. Указываем путь к проекту
 3. Claude получает доступ к файлам
@@ -213,6 +223,7 @@ Claude: [сканирует файлы через Filesystem MCP]
 ```
 
 **Что произошло:**
+
 1. Claude сам прошёлся по всем файлам
 2. Нашёл комментарии TODO
 3. Показал где они находятся
@@ -233,6 +244,7 @@ claude mcp add gdrive npx @modelcontextprotocol/server-gdrive --auth
 ```
 
 **Что здесь происходит:**
+
 1. Устанавливаем Google Drive MCP
 2. Авторизуемся в Google аккаунте
 3. Claude получает доступ к документам
@@ -283,11 +295,13 @@ Claude: [использует Slack MCP]
 ## 💼 Для вайбкодеров: Полный рабочий пример
 
 ### 🎯 Задача
+
 Проверить пользователя Telegram бота и дать подписку если нужно.
 
 ### 💡 Как это работает с MCP
 
 **Вы просто говорите Claude:**
+
 ```
 Проверь пользователя 5439920152 и дай NEUROTESTER если баланс > 10000
 ```
@@ -300,6 +314,7 @@ Claude:
 Шаг 2: Проверяю пользователя...
 
 Результат:
+
 - Username: @john_doe
 - Баланс: 15,000 звёзд ⭐
 - Подписка: нет
@@ -311,6 +326,7 @@ Claude:
 ```
 
 **Что произошло:**
+
 1. Claude подключился к вашей базе через Supabase MCP
 2. Нашёл пользователя
 3. Проверил баланс
@@ -327,12 +343,14 @@ Claude:
 ### 🤔 Когда использовать MCP?
 
 **✅ Используйте MCP:**
+
 - Частые операции (проверка пользователей каждый день)
 - Нужна автоматизация (Claude решает сам)
 - Сложная логика (цепочки запросов)
 - Работа с Claude Code
 
 **❌ Используйте обычный API:**
+
 - Одноразовая задача
 - Простой запрос
 - Не нужна автоматизация
@@ -340,19 +358,21 @@ Claude:
 ### Сравнение:
 
 **Обычный API (вручную):**
+
 ```javascript
 // Вы пишете код сами
-const response = await fetch('https://api.example.com/users/123');
+const response = await fetch("https://api.example.com/users/123");
 const data = await response.json();
 console.log(data);
 ```
 
 **MCP (автоматически):**
+
 ```markdown
 Вы: Проверь пользователя 123
 
 Claude: [сам пишет и выполняет код]
-        Готово! Пользователь найден.
+Готово! Пользователь найден.
 ```
 
 ---
@@ -362,16 +382,19 @@ Claude: [сам пишет и выполняет код]
 ### Задание: Подключите Supabase MCP
 
 **Что нужно сделать:**
+
 1. Установите Supabase MCP (одна команда)
 2. Попросите Claude проверить пользователя
 3. Всё!
 
 **Команда установки:**
+
 ```bash
 claude mcp add supabase npx @modelcontextprotocol/server-supabase
 ```
 
 **Проверка:**
+
 ```
 Вы: Проверь есть ли пользователь 123 в базе
 
@@ -395,17 +418,21 @@ Claude: [использует Supabase MCP]
 ## 🎯 Главное из главы
 
 ### Что такое MCP?
+
 Способ дать Claude прямой доступ к данным (без ручного копирования)
 
 ### Зачем это нужно?
+
 Экономия времени в 50x на рутинных операциях
 
 ### Как использовать?
+
 1. Установить MCP сервер
 2. Подключить к Claude Code
 3. Просто сказать что нужно
 
 ### Для вайбкодеров:
+
 **Supabase MCP** — главный инструмент для работы с Telegram ботами!
 
 ---
@@ -413,11 +440,13 @@ Claude: [использует Supabase MCP]
 ## 🔍 Проверь себя
 
 **До MCP:**
+
 - Копировал данные вручную ❌
 - Тратил 10 минут на проверку пользователя ⏱️
 - Claude давал советы, я исполнял 🤷
 
 **После MCP:**
+
 - Claude берёт данные сам ✅
 - Всё за 3 секунды ⚡
 - Claude исполняет, я контролирую 🎯
@@ -427,6 +456,7 @@ Claude: [использует Supabase MCP]
 ## ✅ Тест: Проверь свои знания по MCP
 
 ### Вопрос 1: Что такое MCP?
+
 **a)** Протокол для копирования файлов
 **b)** Способ связи Claude с внешними данными и сервисами
 **c)** Модуль для программирования на C++
@@ -444,6 +474,7 @@ Claude: [использует Supabase MCP]
 ---
 
 ### Вопрос 2: Зачем нужны MCP серверы?
+
 **a)** Для ускорения работы компьютера
 **b)** Чтобы Claude мог выполнять операции с данными автоматически
 **c)** Для создания веб-сайтов
@@ -461,6 +492,7 @@ Claude: [использует Supabase MCP]
 ---
 
 ### Вопрос 3: Какая команда устанавливает Supabase MCP?
+
 **a)** `npm install supabase`
 **b)** `claude mcp install supabase`
 **c)** `claude mcp add supabase npx @modelcontextprotocol/server-supabase`
@@ -478,6 +510,7 @@ Claude: [использует Supabase MCP]
 ---
 
 ### Вопрос 4: Что происходит БЕЗ MCP при проверке пользователя бота?
+
 **a)** Claude автоматически проверяет базу данных
 **b)** Вы вручную копируете Telegram ID, подключаетесь по SSH, выполняете запросы, копируете результаты
 **c)** Всё работает через Google Docs
@@ -495,6 +528,7 @@ Claude: [использует Supabase MCP]
 ---
 
 ### Вопрос 5: Какой MCP главный для работы с Telegram ботами?
+
 **a)** Filesystem MCP
 **b)** Google Drive MCP
 **c)** Supabase MCP
@@ -512,6 +546,7 @@ Claude: [использует Supabase MCP]
 ---
 
 ### Вопрос 6: Что делает Filesystem MCP?
+
 **a)** Удаляет все файлы в проекте
 **b)** Даёт Claude доступ к чтению и изменению файлов проекта
 **c)** Создаёт новую файловую систему
@@ -529,6 +564,7 @@ Claude: [использует Supabase MCP]
 ---
 
 ### Вопрос 7: Где хранится конфигурация MCP серверов?
+
 **a)** `/etc/mcp/config.json`
 **b)** `~/.claude/mcp-servers.json`
 **c)** `/var/log/mcp.conf`
@@ -546,6 +582,7 @@ Claude: [использует Supabase MCP]
 ---
 
 ### Вопрос 8: Что нужно указать в конфигурации Supabase MCP?
+
 **a)** Только название проекта
 **b)** SUPABASE_URL и SUPABASE_KEY
 **c)** Пароль от компьютера
@@ -557,6 +594,7 @@ Claude: [использует Supabase MCP]
 **Правильный ответ: b)** SUPABASE_URL и SUPABASE_KEY
 
 **Объяснение:** Для подключения к Supabase нужны два параметра:
+
 - `SUPABASE_URL` — адрес вашего проекта (https://ваш-проект.supabase.co)
 - `SUPABASE_KEY` — API ключ для доступа к базе данных
 
@@ -567,6 +605,7 @@ Claude: [использует Supabase MCP]
 ---
 
 ### Вопрос 9: В чём главное отличие MCP от обычного API?
+
 **a)** MCP работает быстрее
 **b)** MCP позволяет Claude самостоятельно принимать решения и выполнять операции
 **c)** MCP бесплатный
@@ -584,6 +623,7 @@ Claude: [использует Supabase MCP]
 ---
 
 ### Вопрос 10: Что произойдёт если попросить Claude "проверить пользователя 123" с подключенным Supabase MCP?
+
 **a)** Claude попросит вас выполнить SQL запрос
 **b)** Ничего не произойдёт
 **c)** Claude сам подключится к базе, выполнит запрос и покажет результаты
@@ -595,6 +635,7 @@ Claude: [использует Supabase MCP]
 **Правильный ответ: c)** Claude сам подключится к базе, выполнит запрос и покажет результаты
 
 **Объяснение:** С подключенным MCP Claude становится полностью автономным. Он:
+
 1. Подключается к Supabase
 2. Выполняет SQL запрос (`SELECT * FROM users WHERE telegram_id = '123'`)
 3. Анализирует результаты
@@ -609,11 +650,13 @@ Claude: [использует Supabase MCP]
 ## 📝 Домашние задания
 
 ### 🟢 Базовое задание (15-25 минут)
+
 **"Первый MCP сервер"**
 
 **Цель:** Подключить Filesystem MCP и научить Claude работать с файлами проекта.
 
 **Задание:**
+
 1. Установите Filesystem MCP для вашего проекта
 2. Попросите Claude найти все TODO комментарии в коде
 3. Попросите Claude создать отчёт по структуре проекта
@@ -630,6 +673,7 @@ claude mcp list
 ```
 
 **Проверочные команды для Claude:**
+
 ```
 1. "Найди все TODO комментарии в проекте"
 2. "Покажи структуру директорий проекта"
@@ -637,6 +681,7 @@ claude mcp list
 ```
 
 **Критерии успеха:**
+
 - ✅ Filesystem MCP успешно установлен
 - ✅ Claude находит и показывает TODO комментарии
 - ✅ Claude отображает структуру проекта
@@ -648,6 +693,7 @@ claude mcp list
 ---
 
 ### 🟡 Продвинутое задание (30-45 минут)
+
 **"MCP экосистема для Telegram бота"**
 
 **Цель:** Настроить полноценную MCP инфраструктуру для работы с Telegram ботом.
@@ -656,17 +702,17 @@ claude mcp list
 Подключите 3-5 MCP серверов и автоматизируйте рабочий процесс.
 
 **Обязательные MCP:**
+
 1. **Supabase MCP** — работа с базой данных
 2. **Filesystem MCP** — работа с кодом проекта
 3. **Slack MCP** (или альтернатива) — уведомления команды
 
-**Дополнительные (на выбор):**
-4. Google Drive MCP — отчёты и документация
-5. GitHub MCP — автоматизация pull requests
+**Дополнительные (на выбор):** 4. Google Drive MCP — отчёты и документация 5. GitHub MCP — автоматизация pull requests
 
 **Шаги выполнения:**
 
 **1. Supabase MCP**
+
 ```bash
 # Установка
 npm install -g @modelcontextprotocol/server-supabase
@@ -686,12 +732,14 @@ claude mcp add supabase npx @modelcontextprotocol/server-supabase
 ```
 
 **2. Filesystem MCP**
+
 ```bash
 cd ~/999-agents-telegraf
 claude mcp add filesystem npx @modelcontextprotocol/server-filesystem $(pwd)
 ```
 
 **3. Slack MCP**
+
 ```bash
 npm install -g @modelcontextprotocol/server-slack
 claude mcp add slack npx @modelcontextprotocol/server-slack
@@ -711,6 +759,7 @@ claude mcp add slack npx @modelcontextprotocol/server-slack
 **Проверочные сценарии:**
 
 **Сценарий 1: Проверка пользователя**
+
 ```
 Вы: "Проверь пользователя 5439920152 в базе и покажи его баланс"
 
@@ -721,6 +770,7 @@ claude mcp add slack npx @modelcontextprotocol/server-slack
 ```
 
 **Сценарий 2: Аудит кода**
+
 ```
 Вы: "Найди в проекте все файлы обработчиков (handlers) и покажи где нет обработки ошибок"
 
@@ -732,6 +782,7 @@ claude mcp add slack npx @modelcontextprotocol/server-slack
 ```
 
 **Сценарий 3: Командная работа**
+
 ```
 Вы: "Когда найдёшь критическую проблему в коде — отправь уведомление в #dev-alerts в Slack"
 
@@ -742,6 +793,7 @@ claude mcp add slack npx @modelcontextprotocol/server-slack
 ```
 
 **Критерии успеха:**
+
 - ✅ Все 3-5 MCP серверов подключены и работают
 - ✅ Claude может одновременно работать с базой, файлами и Slack
 - ✅ Автоматические сценарии выполняются без ошибок
@@ -749,6 +801,7 @@ claude mcp add slack npx @modelcontextprotocol/server-slack
 
 **Бонус задание (+10 минут):**
 Создайте автоматический воркфлоу:
+
 1. Claude проверяет пользователей с балансом > 50,000 без подписки
 2. Даёт им NEUROTESTER автоматически
 3. Отправляет отчёт в Slack с количеством обработанных пользователей
@@ -756,6 +809,7 @@ claude mcp add slack npx @modelcontextprotocol/server-slack
 ---
 
 ### 🔴 Проектное задание (50-60+ минут)
+
 **"Создание собственного MCP сервера"**
 
 **Цель:** Разработать кастомный MCP сервер для специфичных нужд проекта.
@@ -764,6 +818,7 @@ claude mcp add slack npx @modelcontextprotocol/server-slack
 Создать MCP сервер, который интегрирует Claude с API вашего Telegram бота для автоматизации работы с пользователями.
 
 **Функционал MCP сервера:**
+
 1. Проверка статуса пользователей
 2. Управление подписками
 3. Анализ баланса звёзд
@@ -790,6 +845,7 @@ custom-telegram-bot-mcp/
 **Шаг 1: Базовая структура (15 минут)**
 
 **package.json:**
+
 ```json
 {
   "name": "telegram-bot-mcp",
@@ -807,140 +863,148 @@ custom-telegram-bot-mcp/
 ```
 
 **index.js:**
+
 ```javascript
 #!/usr/bin/env node
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 // Инициализация Supabase клиента
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
+  process.env.SUPABASE_KEY,
 );
 
 // Создание MCP сервера
 const server = new Server(
   {
-    name: 'telegram-bot-mcp',
-    version: '1.0.0',
+    name: "telegram-bot-mcp",
+    version: "1.0.0",
   },
   {
     capabilities: {
       tools: {},
-      resources: {}
-    }
-  }
+      resources: {},
+    },
+  },
 );
 
 // Регистрация инструментов
-server.setRequestHandler('tools/list', async () => ({
+server.setRequestHandler("tools/list", async () => ({
   tools: [
     {
-      name: 'check_user',
-      description: 'Проверить статус пользователя Telegram бота',
+      name: "check_user",
+      description: "Проверить статус пользователя Telegram бота",
       inputSchema: {
-        type: 'object',
+        type: "object",
         properties: {
           telegram_id: {
-            type: 'string',
-            description: 'Telegram ID пользователя'
-          }
+            type: "string",
+            description: "Telegram ID пользователя",
+          },
         },
-        required: ['telegram_id']
-      }
+        required: ["telegram_id"],
+      },
     },
     {
-      name: 'grant_access',
-      description: 'Предоставить NEUROTESTER подписку',
+      name: "grant_access",
+      description: "Предоставить NEUROTESTER подписку",
       inputSchema: {
-        type: 'object',
+        type: "object",
         properties: {
           telegram_id: {
-            type: 'string',
-            description: 'Telegram ID пользователя'
-          }
+            type: "string",
+            description: "Telegram ID пользователя",
+          },
         },
-        required: ['telegram_id']
-      }
-    }
-  ]
+        required: ["telegram_id"],
+      },
+    },
+  ],
 }));
 
 // Обработчик инструмента check_user
-server.setRequestHandler('tools/call', async (request) => {
-  if (request.params.name === 'check_user') {
+server.setRequestHandler("tools/call", async (request) => {
+  if (request.params.name === "check_user") {
     const { telegram_id } = request.params.arguments;
 
     // Запрос к базе данных
     const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('telegram_id', telegram_id)
+      .from("users")
+      .select("*")
+      .eq("telegram_id", telegram_id)
       .single();
 
     if (error) {
       return {
-        content: [{
-          type: 'text',
-          text: `❌ Ошибка: ${error.message}`
-        }]
+        content: [
+          {
+            type: "text",
+            text: `❌ Ошибка: ${error.message}`,
+          },
+        ],
       };
     }
 
     // Проверка баланса
-    const { data: balance } = await supabase
-      .rpc('getUserBalance', { user_telegram_id: telegram_id });
+    const { data: balance } = await supabase.rpc("getUserBalance", {
+      user_telegram_id: telegram_id,
+    });
 
     return {
-      content: [{
-        type: 'text',
-        text: `
+      content: [
+        {
+          type: "text",
+          text: `
 📊 Данные пользователя ${telegram_id}:
-- Username: @${user.username || 'нет'}
-- Email: ${user.email || 'нет'}
+- Username: @${user.username || "нет"}
+- Email: ${user.email || "нет"}
 - Баланс: ${balance || 0} звёзд ⭐
-- Подписка: ${user.subscription || 'нет'}
+- Подписка: ${user.subscription || "нет"}
 - Регистрация: ${user.created_at}
-        `.trim()
-      }]
+        `.trim(),
+        },
+      ],
     };
   }
 
-  if (request.params.name === 'grant_access') {
+  if (request.params.name === "grant_access") {
     const { telegram_id } = request.params.arguments;
 
     // Предоставление подписки
-    const { error } = await supabase
-      .from('payments_v2')
-      .insert({
-        telegram_id,
-        amount: 0,
-        stars: 0,
-        status: 'COMPLETED',
-        subscription_type: 'NEUROTESTER',
-        payment_method: 'Manual',
-        description: 'Manual NEUROTESTER grant via MCP',
-        payment_date: new Date().toISOString()
-      });
+    const { error } = await supabase.from("payments_v2").insert({
+      telegram_id,
+      amount: 0,
+      stars: 0,
+      status: "COMPLETED",
+      subscription_type: "NEUROTESTER",
+      payment_method: "Manual",
+      description: "Manual NEUROTESTER grant via MCP",
+      payment_date: new Date().toISOString(),
+    });
 
     if (error) {
       return {
-        content: [{
-          type: 'text',
-          text: `❌ Ошибка: ${error.message}`
-        }]
+        content: [
+          {
+            type: "text",
+            text: `❌ Ошибка: ${error.message}`,
+          },
+        ],
       };
     }
 
     return {
-      content: [{
-        type: 'text',
-        text: `✅ NEUROTESTER подписка успешно предоставлена пользователю ${telegram_id}`
-      }]
+      content: [
+        {
+          type: "text",
+          text: `✅ NEUROTESTER подписка успешно предоставлена пользователю ${telegram_id}`,
+        },
+      ],
     };
   }
 });
@@ -949,7 +1013,7 @@ server.setRequestHandler('tools/call', async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('Telegram Bot MCP Server запущен');
+  console.error("Telegram Bot MCP Server запущен");
 }
 
 main().catch(console.error);
@@ -978,6 +1042,7 @@ claude mcp add telegram-bot telegram-bot-mcp
 **Шаг 3: Проверка работы (10 минут)**
 
 **Тест 1: Проверка пользователя**
+
 ```
 Вы: "Используй telegram-bot MCP чтобы проверить пользователя 5439920152"
 
@@ -991,6 +1056,7 @@ claude mcp add telegram-bot telegram-bot-mcp
 ```
 
 **Тест 2: Предоставление доступа**
+
 ```
 Вы: "Дай NEUROTESTER подписку пользователю 123456789"
 
@@ -1003,6 +1069,7 @@ claude mcp add telegram-bot telegram-bot-mcp
 Добавьте новые инструменты:
 
 **1. Массовая обработка пользователей:**
+
 ```javascript
 {
   name: 'process_high_balance_users',
@@ -1021,6 +1088,7 @@ claude mcp add telegram-bot telegram-bot-mcp
 ```
 
 **2. Генерация отчётов:**
+
 ```javascript
 {
   name: 'generate_daily_report',
@@ -1038,6 +1106,7 @@ claude mcp add telegram-bot telegram-bot-mcp
 ```
 
 **3. Поиск проблемных пользователей:**
+
 ```javascript
 {
   name: 'find_stuck_users',
@@ -1050,6 +1119,7 @@ claude mcp add telegram-bot telegram-bot-mcp
 ```
 
 **Критерии успеха:**
+
 - ✅ MCP сервер успешно создан и запускается
 - ✅ Claude может использовать кастомные инструменты
 - ✅ Работа с Supabase через MCP функционирует корректно
@@ -1058,12 +1128,14 @@ claude mcp add telegram-bot telegram-bot-mcp
 - ✅ Написана документация по использованию
 
 **Бонус задание (+15 минут):**
+
 1. Добавьте логирование всех операций в отдельную таблицу `mcp_operations_log`
 2. Реализуйте rate limiting (не более 100 запросов в минуту)
 3. Создайте GitHub репозиторий с вашим MCP сервером
 4. Опубликуйте в npm как `@yourusername/telegram-bot-mcp`
 
 **Дополнительные ресурсы:**
+
 - [MCP SDK Документация](https://modelcontextprotocol.io/docs)
 - [Примеры MCP серверов](https://github.com/modelcontextprotocol/servers)
 - [Официальный туториал](https://modelcontextprotocol.io/tutorials/building-mcp-with-llm)
